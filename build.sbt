@@ -24,6 +24,9 @@ pollInterval := 1000
 logBuffered := false
 
 cancelable := true
+
+playScalaSettings
+
 /*
 testOptions := Seq(Tests.Filter(s =>
   Seq("Spec", "Suite", "Unit", "all").exists(s.endsWith(_)) &&
