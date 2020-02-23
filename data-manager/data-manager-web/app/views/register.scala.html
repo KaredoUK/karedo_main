@@ -1,3 +1,5 @@
+@(applicationId: String)
+
 @main("Register") {
 
     <div class="well">
@@ -12,6 +14,8 @@
         <div>
             <label>Insert Mobile Number</label><input type="text" name="msisdn" id="msisdn"/>
         </div>
+
+        <input type="hidden" name="applicationId" id="applicationId" value="@applicationId"/>
 
         <input type="submit">Register</input>
     </form>

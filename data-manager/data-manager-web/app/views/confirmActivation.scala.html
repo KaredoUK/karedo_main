@@ -1,3 +1,5 @@
+@(confirmationDestination: String, confirmationAddress: String)
+
 @main("Confirm Activation") {
 
     <div class="well">
@@ -5,7 +7,7 @@
     </div>
 
     <div class="well">
-        Your registration request has been received and an activation code has been sent to your {mobile number|email} {number|email}.
+       Your registration request has been received and an activation code has been sent to your @confirmationDestination: @confirmationAddress.
        Please insert the value here when received.
     </div>
 
