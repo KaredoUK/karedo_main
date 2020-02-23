@@ -11,5 +11,8 @@ object wallet extends Build {
 
   lazy val offer = 
     Project("offer", file("./offer")) 
+
+  lazy val offerapi = 
+    Project("offerapi", file("./offerapi")) 
 }
 
