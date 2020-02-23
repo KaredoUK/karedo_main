@@ -4,6 +4,8 @@
 
 GET     /                           controllers.MainController.index
 GET     /register                   controllers.MainController.register
+POST    /register                   controllers.MainController.submitRegistration
+POST    /confirmActivation          controllers.MainController.confirmActivation
 GET     /message                    controllers.MessageController.getMessage()
 GET     /assets/javascripts/routes  controllers.MessageController.javascriptRoutes()
 

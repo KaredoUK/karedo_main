@@ -4,22 +4,15 @@
         <h1>Register your account</h1>
     </div>
 
-    <div>
-        <label>Insert Email</label><input type="email" name="email" id="email"/>
-    </div>
+    <form name="register" action="@controllers.routes.MainController.submitRegistration.url" method="post">
+        <div>
+            <label>Insert Email</label><input type="email" name="email" id="email"/>
+        </div>
 
-    <div>
-        <label>Insert Name</label><input type="text" name="name" id="name"/>
-    </div>
+        <div>
+            <label>Insert Mobile Number</label><input type="text" name="msisdn" id="msisdn"/>
+        </div>
 
-    <div>
-        <label>Address</label>
-        <label>Line 1</label><input type="text" name="address_line1" id="address_line1"/>
-        <label>Line 2</label><input type="text" name="address_line2" id="address_line2"/>
-        <label>Town</label><input type="text" name="town" id="town"/>
-        <label>Post Code</label><input type="text" name="postcode" id="postcode"/>
-    </div>
-
-
-    <button type="submit">Register</button>
+        <input type="submit">Register</input>
+    </form>
 }

@@ -1,0 +1,19 @@
+@main("Confirm Activation") {
+
+    <div class="well">
+        <h1>Confirm registration</h1>
+    </div>
+
+    <div class="well">
+        Your registration request has been received and an activation code has been sent to your {mobile number|email} {number|email}.
+       Please insert the value here when received.
+    </div>
+
+    <form name="confirmRegistration" action="@controllers.routes.MainController.confirmActivation.url" method="post">
+        <div>
+            <label>Insert Activation Code</label><input type="text" name="activationCode" id="activationCode"/>
+        </div>
+
+        <input type="submit" >Register</input>
+    </form>
+}
