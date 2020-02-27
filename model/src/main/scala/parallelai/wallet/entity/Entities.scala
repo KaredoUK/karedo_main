@@ -1,14 +1,17 @@
 package parallelai.wallet.entity
 
+import java.util.UUID
+import org.joda.time.DateTime
+
 
 case class RetailOffer (
-  id: Int,
+  id: UUID,
   title: String,
   description: String,
   price: Double,
   imageUrl: String,
   props: Map[String, String],
-  timestamp: Int,
+  timestamp: DateTime,
   test: Option[Int]
 )
 
