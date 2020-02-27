@@ -21,6 +21,11 @@ object Common {
     "spray nightlies" at "http://nightlies.spray.io"
   )
 
+  val conjarResolver = "conjars.org" at "http://conjars.org/repo"
+
   val specs2 = "org.specs2" %% "specs2" % "1.14"
   val sprayJson = "io.spray" %% "spray-json" % sprayJsonVersion
+  val sprayClient = "io.spray" % "spray-client" % sprayVersion
+
+  val subcutExt = "com.pragmasoft" % "subcut_ext" % "2.0"
 }

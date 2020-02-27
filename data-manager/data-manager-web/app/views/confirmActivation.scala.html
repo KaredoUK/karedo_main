@@ -1,4 +1,4 @@
-@(confirmationDestination: String, confirmationAddress: String)
+@(confirmationDestination: String, confirmationAddress: String, applicationId: String)
 
 @main("Confirm Activation") {
 
@@ -15,6 +15,8 @@
         <div>
             <label>Insert Activation Code</label><input type="text" name="activationCode" id="activationCode"/>
         </div>
+
+        <input type="hidden" name="applicationId" id="applicationId" value="@{applicationId.toString}"/>
 
         <input type="submit" >Register</input>
     </form>
