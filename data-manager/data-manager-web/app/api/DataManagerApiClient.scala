@@ -14,13 +14,14 @@ import spray.json._
 import spray.httpx.SprayJsonSupport
 import spray.client.pipelining._
 import SprayJsonSupport._
+import java.util.UUID
 
 
 trait DataManagerApiClient {
 
   def register(request: RegistrationRequest) : Future[RegistrationResponse]
 
-  def validateRegistration(validation: RegistrationValidation) : Future[Boolean]
+  def validateRegistration(validation: RegistrationValidation) : Future[RegistrationValidationResponse]
 }
 
 
@@ -32,17 +33,16 @@ class DataManagerRestClient(implicit val bindingModule: BindingModule) extends D
   import actorSystem.dispatcher
 
   val registerPipeline = sendReceive ~> unmarshal[RegistrationResponse]
-  val validatePipeline = sendReceive ~> isSuccessfulValidation
+  val validatePipeline = sendReceive ~> unmarshal[RegistrationValidationResponse]
 
   override def register(request: RegistrationRequest): Future[RegistrationResponse] = registerPipeline { Post(apiBaseUri + "/register", request) }
 
-  override def validateRegistration(validation: RegistrationValidation): Future[Boolean] = validatePipeline { Post(apiBaseUri + "/validateRegistration", validation) }
-
-  private def isSuccessfulValidation(validationResponse: Future[HttpResponse]): Future[Boolean] = validationResponse map { response => response.status.isSuccess }
+  override def validateRegistration(validation: RegistrationValidation): Future[RegistrationValidationResponse] = validatePipeline { Post(apiBaseUri + "/validateRegistration", validation) }
 }
 
 class DataManagerMockClient extends DataManagerApiClient{
-  override def validateRegistration(validation: RegistrationValidation): Future[Boolean] = Future.successful(true)
+  override def validateRegistration(validation: RegistrationValidation): Future[RegistrationValidationResponse] =
+    Future.successful( RegistrationValidationResponse(validation.applicationId, UUID.randomUUID()) )
 
   override def register(request: RegistrationRequest): Future[RegistrationResponse] =
     request match {

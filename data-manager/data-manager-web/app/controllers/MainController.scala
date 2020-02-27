@@ -26,6 +26,7 @@ import com.parallelai.wallet.datamanager.data.UserProfile
 import play.api.mvc.Cookie
 import com.parallelai.wallet.datamanager.data.RegistrationRequest
 import com.parallelai.wallet.datamanager.data.UserInfo
+import spray.client.UnsuccessfulResponseException
 
 object forms {
 
@@ -92,7 +93,7 @@ trait RegistrationController extends Controller {
               Ok(views.html.confirmActivation.render(response.channel, response.address, response.applicationId.toString))
 
           } recoverWith {
-            case exception => Future.successful(InternalServerError(exception.toString))
+            redirectToForFailedRequestAndFailForOtherCases(routes.MainController.register)
           }
         }
       }
@@ -111,19 +112,30 @@ trait RegistrationController extends Controller {
         validation => {
 
           dataManagerApiClient.validateRegistration(validation) map {
-            isValidated =>
-              if(isValidated)
-                Ok(views.html.registrationCompleted.render()).withCookies(Cookie("applicationId", validation.applicationId.toString))
-              else
-                Redirect(routes.MainController.register.absoluteURL(false) )
+            validationResponse =>
+              Ok(views.html.registrationCompleted.render())
+                .withCookies(
+                  Cookie("applicationId", validationResponse.applicationId.toString),
+                  Cookie("uuid", validationResponse.userID.toString)
+                )
           } recoverWith {
-            case exception => Future.successful(InternalServerError(exception.toString))
+             redirectToForFailedRequestAndFailForOtherCases(routes.MainController.confirmActivation)
           }
         }
       }
     )
   }
 
+  def redirectToForFailedRequestAndFailForOtherCases(targetEndPoint: Call)(implicit request : Request[_]) : PartialFunction[Throwable, Future[SimpleResult]] = {
+    case unsuccessfulResponse : UnsuccessfulResponseException =>
+      Future.successful {
+        unsuccessfulResponse.responseStatus match {
+          case BadRequest | Unauthorized => Redirect(targetEndPoint.absoluteURL(false))
+          case _ => InternalServerError(unsuccessfulResponse.responseStatus.toString)
+        }
+      }
+    case exception => Future.successful(InternalServerError(exception.toString))
+  }
 
   def editProfile = async {
     // Retrieve profile

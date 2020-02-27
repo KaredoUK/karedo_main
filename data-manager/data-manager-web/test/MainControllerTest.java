@@ -1,10 +1,8 @@
-import controllers.routes;
-import org.junit.*;
+import org.junit.Test;
+import play.mvc.Content;
 
-import play.mvc.*;
-
+import static org.fest.assertions.Assertions.assertThat;
 import static play.test.Helpers.*;
-import static org.fest.assertions.Assertions.*;
 
 
 /**
@@ -14,14 +12,7 @@ import static org.fest.assertions.Assertions.*;
  *
  */
 public class MainControllerTest {
-
-    @Test
-    public void simpleCheck() {
-        int a = 1 + 1;
-        assertThat(a).isEqualTo(2);
-    }
-
-    @Test
+  @Test
     public void indexTemplateShouldContainTheStringThatIsPassedToIt() {
         running(fakeApplication(), new Runnable() {
             public void run() {
@@ -32,17 +23,17 @@ public class MainControllerTest {
         });
     }
 
-    @Test
-    public void indexShouldContainTheCorrectString() {
-        running(fakeApplication(), new Runnable() {
-            public void run() {
-                Result result = callAction(routes.ref.MainController.index());
-                assertThat(status(result)).isEqualTo(OK);
-                assertThat(contentType(result)).isEqualTo("text/html");
-                assertThat(charset(result)).isEqualTo("utf-8");
-                assertThat(contentAsString(result)).contains("Hello from Java");
-            }
-        });
-    }
+//    @Test
+//    public void indexShouldContainTheCorrectString() {
+//        running(fakeApplication(), new Runnable() {
+//            public void run() {
+//                Result result = callAction(routes.ref.MainController.index());
+//                assertThat(status(result)).isEqualTo(OK);
+//                assertThat(contentType(result)).isEqualTo("text/html");
+//                assertThat(charset(result)).isEqualTo("utf-8");
+//                assertThat(contentAsString(result)).contains("Hello from Java");
+//            }
+//        });
+//    }
 
 }
