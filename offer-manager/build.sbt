@@ -19,7 +19,8 @@ libraryDependencies ++= Seq(
   "org.eigengo.monitor"     % "output-statsd"         % "0.2-SNAPSHOT",
   "org.specs2"             %% "specs2"                % "2.2.2"        % "test",
   "io.spray"                % "spray-testkit"         % "1.2.0"        % "test",
-  "com.typesafe.akka"      %% "akka-testkit"          % "2.2.3"        % "test"
+  "com.typesafe.akka"      %% "akka-testkit"          % "2.2.3"        % "test",
+  "com.newzly"             %% "phantom-dsl"           % "0.3.0"
 )
 
 scalacOptions ++= Seq(
