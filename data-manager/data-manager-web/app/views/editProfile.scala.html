@@ -1,0 +1,24 @@
+@(userProfile: com.parallelai.wallet.datamanager.data.UserProfile)
+
+@main("Edit Profile") {
+
+    <div class="well">
+        <h1>Register your account</h1>
+    </div>
+
+    <form name="editProfile" action="@controllers.routes.MainController.updateProfile.url" method="post">
+        <div>
+            <label>Email</label><input type="text" name="name" id="name">@userProfile.info.fullName</input>
+        </div>
+
+        <div>
+            <label>Email</label><input type="email" name="email" id="email" readonly="true">@userProfile.info.email</input>
+        </div>
+
+        <div>
+            <label>Mobile Number</label><input type="text" name="msisdn" id="msisdn" readonly="true">@userProfile.info.msisdn</input>
+        </div>
+
+        <input type="submit">Register</input>
+    </form>
+}
