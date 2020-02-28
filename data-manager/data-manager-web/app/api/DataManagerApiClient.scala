@@ -28,7 +28,7 @@ trait DataManagerApiClient {
 class DataManagerRestClient(implicit val bindingModule: BindingModule) extends DataManagerApiClient with Injectable {
   implicit val actorSystem = ActorSystem("program-info-client")
 
-  val apiBaseUri = injectProperty[String]("data.manager.api.url")
+  val apiBaseUri = injectOptionalProperty[String]("data.manager.api.url") getOrElse "http://localhost:8080"
 
   import actorSystem.dispatcher
 

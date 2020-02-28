@@ -7,51 +7,39 @@ import core.{User, RegistrationActor}
 import akka.util.Timeout
 import RegistrationActor._
 import spray.http._
-import core.User
-import core.RegistrationActor.Register
-import scala.Some
+import com.parallelai.wallet.datamanager.data._
+import ApiDataJsonProtocol._
 
 class RegistrationService(registration: ActorRef)(implicit executionContext: ExecutionContext)
   extends Directives with DefaultJsonFormats {
 
   import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
 
-  case class ImageUploaded(size: Int)
-
   import akka.pattern.ask
   import scala.concurrent.duration._
   implicit val timeout = Timeout(2.seconds)
 
-  implicit val userFormat = jsonFormat4(User)
-  implicit val registerFormat = jsonFormat1(Register)
-  implicit val registeredFormat = jsonObjectFormat[Registered.type]
-  implicit val notRegisteredFormat = jsonObjectFormat[NotRegistered.type]
-  implicit val imageUploadedFormat = jsonFormat1(ImageUploaded)
-
-  implicit object EitherErrorSelector extends ErrorSelector[NotRegistered.type] {
-    def apply(v: NotRegistered.type): StatusCode = StatusCodes.BadRequest
+  implicit object EitherErrorSelector extends ErrorSelector[RegistrationError] {
+    def apply(error: RegistrationError): StatusCode = error match {
+      case InvalidRequest => StatusCodes.BadRequest
+      case InvalidValidationCode => StatusCodes.Unauthorized
+      case InternalError(_) => StatusCodes.InternalServerError
+    }
   }
 
   val route =
     path("register") {
       post {
-        handleWith { ru: Register => (registration ? ru).mapTo[Either[NotRegistered.type, Registered.type]] }
+        handleWith {
+          registrationRequest: RegistrationRequest => (registration ? registrationRequest).mapTo[Either[RegistrationError, RegistrationResponse]]
+        }
       }
     } ~
-    path("register" / "image") {
+    path("validateRegistration") {
       post {
-        handleWith { data: MultipartFormData =>
-          data.fields.get("files[]") match {
-            case Some(imageEntity) =>
-              val size = imageEntity.entity.buffer.length
-              println(s"Uploaded $size")
-              ImageUploaded(size)
-            case None =>
-              println("No files")
-              ImageUploaded(0)
-          }
+        handleWith {
+          registrationValidation: RegistrationValidation =>  (registration ? registrationValidation).mapTo[Either[RegistrationError, RegistrationValidationResponse]]
         }
       }
     }
-
 }

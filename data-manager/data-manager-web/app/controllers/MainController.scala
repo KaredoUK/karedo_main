@@ -157,8 +157,8 @@ object MainController extends RegistrationController with AppConfigInjection {
     implicit val _ = bindingModule
 
     bindingModule.injectPropertyOptional[Boolean]("useMockApi") match {
-      case Some(false) => new DataManagerRestClient
-      case _ => new DataManagerMockClient
+      case Some(true) => new DataManagerMockClient
+      case _ => new DataManagerRestClient
     }
   }
 }
