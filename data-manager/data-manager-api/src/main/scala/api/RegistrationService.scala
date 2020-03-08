@@ -7,6 +7,7 @@ import core.{User, RegistrationActor}
 import akka.util.Timeout
 import RegistrationActor._
 import spray.http._
+import spray.http.StatusCodes._
 import com.parallelai.wallet.datamanager.data._
 import ApiDataJsonProtocol._
 
@@ -21,21 +22,21 @@ class RegistrationService(registration: ActorRef)(implicit executionContext: Exe
 
   implicit object EitherErrorSelector extends ErrorSelector[RegistrationError] {
     def apply(error: RegistrationError): StatusCode = error match {
-      case InvalidRequest => StatusCodes.BadRequest
-      case InvalidValidationCode => StatusCodes.Unauthorized
-      case InternalError(_) => StatusCodes.InternalServerError
+      case InvalidRequest => BadRequest
+      case InvalidValidationCode => Unauthorized
+      case InternalError(_) => InternalServerError
     }
   }
 
   val route =
-    path("register") {
+    path("account") {
       post {
         handleWith {
           registrationRequest: RegistrationRequest => (registration ? registrationRequest).mapTo[Either[RegistrationError, RegistrationResponse]]
         }
       }
     } ~
-    path("validateRegistration") {
+    path("account" / "application" / "validation") {
       post {
         handleWith {
           registrationValidation: RegistrationValidation =>  (registration ? registrationValidation).mapTo[Either[RegistrationError, RegistrationValidationResponse]]

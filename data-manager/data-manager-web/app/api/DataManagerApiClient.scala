@@ -35,9 +35,9 @@ class DataManagerRestClient(implicit val bindingModule: BindingModule) extends D
   val registerPipeline = sendReceive ~> unmarshal[RegistrationResponse]
   val validatePipeline = sendReceive ~> unmarshal[RegistrationValidationResponse]
 
-  override def register(request: RegistrationRequest): Future[RegistrationResponse] = registerPipeline { Post(apiBaseUri + "/register", request) }
+  override def register(request: RegistrationRequest): Future[RegistrationResponse] = registerPipeline { Post(apiBaseUri + "/account", request) }
 
-  override def validateRegistration(validation: RegistrationValidation): Future[RegistrationValidationResponse] = validatePipeline { Post(apiBaseUri + "/validateRegistration", validation) }
+  override def validateRegistration(validation: RegistrationValidation): Future[RegistrationValidationResponse] = validatePipeline { Post(apiBaseUri + "/account/application/validation", validation) }
 }
 
 class DataManagerMockClient extends DataManagerApiClient{
