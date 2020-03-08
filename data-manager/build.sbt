@@ -1,3 +1,4 @@
+
 name := "data-manager"
 
 Common.settings

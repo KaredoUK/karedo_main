@@ -1,11 +1,13 @@
 package core
 
+import parallelai.wallet.persistence.UserAccountDAO
 import akka.actor.{ActorRef, Actor}
 import com.parallelai.wallet.datamanager.data._
 import scala.concurrent.Future
 import scala.async.Async.{async, await}
 import java.util.UUID
 import spray.json.{JsObject, JsString, JsValue, RootJsonFormat}
+import parallelai.wallet.persistence.cassandra.UserAccountCassandraDAO
 
 /**
  * We use the companion object to hold all the messages that the ``RegistrationActor``
@@ -52,6 +54,8 @@ class RegistrationActor extends Actor{
 
   import context.dispatcher
 
+  val userAccountDAO : UserAccountDAO = new UserAccountCassandraDAO()
+
   // notice that we don't actually perform any DB operations.
   // that's for another template
   def receive: Receive = {
@@ -65,13 +69,46 @@ class RegistrationActor extends Actor{
     response recover { case t => Left(InternalError(t)) } foreach { response : Either[RegistrationError, T] => replyTo ! response }
   }
 
+  def hasAccountForAppId(appId: ApplicationID) : Future[Boolean] = userAccountDAO.getByApplicationId(appId).map { _.isDefined }
+
+  def hasAccountForMsisdn(msisdnOption: Option[String]) : Future[Boolean] =
+    msisdnOption.map { msisdn => userAccountDAO.getByMsisdn(msisdn).map { _.isDefined } } getOrElse Future.successful(false)
+
+  def hasAccountForEmail(emailOption: Option[String]) : Future[Boolean] =
+    emailOption.map { email => userAccountDAO.getByEmail(email).map { _.isDefined } } getOrElse Future.successful(false)
+
+  def overlapsExistingUser(appId: ApplicationID, msisdn: Option[String], email: Option[String]) : Future[Boolean] =
+    hasAccountForAppId(appId) flatMap { matchesAppId : Boolean =>
+      if(matchesAppId) {
+        Future.successful(true)
+      } else {
+        hasAccountForMsisdn(msisdn) flatMap { matchesEmail : Boolean =>
+          if(matchesEmail) Future.successful(true)
+          else hasAccountForEmail(email)
+        }
+      }
+    }
+
+
   def registerUser(registrationRequest: RegistrationRequest): Future[Either[RegistrationError, RegistrationResponse]] = async {
     registrationRequest match {
       case RegistrationRequest(appId, Some(msisdn), emailOption) => {
-        Right(RegistrationResponse(appId, "msisdn", msisdn))
+        if( await { overlapsExistingUser(appId, Some(msisdn), emailOption) } ) {
+          Left(InvalidRequest)
+        } else {
+
+          //Send authentication code
+          Right(RegistrationResponse(appId, "msisdn", msisdn))
+        }
       }
       case RegistrationRequest(appId, None, Some(email)) => {
-        Right(RegistrationResponse(appId, "email", email))
+        if( await {  overlapsExistingUser(appId, None, Some(email)) } ) {
+          Left(InvalidRequest)
+        } else {
+
+          //Send authentication code
+          Right(RegistrationResponse(appId, "email", email))
+        }
       }
       case _ => Left(InvalidRequest)
     }

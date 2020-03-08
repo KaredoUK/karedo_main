@@ -32,7 +32,7 @@ class RegistrationService(registration: ActorRef)(implicit executionContext: Exe
     path("account") {
       post {
         handleWith {
-          registrationRequest: RegistrationRequest => (registration ? registrationRequest).mapTo[Either[RegistrationError, RegistrationResponse]]
+          registrationRequest: RegistrationRequest => (registration ? registrationRequest).mapTo[Either[String, List[RegistrationResponse]]]
         }
       }
     } ~

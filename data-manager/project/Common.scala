@@ -6,7 +6,7 @@ object Common {
   val settings: Seq[Setting[_]] = Seq (
     version := "1.0",
     scalaVersion := "2.10.2",
-    organization := "com.parallelai"
+    organization := "parallelai.wallet"
   )
 
   val akkaVersion = "2.2.3"
