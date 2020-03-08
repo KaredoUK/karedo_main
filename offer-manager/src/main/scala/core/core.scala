@@ -1,6 +1,7 @@
 package core
 
 import akka.actor.{Props, ActorSystem}
+import parallelai.wallet.offer.actors.RetailOfferActor
 
 /**
  * Core is type containing the ``system: ActorSystem`` member. This enables us to use it in our
@@ -39,5 +40,6 @@ trait CoreActors {
 
   val registration = system.actorOf(Props[RegistrationActor])
   val messenger    = system.actorOf(Props[MessengerActor])
+  val retailOfferActor = system.actorOf(Props[RetailOfferActor])
 
 }

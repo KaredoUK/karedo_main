@@ -3,6 +3,7 @@ package api
 import core.{CoreActors, Core}
 import akka.actor.Props
 import spray.routing.RouteConcatenation
+import parallelai.wallet.offer.services.RetailOfferService
 
 /**
  * The REST API layer. It exposes the REST services, but does not provide any
@@ -17,7 +18,8 @@ trait Api extends RouteConcatenation {
 
   val routes =
     new RegistrationService(registration).route ~
-    new MessengerService(messenger).route
+    new MessengerService(messenger).route ~
+    new RetailOfferService(retailOfferActor).route
 
   val rootService = system.actorOf(Props(new RoutedHttpService(routes)))
 

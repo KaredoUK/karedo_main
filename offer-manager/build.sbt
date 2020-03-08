@@ -19,7 +19,7 @@ libraryDependencies ++= Seq(
   "io.spray"            % "spray-testkit"    % "1.2-20130712" % "test",
   "com.typesafe.akka"  %% "akka-testkit"     % "2.2.0"        % "test",
   "com.novocode"        % "junit-interface"  % "0.7"          % "test->default",
-  "parallelai.wallet"   % "model"            % "1.0"
+  "parallelai.wallet"  %% "model"            % "1.0" changing()
 )
 
 scalacOptions ++= Seq(
