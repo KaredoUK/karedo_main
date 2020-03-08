@@ -15,3 +15,13 @@ case class RetailOffer (
   test: Option[Int]
 )
 
+case class CustomerOffer (
+  id: UUID,
+  title: String,
+  description: String,
+  value: Double,
+  imageUrl: String,
+  props: Map[String, String],
+  timestamp: DateTime,
+  test: Option[Int]
+)
