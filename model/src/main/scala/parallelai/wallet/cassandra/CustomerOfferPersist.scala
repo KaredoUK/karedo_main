@@ -21,6 +21,7 @@ sealed class CustomerOfferRecord private() extends CassandraTable[CustomerOfferR
   object timestamp extends DateTimeColumn(this) // with ClusteringOrder[_]
   object test extends OptionalIntColumn(this)
 
+
   override def fromRow(row: Row): CustomerOffer = {
     CustomerOffer(id(row), title(row), description(row), value(row), imageUrl(row), props(row), timestamp(row), test(row));
   }

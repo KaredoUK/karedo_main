@@ -12,6 +12,7 @@ libraryDependencies ++= Seq(
   "ch.qos.logback"      % "logback-classic"  % "1.0.13",
   "io.spray"            % "spray-can"        % Common.sprayVersion,
   "io.spray"            % "spray-routing"    % Common.sprayVersion,
+  "commons-lang"        % "commons-lang"     % "2.3",
   Common.sprayJson,
   Common.scalaAsync,
   Common.specs2 % "test",

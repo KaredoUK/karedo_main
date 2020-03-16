@@ -2,7 +2,9 @@ package com.parallelai.wallet.datamanager.data
 
 import java.util.UUID
 
-case class RegistrationRequest(applicationId: ApplicationID, msisdn: Option[String], email: Option[String])
+case class RegistrationRequest(applicationId: ApplicationID, msisdn: Option[String], email: Option[String]) {
+  def isValid : Boolean = msisdn.isDefined || email.isDefined
+}
 case class RegistrationValidation(applicationId: ApplicationID, validationCode: String)
 
 case class RegistrationResponse(applicationId: ApplicationID, channel: String, address: String)

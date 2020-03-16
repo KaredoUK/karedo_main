@@ -23,6 +23,8 @@ class RegistrationService(registration: ActorRef)(implicit executionContext: Exe
   implicit object EitherErrorSelector extends ErrorSelector[RegistrationError] {
     def apply(error: RegistrationError): StatusCode = error match {
       case InvalidRequest => BadRequest
+      case ApplicationAlreadyRegistered => BadRequest
+      case UserAlreadyRegistered => BadRequest
       case InvalidValidationCode => Unauthorized
       case InternalError(_) => InternalServerError
     }
@@ -32,7 +34,8 @@ class RegistrationService(registration: ActorRef)(implicit executionContext: Exe
     path("account") {
       post {
         handleWith {
-          registrationRequest: RegistrationRequest => (registration ? registrationRequest).mapTo[Either[String, List[RegistrationResponse]]]
+          registrationRequest: RegistrationRequest =>
+              (registration ? registrationRequest).mapTo[Either[RegistrationError, RegistrationResponse]]
         }
       }
     } ~

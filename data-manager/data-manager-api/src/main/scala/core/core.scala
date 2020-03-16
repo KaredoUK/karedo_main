@@ -1,7 +1,7 @@
 package core
 
-import akka.actor.{Props, ActorSystem}
-
+import akka.actor.{ActorDSL, Props, ActorSystem}
+import ActorDSL._
 /**
  * Core is type containing the ``system: ActorSystem`` member. This enables us to use it in our
  * apps as well as in our tests.
@@ -39,5 +39,8 @@ trait CoreActors {
 
   val registration = system.actorOf(Props[RegistrationActor])
   val messenger    = system.actorOf(Props[MessengerActor])
+
+
+
 
 }
