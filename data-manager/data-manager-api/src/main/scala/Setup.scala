@@ -8,16 +8,18 @@ import ExecutionContext.Implicits.global
 object Setup extends App {
 
 
-  val userAccountCassandraPersistence = new UserAccountRecord
-  val clientApplicationCassandraPersistence = new ClientApplicationRecord
+  val userAccountCassandraPersistence = new UserAccountCassandraDAO
 
   println("Creating cassandra tables")
 
-  println(s"User account: ${userAccountCassandraPersistence.schema()}")
-  println(s"Client app account: ${clientApplicationCassandraPersistence.schema()}")
+  val tables = userAccountCassandraPersistence.createTables
 
-  val userAccountTable = userAccountCassandraPersistence.createTable()
-  val clientAppTable = clientApplicationCassandraPersistence.createTable()
+  println(s"Waiting for ${tables.size} to be created")
 
-  Await.ready( sequence( List(userAccountTable, clientAppTable) ), 30.seconds )
+  Await.ready( sequence( tables ), 20.seconds )
+
+  println("Done")
+
+  userAccountCassandraPersistence.clientApplicationRecord.cassandra.close()
+
 }

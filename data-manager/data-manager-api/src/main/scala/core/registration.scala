@@ -1,12 +1,12 @@
 package core
 
 import parallelai.wallet.persistence.{ClientApplicationDAO, UserAccountDAO}
-import akka.actor.{ActorLogging, ActorRef, Actor}
+import akka.actor.{Props, ActorLogging, ActorRef, Actor}
 import com.parallelai.wallet.datamanager.data._
 import scala.concurrent.Future
 import scala.async.Async._
 import java.util.UUID
-import spray.json.{JsObject, JsString, JsValue, RootJsonFormat}
+import spray.json._
 import parallelai.wallet.persistence.cassandra.{ClientApplicationCassandraDAO, UserAccountCassandraDAO}
 import parallelai.wallet.entity.{ClientApplication, UserAccount}
 import com.parallelai.wallet.datamanager.data.RegistrationValidation
@@ -17,6 +17,21 @@ import com.parallelai.wallet.datamanager.data.RegistrationValidationResponse
 import com.parallelai.wallet.datamanager.data.RegistrationRequest
 import org.apache.commons.lang.math.RandomUtils
 import org.apache.commons.lang.RandomStringUtils
+import javax.management.InvalidApplicationException
+import com.parallelai.wallet.datamanager.data.RegistrationValidation
+import com.parallelai.wallet.datamanager.data.RegistrationResponse
+import parallelai.wallet.entity.ClientApplication
+import scala.Some
+import parallelai.wallet.entity.UserAccount
+import com.parallelai.wallet.datamanager.data.RegistrationValidationResponse
+import com.parallelai.wallet.datamanager.data.RegistrationRequest
+import com.parallelai.wallet.datamanager.data.RegistrationValidation
+import com.parallelai.wallet.datamanager.data.RegistrationResponse
+import parallelai.wallet.entity.ClientApplication
+import scala.Some
+import parallelai.wallet.entity.UserAccount
+import com.parallelai.wallet.datamanager.data.RegistrationValidationResponse
+import com.parallelai.wallet.datamanager.data.RegistrationRequest
 
 /**
  * We use the companion object to hold all the messages that the ``RegistrationActor``
@@ -24,10 +39,14 @@ import org.apache.commons.lang.RandomStringUtils
  */
 object RegistrationActor {
 
+
+  def props( userAccountDAO : UserAccountDAO, clientApplicationDAO : ClientApplicationDAO) : Props =
+    Props( classOf[RegistrationActor], userAccountDAO, clientApplicationDAO)
+
   sealed trait RegistrationError
   case object ApplicationAlreadyRegistered extends RegistrationError
   case object UserAlreadyRegistered extends RegistrationError
-  case object InvalidRequest extends RegistrationError
+  case class InvalidRequest(reason: String) extends RegistrationError
   case object InvalidValidationCode extends RegistrationError
   case class InternalError(throwable: Throwable) extends RegistrationError
 
@@ -35,21 +54,43 @@ object RegistrationActor {
     def write(error: RegistrationError) =  error match {
       case ApplicationAlreadyRegistered => JsString("ApplicationAlreadyRegistered")
       case UserAlreadyRegistered => JsString("UserAlreadyRegistered")
-      case InvalidRequest => JsString("InvalidRequest")
       case InvalidValidationCode => JsString("InvalidValidationCode")
+      case InvalidRequest(reason) => JsObject(
+        "type" -> JsString("InvalidRequest"),
+        "data" -> JsObject { "reason" -> JsString(reason)  }
+      )
       case InternalError(throwable) => JsObject(
-        "errorClass" -> JsString(throwable.getClass.getName),
-        "errorMessage" -> JsString(throwable.getMessage)
+        "type" -> JsString("InternalError"),
+        "data" -> JsObject (
+          "errorClass" -> JsString(throwable.getClass.getName),
+          "errorMessage" -> JsString(throwable.getMessage)
+        )
       )
     }
     def read(value: JsValue) = {
       value match {
-        case JsString("InvalidRequest") => InvalidRequest
         case JsString("InvalidValidationCode") => InvalidValidationCode
         case JsObject(attributes) => {
-          val errorClass = attributes.get("errorClass").getOrElse("Unknown")
-          val errorMessage = attributes.get("errorMessage").getOrElse("Unknown")
-          InternalError(new Exception(s"Exception of class $errorClass, message: '$errorMessage'"))
+          attributes.get("type") match {
+            case Some(JsString("InvalidRequest")) =>
+              val data = attributes.get("data") map { _.asInstanceOf[JsObject] }
+              data match {
+                case None => InvalidRequest("Unknown reason")
+                case Some(errorData) =>
+                  val reason = errorData.fields.get("reason") map { _.toString } getOrElse ("Unknown")
+                  InvalidRequest(reason)
+              }
+            case Some(JsString("InternalError")) =>
+              val data = attributes.get("data") map { _.asInstanceOf[JsObject] }
+              data match {
+                case None => InternalError (new Exception (s"Exception of class Unknown, message: Unknown") )
+                case Some(errorData) =>
+                  val errorClass = errorData.fields.get("errorClass") map { _.toString } getOrElse ("Unknown")
+                  val errorMessage = errorData.fields.get("errorMessage") map { _.toString } getOrElse ("Unknown")
+                  InternalError (new Exception (s"Exception of class $errorClass, message: '$errorMessage'") )
+              }
+            case _ => InternalError(new Exception(s"Unmapped error '$value'"))
+          }
         }
         case JsString(errorName) => InternalError(new Exception(s"Unmapped error '$errorName'"))
         case _ => InternalError(new Exception(s"Unmapped error '$value'"))
@@ -57,23 +98,23 @@ object RegistrationActor {
 
     }
   }
+
+  case class AddApplication(applicationId: ApplicationID, accountId: UserID)
 }
 
 /**
  * Registers the users. Replies with
  */
-class RegistrationActor extends Actor with ActorLogging {
+class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : ClientApplicationDAO) extends Actor with ActorLogging {
   import RegistrationActor._
 
   import context.dispatcher
-
-  val userAccountDAO : UserAccountDAO = new UserAccountCassandraDAO()
-  val clientApplicationDAO : ClientApplicationDAO = new ClientApplicationCassandraDAO()
 
   // notice that we don't actually perform any DB operations.
   // that's for another template
   def receive: Receive = {
     case request: RegistrationRequest =>  replyToSender { registerUser(request) }
+    case request: AddApplication =>  replyToSender { registerApplication(request) }
     case validation: RegistrationValidation => replyToSender { validateUser(validation) }
   }
 
@@ -107,14 +148,25 @@ class RegistrationActor extends Actor with ActorLogging {
     }
   } 
   
-  def applicationNotRegistered(registrationRequest : RegistrationRequest) : Future[Option[RegistrationError]] =
-    clientApplicationDAO.getById(registrationRequest.applicationId) map { _  map { _ => ApplicationAlreadyRegistered } }
+  def applicationNotRegistered(applicationId: ApplicationID) : Future[Option[RegistrationError]] =
+    clientApplicationDAO.getById(applicationId) map { _  map { _ => ApplicationAlreadyRegistered } }
   
-  def validRegistrationRequest(registrationRequest : RegistrationRequest) : Future[Option[RegistrationError]] = 
-    Future.successful { if(registrationRequest.isValid) None else Some(InvalidRequest) }
-  
-  def registerUser(registrationRequest: RegistrationRequest): Future[Either[RegistrationError, RegistrationResponse]] = 
-    withValidations(registrationRequest)  ( validRegistrationRequest, applicationNotRegistered(_) ) { processValidRegistrationRequest }
+  def validUserIdentification(userIdentification : WithUserContacts) : Future[Option[RegistrationError]] =
+    Future.successful { if(userIdentification.isValid) None else Some(InvalidRequest("Invalid user identification")) }
+
+  def registerUser(registrationRequest: RegistrationRequest): Future[Either[RegistrationError, RegistrationResponse]] =
+    withValidations(registrationRequest) ( validUserIdentification, (registrationRequest) => applicationNotRegistered(registrationRequest.applicationId) ) { processValidRegistrationRequest }
+
+  def registerApplication(registrationRequest: AddApplication): Future[Either[RegistrationError, RegistrationResponse]] =
+    withValidations(registrationRequest) ( request => applicationNotRegistered(request.applicationId) ) {
+      _ =>  userAccountDAO.getById(registrationRequest.accountId) map {
+              _ match {
+                case None => Left(InvalidRequest("User doesn't exist"))
+                case Some(userAccount) => activateApplication(registrationRequest.applicationId, userAccount.id, UserContacts(userAccount.email, userAccount.msisdn))
+              }
+            }
+    }
+
 
   def processValidRegistrationRequest(registrationRequest: RegistrationRequest): Future[Either[RegistrationError, RegistrationResponse]] = async {
     val existingAccountOp: Option[UserAccount] = await {
@@ -131,23 +183,30 @@ class RegistrationActor extends Actor with ActorLogging {
 
         case Some(account) =>
           log.debug("Updating account of already registered user {}", account)
-          userAccountDAO.update(account.copy(msisdn = registrationRequest.msisdn, email = registrationRequest.email))
+          registrationRequest.msisdn filter { _ != account.msisdn } foreach { userAccountDAO.setMsisdn(account.id, _) }
+          registrationRequest.email  filter { _ != account.email } foreach { userAccountDAO.setEmail(account.id, _) }
           account.id
       }
 
-      val activationCode = RandomStringUtils.random(6)
-
-      clientApplicationDAO.insertNew(ClientApplication(registrationRequest.applicationId, accountId, activationCode))
-
-      //activationMessageActor ! registrationRequest
-
-      if(registrationRequest.msisdn.isDefined)
-        Right(RegistrationResponse(registrationRequest.applicationId, "msisdn", registrationRequest.msisdn.get))
-      else
-        Right(RegistrationResponse(registrationRequest.applicationId, "email", registrationRequest.email.get))
+      activateApplication(registrationRequest.applicationId, accountId, registrationRequest)
     }
   }
 
+  private def activateApplication(applicationId: ApplicationID, accountId: UserID, userContacts: WithUserContacts) : Either[RegistrationError, RegistrationResponse] = {
+    val activationCode = RandomStringUtils.randomAlphanumeric(6)
+
+    log.info("Activation code for registration request of application {} is '{}'", applicationId, activationCode)
+
+    clientApplicationDAO.insertNew(ClientApplication(applicationId, accountId, activationCode))
+
+    //activationMessageActor ! registrationRequest
+
+    if(userContacts.msisdn.isDefined)
+      Right(RegistrationResponse(applicationId, "msisdn", userContacts.msisdn.get))
+    else
+      Right(RegistrationResponse(applicationId, "email", userContacts.email.get))
+  }
+  
   private def createNewUserAccount(registrationRequest: RegistrationRequest) : UUID = {
     val account = UserAccount( id = UUID.randomUUID(), email = registrationRequest.email, msisdn = registrationRequest.msisdn )
     userAccountDAO.insertNew(account)
@@ -159,25 +218,25 @@ class RegistrationActor extends Actor with ActorLogging {
     val clientAppOption = await { clientApplicationDAO.getById(validation.applicationId) }
 
     clientAppOption match {
-      case None => Left(InvalidRequest)
+      case None => Left(InvalidRequest(s"Unable to find client application with ID '${validation.applicationId}'"))
 
       case Some(clientApplication) =>
-        // I don't care if the user validate twice. I just check the validation code
+        // I don't care if the user validates twice. I just check the validation code
         if(clientApplication.activationCode == validation.validationCode) {
           val userOpt = await { userAccountDAO.getByApplicationId(validation.applicationId) }
 
           userOpt map { user => 
-            Right(RegistrationValidationResponse(validation.applicationId, user.id)) 
+            clientApplicationDAO.update(clientApplication copy (active = true))
+            userAccountDAO.setActive(user.id)
+
+            Right(RegistrationValidationResponse(validation.applicationId, user.id))
           } getOrElse {
-            Left(InternalError(new IllegalStateException(s"Unable to find user for valid application ID ${validation.applicationId}")))
+            Left(InternalError(new IllegalStateException(s"Unable to find user for valid application ID '${validation.applicationId}'")))
           }
-        }
-        else {
-          Left(InvalidRequest)
+        } else {
+          Left(InvalidValidationCode)
         }
     }
 
   }
-
-
 }

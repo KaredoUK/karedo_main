@@ -18,15 +18,18 @@ import org.joda.time.DateTime
 import scala.async.Async.{async, await}
 import java.util.concurrent.atomic.AtomicInteger
 import scala.util.{Failure, Success, Try}
-import com.twitter.io.exp.VarSource.Failed
 import parallelai.wallet.persistence.QueryUtils._
-import com.newzly.phantom.Implicits._
+import parallelai.wallet.entity.AccountSettings
+import parallelai.wallet.entity.ClientApplication
+import scala.Some
+import parallelai.wallet.entity.UserAccount
+import parallelai.wallet.entity.UserInfo
 
 sealed class UserAccountRecord extends CassandraTable[UserAccountRecord, UserAccount] with DBConnector {
 
   object id extends UUIDColumn(this) with PartitionKey[UUID]
-  object msisdn extends OptionalStringColumn(this) with SecondaryKey[Option[String]]
-  object email extends OptionalStringColumn(this) with SecondaryKey[Option[String]]
+  object msisdn extends OptionalStringColumn(this) 
+  object email extends OptionalStringColumn(this) 
 
   //PersonalInfo
   object personalInfo_name extends StringColumn(this)
@@ -73,12 +76,32 @@ sealed class UserAccountRecord extends CassandraTable[UserAccountRecord, UserAcc
   }
 }
 
+sealed class EmailUserLookupRecord extends CassandraTable[EmailUserLookupRecord, EmailUserLookup] with DBConnector {
+  object email extends StringColumn(this) with PartitionKey[String]
+  object userId extends UUIDColumn(this) with Index[UUID]
+
+  addColumn(email)
+  addColumn(userId)
+
+  override def fromRow(row: Row): EmailUserLookup = EmailUserLookup(email(row), userId(row))
+}
+
+sealed class MsisdnUserLookupRecord extends CassandraTable[MsisdnUserLookupRecord, MsisdnUserLookup] with DBConnector {
+  object msisdn extends StringColumn(this) with PartitionKey[String]
+  object userId extends UUIDColumn(this) with Index[UUID]
+
+  addColumn(msisdn)
+  addColumn(userId)
+
+  override def fromRow(row: Row): MsisdnUserLookup = MsisdnUserLookup(msisdn(row), userId(row))
+}
+
 sealed class ClientApplicationRecord extends CassandraTable[ClientApplicationRecord, ClientApplication] with DBConnector {
 
   object id extends UUIDColumn(this) with PartitionKey[UUID]
-  object activationCode extends StringColumn(this) //with Index[String]
+  object activationCode extends StringColumn(this)
   object active extends BooleanColumn(this)
-  object accountId extends UUIDColumn(this) with SecondaryKey[UUID]
+  object accountId extends UUIDColumn(this) with Index[UUID]
 
   // Need to add columns otherwise the table creation won't work
   addColumn(id)
@@ -94,30 +117,35 @@ sealed class ClientApplicationRecord extends CassandraTable[ClientApplicationRec
 class UserAccountCassandraDAO extends UserAccountDAO {
   val userAccountRecord = new UserAccountRecord
   val clientApplicationRecord = new ClientApplicationRecord
+  val userByEmail = new EmailUserLookupRecord
+  val userByMsisdn = new MsisdnUserLookupRecord
 
   implicit val session = userAccountRecord.cassandra
 
-  override def update(userAccount: UserAccount): Unit =
+  override def update(userAccount: UserAccount): Future[Unit] =
     userAccountRecord
       .update
       .where(_.id eqs userAccount.id)
-      .modify(_.msisdn setTo userAccount.msisdn)
-      .and(_.email setTo userAccountRecord.normaliseEmail(userAccount.email))
-      .and(_.personalInfo_name setTo userAccount.personalInfo.name)
+      .modify(_.personalInfo_name setTo userAccount.personalInfo.name)
       .and(_.personalInfo_birthDate setTo userAccount.personalInfo.birthDate)
       .and(_.personalInfo_gender setTo userAccount.personalInfo.gender)
       .and(_.personalInfo_postCode setTo userAccount.personalInfo.postCode)
       .and(_.settings_maxMessagesPerWeek setTo userAccount.settings.maxMessagesPerWeek)
       .and(_.active setTo userAccount.active)
+      .future()
+      .map { _ =>  }
 
-  override def setActive(userId: UUID): Unit =
+  override def setActive(userId: UUID): Future[Unit] =
     userAccountRecord
       .update
       .where(_.id eqs userId)
       .modify(_.active setTo true)
+      .future()
+      .map { _ =>  }
 
-  override def insertNew(userAccount: UserAccount): Unit =
-    userAccountRecord.insert
+
+  override def insertNew(userAccount: UserAccount): Future[Unit] = {
+    val accountCreationFuture = userAccountRecord.insert
       .value(_.id, userAccount.id)
       .value(_.msisdn, userAccount.msisdn)
       .value(_.email, userAccount.email)
@@ -128,7 +156,14 @@ class UserAccountCassandraDAO extends UserAccountDAO {
       .value(_.personalInfo_postCode, userAccount.personalInfo.postCode)
       // Account Settings
       .value(_.settings_maxMessagesPerWeek, userAccount.settings.maxMessagesPerWeek)
+      .future()
+      .map { _ =>}
 
+    val emailLookupFuture : Future[Unit] = userAccount.email.fold[Future[Unit]]( successful[Unit]() )  { email => userByEmail.insert.value(_.email, email).value(_.userId, userAccount.id).future().map { _ => () } }
+    val msisdnLookupFuture : Future[Unit] = userAccount.msisdn.fold[Future[Unit]]( successful[Unit]() )  { msisdn => userByMsisdn.insert.value(_.msisdn, msisdn).value(_.userId, userAccount.id).future().map { _ => () } }
+
+    sequence( List(accountCreationFuture, emailLookupFuture, msisdnLookupFuture) ) map { _ => }
+  }
 
   override def findByAnyOf(applicationIdOpt: Option[UUID], msisdnOpt: Option[String], emailOpt: Option[String]): Future[Option[UserAccount]] = {
     val byAppId: Future[Option[UserAccount]] = findByOptional(applicationIdOpt) {  getByApplicationId(_) }
@@ -143,7 +178,7 @@ class UserAccountCassandraDAO extends UserAccountDAO {
       clientApplicationOption =>
         clientApplicationOption match {
           case Some(clientApplication) =>
-            val userAccountFuture = getById(clientApplication.id)
+            val userAccountFuture = getById(clientApplication.accountId)
 
             if (mustBeActive)
               userAccountFuture map { _.filter { _.active } }
@@ -160,25 +195,71 @@ class UserAccountCassandraDAO extends UserAccountDAO {
       .where(_.id eqs userId)
       .one()
 
-  override def getByEmail(email: String, mustBeActive: Boolean = false): Future[Option[UserAccount]] = {
-    val baseQuery = userAccountRecord
-      .select
-      .where(_.email eqs Some(email))
 
-    val query = if (mustBeActive) baseQuery.and(_.active eqs true) else baseQuery
+  private def getByLookup(mustBeActive: Boolean) ( lookup : Future[ Option[ { def userId: UUID } ] ] ) = {
+    val user : Future[Option[UserAccount]] = lookup flatMap {
+      _ match {
+        case Some(lookupRecord) => getById(lookupRecord.userId)
+        case None => successful(None)
+      }
+    }
 
-    query.one()
+    if(mustBeActive) user map { _.filter( _.active ) }
+    else user
   }
 
-  override def getByMsisdn(msisdn: String, mustBeActive: Boolean = false): Future[Option[UserAccount]] = {
-    val baseQuery = userAccountRecord
-      .select
-      .where(_.msisdn eqs userAccountRecord.normaliseEmail(Some(msisdn)))
+  override def getByEmail(email: String, mustBeActive: Boolean = false): Future[Option[UserAccount]] =
+    getByLookup(mustBeActive) {
+      userByEmail
+        .select
+        .where( _.email eqs email )
+        .one()
+    }
 
-    val query = if (mustBeActive) baseQuery.and(_.active eqs true) else baseQuery
+  override def getByMsisdn(msisdn: String, mustBeActive: Boolean = false): Future[Option[UserAccount]] =
+    getByLookup(mustBeActive) {
+      userByMsisdn
+        .select
+        .where( _.msisdn eqs msisdn )
+        .one()
+    }
 
-    query.one()
+
+  override def setEmail(userId: UUID, email: String) : Future[Unit] = async {
+    val oldRecord = await { getById(userId) }
+
+    oldRecord match {
+      case Some(account) =>
+        val oldEmailOp = account.email
+        userAccountRecord.update.modify( _.email setTo Some(email)).future()
+        //val deleteOtherEmail = oldEmailOp map { oldEmail => userByEmail.delete.where( _.email eqs oldEmail).execute().map( _ => () ) } getOrElse successful[Unit]( () )
+        userByEmail.insert.value(_.email, email).value(_.userId, userId).future()
+
+      case None => throw new IllegalArgumentException(s"Cannot find user with ID ${userId}")
+    }
   }
+
+  override def setMsisdn(userId: UUID, msisdn: String) : Future[Unit] =  async {
+    val oldRecord = await { getById(userId) }
+
+    oldRecord match {
+      case Some(account) =>
+        val oldMsidnOp = account.msisdn
+        userAccountRecord.update.modify( _.msisdn setTo Some(msisdn)).execute()
+        oldMsidnOp foreach { oldMsisdn => userByMsisdn.delete.where( _.msisdn eqs oldMsisdn).execute() }
+        userByMsisdn.insert.value(_.msisdn, msisdn).value(_.userId, userId).execute()
+
+      case None => throw new IllegalArgumentException(s"Cannot find user with ID ${userId}")
+    }
+  }
+
+  def createTables : List[Future[Unit]] =
+    List(
+      userByEmail.createTable(),
+      userByMsisdn.createTable(),
+      userAccountRecord.createTable(),
+      clientApplicationRecord.createTable()
+    )
 }
 
 class ClientApplicationCassandraDAO extends ClientApplicationDAO {
@@ -198,18 +279,22 @@ class ClientApplicationCassandraDAO extends ClientApplicationDAO {
       .where(_.accountId eqs userId)
       .fetch()
 
-  override def update(clientApp: ClientApplication): Unit =
+  override def update(clientApp: ClientApplication): Future[Unit] =
     clientApplicationRecord
       .update
       .where(_.id eqs clientApp.id)
       .modify(_.activationCode setTo clientApp.activationCode)
       .and(_.active setTo clientApp.active)
+      .future()
+      .map { _ =>}
 
-  override def insertNew(clientApp: ClientApplication): Unit =
+  override def insertNew(clientApp: ClientApplication): Future[Unit] =
     clientApplicationRecord
       .insert
       .value(_.id, clientApp.id)
       .value(_.accountId, clientApp.accountId)
       .value(_.activationCode, clientApp.activationCode)
       .value(_.active, clientApp.active)
+      .future()
+      .map { _ =>}
 }

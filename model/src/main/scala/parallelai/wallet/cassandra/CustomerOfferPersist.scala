@@ -13,7 +13,7 @@ import com.newzly.phantom.iteratee.Iteratee
 
 sealed class CustomerOfferRecord private() extends CassandraTable[CustomerOfferRecord, CustomerOffer] {
   object id extends UUIDColumn(this) with PartitionKey[UUID]
-  object title extends StringColumn(this) with SecondaryKey[String]
+  object title extends StringColumn(this) with Index[String]
   object description extends StringColumn(this)
   object value extends DoubleColumn(this)
   object imageUrl extends StringColumn(this)

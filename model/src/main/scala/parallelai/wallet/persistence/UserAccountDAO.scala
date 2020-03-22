@@ -14,11 +14,15 @@ trait UserAccountDAO {
 
   def getByApplicationId(applicationId: UUID, mustBeActive: Boolean = false) : Future[Option[UserAccount]]
 
-  def insertNew(userAccount: UserAccount) : Unit
+  def insertNew(userAccount: UserAccount) : Future[Unit]
 
-  def update(userAccount: UserAccount): Unit
+  def update(userAccount: UserAccount): Future[Unit]
 
-  def setActive(userId : UUID): Unit
+  def setActive(userId : UUID): Future[Unit]
+
+  def setEmail(userId: UUID, email: String) : Future[Unit]
+
+  def setMsisdn(userId: UUID, msisdn: String) : Future[Unit]
 
   def findByAnyOf(applicationId: Option[UUID], msisdn: Option[String], email: Option[String]) : Future[Option[UserAccount]]
 }

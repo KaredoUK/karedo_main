@@ -10,8 +10,11 @@ import spray.http._
 import spray.http.StatusCodes._
 import com.parallelai.wallet.datamanager.data._
 import ApiDataJsonProtocol._
+import RegistrationActor.AddApplication
+import parallelai.wallet.entity.UserAccount
+import core.EditAccountActor.GetAccount
 
-class RegistrationService(registration: ActorRef)(implicit executionContext: ExecutionContext)
+class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(implicit executionContext: ExecutionContext)
   extends Directives with DefaultJsonFormats {
 
   import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
@@ -22,7 +25,7 @@ class RegistrationService(registration: ActorRef)(implicit executionContext: Exe
 
   implicit object EitherErrorSelector extends ErrorSelector[RegistrationError] {
     def apply(error: RegistrationError): StatusCode = error match {
-      case InvalidRequest => BadRequest
+      case InvalidRequest(reason) => BadRequest
       case ApplicationAlreadyRegistered => BadRequest
       case UserAlreadyRegistered => BadRequest
       case InvalidValidationCode => Unauthorized
@@ -35,14 +38,30 @@ class RegistrationService(registration: ActorRef)(implicit executionContext: Exe
       post {
         handleWith {
           registrationRequest: RegistrationRequest =>
-              (registration ? registrationRequest).mapTo[Either[RegistrationError, RegistrationResponse]]
+            (registrationActor ? registrationRequest).mapTo[Either[RegistrationError, RegistrationResponse]]
+        }
+      }
+    }~
+    path( "account" / JavaUUID ) { accountId: UserID =>
+      rejectEmptyResponse {
+        get {
+          complete {
+            (editAccountActor ? GetAccount(accountId)).mapTo[Option[UserProfile]]
+          }
+        }
+      }
+    } ~
+    path("account" / JavaUUID / "application" / JavaUUID ) { (accountId: UserID, applicationId: ApplicationID) =>
+      put {
+        complete {
+          (registrationActor ? AddApplication(accountId, applicationId)).mapTo[Either[RegistrationError, RegistrationResponse]]
         }
       }
     } ~
     path("account" / "application" / "validation") {
       post {
         handleWith {
-          registrationValidation: RegistrationValidation =>  (registration ? registrationValidation).mapTo[Either[RegistrationError, RegistrationValidationResponse]]
+          registrationValidation: RegistrationValidation =>  (registrationActor ? registrationValidation).mapTo[Either[RegistrationError, RegistrationValidationResponse]]
         }
       }
     }
