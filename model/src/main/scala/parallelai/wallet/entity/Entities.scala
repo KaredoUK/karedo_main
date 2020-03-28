@@ -17,10 +17,10 @@ case class RetailOffer (
 
 case class CustomerOffer (
   id: UUID,
+  customerId: UUID,
+  retailOfferId: UUID,
   title: String,
-  description: String,
   value: Double,
-  imageUrl: String,
   props: Map[String, String],
   timestamp: DateTime,
   test: Option[Int]

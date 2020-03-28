@@ -12,18 +12,18 @@ import com.newzly.phantom.iteratee.Iteratee
 
 
 sealed class CustomerOfferRecord private() extends CassandraTable[CustomerOfferRecord, CustomerOffer] {
-  object id extends UUIDColumn(this) with PartitionKey[UUID]
-  object title extends StringColumn(this) with SecondaryKey[String]
-  object description extends StringColumn(this)
+  object id extends UUIDColumn(this) with PartitionKey[UUID] with PrimaryKey[UUID]
+  object customerId extends UUIDColumn(this) with PrimaryKey[UUID]
+  object retailOfferId extends UUIDColumn(this) with SecondaryKey[UUID]
+  object title extends StringColumn(this)
   object value extends DoubleColumn(this)
-  object imageUrl extends StringColumn(this)
   object props extends MapColumn[CustomerOfferRecord, CustomerOffer, String, String](this)
   object timestamp extends DateTimeColumn(this) // with ClusteringOrder[_]
   object test extends OptionalIntColumn(this)
 
 
   override def fromRow(row: Row): CustomerOffer = {
-    CustomerOffer(id(row), title(row), description(row), value(row), imageUrl(row), props(row), timestamp(row), test(row));
+    CustomerOffer(id(row), customerId(row), retailOfferId(row), title(row), value(row), props(row), timestamp(row), test(row));
   }
 }
 
@@ -34,10 +34,10 @@ object CustomerOfferRecord extends CustomerOfferRecord with DBConnector {
   def insertNewRecord(ro: CustomerOffer): ScalaFuture[ResultSet] = {
 
     insert.value(_.id, ro.id)
+      .value(_.customerId, ro.customerId)
+      .value(_.retailOfferId, ro.retailOfferId)
       .value(_.title, ro.title)
-      .value(_.description, ro.description)
       .value(_.value, ro.value)
-      .value(_.imageUrl, ro.imageUrl)
       .value(_.props, ro.props)
       .value(_.timestamp, ro.timestamp)
       .value(_.test, ro.test)
@@ -55,7 +55,7 @@ object CustomerOfferRecord extends CustomerOfferRecord with DBConnector {
       res => res run Iteratee.collect()
     }
   }
-  def getRecipePage(start: Int, limit: Int): ScalaFuture[Iterator[CustomerOffer]] = {
+  def getCustomerOfferPage(start: Int, limit: Int): ScalaFuture[Iterator[CustomerOffer]] = {
     select.fetchEnumerator() flatMap {
       res => res run Iteratee.slice(start, limit)
     }
