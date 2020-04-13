@@ -12,7 +12,7 @@ import com.parallelai.wallet.datamanager.data._
 import ApiDataJsonProtocol._
 import RegistrationActor.AddApplication
 import parallelai.wallet.entity.UserAccount
-import core.EditAccountActor.GetAccount
+import core.EditAccountActor.{FindAccount, GetAccount}
 
 class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(implicit executionContext: ExecutionContext)
   extends Directives with DefaultJsonFormats {
@@ -39,6 +39,15 @@ class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(im
         handleWith {
           registrationRequest: RegistrationRequest =>
             (registrationActor ? registrationRequest).mapTo[Either[RegistrationError, RegistrationResponse]]
+        }
+      } ~
+      get {
+        parameterMap { params =>
+          rejectEmptyResponse {
+            complete {
+              (editAccountActor ? FindAccount(params.get("msisdn"), params.get("email"))).mapTo[Option[UserProfile]]
+            }
+          }
         }
       }
     }~
