@@ -9,7 +9,7 @@ trait ClientApplicationDAO {
 
   def findByUserId(userId: UUID) : Future[Seq[ClientApplication]]
 
-  def update(clientApp: ClientApplication) : Unit
+  def update(clientApp: ClientApplication) : Future[Unit]
 
-  def insertNew(clientApp: ClientApplication) : Unit
+  def insertNew(clientApp: ClientApplication) : Future[Unit]
 }

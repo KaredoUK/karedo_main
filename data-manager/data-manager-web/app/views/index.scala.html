@@ -1,6 +1,6 @@
 @(message: String)
 
-@main("Welcome to Play Framework") {
+@main("Welcome to Data Manager Web UI") {
 
     <script type='text/javascript' src='@routes.Assets.at("javascripts/index.min.js")'></script>
         <style></style>
@@ -9,6 +9,8 @@
         <h1>@message</h1>
     </div>
 
-    <a id="getMessageButton" href="@routes.MainController.register.url" >Register</a>
+    <a id="registerUserButton" href="@routes.MainController.register.url" >Register new user</a>
+    <a id="registerAppButton" href="@routes.MainController.registerApplication.url" >Register new application for existing user</a>
+    <a id="manageUserButton" href="@routes.MainController.registerApplication.url" >Manage user TBD</a>
 
 }

@@ -1,12 +1,12 @@
-@(applicationId: String)
+@(applicationId: String, registerAction: String, title: String)
 
 @main("Register") {
 
     <div class="well">
-        <h1>Register your account</h1>
+        <h1>@title</h1>
     </div>
 
-    <form name="register" action="@controllers.routes.MainController.submitRegistration.url" method="post">
+    <form name="register" action="@registerAction" method="post">
         <div>
             <label>Insert Email</label><input type="email" name="email" id="email"/>
         </div>
