@@ -12,6 +12,7 @@ object EditAccountActor {
     Props(classOf[EditAccountActor], userAccountDAO, clientApplicationDAO)
 
   case class GetAccount(accountId: UserID)
+  case class FindAccount(msisdn: Option[String], email: Option[String]) extends WithUserContacts
 }
 
 import EditAccountActor._
@@ -20,7 +21,13 @@ class EditAccountActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : C
   import context.dispatcher
 
   override def receive: Receive = {
-    case GetAccount(accountId) => userAccountDAO.getById(accountId) map { _ map { userAccountToUserProfile } }
+    case GetAccount(accountId) =>
+      log.info("Trying to get account with account ID {}", accountId)
+      userAccountDAO.getById(accountId) map { _ map { userAccountToUserProfile } }
+
+    case FindAccount(msisdnOp, emailOp) =>
+      log.info("Trying to find account with msisdn {} or email {}", msisdnOp, emailOp)
+      userAccountDAO.findByAnyOf(None, msisdnOp, emailOp) map { _ map { userAccountToUserProfile } }
   }
 
   def userAccountToUserProfile(userAccount: UserAccount): UserProfile =
