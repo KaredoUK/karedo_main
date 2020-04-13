@@ -1,5 +1,3 @@
-organization := "parallelai.wallet"
-
 name := "model"
 
 version := "1.0"
