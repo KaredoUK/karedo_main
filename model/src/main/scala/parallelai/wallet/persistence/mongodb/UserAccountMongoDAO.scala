@@ -105,7 +105,7 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
 
   override def findByAnyOf(applicationId: Option[UUID], msisdn: Option[String], email: Option[String]): Future[Option[UserAccount]] =
     successful {
-      val byAppIdOpt = applicationId map { value => MongoDBObject( "applications.id" -> value ) }
+      val byAppIdOpt = applicationId map { value => byApplicationId(value) }
       val byMsisdnOpt = msisdn map { value => MongoDBObject( "msisdn" -> value ) }
       val byEmailOpt = email map { value => MongoDBObject( "email" -> value ) }
 
@@ -141,7 +141,13 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
 
   override def getByEmail(email: String, mustBeActive: Boolean): Future[Option[UserAccount]] =
     successful {
-      dao.findOne( MongoDBObject( "email" -> Some(email) ) )
+      val query = if(mustBeActive) {
+        $and(MongoDBObject( "email" -> Some(email) ), MongoDBObject( "active" -> true) )
+      } else {
+        MongoDBObject( "email" -> Some(email) )
+      }
+
+      dao.findOne( query )
     }
 }
 
