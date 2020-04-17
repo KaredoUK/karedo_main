@@ -23,9 +23,9 @@ import com.mongodb.casbah.Imports._
 
 
 object userAccountMongoUtils {
-  def byId(userId: UUID) = MongoDBObject("id" -> userId)
+  def byId(userId: UUID) = MongoDBObject("_id" -> userId)
 
-  def applicationById(applicationId: UUID) = "applications" $elemMatch MongoDBObject( "id" -> applicationId )
+  def byApplicationId(applicationId: UUID) = "applications" $elemMatch MongoDBObject( "_id" -> applicationId )
 }
 
 import userAccountMongoUtils._
@@ -95,9 +95,9 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
   override def getByApplicationId(applicationId: UUID, mustBeActive: Boolean): Future[Option[UserAccount]] =
     successful{
       val query = if(mustBeActive) {
-        $and(applicationById(applicationId), MongoDBObject( "active" -> true) )
+        $and(byApplicationId(applicationId), MongoDBObject( "active" -> true) )
       } else {
-        applicationById(applicationId)
+        byApplicationId(applicationId)
       }
 
       dao.findOne(query)
