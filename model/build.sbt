@@ -9,8 +9,10 @@ val phantomVersion = "0.5.0"
 libraryDependencies ++= Seq(
   "com.newzly"              %% "phantom-dsl"            % phantomVersion,
   "org.scala-lang.modules"  %% "scala-async"            % "0.9.0",
-  "org.cassandraunit"       %   "cassandra-unit"        % "1.1.1.2" % "test",
-  "org.scalatest"           %% "scalatest"              % "2.1.5" % "test"
+  "com.novus"               %% "salat" % "1.9.8",
+  "org.mongodb"             %% "casbah"                 % "2.7.1",
+  "com.pragmasoft"          % "subcut_ext"               % "2.0",
+  "com.github.athieriot"    %% "specs2-embedmongo"      % "0.6.0" % "test"
 )
 
 scalacOptions ++= Seq(
