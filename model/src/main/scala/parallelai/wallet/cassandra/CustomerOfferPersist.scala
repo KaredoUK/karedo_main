@@ -13,15 +13,10 @@ import com.newzly.phantom.iteratee.Iteratee
 
 sealed class CustomerOfferRecord private() extends CassandraTable[CustomerOfferRecord, CustomerOffer] {
   object id extends UUIDColumn(this) with PartitionKey[UUID]
-  object title extends StringColumn(this) with SecondaryKey[String]
   object description extends StringColumn(this)
-  object id extends UUIDColumn(this) with PartitionKey[UUID] with PrimaryKey[UUID]
   object customerId extends UUIDColumn(this) with PrimaryKey[UUID]
-  object retailOfferId extends UUIDColumn(this) with SecondaryKey[UUID]
-  object title extends StringColumn(this)
-  object id extends UUIDColumn(this) with PartitionKey[UUID]
+  object retailOfferId extends UUIDColumn(this) with Index[UUID]
   object title extends StringColumn(this) with Index[String]
-  object description extends StringColumn(this)
   object value extends DoubleColumn(this)
   object props extends MapColumn[CustomerOfferRecord, CustomerOffer, String, String](this)
   object timestamp extends DateTimeColumn(this) // with ClusteringOrder[_]
