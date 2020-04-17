@@ -19,6 +19,8 @@ object DBConnector {
   lazy val session = blocking {
     cluster.connect(keySpace)
   }
+
+  sys.addShutdownHook(session.close())
 }
 
 trait DBConnector {
