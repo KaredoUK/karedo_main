@@ -13,13 +13,9 @@ import org.specs2.time.NoTimeConversions
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class UserAccountMongoDAOSpec extends Specification with EmbedConnection with CleanAfterExample with NoTimeConversions {
+class UserAccountMongoDAOSpec extends Specification with EmbedConnection with CleanAfterExample with NoTimeConversions with MongoTestUtils {
 
   sequential
-
-  implicit def mapAsConfigSource : Map[String, String] => PropertiesConfigMapSource = new PropertiesConfigMapSource(_)
-
-  def fromFuture[T] (future: Future[T]) : T = result(future, 2.seconds)
 
   "UserAccountMongoDAO" should {
 
@@ -130,6 +126,16 @@ class UserAccountMongoDAOSpec extends Specification with EmbedConnection with Cl
         } yield (byMsisdn, byEmail, byApplicationId, shouldntFind)
 
       fromFuture(findAfterInsert) shouldEqual (Some(userAccount), Some(userAccount), Some(userAccount), None)
+    }
+
+    "Delete by ID" in {
+      val findAfterDelete = for {
+        insert <- accountDAO.insertNew(userAccount, clientApplication)
+        delete <- accountDAO.delete(userAccount.id)
+        read <- accountDAO.getById(userAccount.id)
+      } yield read
+
+      fromFuture(findAfterDelete) shouldEqual None
     }
 
   }

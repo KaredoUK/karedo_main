@@ -149,6 +149,11 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
 
       dao.findOne( query )
     }
+
+  override def delete(userId: UUID) : Future[Unit] =
+    successful {
+      dao.removeById(userId, WriteConcern.Safe)
+    }
 }
 
 
@@ -161,7 +166,13 @@ class ClientApplicationMongoDAO(implicit val bindingModule: BindingModule)  exte
 
   override def getById(applicationId: UUID): Future[Option[ClientApplication]] =
     successful{
-      dao.findOneById(applicationId) flatMap {  account => account.applications.find(_.id == applicationId).map( _.toClientApplication(account.id) ) }
+      dao.findOne( byApplicationId(applicationId) ) flatMap {
+        account =>
+          account.applications.find(_.id == applicationId).map {
+            app =>
+              app.toClientApplication(account.id)
+          }
+      }
     }
 
   override def findByUserId(userId: UUID): Future[Seq[ClientApplication]] =

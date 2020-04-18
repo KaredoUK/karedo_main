@@ -1,3 +1,17 @@
+package core
+
+import akka.actor.{Props, ActorLogging, Actor}
+import akka.actor.Actor.Receive
+import parallelai.wallet.persistence.{ClientApplicationDAO, UserAccountDAO}
+import com.parallelai.wallet.datamanager.data._
+import parallelai.wallet.entity.UserAccount
+
+object EditAccountActor {
+  def props(userAccountDAO : UserAccountDAO, clientApplicationDAO : ClientApplicationDAO): Props =
+    Props(classOf[EditAccountActor], userAccountDAO, clientApplicationDAO)
+
+  case class GetAccount(accountId: UserID)
+
   case class FindAccount(msisdn: Option[String], email: Option[String]) extends WithUserContacts
 }
 

@@ -7,7 +7,6 @@ import scala.concurrent.Future
 import scala.async.Async._
 import java.util.UUID
 import spray.json._
-import parallelai.wallet.persistence.cassandra.{ClientApplicationCassandraDAO, UserAccountCassandraDAO}
 import parallelai.wallet.entity.{ClientApplication, UserAccount}
 import com.parallelai.wallet.datamanager.data.RegistrationValidation
 import com.parallelai.wallet.datamanager.data.RegistrationResponse
@@ -162,7 +161,13 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
       _ =>  userAccountDAO.getById(registrationRequest.accountId) map {
               _ match {
                 case None => Left(InvalidRequest("User doesn't exist"))
-                case Some(userAccount) => activateApplication(registrationRequest.applicationId, userAccount.id, UserContacts(userAccount.email, userAccount.msisdn))
+                case Some(userAccount) =>
+                  activateApplication(
+                    registrationRequest.applicationId,
+                    userAccount.id,
+                    UserContacts(userAccount.email, userAccount.msisdn),
+                    newActivationCode
+                  )
               }
             }
     }
@@ -176,30 +181,20 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
     if (existingAccountOp.filter( { _.active } ).isDefined) {
       Left(UserAlreadyRegistered)
     } else {
-      val accountId = existingAccountOp match {
-        case None =>
-          log.debug("Creating new account for request {}", registrationRequest)
-          createNewUserAccount(registrationRequest)
-
-        case Some(account) =>
-          log.debug("Updating account of already registered user {}", account)
-          registrationRequest.msisdn filter { _ != account.msisdn } foreach { userAccountDAO.setMsisdn(account.id, _) }
-          registrationRequest.email  filter { _ != account.email } foreach { userAccountDAO.setEmail(account.id, _) }
-          account.id
+      if(existingAccountOp.isDefined) {
+        log.debug("Removing account of already registered but not active user {}", existingAccountOp.get)
+        userAccountDAO.delete(existingAccountOp.get.id)
       }
 
-      activateApplication(registrationRequest.applicationId, accountId, registrationRequest)
+      log.debug("Creating new account for request {}", registrationRequest)
+      val (accountId, validationCode) = createNewUserAccount(registrationRequest)
+
+      activateApplication(registrationRequest.applicationId, accountId, registrationRequest, validationCode)
     }
   }
 
-  private def activateApplication(applicationId: ApplicationID, accountId: UserID, userContacts: WithUserContacts) : Either[RegistrationError, RegistrationResponse] = {
-    val activationCode = RandomStringUtils.randomAlphanumeric(6)
-
-    log.info("Activation code for registration request of application {} is '{}'", applicationId, activationCode)
-
-    clientApplicationDAO.insertNew(ClientApplication(applicationId, accountId, activationCode))
-
-    //activationMessageActor ! registrationRequest
+  private def activateApplication(applicationId: ApplicationID, accountId: UserID, userContacts: WithUserContacts, validationCode: String) : Either[RegistrationError, RegistrationResponse] = {
+    //activationMessageActor ! (registrationRequest, validationCode)
 
     if(userContacts.msisdn.isDefined)
       Right(RegistrationResponse(applicationId, "msisdn", userContacts.msisdn.get))
@@ -207,15 +202,28 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
       Right(RegistrationResponse(applicationId, "email", userContacts.email.get))
   }
   
-  private def createNewUserAccount(registrationRequest: RegistrationRequest) : UUID = {
+  private def createNewUserAccount(registrationRequest: RegistrationRequest) : (UUID, String) = {
     val account = UserAccount( id = UUID.randomUUID(), email = registrationRequest.email, msisdn = registrationRequest.msisdn )
-    userAccountDAO.insertNew(account)
 
-    account.id
+    val activationCode = newActivationCode
+
+    log.info("Activation code for registration request of application {} is '{}'", registrationRequest.applicationId, activationCode)
+
+    val firstApplication = ClientApplication(registrationRequest.applicationId, account.id, activationCode)
+
+    userAccountDAO.insertNew(account, firstApplication)
+
+    (account.id, activationCode)
+  }
+
+  def newActivationCode: String = {
+    RandomStringUtils.randomAlphanumeric(6)
   }
 
   def validateUser(validation: RegistrationValidation) : Future[Either[RegistrationError, RegistrationValidationResponse]] = async {
-    val clientAppOption = await { clientApplicationDAO.getById(validation.applicationId) }
+    val clientAppOption = await {
+      clientApplicationDAO.getById(validation.applicationId)
+    }
 
     clientAppOption match {
       case None => Left(InvalidRequest(s"Unable to find client application with ID '${validation.applicationId}'"))

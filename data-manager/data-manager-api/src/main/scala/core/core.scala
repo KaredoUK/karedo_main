@@ -3,7 +3,10 @@ package core
 import akka.actor.{ActorDSL, Props, ActorSystem}
 import ActorDSL._
 import parallelai.wallet.persistence.{ClientApplicationDAO, UserAccountDAO}
-import parallelai.wallet.persistence.cassandra.{ClientApplicationCassandraDAO, UserAccountCassandraDAO}
+import parallelai.wallet.config.AppConfigPropertySource
+import com.typesafe.config.ConfigFactory
+import com.escalatesoft.subcut.inject.NewBindingModule._
+import parallelai.wallet.persistence.mongodb.{ClientApplicationMongoDAO, UserAccountMongoDAO}
 
 /**
  * Core is type containing the ``system: ActorSystem`` member. This enables us to use it in our
@@ -40,10 +43,17 @@ trait BootedCore extends Core {
 trait CoreActors {
   this: Core =>
 
-  val userAccountDAO : UserAccountDAO = new UserAccountCassandraDAO()
-  val clientApplicationDAO : ClientApplicationDAO = new ClientApplicationCassandraDAO()
+  implicit val configProvider = AppConfigPropertySource(ConfigFactory.load())
 
+  implicit val bindingModule = newBindingModuleWithConfig
+
+
+  val userAccountDAO : UserAccountDAO = new UserAccountMongoDAO()
+  val clientApplicationDAO : ClientApplicationDAO = new ClientApplicationMongoDAO()
+
+  // This should be an actor pool at least if we don't want to use a one actor per request strategy
   val registration = system.actorOf(RegistrationActor.props(userAccountDAO, clientApplicationDAO))
   val editAccount = system.actorOf(EditAccountActor.props(userAccountDAO, clientApplicationDAO))
+
   val messenger = system.actorOf(Props[MessengerActor])
 }

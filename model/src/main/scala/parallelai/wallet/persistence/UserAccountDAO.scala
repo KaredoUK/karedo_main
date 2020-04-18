@@ -25,6 +25,8 @@ trait UserAccountDAO {
   def setMsisdn(userId: UUID, msisdn: String) : Future[Unit]
 
   def findByAnyOf(applicationId: Option[UUID], msisdn: Option[String], email: Option[String]) : Future[Option[UserAccount]]
+
+  def delete(userId: UUID) : Future[Unit]
 }
 
 
