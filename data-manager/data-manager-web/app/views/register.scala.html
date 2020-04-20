@@ -1,22 +1,27 @@
-@(applicationId: String)
+@(applicationId: String, registerAction: String, title: String)
 
 @main("Register") {
 
-    <div class="well">
-        <h1>Register your account</h1>
+    <div class="container">
+        <div class="well">
+            <h1>@title</h1>
+        </div>
+
+        <form name="register" action="@registerAction" method="post">
+            <div>
+                <label>Insert Email</label><input type="email" name="email" id="email"/>
+            </div>
+
+            <div>
+                <label>Insert Mobile Number</label><input type="text" name="msisdn" id="msisdn"/>
+            </div>
+
+            <input type="hidden" name="applicationId" id="applicationId" value="@applicationId"/>
+
+            <input type="submit" value="Register"/>
+        </form>
+
     </div>
 
-    <form name="register" action="@controllers.routes.MainController.submitRegistration.url" method="post">
-        <div>
-            <label>Insert Email</label><input type="email" name="email" id="email"/>
-        </div>
 
-        <div>
-            <label>Insert Mobile Number</label><input type="text" name="msisdn" id="msisdn"/>
-        </div>
-
-        <input type="hidden" name="applicationId" id="applicationId" value="@applicationId"/>
-
-        <input type="submit">Register</input>
-    </form>
 }
