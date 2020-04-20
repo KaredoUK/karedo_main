@@ -15,4 +15,5 @@ dist
 **/out
 **/RUNNING_PID
 **/.settings
+**/.project
     

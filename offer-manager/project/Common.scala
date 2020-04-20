@@ -1,9 +1,9 @@
 import sbt._
 import Keys._
 
-object Common {
+object Common extends Build {
 
-  val settings: Seq[Setting[_]] = Seq (
+  super.settings ++ Seq (
     version := "1.0",
     scalaVersion := "2.10.2",
     organization := "parallelai.wallet"
