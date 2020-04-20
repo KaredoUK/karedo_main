@@ -3,14 +3,17 @@
 @main("Welcome to Data Manager Web UI") {
 
     <script type='text/javascript' src='@routes.Assets.at("javascripts/index.min.js")'></script>
-        <style></style>
+    <script type="text/javascript" src='@routes.Assets.at("sylesheets/sign-in-scripts.js")'></script>
+
+    <style>
+    </style>
     
     <div class="well">
         <h1>@message</h1>
     </div>
 
-    <a id="registerUserButton" href="@routes.MainController.register.url" >Register new user</a>
-    <a id="registerAppButton" href="@routes.MainController.registerApplication.url" >Register new application for existing user</a>
-    <a id="manageUserButton" href="@routes.MainController.registerApplication.url" >Manage user TBD</a>
+    <a id="registerUserButton" class="btn btn-default" role="button" href="@routes.MainController.register.url" >Register new user</a>
+    <p/>
+    <a id="registerAppButton" class="btn btn-default" role="button" href="@routes.MainController.registerApplication.url" >I'm an existing user</a>
 
 }

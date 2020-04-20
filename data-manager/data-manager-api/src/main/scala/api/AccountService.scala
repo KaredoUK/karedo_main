@@ -12,7 +12,7 @@ import com.parallelai.wallet.datamanager.data._
 import ApiDataJsonProtocol._
 import RegistrationActor.AddApplication
 import parallelai.wallet.entity.UserAccount
-import core.EditAccountActor.GetAccount
+import core.EditAccountActor.{FindAccount, GetAccount}
 
 class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(implicit executionContext: ExecutionContext)
   extends Directives with DefaultJsonFormats {
@@ -21,7 +21,7 @@ class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(im
 
   import akka.pattern.ask
   import scala.concurrent.duration._
-  implicit val timeout = Timeout(2.seconds)
+  implicit val timeout = Timeout(20.seconds)
 
   implicit object EitherErrorSelector extends ErrorSelector[RegistrationError] {
     def apply(error: RegistrationError): StatusCode = error match {
@@ -40,13 +40,13 @@ class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(im
           registrationRequest: RegistrationRequest =>
             (registrationActor ? registrationRequest).mapTo[Either[RegistrationError, RegistrationResponse]]
         }
-      }
-    }~
-    path( "account" / JavaUUID ) { accountId: UserID =>
-      rejectEmptyResponse {
-        get {
-          complete {
-            (editAccountActor ? GetAccount(accountId)).mapTo[Option[UserProfile]]
+      } ~
+      get {
+        parameters('email.?, 'msisdn.?) { (email, msisdn) =>
+          rejectEmptyResponse {
+            complete {
+              (editAccountActor ? FindAccount(msisdn, email)).mapTo[Option[UserProfile]]
+            }
           }
         }
       }
@@ -54,7 +54,16 @@ class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(im
     path("account" / JavaUUID / "application" / JavaUUID ) { (accountId: UserID, applicationId: ApplicationID) =>
       put {
         complete {
-          (registrationActor ? AddApplication(accountId, applicationId)).mapTo[Either[RegistrationError, RegistrationResponse]]
+          (registrationActor ? AddApplication(applicationId, accountId)).mapTo[Either[RegistrationError, RegistrationResponse]]
+        }
+      }
+    } ~
+    path( "account" / JavaUUID ) { accountId: UserID =>
+      rejectEmptyResponse {
+        get {
+          complete {
+            (editAccountActor ? GetAccount(accountId)).mapTo[Option[UserProfile]]
+          }
         }
       }
     } ~

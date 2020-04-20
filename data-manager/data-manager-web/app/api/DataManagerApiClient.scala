@@ -48,11 +48,14 @@ class DataManagerRestClient(implicit val bindingModule: BindingModule) extends D
 
   override def register(request: RegistrationRequest): Future[RegistrationResponse] = registerPipeline { Post(apiBaseUri + "/account", request) }
 
-  override def addApplication(accountId: UUID, applicationId: ApplicationID) : Future[RegistrationResponse] = registerPipeline { Put(apiBaseUri + s"/$accountId/application/$applicationId") }
+  override def addApplication(accountId: UUID, applicationId: ApplicationID) : Future[RegistrationResponse] = {
+    println(s"Calling  PUT $apiBaseUri/account/$accountId/application/$applicationId")
+    registerPipeline { Put( s"$apiBaseUri/account/$accountId/application/$applicationId") }
+  }
 
-  override def validateRegistration(validation: RegistrationValidation): Future[RegistrationValidationResponse] = validatePipeline { Post(apiBaseUri + "/account/application/validation", validation) }
+  override def validateRegistration(validation: RegistrationValidation): Future[RegistrationValidationResponse] = validatePipeline { Post( s"$apiBaseUri/account/application/validation", validation) }
 
-  override def getUserProfile(accountId: UUID) : Future[Option[UserProfile]] = retrieveUserProfilePipeline { Get(apiBaseUri + s"/account/$accountId")}
+  override def getUserProfile(accountId: UUID) : Future[Option[UserProfile]] = retrieveUserProfilePipeline { Get(s"$apiBaseUri/account/$accountId")}
 
   override def findUser(msisdnOp: Option[String], emailOp: Option[String]): Future[Option[UserProfile]] = {
     val findBy = msisdnOp map { msisdn => s"msisdn=$msisdn" } orElse ( emailOp map { email => s"email=$email" } )

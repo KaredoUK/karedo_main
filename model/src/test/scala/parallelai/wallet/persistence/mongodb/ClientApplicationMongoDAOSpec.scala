@@ -30,14 +30,47 @@ class ClientApplicationMongoDAOSpec extends Specification with EmbedConnection w
 
 
     "Find a user's application" in {
-
-      val findAfterInsert =
-        for {
+      val findAfterInsert = for {
           createNew <- accountDAO.insertNew(userAccount, clientApplication)
           getAppById <- clientAppDAO.getById(clientApplication.id)
         } yield getAppById
 
       fromFuture(findAfterInsert) shouldEqual Some(clientApplication)
+    }
+
+    "Update an application" in {
+      val updated = clientApplication.copy(activationCode = "new activation code", active = true)
+      val findAfterUpdate = for {
+        createNew <- accountDAO.insertNew(userAccount, clientApplication)
+        update <- clientAppDAO.update(updated)
+        updated <- clientAppDAO.getById(clientApplication.id)
+      } yield updated
+
+      fromFuture(findAfterUpdate) shouldEqual Some(updated)
+    }
+
+    "Add a new application to an existing user, shoud be in the DB" in {
+      val secondClientApplication = ClientApplication(UUID.randomUUID(), userAccount.id, "ACT_CODE")
+
+      val findAfterAddingToUser = for {
+        createNew <- accountDAO.insertNew(userAccount, clientApplication)
+        update <- clientAppDAO.insertNew(secondClientApplication)
+        inserted <- clientAppDAO.getById(secondClientApplication.id)
+      } yield inserted
+
+      fromFuture(findAfterAddingToUser) shouldEqual Some(secondClientApplication)
+    }
+
+    "Add a new application to an existign user, should be associeted to the user" in {
+      val secondClientApplication = ClientApplication(UUID.randomUUID(), userAccount.id, "ACT_CODE")
+
+      val findUserAfterAddingNewApp = for {
+        createNew <- accountDAO.insertNew(userAccount, clientApplication)
+        update <- clientAppDAO.insertNew(secondClientApplication)
+        findUserByAppId <- accountDAO.getByApplicationId(secondClientApplication.id)
+      } yield findUserByAppId
+
+      fromFuture(findUserAfterAddingNewApp) shouldEqual Some(userAccount)
     }
 
   }

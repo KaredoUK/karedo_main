@@ -20,6 +20,9 @@ import parallelai.wallet.entity.ClientApplication
 import scala.Some
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import com.mongodb.casbah.Imports._
+import parallelai.wallet.entity.ClientApplication
+import scala.Some
+import parallelai.wallet.entity.UserAccount
 
 
 object userAccountMongoUtils {
@@ -168,10 +171,7 @@ class ClientApplicationMongoDAO(implicit val bindingModule: BindingModule)  exte
     successful{
       dao.findOne( byApplicationId(applicationId) ) flatMap {
         account =>
-          account.applications.find(_.id == applicationId).map {
-            app =>
-              app.toClientApplication(account.id)
-          }
+          account.applications.find(_.id == applicationId).map { _.toClientApplication(account.id) }
       }
     }
 
@@ -184,7 +184,7 @@ class ClientApplicationMongoDAO(implicit val bindingModule: BindingModule)  exte
     successful {
       dao.update(
         MongoDBObject(
-          "id" -> clientApp.accountId,
+          "_id" -> clientApp.accountId,
           "applications._id" -> clientApp.id
         ),
         $set(
@@ -199,9 +199,7 @@ class ClientApplicationMongoDAO(implicit val bindingModule: BindingModule)  exte
       dao.update(
         byId(clientApp.accountId),
         $push(
-          "applications.$._id" -> clientApp.id,
-          "applications.$.activationCode" -> clientApp.activationCode,
-          "applications.$.active" -> clientApp.active
+          "applications" -> MongoUserApplicationInfo(clientApp.id, clientApp.activationCode, clientApp.active)
         )
       )
     }

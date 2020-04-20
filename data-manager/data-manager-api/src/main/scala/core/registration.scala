@@ -160,13 +160,18 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
     withValidations(registrationRequest) ( request => applicationNotRegistered(request.applicationId) ) {
       _ =>  userAccountDAO.getById(registrationRequest.accountId) map {
               _ match {
-                case None => Left(InvalidRequest("User doesn't exist"))
+                case None => Left(InvalidRequest(s"User with ID ${registrationRequest.accountId} doesn't exist"))
                 case Some(userAccount) =>
+
+                  val activationCode = newActivationCode
+
+                  clientApplicationDAO.insertNew(ClientApplication(registrationRequest.applicationId, registrationRequest.accountId, newActivationCode))
+
                   activateApplication(
                     registrationRequest.applicationId,
                     userAccount.id,
                     UserContacts(userAccount.email, userAccount.msisdn),
-                    newActivationCode
+                    activationCode
                   )
               }
             }
@@ -196,6 +201,8 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
   private def activateApplication(applicationId: ApplicationID, accountId: UserID, userContacts: WithUserContacts, validationCode: String) : Either[RegistrationError, RegistrationResponse] = {
     //activationMessageActor ! (registrationRequest, validationCode)
 
+    log.info("Validation code for registration request of application {} is '{}'", applicationId, validationCode)
+
     if(userContacts.msisdn.isDefined)
       Right(RegistrationResponse(applicationId, "msisdn", userContacts.msisdn.get))
     else
@@ -206,8 +213,6 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
     val account = UserAccount( id = UUID.randomUUID(), email = registrationRequest.email, msisdn = registrationRequest.msisdn )
 
     val activationCode = newActivationCode
-
-    log.info("Activation code for registration request of application {} is '{}'", registrationRequest.applicationId, activationCode)
 
     val firstApplication = ClientApplication(registrationRequest.applicationId, account.id, activationCode)
 

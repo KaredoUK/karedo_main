@@ -140,14 +140,19 @@ trait RegistrationController extends Controller {
           userProfileFutureOp flatMap {
             _ match {
               case Some(userProfile) =>
+                println(s"Adding application ${userProfile.info.userId}  to user ${registrationRequest.applicationId}")
                 val addApplicationResponseFuture = dataManagerApiClient.addApplication(userProfile.info.userId, registrationRequest.applicationId)
                 addApplicationResponseFuture map { response =>
                   Ok(views.html.confirmActivation.render(response.channel, response.address, response.applicationId.toString))
                 } recoverWith {
                   redirectToForFailedRequestAndFailForOtherCases(routes.MainController.registerApplication)
                 }
-              case None => Future.successful(BadRequest("Cannot find User to add the application to"))
+              case None =>
+                println("Cannot find user")
+                Future.successful(BadRequest("Cannot find User to add the application to"))
             }
+          } recoverWith {
+            redirectToForFailedRequestAndFailForOtherCases(routes.MainController.registerApplication)
           }
         }
       }

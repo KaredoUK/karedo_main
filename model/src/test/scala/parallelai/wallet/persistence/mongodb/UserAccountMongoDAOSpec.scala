@@ -121,8 +121,22 @@ class UserAccountMongoDAOSpec extends Specification with EmbedConnection with Cl
 
           byMsisdn <- accountDAO.findByAnyOf(Some(UUID.randomUUID()), userAccount.msisdn, None)
           byEmail <- accountDAO.findByAnyOf(None, Some("-----"), userAccount.email)
-          byApplicationId <- accountDAO.findByAnyOf(Some(clientApplication.id), None, None)
+          byApplicationId <- accountDAO.findByAnyOf(Some(clientApplication.id), Some("____"), Some("____"))
           shouldntFind <- accountDAO.findByAnyOf(Some(UUID.randomUUID()), Some("-----"), Some("notanemail"))
+        } yield (byMsisdn, byEmail, byApplicationId, shouldntFind)
+
+      fromFuture(findAfterInsert) shouldEqual (Some(userAccount), Some(userAccount), Some(userAccount), None)
+    }
+
+    "Find by any of id, email, application id, passing only one param" in {
+      val findAfterInsert =
+        for {
+          insert <- accountDAO.insertNew(userAccount, clientApplication)
+
+          byMsisdn <- accountDAO.findByAnyOf(None, userAccount.msisdn, None)
+          byEmail <- accountDAO.findByAnyOf(None, None, userAccount.email)
+          byApplicationId <- accountDAO.findByAnyOf(Some(clientApplication.id), None, None)
+          shouldntFind <- accountDAO.findByAnyOf(None, None, None)
         } yield (byMsisdn, byEmail, byApplicationId, shouldntFind)
 
       fromFuture(findAfterInsert) shouldEqual (Some(userAccount), Some(userAccount), Some(userAccount), None)
@@ -136,6 +150,16 @@ class UserAccountMongoDAOSpec extends Specification with EmbedConnection with Cl
       } yield read
 
       fromFuture(findAfterDelete) shouldEqual None
+    }
+
+    "Set account active" in {
+      val findAfterSettingActive = for {
+        insert <- accountDAO.insertNew(userAccount, clientApplication)
+        active <- accountDAO.setActive(userAccount.id)
+        read <- accountDAO.getById(userAccount.id)
+      } yield read
+
+      fromFuture(findAfterSettingActive) map { _.active } shouldEqual Some(true)
     }
 
   }
