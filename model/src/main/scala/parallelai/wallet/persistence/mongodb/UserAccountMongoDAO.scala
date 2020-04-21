@@ -95,6 +95,15 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
       )
     }
 
+  def insertNew(userAccount: UserAccount, firstApplications: ClientApplication* ): Future[Unit] =
+    successful {
+      dao.insert(
+        MongoUserAccount(userAccount.id, userAccount.msisdn, userAccount.email, userAccount.personalInfo, userAccount.settings, userAccount.active,
+          firstApplications map { app => MongoUserApplicationInfo(app.id, app.activationCode, app.active) } toList
+        )
+      )
+    }
+
   override def getByApplicationId(applicationId: UUID, mustBeActive: Boolean): Future[Option[UserAccount]] =
     successful{
       val query = if(mustBeActive) {
@@ -199,7 +208,8 @@ class ClientApplicationMongoDAO(implicit val bindingModule: BindingModule)  exte
       dao.update(
         byId(clientApp.accountId),
         $push(
-          "applications" -> MongoUserApplicationInfo(clientApp.id, clientApp.activationCode, clientApp.active)
+          "applications" -> MongoDBObject( "_id" -> clientApp.id, "activationCode" -> clientApp.activationCode, "active" -> clientApp.active)
+          // Don't use the MongoUserApplicationInfo direct otherwise will try to add a list of Any into applications and fuck up the object
         )
       )
     }

@@ -17,7 +17,7 @@ class ClientApplicationMongoDAOSpec extends Specification with EmbedConnection w
     implicit val bindingModule = newBindingModuleWithConfig(
       Map(
         "mongo.server.host" -> "localhost",
-        "mongo.server.port" -> s"$embedConnectionPort",
+        "mongo.server.port" ->  s"$embedConnectionPort",
         "mongo.db.name" -> "test"
       )
     )
@@ -36,6 +36,15 @@ class ClientApplicationMongoDAOSpec extends Specification with EmbedConnection w
         } yield getAppById
 
       fromFuture(findAfterInsert) shouldEqual Some(clientApplication)
+    }
+
+    "Find a user by app id" in {
+      val findUserByAppId = for {
+        createNew <- accountDAO.insertNew(userAccount, clientApplication)
+        findUserByAppId <- accountDAO.getByApplicationId(clientApplication.id)
+      } yield findUserByAppId
+
+      fromFuture(findUserByAppId) shouldEqual Some(userAccount)
     }
 
     "Update an application" in {
@@ -59,9 +68,22 @@ class ClientApplicationMongoDAOSpec extends Specification with EmbedConnection w
       } yield inserted
 
       fromFuture(findAfterAddingToUser) shouldEqual Some(secondClientApplication)
+      None shouldEqual None
     }
 
-    "Add a new application to an existign user, should be associeted to the user" in {
+    "Load an account with two apps" in {
+      val secondClientApplication = ClientApplication(UUID.randomUUID(), userAccount.id, "ACT_CODE")
+
+      val findAfterAddingToUser = for {
+        createNew <- accountDAO.insertNew(userAccount, clientApplication, secondClientApplication)
+        user <- accountDAO.getById(userAccount.id)
+        inserted <- clientAppDAO.getById(secondClientApplication.id)
+      } yield inserted
+
+      fromFuture(findAfterAddingToUser) shouldEqual Some(secondClientApplication)
+    }
+
+    "Add a new application to an existing user, should be associeted to the user" in {
       val secondClientApplication = ClientApplication(UUID.randomUUID(), userAccount.id, "ACT_CODE")
 
       val findUserAfterAddingNewApp = for {
