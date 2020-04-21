@@ -1,6 +1,9 @@
+
 name := """offer-manager-web"""
 
 version := "0.1"
+
+//Common.settings
 
 libraryDependencies ++= Seq(
   // Select Play modules
@@ -13,9 +16,17 @@ libraryDependencies ++= Seq(
   javaCore,  // The core Java API
   // WebJars pull in client-side web libraries
   "org.webjars" %% "webjars-play" % "2.2.0",
-  "org.webjars" % "bootstrap" % "2.3.1"
+  "org.webjars" % "bootstrap" % "2.3.1",
+  "com.pragmasoft" % "subcut_ext" % "2.0"
   // Add your own project dependencies in the form:
   // "group" % "artifact" % "version"
+//   Common.sprayClient,
+//   Common.subcutExt
 )
+
+//resolvers ++= Common.sprayResolvers
+
+//resolvers += Common.conjarResolver
+
 
 play.Project.playScalaSettings
