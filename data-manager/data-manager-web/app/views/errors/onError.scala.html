@@ -1,0 +1,20 @@
+@(throwable: Throwable)
+
+@main("Internal Error") {
+
+    <script type='text/javascript' src='@routes.Assets.at("javascripts/index.min.js")'></script>
+    <script type="text/javascript" src='@routes.Assets.at("sylesheets/sign-in-scripts.js")'></script>
+
+    <style>
+    </style>
+    
+    <div class="well">
+        <h1>An unexpected error occurred</h1>
+    </div>
+
+    <div class="well">
+        @throwable.getMessage()
+    </div>
+
+    <a id="home" class="btn btn-default" role="button" href="/" >Go to the site home page§</a>
+}

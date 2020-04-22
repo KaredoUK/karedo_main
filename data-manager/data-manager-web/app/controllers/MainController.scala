@@ -27,6 +27,15 @@ import play.api.mvc.Cookie
 import com.parallelai.wallet.datamanager.data.RegistrationRequest
 import com.parallelai.wallet.datamanager.data.UserInfo
 import spray.client.UnsuccessfulResponseException
+import play.api.mvc.Results._
+import com.parallelai.wallet.datamanager.data.AddApplicationRequest
+import com.parallelai.wallet.datamanager.data.RegistrationValidation
+import scala.Some
+import play.api.mvc.SimpleResult
+import play.api.mvc.Call
+import com.parallelai.wallet.datamanager.data.UserProfile
+import play.api.mvc.Cookie
+import com.parallelai.wallet.datamanager.data.RegistrationRequest
 
 object forms {
 
@@ -92,6 +101,8 @@ import forms._
 trait RegistrationController extends Controller {
   def dataManagerApiClient : DataManagerApiClient
 
+  def badRequest(error: String)(implicit request: Request[_]) = BadRequest(views.html.errors.onBadRequest(request, error))
+
   def index = Action {
     Ok(views.html.index.render("Hello from Data Manager Web UI"))
   }
@@ -109,7 +120,7 @@ trait RegistrationController extends Controller {
     registrationForm.bindFromRequest.fold (
 
       hasErrors = {
-        form => Future.successful( BadRequest("Invalid request") )
+        form => Future.successful( badRequest("Invalid request") )
       },
 
       success = {
@@ -130,7 +141,7 @@ trait RegistrationController extends Controller {
   def submitRegisterApplication = async { implicit request : Request[_] =>
     addApplicationForm.bindFromRequest.fold (
       hasErrors = {
-        form => Future.successful( BadRequest("Invalid request") )
+        form => Future.successful( badRequest("Invalid request") )
       },
 
       success = {
@@ -140,7 +151,6 @@ trait RegistrationController extends Controller {
           userProfileFutureOp flatMap {
             _ match {
               case Some(userProfile) =>
-                println(s"Adding application ${userProfile.info.userId}  to user ${registrationRequest.applicationId}")
                 val addApplicationResponseFuture = dataManagerApiClient.addApplication(userProfile.info.userId, registrationRequest.applicationId)
                 addApplicationResponseFuture map { response =>
                   Ok(views.html.confirmActivation.render(response.channel, response.address, response.applicationId.toString))
@@ -148,8 +158,7 @@ trait RegistrationController extends Controller {
                   redirectToForFailedRequestAndFailForOtherCases(routes.MainController.registerApplication)
                 }
               case None =>
-                println("Cannot find user")
-                Future.successful(BadRequest("Cannot find User to add the application to"))
+                Future.successful(badRequest("Cannot find User to add the application to"))
             }
           } recoverWith {
             redirectToForFailedRequestAndFailForOtherCases(routes.MainController.registerApplication)
@@ -163,7 +172,7 @@ trait RegistrationController extends Controller {
 
     confirmActivationForm.bindFromRequest.fold (
       hasErrors = {
-        form => Future.successful( BadRequest("Invalid request") )
+        form => Future.successful( badRequest("Invalid request") )
       },
 
       success = {

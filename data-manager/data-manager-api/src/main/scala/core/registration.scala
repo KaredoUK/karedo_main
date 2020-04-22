@@ -165,7 +165,7 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
 
                   val activationCode = newActivationCode
 
-                  clientApplicationDAO.insertNew(ClientApplication(registrationRequest.applicationId, registrationRequest.accountId, newActivationCode))
+                  clientApplicationDAO.insertNew(ClientApplication(registrationRequest.applicationId, registrationRequest.accountId, activationCode))
 
                   activateApplication(
                     registrationRequest.applicationId,
