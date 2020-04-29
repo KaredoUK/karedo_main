@@ -145,13 +145,13 @@ trait RegistrationController extends Controller {
       },
 
       success = {
-        registrationRequest => {
-          val userProfileFutureOp : Future[Option[UserProfile]] = dataManagerApiClient.findUserByMsisdnOrEmail(registrationRequest.msisdn, registrationRequest.email)
+        addApplicationRequest => {
+          val userProfileFutureOp : Future[Option[UserProfile]] = dataManagerApiClient.findUserByMsisdnOrEmail(addApplicationRequest.msisdn, addApplicationRequest.email)
 
           userProfileFutureOp flatMap {
             _ match {
               case Some(userProfile) =>
-                val addApplicationResponseFuture = dataManagerApiClient.addApplication(userProfile.info.userId, registrationRequest.applicationId)
+                val addApplicationResponseFuture = dataManagerApiClient.addApplication(userProfile.info.userId, addApplicationRequest.applicationId)
                 addApplicationResponseFuture map { response =>
                   Ok(views.html.confirmActivation.render(response.channel, response.address, response.applicationId.toString))
                 } recoverWith {

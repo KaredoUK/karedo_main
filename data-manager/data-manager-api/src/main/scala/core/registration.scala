@@ -3,7 +3,7 @@ package core
 import parallelai.wallet.persistence.{ClientApplicationDAO, UserAccountDAO}
 import akka.actor.{Props, ActorLogging, ActorRef, Actor}
 import com.parallelai.wallet.datamanager.data._
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.async.Async._
 import java.util.UUID
 import spray.json._
@@ -31,13 +31,13 @@ import scala.Some
 import parallelai.wallet.entity.UserAccount
 import com.parallelai.wallet.datamanager.data.RegistrationValidationResponse
 import com.parallelai.wallet.datamanager.data.RegistrationRequest
+import scala.concurrent.Future.successful
 
 /**
  * We use the companion object to hold all the messages that the ``RegistrationActor``
  * receives.
  */
 object RegistrationActor {
-
 
   def props( userAccountDAO : UserAccountDAO, clientApplicationDAO : ClientApplicationDAO) : Props =
     Props( classOf[RegistrationActor], userAccountDAO, clientApplicationDAO)
@@ -99,6 +99,30 @@ object RegistrationActor {
   }
 
   case class AddApplication(applicationId: ApplicationID, accountId: UserID)
+
+  def withValidations[Request, Error, Response](request: Request)(validations: (Request => Future[Option[Error]])*)
+                                               (successFlow: Request => Future[Either[Error, Response]])
+                                               (implicit executionContext: ExecutionContext)
+    : Future[Either[Error, Response]] = {
+    val validationResult = validations.foldLeft[Future[Option[Error]]](successful(None)) {
+      case (currStatus, currFunction) =>
+        currStatus flatMap { _ match {
+          case Some(_) => currStatus
+          case None => currFunction(request)
+        }
+        }
+    }
+    validationResult flatMap {
+      _ match {
+        case Some(validationError) => successful(Left(validationError))
+        case None => successFlow(request)
+      }
+    }
+  }
+
+  def newActivationCode: String = {
+    RandomStringUtils.randomAlphanumeric(6)
+  }
 }
 
 /**
@@ -117,113 +141,45 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
     case validation: RegistrationValidation => replyToSender { validateUser(validation) }
   }
 
-  def replyToSender[T <: Any](response: Future[Either[RegistrationError, T]]): Unit = {
-    val replyTo = sender
-
-    response recover {
-      case t =>
-        log.warning("Internal error: {}", t)
-        Left(InternalError(t))
-    } foreach {
-      response : Either[RegistrationError, T] =>
-        replyTo ! response
-    }
-  }
-
-  def withValidations[Request, Error, Response](request: Request)(validations: (Request => Future[Option[Error]])*) (successFlow: Request => Future[Either[Error, Response]]) : Future[Either[Error, Response]] = {
-    val validationResult = validations.foldLeft[Future[Option[Error]]](Future.successful(None)) { 
-      case (currStatus, currFunction) =>  
-        currStatus flatMap { _ match {
-          case Some(_) => currStatus
-          case None => currFunction(request)
-          }
-        }
-    }
-    validationResult flatMap {
-      _ match {
-        case Some(validationError) => Future.successful(Left(validationError))
-        case None => successFlow(request)
-      } 
-    }
-  } 
-  
-  def applicationNotRegistered(applicationId: ApplicationID) : Future[Option[RegistrationError]] =
-    clientApplicationDAO.getById(applicationId) map { _  map { _ => ApplicationAlreadyRegistered } }
-  
-  def validUserIdentification(userIdentification : WithUserContacts) : Future[Option[RegistrationError]] =
-    Future.successful { if(userIdentification.isValid) None else Some(InvalidRequest("Invalid user identification")) }
-
   def registerUser(registrationRequest: RegistrationRequest): Future[Either[RegistrationError, RegistrationResponse]] =
-    withValidations(registrationRequest) ( validUserIdentification, (registrationRequest) => applicationNotRegistered(registrationRequest.applicationId) ) { processValidRegistrationRequest }
+    withValidations(registrationRequest) ( validUserIdentification, applicationNotRegistered, noActiveAccountForMsisdnOrEmail ) { request =>
+
+      log.debug("Creating new account for request {}", request)
+      val account = UserAccount( id = UUID.randomUUID(), email = request.email, msisdn = request.msisdn )
+
+      val activationCode = newActivationCode
+
+      val firstApplication = ClientApplication(request.applicationId, account.id, activationCode)
+
+      userAccountDAO.insertNew(account, firstApplication)
+
+      (account.id, activationCode)
+
+      successful( activateApplication(request.applicationId, account.id, request, activationCode) )
+    }
+
 
   def registerApplication(registrationRequest: AddApplication): Future[Either[RegistrationError, RegistrationResponse]] =
-    withValidations(registrationRequest) ( request => applicationNotRegistered(request.applicationId) ) {
-      _ =>  userAccountDAO.getById(registrationRequest.accountId) map {
-              _ match {
-                case None => Left(InvalidRequest(s"User with ID ${registrationRequest.accountId} doesn't exist"))
-                case Some(userAccount) =>
+    withValidations(registrationRequest) ( applicationNotRegistered ) { request =>
 
-                  val activationCode = newActivationCode
+      userAccountDAO.getById(request.accountId) map {
+        _ match {
+          case None => Left(InvalidRequest(s"User with ID ${registrationRequest.accountId} doesn't exist"))
 
-                  clientApplicationDAO.insertNew(ClientApplication(registrationRequest.applicationId, registrationRequest.accountId, activationCode))
+          case Some(userAccount) =>
+            val activationCode = newActivationCode
 
-                  activateApplication(
-                    registrationRequest.applicationId,
-                    userAccount.id,
-                    UserContacts(userAccount.email, userAccount.msisdn),
-                    activationCode
-                  )
-              }
-            }
-    }
+            clientApplicationDAO.insertNew(ClientApplication(registrationRequest.applicationId, registrationRequest.accountId, activationCode))
 
-
-  def processValidRegistrationRequest(registrationRequest: RegistrationRequest): Future[Either[RegistrationError, RegistrationResponse]] = async {
-    val existingAccountOp: Option[UserAccount] = await {
-      userAccountDAO.findByAnyOf(None, registrationRequest.msisdn, registrationRequest.email)
-    }
-
-    if (existingAccountOp.filter( { _.active } ).isDefined) {
-      Left(UserAlreadyRegistered)
-    } else {
-      if(existingAccountOp.isDefined) {
-        log.debug("Removing account of already registered but not active user {}", existingAccountOp.get)
-        userAccountDAO.delete(existingAccountOp.get.id)
+            activateApplication(
+              registrationRequest.applicationId,
+              userAccount.id,
+              UserContacts(userAccount.email, userAccount.msisdn),
+              activationCode
+            )
+        }
       }
-
-      log.debug("Creating new account for request {}", registrationRequest)
-      val (accountId, validationCode) = createNewUserAccount(registrationRequest)
-
-      activateApplication(registrationRequest.applicationId, accountId, registrationRequest, validationCode)
     }
-  }
-
-  private def activateApplication(applicationId: ApplicationID, accountId: UserID, userContacts: WithUserContacts, validationCode: String) : Either[RegistrationError, RegistrationResponse] = {
-    //activationMessageActor ! (registrationRequest, validationCode)
-
-    log.info("Validation code for registration request of application {} is '{}'", applicationId, validationCode)
-
-    if(userContacts.msisdn.isDefined)
-      Right(RegistrationResponse(applicationId, "msisdn", userContacts.msisdn.get))
-    else
-      Right(RegistrationResponse(applicationId, "email", userContacts.email.get))
-  }
-  
-  private def createNewUserAccount(registrationRequest: RegistrationRequest) : (UUID, String) = {
-    val account = UserAccount( id = UUID.randomUUID(), email = registrationRequest.email, msisdn = registrationRequest.msisdn )
-
-    val activationCode = newActivationCode
-
-    val firstApplication = ClientApplication(registrationRequest.applicationId, account.id, activationCode)
-
-    userAccountDAO.insertNew(account, firstApplication)
-
-    (account.id, activationCode)
-  }
-
-  def newActivationCode: String = {
-    RandomStringUtils.randomAlphanumeric(6)
-  }
 
   def validateUser(validation: RegistrationValidation) : Future[Either[RegistrationError, RegistrationValidationResponse]] = async {
     val clientAppOption = await {
@@ -252,4 +208,50 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
     }
 
   }
+
+  private def activateApplication(applicationId: ApplicationID, accountId: UserID, userContacts: WithUserContacts, validationCode: String) : Either[RegistrationError, RegistrationResponse] = {
+    //activationMessageActor ! (registrationRequest, validationCode)
+
+    log.info("Validation code for registration request of application {} is '{}'", applicationId, validationCode)
+
+    if(userContacts.msisdn.isDefined)
+      Right(RegistrationResponse(applicationId, "msisdn", userContacts.msisdn.get))
+    else
+      Right(RegistrationResponse(applicationId, "email", userContacts.email.get))
+  }
+
+  def replyToSender[T <: Any](response: Future[Either[RegistrationError, T]]): Unit = {
+    val replyTo = sender
+
+    response recover {
+      case t =>
+        log.warning("Internal error: {}", t)
+        Left(InternalError(t))
+    } foreach {
+      response : Either[RegistrationError, T] =>
+        replyTo ! response
+    }
+  }
+
+  def applicationNotRegistered(withApplicationId: { def applicationId: ApplicationID }) : Future[Option[RegistrationError]] =
+    clientApplicationDAO.getById(withApplicationId.applicationId) map { _  map { _ => ApplicationAlreadyRegistered } }
+
+  def validUserIdentification(userIdentification : WithUserContacts) : Future[Option[RegistrationError]] =
+    successful { if(userIdentification.isValid) None else Some(InvalidRequest("Invalid user identification")) }
+
+  // This validation has side effects!!!
+  def noActiveAccountForMsisdnOrEmail(userIdentification : WithUserContacts) : Future[Option[RegistrationError]] =
+    userAccountDAO.findByAnyOf(None, userIdentification.msisdn, userIdentification.email) map { existingAccountOp =>
+      if (existingAccountOp.filter( { _.active } ).isDefined) {
+        Some(UserAlreadyRegistered)
+      } else {
+        if (existingAccountOp.isDefined) {
+          log.debug("Removing account of already registered but not active user {}", existingAccountOp.get)
+          userAccountDAO.delete(existingAccountOp.get.id)
+        }
+
+        None
+      }
+    }
+
 }
