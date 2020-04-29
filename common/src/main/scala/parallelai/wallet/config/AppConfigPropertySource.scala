@@ -1,4 +1,4 @@
-package config
+package parallelai.wallet.config
 
 import com.escalatesoft.subcut.inject.config.{ConfigPropertySource, Undefined, Defined, ConfigProperty}
 import com.typesafe.config.{Config, ConfigFactory}
@@ -24,5 +24,6 @@ object AppConfigPropertySource {
 
 class AppConfigPropertySource(appConfig: Config) extends ConfigPropertySource {
   override def getOptional(propertyName: String): ConfigProperty =
-    if(appConfig.hasPath(propertyName)) Defined(propertyName, appConfig.getString(propertyName)) else Undefined(propertyName)
+    if (appConfig.hasPath(propertyName)) Defined(propertyName, appConfig.getString(propertyName))
+    else                                Undefined(propertyName)
 }

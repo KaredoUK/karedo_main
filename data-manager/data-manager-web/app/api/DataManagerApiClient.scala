@@ -26,7 +26,9 @@ import com.parallelai.wallet.datamanager.data.RegistrationRequest
 
 trait DataManagerApiClient {
   def getUserProfile(accountId: UUID) : Future[Option[UserProfile]]
-  def findUser(msisdn: Option[String], email: Option[String]) : Future[Option[UserProfile]]
+  def findUserByMsisdnOrEmail(msisdn: Option[String], email: Option[String]) : Future[Option[UserProfile]]
+  
+  def findUserForApplication(applicationId: UUID): Future[Option[UserProfile]]
 
   def register(request: RegistrationRequest) : Future[RegistrationResponse]
   def addApplication(accountId: UUID, applicationId: ApplicationID) : Future[RegistrationResponse]
@@ -57,13 +59,17 @@ class DataManagerRestClient(implicit val bindingModule: BindingModule) extends D
 
   override def getUserProfile(accountId: UUID) : Future[Option[UserProfile]] = retrieveUserProfilePipeline { Get(s"$apiBaseUri/account/$accountId")}
 
-  override def findUser(msisdnOp: Option[String], emailOp: Option[String]): Future[Option[UserProfile]] = {
+  override def findUserByMsisdnOrEmail(msisdnOp: Option[String], emailOp: Option[String]): Future[Option[UserProfile]] = {
     val findBy = msisdnOp map { msisdn => s"msisdn=$msisdn" } orElse ( emailOp map { email => s"email=$email" } )
 
     findBy match {
       case Some(query) => retrieveUserProfilePipeline { Get(apiBaseUri + s"/account?$query") }
       case None => Future.failed(new IllegalArgumentException("Invalid identification, need to provide at least one of msisdn and email"))
     }
+  }
+
+  def findUserForApplication(applicationId: UUID): Future[Option[UserProfile]] = {
+    retrieveUserProfilePipeline { Get(apiBaseUri + s"/account?applicationId=$applicationId") }
   }
 
   def notFoundToNone(response: HttpResponse): HttpResponse = {

@@ -13,7 +13,7 @@ object EditAccountActor {
 
   case class GetAccount(accountId: UserID)
 
-  case class FindAccount(msisdn: Option[String], email: Option[String]) extends WithUserContacts
+  case class FindAccount(applicationId: Option[UserID], msisdn: Option[String], email: Option[String]) extends WithUserContacts
 }
 
 import EditAccountActor._
@@ -36,10 +36,10 @@ class EditAccountActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : C
         userAccountDAO.getById(accountId) map { _ map { userAccountToUserProfile } }
       }
 
-    case FindAccount(msisdnOp, emailOp) =>
+    case FindAccount(applicationIdOp, msisdnOp, emailOp) =>
       log.info("Trying to find account with msisdn {} or email {} sender is {}", msisdnOp, emailOp, sender)
       replyToSender {
-        userAccountDAO.findByAnyOf(None, msisdnOp, emailOp) map { _ map { userAccountToUserProfile } }
+        userAccountDAO.findByAnyOf(applicationIdOp, msisdnOp, emailOp) map { _ map { userAccountToUserProfile } }
       }
   }
 

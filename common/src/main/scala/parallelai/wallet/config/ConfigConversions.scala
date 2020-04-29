@@ -1,4 +1,4 @@
-package config
+package parallelai.wallet.config
 
 import com.escalatesoft.subcut.inject.config.ConfigProperty
 import scala.concurrent.duration._
@@ -22,4 +22,6 @@ object ConfigConversions {
   }
 
   implicit def toBoolean(prop: ConfigProperty): Boolean = prop.value.equalsIgnoreCase("true")
+
+  implicit def toListOfString(prop: ConfigProperty): List[String] = prop.value.split(",").toList
 }

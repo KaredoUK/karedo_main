@@ -13,6 +13,7 @@ import ApiDataJsonProtocol._
 import RegistrationActor.AddApplication
 import parallelai.wallet.entity.UserAccount
 import core.EditAccountActor.{FindAccount, GetAccount}
+import java.util.UUID
 
 class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(implicit executionContext: ExecutionContext)
   extends Directives with DefaultJsonFormats {
@@ -42,10 +43,10 @@ class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(im
         }
       } ~
       get {
-        parameters('email.?, 'msisdn.?) { (email, msisdn) =>
+        parameters('email.?, 'msisdn.?, 'applicationId.?) { (email, msisdn, applicationId) =>
           rejectEmptyResponse {
             complete {
-              (editAccountActor ? FindAccount(msisdn, email)).mapTo[Option[UserProfile]]
+              (editAccountActor ? FindAccount(applicationId map { UUID.fromString(_) }, msisdn, email)).mapTo[Option[UserProfile]]
             }
           }
         }

@@ -14,7 +14,6 @@ import com.parallelai.wallet.datamanager.data.UserSettings
 import com.parallelai.wallet.datamanager.data.RegistrationRequest
 import com.parallelai.wallet.datamanager.data.UserInfo
 import api.{DataManagerRestClient, DataManagerApiClient}
-import config.AppConfigInjection
 import com.parallelai.wallet.datamanager.data.UserProfile
 import scala.Some
 import com.parallelai.wallet.datamanager.data.UserSettings
@@ -36,6 +35,7 @@ import play.api.mvc.Call
 import com.parallelai.wallet.datamanager.data.UserProfile
 import play.api.mvc.Cookie
 import com.parallelai.wallet.datamanager.data.RegistrationRequest
+import parallelai.wallet.config.AppConfigInjection
 
 object forms {
 
@@ -146,7 +146,7 @@ trait RegistrationController extends Controller {
 
       success = {
         registrationRequest => {
-          val userProfileFutureOp : Future[Option[UserProfile]] = dataManagerApiClient.findUser(registrationRequest.msisdn, registrationRequest.email)
+          val userProfileFutureOp : Future[Option[UserProfile]] = dataManagerApiClient.findUserByMsisdnOrEmail(registrationRequest.msisdn, registrationRequest.email)
 
           userProfileFutureOp flatMap {
             _ match {
@@ -211,7 +211,6 @@ trait RegistrationController extends Controller {
   }
 }
 
-import config.ConfigConversions._
 object MainController extends RegistrationController with AppConfigInjection {
   implicit val _ = bindingModule
 

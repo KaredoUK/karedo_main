@@ -1,4 +1,4 @@
-package config
+package parallelai.wallet.config
 
 import com.escalatesoft.subcut.inject.{NewBindingModule, BindingModule}
 
