@@ -13,7 +13,7 @@ import scala.concurrent.Future
 object EmailActor {
   case class SendEmail(to: String, message: String, subject: String, retryCount: Int = 3)
 
-  def props(bindingModule : BindingModule) = Props(classOf[EmailActor], bindingModule)
+  def props(implicit bindingModule : BindingModule) = Props(classOf[EmailActor], bindingModule)
 }
 
 class EmailActor(implicit val bindingModule : BindingModule) extends Actor with ActorLogging with Injectable {

@@ -2,6 +2,7 @@ package core
 
 import java.net.URI
 
+import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
 import core.MessengerActor.SendMessage
 import parallelai.wallet.persistence.{ClientApplicationDAO, UserAccountDAO}
 import akka.actor.{Props, ActorLogging, ActorRef, Actor}
@@ -42,8 +43,8 @@ import scala.concurrent.Future.successful
  */
 object RegistrationActor {
 
-  def props( userAccountDAO : UserAccountDAO, clientApplicationDAO : ClientApplicationDAO, messengerActor: ActorRef) : Props =
-    Props( classOf[RegistrationActor], userAccountDAO, clientApplicationDAO, messengerActor)
+  def props( userAccountDAO : UserAccountDAO, clientApplicationDAO : ClientApplicationDAO, messengerActor: ActorRef)(implicit bindingModule : BindingModule) : Props =
+    Props( classOf[RegistrationActor], userAccountDAO, clientApplicationDAO, messengerActor, bindingModule)
 
   sealed trait RegistrationError
   case object ApplicationAlreadyRegistered extends RegistrationError
@@ -132,10 +133,12 @@ object RegistrationActor {
  * Registers the users. Replies with
  */
 class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : ClientApplicationDAO,
-                        messengerActor: ActorRef) extends Actor with ActorLogging {
+                        messengerActor: ActorRef)(implicit val bindingModule : BindingModule) extends Actor with ActorLogging with Injectable {
   import RegistrationActor._
 
   import context.dispatcher
+
+  val uiServerAddress = injectProperty[String]("ui.web.server.address")
 
   // notice that we don't actually perform any DB operations.
   // that's for another template
@@ -216,7 +219,8 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
   private def activateApplication(applicationId: ApplicationID, accountId: UserID, userContacts: WithUserContacts, validationCode: String) : Either[RegistrationError, RegistrationResponse] = {
     log.info("Validation code for registration request of application {} is '{}'", applicationId, validationCode)
 
-    val activationMessage = s"Welcome to Karedo, your activation code is $validationCode"
+    val activationMessage = s"Welcome to Karedo, your activation code is $validationCode. " +
+      s"Please click on $uiServerAddress/confirmActivation?applicationId=$applicationId&activationCode=$validationCode"
 
     if(userContacts.msisdn.isDefined) {
       messengerActor ! SendMessage(URI.create(s"sms:${userContacts.msisdn.get}"), activationMessage)

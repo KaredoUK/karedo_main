@@ -138,6 +138,20 @@ trait RegistrationController extends Controller {
 
   }
 
+  def getConfirmActivation = Action { implicit request: Request[_] =>
+    confirmActivationForm.bindFromRequest.fold (
+      hasErrors = {
+        form => badRequest("Invalid request")
+      },
+
+      success = {
+        confirmActivation => {
+          Ok(views.html.confirmActivationDirect.render(confirmActivation.applicationId.toString, confirmActivation.validationCode))
+        }
+      }
+    )
+  }
+
   def submitRegisterApplication = async { implicit request : Request[_] =>
     addApplicationForm.bindFromRequest.fold (
       hasErrors = {

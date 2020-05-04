@@ -1,0 +1,22 @@
+@(applicationId: String, activationCode: String)
+
+@main("Confirm Activation") {
+
+    <div class="well">
+        <h1>Confirm registration</h1>
+    </div>
+
+    <div class="well">
+       Please submit your activation code.
+    </div>
+
+    <form name="confirmRegistration" action="@controllers.routes.MainController.confirmActivation.url" method="post">
+        <div>
+            <label>Insert Activation Code</label><input type="text" name="activationCode" id="activationCode" value="@activationCode"/>
+        </div>
+
+        <input type="hidden" name="applicationId" id="applicationId" value="@{applicationId.toString}"/>
+
+        <input type="submit" >Register</input>
+    </form>
+}

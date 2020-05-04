@@ -10,7 +10,7 @@ import scala.concurrent.Future
 object SMSActor {
   case class SendSMS(to: String, message: String, retryCount: Int = 3)
 
-  def props(bindingModule : BindingModule) = Props(classOf[SMSActor], bindingModule)
+  def props(implicit bindingModule : BindingModule) = Props(classOf[SMSActor], bindingModule)
 }
 
 class SMSActor(implicit val bindingModule : BindingModule) extends Actor with ActorLogging with Injectable {

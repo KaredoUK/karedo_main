@@ -49,8 +49,8 @@ trait CoreActors {
 
   val userAccountDAO : UserAccountDAO = new UserAccountMongoDAO()
 
-  val emailActor = system.actorOf(EmailActor.props(bindingModule))
-  val smsActor = system.actorOf(SMSActor.props(bindingModule))
+  val emailActor = system.actorOf(EmailActor.props)
+  val smsActor = system.actorOf(SMSActor.props)
 
   val messenger = system.actorOf(MessengerActor.props(emailActor, smsActor))
 
