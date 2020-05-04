@@ -47,13 +47,16 @@ trait CoreActors {
 
   implicit val bindingModule = newBindingModuleWithConfig
 
-
   val userAccountDAO : UserAccountDAO = new UserAccountMongoDAO()
+
+  val emailActor = system.actorOf(EmailActor.props(bindingModule))
+  val smsActor = system.actorOf(SMSActor.props(bindingModule))
+
+  val messenger = system.actorOf(MessengerActor.props(emailActor, smsActor))
+
   val clientApplicationDAO : ClientApplicationDAO = new ClientApplicationMongoDAO()
-
   // This should be an actor pool at least if we don't want to use a one actor per request strategy
-  val registration = system.actorOf(RegistrationActor.props(userAccountDAO, clientApplicationDAO))
-  val editAccount = system.actorOf(EditAccountActor.props(userAccountDAO, clientApplicationDAO))
+  val registration = system.actorOf(RegistrationActor.props(userAccountDAO, clientApplicationDAO, messenger))
 
-  val messenger = system.actorOf(Props[MessengerActor])
+  val editAccount = system.actorOf(EditAccountActor.props(userAccountDAO, clientApplicationDAO))
 }

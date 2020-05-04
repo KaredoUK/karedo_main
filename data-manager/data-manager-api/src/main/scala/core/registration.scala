@@ -1,5 +1,8 @@
 package core
 
+import java.net.URI
+
+import core.MessengerActor.SendMessage
 import parallelai.wallet.persistence.{ClientApplicationDAO, UserAccountDAO}
 import akka.actor.{Props, ActorLogging, ActorRef, Actor}
 import com.parallelai.wallet.datamanager.data._
@@ -39,8 +42,8 @@ import scala.concurrent.Future.successful
  */
 object RegistrationActor {
 
-  def props( userAccountDAO : UserAccountDAO, clientApplicationDAO : ClientApplicationDAO) : Props =
-    Props( classOf[RegistrationActor], userAccountDAO, clientApplicationDAO)
+  def props( userAccountDAO : UserAccountDAO, clientApplicationDAO : ClientApplicationDAO, messengerActor: ActorRef) : Props =
+    Props( classOf[RegistrationActor], userAccountDAO, clientApplicationDAO, messengerActor)
 
   sealed trait RegistrationError
   case object ApplicationAlreadyRegistered extends RegistrationError
@@ -128,7 +131,8 @@ object RegistrationActor {
 /**
  * Registers the users. Replies with
  */
-class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : ClientApplicationDAO) extends Actor with ActorLogging {
+class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : ClientApplicationDAO,
+                        messengerActor: ActorRef) extends Actor with ActorLogging {
   import RegistrationActor._
 
   import context.dispatcher
@@ -210,14 +214,18 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
   }
 
   private def activateApplication(applicationId: ApplicationID, accountId: UserID, userContacts: WithUserContacts, validationCode: String) : Either[RegistrationError, RegistrationResponse] = {
-    //activationMessageActor ! (registrationRequest, validationCode)
-
     log.info("Validation code for registration request of application {} is '{}'", applicationId, validationCode)
 
-    if(userContacts.msisdn.isDefined)
+    val activationMessage = s"Welcome to Karedo, your activation code is $validationCode"
+
+    if(userContacts.msisdn.isDefined) {
+      messengerActor ! SendMessage(URI.create(s"sms:${userContacts.msisdn.get}"), activationMessage)
       Right(RegistrationResponse(applicationId, "msisdn", userContacts.msisdn.get))
-    else
+    }
+    else {
+      messengerActor ! SendMessage(URI.create(s"mailto:${userContacts.email.get}"), activationMessage, "Welcome to Karedo")
       Right(RegistrationResponse(applicationId, "email", userContacts.email.get))
+    }
   }
 
   def replyToSender[T <: Any](response: Future[Either[RegistrationError, T]]): Unit = {

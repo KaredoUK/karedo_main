@@ -8,11 +8,15 @@
 
     <form name="editProfile" action="@controllers.routes.MainController.updateProfile.url" method="post">
         <div>
-            <label>Email</label><input type="text" name="name" id="name">@userProfile.info.fullName</input>
+            <label>Name</label><input type="text" name="name" id="name">@userProfile.info.fullName</input>
         </div>
 
         <div>
             <label>Email</label><input type="email" name="email" id="email" readonly="true">@userProfile.info.email</input>
+        </div>
+
+        <div>
+            <label>Mobile Number</label><input type="text" name="msisdn" id="msisdn" readonly="true">@userProfile.info.msisdn</input>
         </div>
 
         <div>
