@@ -21,6 +21,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka"  %% "akka-testkit"     % Common.akkaVersion     % "test",
   "com.novocode"        % "junit-interface"  % "0.7"                  % "test->default",
   "parallelai.wallet" %% "model" % "1.0" changing(),
+  "com.github.tomakehurst" % "wiremock" % "1.38" % "test",
   Common.walletCommon
 )
 
