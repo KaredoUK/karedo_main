@@ -10,7 +10,7 @@
        Please submit your activation code.
     </div>
 
-    <form name="confirmRegistration" action="@controllers.routes.MainController.confirmActivation.url" method="post">
+    <form name="confirmRegistration" action="@controllers.routes.RegistrationController.confirmActivation.url" method="post">
         <div>
             <label>Insert Activation Code</label><input type="text" name="activationCode" id="activationCode" value="@activationCode"/>
         </div>

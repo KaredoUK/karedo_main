@@ -3,14 +3,23 @@
 # ~~~~
 
 GET     /                           controllers.MainController.index
-GET     /register                   controllers.MainController.register
-POST    /register                   controllers.MainController.submitRegistration
-GET     /registerApplication        controllers.MainController.registerApplication
-POST    /registerApplication        controllers.MainController.submitRegisterApplication
-GET     /confirmActivation          controllers.MainController.getConfirmActivation
-POST    /confirmActivation          controllers.MainController.confirmActivation
-GET     /editProfile                controllers.MainController.editProfile
-POST    /editProfile                controllers.MainController.updateProfile
+
+# Registration
+GET     /register                   controllers.RegistrationController.register
+POST    /register                   controllers.RegistrationController.submitRegistration
+GET     /registerApplication        controllers.RegistrationController.registerApplication
+POST    /registerApplication        controllers.RegistrationController.submitRegisterApplication
+GET     /confirmActivation          controllers.RegistrationController.getConfirmActivation
+POST    /confirmActivation          controllers.RegistrationController.confirmActivation
+
+# Profile
+GET     /editProfile                controllers.ProfileController.editProfile
+POST    /editProfile                controllers.ProfileController.updateProfile
+
+# Edit Profile
+
+
+# Infrastructure, I18N and JS
 GET     /message                    controllers.MessageController.getMessage()
 GET     /assets/javascripts/routes  controllers.MessageController.javascriptRoutes()
 

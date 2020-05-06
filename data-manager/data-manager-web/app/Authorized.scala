@@ -34,7 +34,7 @@ class AuthorizedFilter(implicit val bindingModule: BindingModule) extends Filter
 
     def notAuthorized : Future[SimpleResult] = {
       logger.debug(s"Not authorized {}", request.path)
-      successful(Redirect(routes.MainController.register.absoluteURL(false)))
+      successful(Redirect(routes.RegistrationController.register.absoluteURL(false)))
     }
 
     def pass : Future[SimpleResult] = {
