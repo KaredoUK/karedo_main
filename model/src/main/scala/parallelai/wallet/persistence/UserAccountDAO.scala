@@ -1,7 +1,7 @@
 package parallelai.wallet.persistence
 
 import java.util.UUID
-import parallelai.wallet.entity.{ClientApplication, UserAccount}
+import parallelai.wallet.entity.{AccountSettings, UserInfo, ClientApplication, UserAccount}
 import scala.concurrent.Future
 
 trait UserAccountDAO {
@@ -17,6 +17,8 @@ trait UserAccountDAO {
   def insertNew(userAccount: UserAccount, firstApplication: ClientApplication) : Future[Unit]
 
   def update(userAccount: UserAccount): Future[Unit]
+
+  def updateSubInfo(id: UUID, userInfo: UserInfo, personalSettings: AccountSettings): Future[Unit]
 
   def setActive(userId : UUID): Future[Unit]
 

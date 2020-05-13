@@ -3,26 +3,16 @@ package parallelai.wallet.persistence.mongodb
 import parallelai.wallet.persistence.{ClientApplicationDAO, UserAccountDAO}
 import scala.concurrent.Future
 import scala.concurrent.Future._
-import parallelai.wallet.entity.{ClientApplication, UserAccount}
+import parallelai.wallet.entity._
 import java.util.UUID
 import com.novus.salat.dao.SalatDAO
 import com.mongodb.casbah.Imports._
-import parallelai.wallet.entity.ClientApplication
-import parallelai.wallet.entity.UserAccount
-import parallelai.wallet.entity.ClientApplication
-import parallelai.wallet.entity.UserAccount
 import com.novus.salat.global._
 import com.novus.salat.dao._
 
 import com.mongodb.casbah.Imports._
-import parallelai.wallet.entity.UserAccount
-import parallelai.wallet.entity.ClientApplication
-import scala.Some
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import com.mongodb.casbah.Imports._
-import parallelai.wallet.entity.ClientApplication
-import scala.Some
-import parallelai.wallet.entity.UserAccount
 
 
 object userAccountMongoUtils {
@@ -40,7 +30,13 @@ trait MongoConnection {
   def mongoDbUser: String
   def mongoDbPwd: String
 
-  val mongoClient = MongoClient( new ServerAddress(mongoHost, mongoPort),  List(MongoCredential.createMongoCRCredential(mongoDbUser, mongoDbName, mongoDbPwd.toCharArray)))
+  val mongoClient =
+    if(mongoDbUser.isEmpty) {
+      MongoClient(mongoHost, mongoPort)
+    } else {
+      MongoClient(new ServerAddress(mongoHost, mongoPort), List(MongoCredential.createMongoCRCredential(mongoDbUser, mongoDbName, mongoDbPwd.toCharArray)))
+    }
+
   val db = mongoClient(mongoDbName)
 }
 
@@ -61,17 +57,36 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
 
   override def update(userAccount: UserAccount): Future[Unit] =
    successful {
+
     dao.update(
       byId(userAccount.id),
       $set(
         "active" -> userAccount.active,
         "email" -> userAccount.email,
         "msisdn" -> userAccount.msisdn,
-        "personalInfo" -> userAccount.personalInfo,
-        "settings" -> userAccount.settings
+        "personalInfo" -> MongoDBObject(
+          "birthDate" -> userAccount.personalInfo.birthDate,
+          "gender" -> userAccount.personalInfo.gender,
+          "name" -> userAccount.personalInfo.name,
+          "postCode" -> userAccount.personalInfo.postCode
+        ),
+        "settings" -> MongoDBObject(
+          "maxMessagesPerWeek" -> userAccount.settings.maxMessagesPerWeek
+        )
       )
     )
   }
+
+  def updateSubInfo(id: UUID, userInfo: UserInfo, personalSettings: AccountSettings): Future[Unit] =
+    successful {
+      dao.update(
+        byId(id),
+        $set(
+          "personalInfo" -> userInfo,
+          "settings" -> personalSettings
+        )
+      )
+    }
 
   override def getByMsisdn(msisdn: String, mustBeActive: Boolean): Future[Option[UserAccount]] =
     successful {

@@ -11,7 +11,7 @@ import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
 import spray.http._
 import org.apache.http.HttpStatus
 import spray.json._
-import spray.httpx.SprayJsonSupport
+import spray.httpx.{UnsuccessfulResponseException, SprayJsonSupport}
 import spray.client.pipelining._
 import SprayJsonSupport._
 import java.util.UUID
@@ -34,6 +34,8 @@ trait DataManagerApiClient {
   def addApplication(accountId: UUID, applicationId: ApplicationID) : Future[RegistrationResponse]
 
   def validateRegistration(validation: RegistrationValidation) : Future[RegistrationValidationResponse]
+
+  def updateUserProfile(userProfile: UserProfile): Future[Unit]
 }
 
 
@@ -47,6 +49,7 @@ class DataManagerRestClient(implicit val bindingModule: BindingModule) extends D
   val registerPipeline = sendReceive ~> unmarshal[RegistrationResponse]
   val validatePipeline = sendReceive ~> unmarshal[RegistrationValidationResponse]
   val retrieveUserProfilePipeline = sendReceive ~> notFoundToNone ~> unmarshal[Option[UserProfile]]
+  val updateProfilePipeline = sendReceive ~> unitIfSuccess
 
   override def register(request: RegistrationRequest): Future[RegistrationResponse] = registerPipeline { Post(apiBaseUri + "/account", request) }
 
@@ -71,6 +74,14 @@ class DataManagerRestClient(implicit val bindingModule: BindingModule) extends D
   def findUserForApplication(applicationId: UUID): Future[Option[UserProfile]] = {
     retrieveUserProfilePipeline { Get(apiBaseUri + s"/account?applicationId=$applicationId") }
   }
+
+  def updateUserProfile(userProfile: UserProfile): Future[Unit] = {
+    updateProfilePipeline { Put(apiBaseUri + s"/account/${userProfile.info.userId}", userProfile) }
+  }
+
+  def unitIfSuccess(response: HttpResponse): Unit =
+    if(response.status.isSuccess) ()
+    else throw new UnsuccessfulResponseException(response)
 
   def notFoundToNone(response: HttpResponse): HttpResponse = {
     if(response.status == StatusCodes.NotFound) {

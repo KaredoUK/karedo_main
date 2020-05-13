@@ -1,0 +1,17 @@
+@(message: String)
+
+@main("Welcome to Data Manager Web UI") {
+
+    <script type='text/javascript' src='@routes.Assets.at("javascripts/index.min.js")'></script>
+    <script type="text/javascript" src='@routes.Assets.at("sylesheets/sign-in-scripts.js")'></script>
+
+    <style>
+    </style>
+    
+    <div class="well">
+        <h1>@message</h1>
+    </div>
+
+    <a id="registerAppButton" class="btn btn-default" role="button" href="@routes.ProfileController.editProfile.url" >Edit your profile</a>
+
+}
