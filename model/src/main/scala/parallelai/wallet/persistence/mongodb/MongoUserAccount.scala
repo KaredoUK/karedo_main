@@ -11,7 +11,7 @@ case class MongoUserAccount(
                 @Key("_id") id: UUID,
                 msisdn: Option[String],
                 email: Option[String],
-                personalInfo: UserInfo = defaultUserInfo,
+                personalInfo: UserPersonalInfo = defaultUserPersonalInfo,
                 settings: AccountSettings = defaultAccountSettings,
                 active: Boolean = false,
                 applications: List[MongoUserApplicationInfo]

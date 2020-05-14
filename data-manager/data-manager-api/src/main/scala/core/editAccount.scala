@@ -4,7 +4,7 @@ import akka.actor.{Props, ActorLogging, Actor}
 import akka.actor.Actor.Receive
 import parallelai.wallet.persistence.{ClientApplicationDAO, UserAccountDAO}
 import com.parallelai.wallet.datamanager.data._
-import parallelai.wallet.entity.{UserInfo => UserProfileInfo, AccountSettings, UserAccount}
+import parallelai.wallet.entity.{UserPersonalInfo, AccountSettings, UserAccount}
 import scala.concurrent.Future
 
 object EditAccountActor {
@@ -55,10 +55,11 @@ class EditAccountActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : C
         userId = userAccount.id,
         fullName = userAccount.personalInfo.name,
         postCode = userAccount.personalInfo.postCode,
-        address = None,
+        birthDate = userAccount.personalInfo.birthDate,
         country = None,
         email = userAccount.email,
-        msisdn = userAccount.msisdn
+        msisdn = userAccount.msisdn,
+        gender = userAccount.personalInfo.gender
       ),
       UserSettings(
         userAccount.settings.maxMessagesPerWeek
@@ -70,9 +71,11 @@ class EditAccountActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : C
       userProfile.info.userId,
       userProfile.info.msisdn,
       userProfile.info.email,
-      UserProfileInfo(
+      UserPersonalInfo(
         userProfile.info.fullName,
-        userProfile.info.postCode
+        userProfile.info.postCode,
+        userProfile.info.birthDate,
+        userProfile.info.gender
       ),
       AccountSettings(userProfile.settings.maxAdsPerWeek)
     )

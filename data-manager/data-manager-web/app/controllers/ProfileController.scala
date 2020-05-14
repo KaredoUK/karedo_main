@@ -5,9 +5,11 @@ import java.util.UUID
 import api.{DataManagerRestClient, DataManagerApiClient}
 import com.parallelai.wallet.datamanager.data.{UserSettings, UserInfo, UserProfile, RegistrationRequest}
 import controllers.RegistrationController._
+import org.joda.time.DateTime
 import parallelai.wallet.config.AppConfigInjection
 import play.api.data.Form
 import play.api.data.Forms._
+import play.api.data.validation.{Valid, ValidationError, Invalid, Constraint}
 import play.api.mvc.{Action, Controller}
 import Action._
 import scala.concurrent.Future._
@@ -17,6 +19,11 @@ import ExecutionContext.Implicits.global
 
 
 object profileForms {
+  val VALID_GENDERS = Set("M", "F")
+  def validGender: Constraint[String] = Constraint[String]("Invalid gender") { value: String =>
+    if(VALID_GENDERS.contains(value)) Valid else Invalid(ValidationError("Invalid gender"))
+  }
+
   val updateProfileForm = Form(
     mapping(
       "info" -> mapping (
@@ -24,12 +31,13 @@ object profileForms {
         "fullName" -> optional(text),
         "email" -> optional(email),
         "msisdn" -> optional(text),
-        "address" -> optional(text),
+        "birthDate" -> optional(jodaDate("dd-MM-yyyy")),
         "postCode" -> optional(text),
-        "country" -> optional(text)
+        "country" -> optional(text),
+        "gender" -> optional(text verifying validGender)
       )(formToUserInfo)(
           (userInfo: UserInfo) => Some(
-            (userInfo.userId.toString, Some(userInfo.fullName), userInfo.email, userInfo.msisdn, userInfo.address, userInfo.postCode, userInfo.country)
+            (userInfo.userId.toString, Some(userInfo.fullName), userInfo.email, userInfo.msisdn, userInfo.birthDate, userInfo.postCode, userInfo.country, userInfo.gender)
           )
       ),
 
@@ -42,8 +50,8 @@ object profileForms {
 
 
   def formToUserInfo(id: String, name: Option[String], email: Option[String], msisdn: Option[String],
-                     address: Option[String], postCode: Option[String], country: Option[String] ) =
-    UserInfo(UUID.fromString(id), name getOrElse "", email, msisdn, address, postCode, country)
+                     birthDate: Option[DateTime], postCode: Option[String], country: Option[String], gender: Option[String] ) =
+    UserInfo(UUID.fromString(id), name getOrElse "", email, msisdn, postCode, country, birthDate, gender)
 }
 
 import api.authorization._

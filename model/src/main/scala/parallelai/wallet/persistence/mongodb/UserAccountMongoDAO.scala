@@ -13,6 +13,8 @@ import com.novus.salat.dao._
 import com.mongodb.casbah.Imports._
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import com.mongodb.casbah.Imports._
+import com.novus.salat._
+import com.novus.salat.global._
 
 
 object userAccountMongoUtils {
@@ -64,20 +66,13 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
         "active" -> userAccount.active,
         "email" -> userAccount.email,
         "msisdn" -> userAccount.msisdn,
-        "personalInfo" -> MongoDBObject(
-          "birthDate" -> userAccount.personalInfo.birthDate,
-          "gender" -> userAccount.personalInfo.gender,
-          "name" -> userAccount.personalInfo.name,
-          "postCode" -> userAccount.personalInfo.postCode
-        ),
-        "settings" -> MongoDBObject(
-          "maxMessagesPerWeek" -> userAccount.settings.maxMessagesPerWeek
-        )
+        "personalInfo" -> grater[UserPersonalInfo].asDBObject(userAccount.personalInfo),
+        "settings" -> grater[AccountSettings].asDBObject(userAccount.settings)
       )
     )
   }
 
-  def updateSubInfo(id: UUID, userInfo: UserInfo, personalSettings: AccountSettings): Future[Unit] =
+  def updateSubInfo(id: UUID, userInfo: UserPersonalInfo, personalSettings: AccountSettings): Future[Unit] =
     successful {
       dao.update(
         byId(id),
@@ -229,7 +224,7 @@ class ClientApplicationMongoDAO(implicit val bindingModule: BindingModule)  exte
       dao.update(
         byId(clientApp.accountId),
         $push(
-          "applications" -> MongoDBObject( "_id" -> clientApp.id, "activationCode" -> clientApp.activationCode, "active" -> clientApp.active)
+          "applications" -> grater[ClientApplication].asDBObject(clientApp)
           // Don't use the MongoUserApplicationInfo direct otherwise will try to add a list of Any into applications and fuck up the object
         )
       )

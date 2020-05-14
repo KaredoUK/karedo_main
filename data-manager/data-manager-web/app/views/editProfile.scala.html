@@ -13,12 +13,21 @@
             </div>
 
             <div>
-                <!-- if (userProfile.info.email.isDefined) readonly="true"-->
-                <label>Email</label><input type="email" name="info.email" id="email" readonly="true" value="@userProfile.info.email" />
+                <label>Email</label>
+                @if(userProfile.info.email.isDefined) {
+                    <input type="email" name="info.email" id="email" readonly="true" value="@userProfile.info.email" />
+                } else {
+                    <input type="email" name="info.email" id="email" value="@userProfile.info.email" />
+                }
             </div>
 
             <div>
-                <label>Mobile Number</label><input type="text" name="info.msisdn" id="msisdn" readonly="true" value="@userProfile.info.msisdn" />
+                <label>Mobile Number</label>
+                @if(userProfile.info.msisdn.isDefined) {
+                    <input type="text" name="info.msisdn" id="msisdn" readonly="true" value="@userProfile.info.msisdn" />
+                } else {
+                <input type="text" name="info.msisdn" id="msisdn" value="@userProfile.info.msisdn" />
+                }
             </div>
 
             <div>
@@ -26,13 +35,27 @@
             </div>
 
             <div>
-                <label>Address</label><input type="text" name="info.address" id="address" value="@userProfile.info.address"/>
+                <label>Birth Date</label><input type="text" class="span2" name="info.birthDate" id="birthDate" value="@userProfile.info.birthDate"/>
             </div>
             <div>
                 <label>Post Code</label><input type="text" name="info.postCode" id="postCode" value="@userProfile.info.postCode"/>
             </div>
             <div>
                 <label>Country</label><input type="text" name="info.country" id="country" value="@userProfile.info.country"/>
+            </div>
+
+            <div>
+                @if(userProfile.info.gender == Some("M")) {
+                    <input type="checkbox" name="info.gender" id="gender.male" value="M" checked="true"/>
+
+                } else {
+                    <input type="checkbox" name="info.gender" id="gender.male" value="M" />
+                } Male
+                @if(userProfile.info.gender == Some("F")) {
+                    <input type="checkbox" name="info.gender" id="gender.female" value="F" checked="true"/>
+                } else {
+                    <input type="checkbox" name="info.gender" id="gender.female" value="F"/>
+                } Female
             </div>
         </div>
 
@@ -46,5 +69,13 @@
 
         <input type="submit" value="Update"/>
     </form>
+    <script src="/assets/javascripts/bootstrap-datepicker.js"></script>
+    <script>
+        $(function() {
+            $('#birthDate').datepicker({
+                format: 'mm-dd-yyyy'
+            });
+        });
+    </script>
 }
 

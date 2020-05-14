@@ -23,6 +23,8 @@ object Common {
 
   val conjarResolver = "conjars.org" at "http://conjars.org/repo"
 
+  val jodaTime = Seq( "joda-time" % "joda-time" % "2.0", "org.joda" % "joda-convert" % "1.2" )
+
   val specs2 = "org.specs2" %% "specs2" % "1.14"
   val sprayJson = "io.spray" %% "spray-json" % sprayJsonVersion
   val sprayClient = "io.spray" % "spray-client" % sprayVersion

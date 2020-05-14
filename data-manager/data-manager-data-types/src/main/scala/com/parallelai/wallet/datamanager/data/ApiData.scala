@@ -1,6 +1,7 @@
 package com.parallelai.wallet.datamanager.data
 
 import java.util.UUID
+import org.joda.time.DateTime
 
 trait WithUserContacts {
   def msisdn: Option[String]
@@ -19,7 +20,8 @@ case class RegistrationValidationResponse(applicationId: ApplicationID, userID: 
 
 case class UserSettings(maxAdsPerWeek: Int)
 case class UserInfo(userId: UserID, fullName: String, email: Option[String], msisdn: Option[String],
-                    address: Option[String], postCode: Option[String], country: Option[String]) extends WithUserContacts
+                    postCode: Option[String], country: Option[String],
+                    birthDate: Option[DateTime], gender: Option[String]) extends WithUserContacts
 
 case class UserProfile(info: UserInfo, settings: UserSettings)
 
