@@ -3,6 +3,7 @@ package api
 import core.{CoreActors, Core}
 import akka.actor.Props
 import spray.routing.RouteConcatenation
+import com.mongodb.casbah.commons.conversions.scala._
 
 /**
  * The REST API layer. It exposes the REST services, but does not provide any
@@ -12,6 +13,9 @@ import spray.routing.RouteConcatenation
  */
 trait Api extends RouteConcatenation {
   this: CoreActors with Core =>
+
+  RegisterConversionHelpers()
+  RegisterJodaTimeConversionHelpers()
 
   private implicit val _ = system.dispatcher
 
