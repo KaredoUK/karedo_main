@@ -4,7 +4,7 @@ import akka.actor.{Props, ActorLogging, Actor}
 import akka.actor.Actor.Receive
 import parallelai.wallet.persistence.{ClientApplicationDAO, UserAccountDAO}
 import com.parallelai.wallet.datamanager.data._
-import parallelai.wallet.entity.UserAccount
+import parallelai.wallet.entity.{UserPersonalInfo, AccountSettings, UserAccount}
 import scala.concurrent.Future
 
 object EditAccountActor {
@@ -14,6 +14,8 @@ object EditAccountActor {
   case class GetAccount(accountId: UserID)
 
   case class FindAccount(applicationId: Option[UserID], msisdn: Option[String], email: Option[String]) extends WithUserContacts
+
+  case class UpdateAccount(userAccount: UserProfile)
 }
 
 import EditAccountActor._
@@ -41,6 +43,10 @@ class EditAccountActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : C
       replyToSender {
         userAccountDAO.findByAnyOf(applicationIdOp, msisdnOp, emailOp) map { _ map { userAccountToUserProfile } }
       }
+
+    case UpdateAccount(userProfile) =>
+      log.info("Trying to update account with id {}", userProfile.info.userId)
+      userAccountDAO.update(userProfileToUserAccount(userProfile))
   }
 
   def userAccountToUserProfile(userAccount: UserAccount): UserProfile =
@@ -49,13 +55,28 @@ class EditAccountActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : C
         userId = userAccount.id,
         fullName = userAccount.personalInfo.name,
         postCode = userAccount.personalInfo.postCode,
-        address = None,
+        birthDate = userAccount.personalInfo.birthDate,
         country = None,
         email = userAccount.email,
-        msisdn = userAccount.msisdn
+        msisdn = userAccount.msisdn,
+        gender = userAccount.personalInfo.gender
       ),
       UserSettings(
         userAccount.settings.maxMessagesPerWeek
       )
+    )
+
+  def userProfileToUserAccount(userProfile: UserProfile): UserAccount =
+    UserAccount(
+      userProfile.info.userId,
+      userProfile.info.msisdn,
+      userProfile.info.email,
+      UserPersonalInfo(
+        userProfile.info.fullName,
+        userProfile.info.postCode,
+        userProfile.info.birthDate,
+        userProfile.info.gender
+      ),
+      AccountSettings(userProfile.settings.maxAdsPerWeek)
     )
 }

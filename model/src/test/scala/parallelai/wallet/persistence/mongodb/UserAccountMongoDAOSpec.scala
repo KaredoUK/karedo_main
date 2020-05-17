@@ -5,7 +5,7 @@ import com.github.athieriot.{CleanAfterExample, EmbedConnection}
 import com.escalatesoft.subcut.inject.NewBindingModule
 import NewBindingModule._
 import com.escalatesoft.subcut.inject.config.PropertiesConfigMapSource
-import parallelai.wallet.entity.{ClientApplication, UserInfo, UserAccount}
+import parallelai.wallet.entity.{ClientApplication, UserPersonalInfo, UserAccount}
 import java.util.UUID
 import scala.concurrent.{Future, Await}
 import Await._
@@ -23,7 +23,9 @@ class UserAccountMongoDAOSpec extends Specification with EmbedConnection with Cl
       Map(
         "mongo.server.host" -> "localhost",
         "mongo.server.port" -> s"$embedConnectionPort",
-        "mongo.db.name" -> "test"
+        "mongo.db.name" -> "test",
+        "mongo.db.user" -> "",
+        "mongo.db.pwd" -> ""
       )
     )
 

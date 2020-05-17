@@ -8,7 +8,7 @@ resolvers ++= Common.sprayResolvers
 
 libraryDependencies ++= Seq(
   Common.sprayJson
-)
+) ++ Common.jodaTime
 
 scalacOptions ++= Seq(
   "-unchecked",

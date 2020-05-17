@@ -7,22 +7,75 @@
     </div>
 
     <form name="editProfile" action="@controllers.routes.ProfileController.updateProfile.url" method="post">
-        <div>
-            <label>Name</label><input type="text" name="name" id="name">@userProfile.info.fullName</input>
+        <div id="userInfo" class="container">
+            <div>
+                <input type="hidden" name="info.userId" id="id" value="@userProfile.info.userId"/>
+            </div>
+
+            <div>
+                <label>Email</label>
+                @if(userProfile.info.email.isDefined) {
+                    <input type="email" name="info.email" id="email" readonly="true" value="@userProfile.info.email" />
+                } else {
+                    <input type="email" name="info.email" id="email" value="@userProfile.info.email" />
+                }
+            </div>
+
+            <div>
+                <label>Mobile Number</label>
+                @if(userProfile.info.msisdn.isDefined) {
+                    <input type="text" name="info.msisdn" id="msisdn" readonly="true" value="@userProfile.info.msisdn" />
+                } else {
+                <input type="text" name="info.msisdn" id="msisdn" value="@userProfile.info.msisdn" />
+                }
+            </div>
+
+            <div>
+                <label>Name</label><input type="text" name="info.fullName" id="name" value="@userProfile.info.fullName"/>
+            </div>
+
+            <div>
+                <label>Birth Date</label><input type="text" class="span2" name="info.birthDate" id="birthDate" value="@userProfile.info.birthDate"/>
+            </div>
+            <div>
+                <label>Post Code</label><input type="text" name="info.postCode" id="postCode" value="@userProfile.info.postCode"/>
+            </div>
+            <div>
+                <label>Country</label><input type="text" name="info.country" id="country" value="@userProfile.info.country"/>
+            </div>
+
+            <div>
+                @if(userProfile.info.gender == Some("M")) {
+                    <input type="checkbox" name="info.gender" id="gender.male" value="M" checked="true"/>
+
+                } else {
+                    <input type="checkbox" name="info.gender" id="gender.male" value="M" />
+                } Male
+                @if(userProfile.info.gender == Some("F")) {
+                    <input type="checkbox" name="info.gender" id="gender.female" value="F" checked="true"/>
+                } else {
+                    <input type="checkbox" name="info.gender" id="gender.female" value="F"/>
+                } Female
+            </div>
         </div>
 
-        <div>
-            <label>Email</label><input type="email" name="email" id="email" readonly="true">@userProfile.info.email</input>
+        <div id="userSettings" class="container">
+            <label>Settings</label>
+            <div>
+                <label>Mobile Number</label>
+                <input type="number" name="settings.maxAdsPerWeek" id="maxAdsPerWeek" value="@userProfile.settings.maxAdsPerWeek"/>
+            </div>
         </div>
 
-        <div>
-            <label>Mobile Number</label><input type="text" name="msisdn" id="msisdn" readonly="true">@userProfile.info.msisdn</input>
-        </div>
-
-        <div>
-            <label>Mobile Number</label><input type="text" name="msisdn" id="msisdn" readonly="true">@userProfile.info.msisdn</input>
-        </div>
-
-        <input type="submit">Register</input>
+        <input type="submit" value="Update"/>
     </form>
+    <script src="/assets/javascripts/bootstrap-datepicker.js"></script>
+    <script>
+        $(function() {
+            $('#birthDate').datepicker({
+                format: 'mm-dd-yyyy'
+            });
+        });
+    </script>
 }
+
