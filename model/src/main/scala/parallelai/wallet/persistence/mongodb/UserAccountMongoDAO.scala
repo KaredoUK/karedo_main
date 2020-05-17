@@ -25,30 +25,15 @@ object userAccountMongoUtils {
 
 import userAccountMongoUtils._
 
-trait MongoConnection {
-  def mongoHost: String
-  def mongoPort: Int
-  def mongoDbName: String
-  def mongoDbUser: String
-  def mongoDbPwd: String
 
-  val mongoClient =
-    if(mongoDbUser.isEmpty) {
-      MongoClient(mongoHost, mongoPort)
-    } else {
-      MongoClient(new ServerAddress(mongoHost, mongoPort), List(MongoCredential.createMongoCRCredential(mongoDbUser, mongoDbName, mongoDbPwd.toCharArray)))
-    }
-
-  val db = mongoClient(mongoDbName)
-}
 
 class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends UserAccountDAO with MongoConnection with Injectable  {
 
-  lazy val mongoHost: String = injectProperty[String]("mongo.server.host")
-  lazy val mongoPort: Int = injectProperty[Int]("mongo.server.port")
-  lazy val mongoDbName: String = injectProperty[String]("mongo.db.name")
-  lazy val mongoDbUser: String = injectProperty[String]("mongo.db.user")
-  lazy val mongoDbPwd: String = injectProperty[String]("mongo.db.pwd")
+//  lazy val mongoHost: String = injectProperty[String]("mongo.server.host")
+//  lazy val mongoPort: Int = injectProperty[Int]("mongo.server.port")
+//  lazy val mongoDbName: String = injectProperty[String]("mongo.db.name")
+//  lazy val mongoDbUser: String = injectProperty[String]("mongo.db.user")
+//  lazy val mongoDbPwd: String = injectProperty[String]("mongo.db.pwd")
 
   implicit def mongoUserAccountToUserAccount(mongoUserAccount: MongoUserAccount) : UserAccount = mongoUserAccount.toUserAccount
   implicit def mongoUserAccountOptionToUserAccountOption(mongoUserAccount: Option[MongoUserAccount]) : Option[UserAccount] = mongoUserAccount map { _.toUserAccount }
@@ -184,11 +169,11 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
 
 
 class ClientApplicationMongoDAO(implicit val bindingModule: BindingModule)  extends ClientApplicationDAO with MongoConnection with Injectable {
-  lazy val mongoHost: String = injectProperty[String]("mongo.server.host")
-  lazy val mongoPort: Int = injectProperty[Int]("mongo.server.port")
-  lazy val mongoDbName: String = injectProperty[String]("mongo.db.name")
-  lazy val mongoDbUser: String = injectProperty[String]("mongo.db.user")
-  lazy val mongoDbPwd: String = injectProperty[String]("mongo.db.pwd")
+//  lazy val mongoHost: String = injectProperty[String]("mongo.server.host")
+//  lazy val mongoPort: Int = injectProperty[Int]("mongo.server.port")
+//  lazy val mongoDbName: String = injectProperty[String]("mongo.db.name")
+//  lazy val mongoDbUser: String = injectProperty[String]("mongo.db.user")
+//  lazy val mongoDbPwd: String = injectProperty[String]("mongo.db.pwd")
 
   val dao = new SalatDAO[MongoUserAccount, UUID](collection = db("UserAccount")) {}
 

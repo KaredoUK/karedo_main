@@ -18,3 +18,7 @@ trait RetailerDAO {
 
   def setName(id: UUID, name: String): Future[Unit]
 }
+
+trait RetailOfferDAO {
+
+}
