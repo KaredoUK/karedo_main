@@ -9,6 +9,7 @@ case class ClientApplication(id: UUID, accountId: UUID, activationCode: String, 
 case class UserPersonalInfo(name: String, postCode: Option[String] = None, birthDate: Option[DateTime] = None, gender: Option[String] = None)
 case class AccountSettings(maxMessagesPerWeek: Int)
 case class UserAccount(id: UUID, msisdn: Option[String], email: Option[String],
+                       password: Option[String] = None,
                        personalInfo: UserPersonalInfo = defaultUserPersonalInfo,
                        settings: AccountSettings = defaultAccountSettings,
                        active: Boolean = false)

@@ -18,8 +18,8 @@ object MainController extends Controller with AppConfigInjection {
   def index = async { request =>
     implicit val _ = request
 
-    isAuthorized(request, dataManagerApiClient) flatMap { authorized =>
-      if(authorized) {
+    isKnownUser(request, dataManagerApiClient) flatMap { knownUser =>
+      if(knownUser) {
         dataManagerApiClient.getUserProfile(readUUIDCookie(COOKIE_UUID).get) map { _ match {
             case Some(userProfile) => Ok(views.html.registered_index.render ( s"Hello '${userProfile.info.fullName}' from Data Manager Web UI") )
             case None => InternalServerError

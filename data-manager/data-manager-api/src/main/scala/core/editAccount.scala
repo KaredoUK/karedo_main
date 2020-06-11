@@ -16,6 +16,8 @@ object EditAccountActor {
   case class FindAccount(applicationId: Option[UserID], msisdn: Option[String], email: Option[String]) extends WithUserContacts
 
   case class UpdateAccount(userAccount: UserProfile)
+
+  case class CheckAccountPassword(accountId: UserID, password: String)
 }
 
 import EditAccountActor._
@@ -62,7 +64,8 @@ class EditAccountActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : C
         gender = userAccount.personalInfo.gender
       ),
       UserSettings(
-        userAccount.settings.maxMessagesPerWeek
+        userAccount.settings.maxMessagesPerWeek,
+        userAccount.password.getOrElse("")
       )
     )
 
@@ -71,6 +74,7 @@ class EditAccountActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : C
       userProfile.info.userId,
       userProfile.info.msisdn,
       userProfile.info.email,
+      Some(userProfile.settings.password),
       UserPersonalInfo(
         userProfile.info.fullName,
         userProfile.info.postCode,

@@ -27,7 +27,7 @@ object authorization {
       case _ => None
     } get
 
-  def isAuthorized(requestHeaders: RequestHeader, dataManagerApiClient: DataManagerApiClient): Future[Boolean] = {
+  def isKnownUser(requestHeaders: RequestHeader, dataManagerApiClient: DataManagerApiClient): Future[Boolean] = {
     implicit val _ = requestHeaders
 
     val userId = readUUIDCookie(COOKIE_UUID)
@@ -74,12 +74,17 @@ class AuthorizedFilter(implicit val bindingModule: BindingModule) extends Filter
     implicit val header = request
 
     if(authorizationRequired(request)) {
-      isAuthorized(request, dataManagerApiClient) flatMap { authorized =>
-         if(authorized) {
-           next(request)
+      isKnownUser(request, dataManagerApiClient) flatMap { isKnown =>
+         if(isKnown) {
+           if(hasValidatedPwd(request)) {
+             next(request)
+           } else {
+             logger.debug("Recognised user but no validated password in cache {}", request.path)
+             successful(Redirect(routes.RegistrationController.passwordRequest(request.uri).absoluteURL(false), Map("redirectTo" -> Seq(request.uri))))
+           }
          } else {
-           logger.debug(s"Not authorized {}", request.path)
-           successful(Redirect(routes.RegistrationController.register.absoluteURL(false)))
+           logger.debug("Not a recognised user {}", request.path)
+           successful(Redirect(routes.RegistrationController.register.absoluteURL(false)).withSession())
         }
       }
     } else {
@@ -87,7 +92,9 @@ class AuthorizedFilter(implicit val bindingModule: BindingModule) extends Filter
     }
   }
 
-  private def authorizationRequired(request: RequestHeader) = {
+  private def hasValidatedPwd(request: RequestHeader): Boolean = request.session.get("pwd").isDefined
+
+  private def authorizationRequired(request: RequestHeader): Boolean = {
     val actionInvoked: String = request.path
     accessiblePagesRegexpList.collectFirst {
       case regex if(regex.findFirstIn(actionInvoked).isDefined) =>

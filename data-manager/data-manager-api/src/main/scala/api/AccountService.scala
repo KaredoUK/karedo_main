@@ -12,7 +12,7 @@ import com.parallelai.wallet.datamanager.data._
 import ApiDataJsonProtocol._
 import RegistrationActor.AddApplication
 import parallelai.wallet.entity.UserAccount
-import core.EditAccountActor.{UpdateAccount, FindAccount, GetAccount}
+import core.EditAccountActor.{CheckAccountPassword, UpdateAccount, FindAccount, GetAccount}
 import java.util.UUID
 
 class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(implicit executionContext: ExecutionContext)
@@ -72,6 +72,23 @@ class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(im
           userProfile: UserProfile =>
             editAccountActor ! UpdateAccount(userProfile)
             ""
+        }
+      }
+    } ~
+    pathPrefix( "account" / JavaUUID  ) { accountId: UserID =>
+      path("authenticate") {
+        get {
+          parameter("pwd") { password =>
+            complete {
+              (editAccountActor ? CheckAccountPassword(accountId, password)).mapTo[Boolean] map { validPwd =>
+                if (validPwd) {
+                  OK
+                } else {
+                  Unauthorized
+                }
+              }
+            }
+          }
         }
       }
     } ~

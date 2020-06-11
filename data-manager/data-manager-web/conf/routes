@@ -11,6 +11,8 @@ GET     /registerApplication        controllers.RegistrationController.registerA
 POST    /registerApplication        controllers.RegistrationController.submitRegisterApplication
 GET     /confirmActivation          controllers.RegistrationController.getConfirmActivation
 POST    /confirmActivation          controllers.RegistrationController.confirmActivation
+GET     /passwordRequest            controllers.RegistrationController.passwordRequest(redirectTo: String)
+POST    /submitPassword             controllers.RegistrationController.submitPassword
 
 # Profile
 GET     /editProfile                controllers.ProfileController.editProfile

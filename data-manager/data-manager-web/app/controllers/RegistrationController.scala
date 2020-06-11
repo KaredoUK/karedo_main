@@ -13,7 +13,7 @@ import scala.Some
 import com.parallelai.wallet.datamanager.data.UserSettings
 import com.parallelai.wallet.datamanager.data.RegistrationRequest
 import com.parallelai.wallet.datamanager.data.UserInfo
-import api.{DataManagerRestClient, DataManagerApiClient}
+import api.{authorization, DataManagerRestClient, DataManagerApiClient}
 import com.parallelai.wallet.datamanager.data.UserProfile
 import scala.Some
 import com.parallelai.wallet.datamanager.data.UserSettings
@@ -82,6 +82,13 @@ object registrationForms {
     )
     (formToRegistrationValidation)
     ( { registrationValidation: RegistrationValidation => Some(registrationValidation.applicationId.toString, registrationValidation.validationCode) })
+  )
+
+  val passwordSubmitForm = Form(
+    tuple(
+      "password" -> nonEmptyText,
+      "redirectTo" -> nonEmptyText
+    )
   )
 
   def formToRegistrationRequest(appId: String, email: Option[String], msisdn: Option[String]) : RegistrationRequest =  {
@@ -218,6 +225,34 @@ trait RegistrationController extends Controller {
 
   def updateProfile = Action {
     Ok(views.html.registrationCompleted.render())
+  }
+
+  def passwordRequest(redirectTo: String) = Action {
+    Ok(views.html.enterPassword.render("", redirectTo))
+  }
+
+  def submitPassword = async { implicit request: Request[_] =>
+
+    import authorization._
+
+    passwordSubmitForm.bindFromRequest.fold(
+      hasErrors = {
+        form => Future.successful( badRequest("Invalid request") )
+      },
+
+      success = { params =>
+        val (password, redirectTo) = params
+
+        dataManagerApiClient.validatePassword(readUUIDCookie(COOKIE_UUID).get, password) map { success =>
+          if (success) {
+            Redirect(redirectTo).withSession("password" -> password)
+          } else {
+            Forbidden("Invalid password")
+          }
+        }
+      }
+     )
+
   }
 }
 

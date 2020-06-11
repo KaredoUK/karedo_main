@@ -18,7 +18,7 @@ case class RegistrationValidation(applicationId: ApplicationID, validationCode: 
 case class RegistrationResponse(applicationId: ApplicationID, channel: String, address: String)
 case class RegistrationValidationResponse(applicationId: ApplicationID, userID: UUID)
 
-case class UserSettings(maxAdsPerWeek: Int)
+case class UserSettings(maxAdsPerWeek: Int, password: String)
 case class UserInfo(userId: UserID, fullName: String, email: Option[String], msisdn: Option[String],
                     postCode: Option[String], country: Option[String],
                     birthDate: Option[DateTime], gender: Option[String]) extends WithUserContacts

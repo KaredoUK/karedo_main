@@ -14,9 +14,6 @@ import com.mongodb.casbah.commons.conversions.scala._
 trait Api extends RouteConcatenation {
   this: CoreActors with Core =>
 
-  RegisterConversionHelpers()
-  RegisterJodaTimeConversionHelpers()
-
   private implicit val _ = system.dispatcher
 
   val routes =

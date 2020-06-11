@@ -83,10 +83,13 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
       )
     }
 
+
+
   override def insertNew(userAccount: UserAccount, firstApplication: ClientApplication): Future[Unit] =
     successful {
       dao.insert(
-        MongoUserAccount(userAccount.id, userAccount.msisdn, userAccount.email, userAccount.personalInfo, userAccount.settings, userAccount.active,
+        MongoUserAccount(userAccount.id, userAccount.msisdn, userAccount.email, userAccount.password,
+          userAccount.personalInfo, userAccount.settings, userAccount.active,
           List(
             MongoUserApplicationInfo(firstApplication.id, firstApplication.activationCode, firstApplication.active)
           )
@@ -97,7 +100,8 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
   def insertNew(userAccount: UserAccount, firstApplications: ClientApplication* ): Future[Unit] =
     successful {
       dao.insert(
-        MongoUserAccount(userAccount.id, userAccount.msisdn, userAccount.email, userAccount.personalInfo, userAccount.settings, userAccount.active,
+        MongoUserAccount(userAccount.id, userAccount.msisdn, userAccount.email, userAccount.password,
+          userAccount.personalInfo, userAccount.settings, userAccount.active,
           firstApplications map { app => MongoUserApplicationInfo(app.id, app.activationCode, app.active) } toList
         )
       )
@@ -150,6 +154,16 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
       )
     }
 
+  override def setPassword(userId: UUID, password: String) : Future[Unit] =
+    successful {
+      dao.update(
+        byId(userId),
+        $set(
+          "password" -> password
+        )
+      )
+    }
+
   override def getByEmail(email: String, mustBeActive: Boolean): Future[Option[UserAccount]] =
     successful {
       val query = if(mustBeActive) {
@@ -166,7 +180,6 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
       dao.removeById(userId, WriteConcern.Safe)
     }
 }
-
 
 class ClientApplicationMongoDAO(implicit val bindingModule: BindingModule)  extends ClientApplicationDAO with MongoConnection with Injectable {
 //  lazy val mongoHost: String = injectProperty[String]("mongo.server.host")

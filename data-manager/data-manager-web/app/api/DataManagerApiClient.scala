@@ -36,6 +36,8 @@ trait DataManagerApiClient {
   def validateRegistration(validation: RegistrationValidation) : Future[RegistrationValidationResponse]
 
   def updateUserProfile(userProfile: UserProfile): Future[Unit]
+
+  def validatePassword(accountId: UUID, password: String): Future[Boolean]
 }
 
 
@@ -50,6 +52,7 @@ class DataManagerRestClient(implicit val bindingModule: BindingModule) extends D
   val validatePipeline = sendReceive ~> unmarshal[RegistrationValidationResponse]
   val retrieveUserProfilePipeline = sendReceive ~> notFoundToNone ~> unmarshal[Option[UserProfile]]
   val updateProfilePipeline = sendReceive ~> unitIfSuccess
+  val validatePwdPipeline = sendReceive
 
   override def register(request: RegistrationRequest): Future[RegistrationResponse] = registerPipeline { Post(apiBaseUri + "/account", request) }
 
@@ -77,6 +80,12 @@ class DataManagerRestClient(implicit val bindingModule: BindingModule) extends D
 
   def updateUserProfile(userProfile: UserProfile): Future[Unit] = {
     updateProfilePipeline { Put(apiBaseUri + s"/account/${userProfile.info.userId}", userProfile) }
+  }
+
+  def validatePassword(accountId: UUID, password: String): Future[Boolean] = {
+    validatePwdPipeline {
+      Get(Uri(s"/$apiBaseUri/account/$accountId/authenticate").copy(query = Uri.Query("password" -> password)))
+    } map { _.status.isSuccess }
   }
 
   def unitIfSuccess(response: HttpResponse): Unit =

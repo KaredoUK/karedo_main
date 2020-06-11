@@ -17,8 +17,10 @@ class ClientApplicationMongoDAOSpec extends Specification with EmbedConnection w
     implicit val bindingModule = newBindingModuleWithConfig(
       Map(
         "mongo.server.host" -> "localhost",
-        "mongo.server.port" ->  s"$embedConnectionPort",
-        "mongo.db.name" -> "test"
+        "mongo.server.port" -> s"$embedConnectionPort",
+        "mongo.db.name" -> "test",
+        "mongo.db.user" -> "",
+        "mongo.db.pwd" -> ""
       )
     )
 
