@@ -1,6 +1,6 @@
 package parallelai.wallet.persistence.mongodb
 
-import org.specs2.mutable.Specification
+import org.specs2.mutable.{After, Specification}
 import com.github.athieriot.{CleanAfterExample, EmbedConnection}
 import com.escalatesoft.subcut.inject.NewBindingModule
 import NewBindingModule._
@@ -165,5 +165,4 @@ class UserAccountMongoDAOSpec extends Specification with EmbedConnection with Cl
     }
 
   }
-
 }

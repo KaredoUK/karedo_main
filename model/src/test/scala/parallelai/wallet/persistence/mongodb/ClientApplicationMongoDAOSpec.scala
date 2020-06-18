@@ -9,7 +9,7 @@ import com.escalatesoft.subcut.inject.NewBindingModule._
 import parallelai.wallet.entity.{ClientApplication, UserAccount}
 import java.util.UUID
 
-class ClientApplicationMongoDAOSpec extends Specification with EmbedConnection with CleanAfterExample with NoTimeConversions with MongoTestUtils{
+class ClientApplicationMongoDAOSpec extends Specification with EmbedConnection with CleanAfterExample with NoTimeConversions with MongoTestUtils {
   sequential
 
   "ClientApplicationMongoDAO" should {
@@ -98,5 +98,4 @@ class ClientApplicationMongoDAOSpec extends Specification with EmbedConnection w
     }
 
   }
-
 }

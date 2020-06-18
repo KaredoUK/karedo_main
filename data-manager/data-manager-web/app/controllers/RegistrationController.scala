@@ -1,5 +1,6 @@
 package controllers
 
+import play.api.Logger
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
@@ -43,14 +44,18 @@ object registrationForms {
     mapping(
       "applicationId" -> nonEmptyText,
       "email" -> optional(email),
-      "msisdn" -> optional(text)
-    )
+      "msisdn" -> optional(text),
+      "password" -> nonEmptyText
+  )
     (formToRegistrationRequest)
-    ( { registrationRequest : RegistrationRequest => Some(registrationRequest.applicationId.toString, registrationRequest.email, registrationRequest.msisdn) } )
+    ( { registrationRequest : RegistrationRequest =>
+        Some(registrationRequest.applicationId.toString, registrationRequest.email, registrationRequest.msisdn, registrationRequest.password)
+      }
+    )
     verifying (
       "You must provide your email or phone number.", {
         _ match {
-          case RegistrationRequest(_, None, None) => false
+          case RegistrationRequest(_, None, None, _) => false
           case _ => true
         }
       }
@@ -91,8 +96,8 @@ object registrationForms {
     )
   )
 
-  def formToRegistrationRequest(appId: String, email: Option[String], msisdn: Option[String]) : RegistrationRequest =  {
-    RegistrationRequest(applicationIdFromString(appId), msisdn, email)
+  def formToRegistrationRequest(appId: String, email: Option[String], msisdn: Option[String], password: String) : RegistrationRequest =  {
+    RegistrationRequest(applicationIdFromString(appId), msisdn, email, password)
   }
 
   def formToAddApplicationRequest(appId: String, email: Option[String], msisdn: Option[String]) : AddApplicationRequest =  {
@@ -233,6 +238,8 @@ trait RegistrationController extends Controller {
 
   def submitPassword = async { implicit request: Request[_] =>
 
+    Logger.debug("Password submit")
+
     import authorization._
 
     passwordSubmitForm.bindFromRequest.fold(
@@ -245,6 +252,7 @@ trait RegistrationController extends Controller {
 
         dataManagerApiClient.validatePassword(readUUIDCookie(COOKIE_UUID).get, password) map { success =>
           if (success) {
+            Logger.debug(s"Password correct, redirecting to '$redirectTo'")
             Redirect(redirectTo).withSession("password" -> password)
           } else {
             Forbidden("Invalid password")

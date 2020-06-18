@@ -10,7 +10,7 @@ trait WithUserContacts {
   def isValid : Boolean = msisdn.isDefined || email.isDefined
 }
 
-case class RegistrationRequest(applicationId: ApplicationID, msisdn: Option[String], email: Option[String]) extends WithUserContacts
+case class RegistrationRequest(applicationId: ApplicationID, msisdn: Option[String], email: Option[String], password: String) extends WithUserContacts
 case class AddApplicationRequest(applicationId: ApplicationID, msisdn: Option[String], email: Option[String])
 
 case class RegistrationValidation(applicationId: ApplicationID, validationCode: String)

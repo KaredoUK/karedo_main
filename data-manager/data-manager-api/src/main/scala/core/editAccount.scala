@@ -49,6 +49,16 @@ class EditAccountActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : C
     case UpdateAccount(userProfile) =>
       log.info("Trying to update account with id {}", userProfile.info.userId)
       userAccountDAO.update(userProfileToUserAccount(userProfile))
+
+    case CheckAccountPassword(accountId, password) =>
+      log.info("Validationg password for account with id {}", accountId)
+      replyToSender {
+        userAccountDAO.getById(accountId) map { _ match {
+          case Some(account) => account.password == Some(password)
+          case None => false
+          }
+        }
+      }
   }
 
   def userAccountToUserProfile(userAccount: UserAccount): UserProfile =

@@ -6,6 +6,7 @@ import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import controllers.routes
 import org.slf4j.LoggerFactory
 import parallelai.wallet.config.ConfigConversions._
+import play.api.Logger
 import play.api.mvc.{Filter, RequestHeader, Results, SimpleResult}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -15,7 +16,6 @@ import scala.util.Try
 import scala.util.matching.Regex
 
 object authorization {
-  val logger = LoggerFactory.getLogger(this.getClass)
 
   val COOKIE_UUID = "uuid"
   val COOKIE_APP_ID = "applicationId"
@@ -33,21 +33,24 @@ object authorization {
     val userId = readUUIDCookie(COOKIE_UUID)
     val applicationId = readUUIDCookie(COOKIE_APP_ID)
 
-    logger.debug( s"Userid ${userId} applicationID ${applicationId}")
+    Logger.debug( s"Userid ${userId} applicationID ${applicationId}")
 
     (userId, applicationId) match {
       case (Some(userId), Some(applicationId)) =>
         dataManagerApiClient.findUserForApplication(applicationId) map {
           _ match {
             case Some(user) =>
-              logger.error(s"User is ${user}")
-              if (user.info.userId.equals(userId))
+              Logger.debug(s"User is ${user}")
+              if (user.info.userId.equals(userId)) {
+                Logger.debug("UserId matches")
                 true
-              else
+              } else {
+                Logger.debug("UserId DOESN'T match")
                 false
+              }
 
             case None =>
-              logger.error(s"User with id is ${userId} is not in the DB")
+              Logger.debug(s"User with id is ${userId} is not in the DB")
               false
           }
         }
@@ -64,7 +67,6 @@ object AuthorizedFilter {
 import api.authorization._
 
 class AuthorizedFilter(implicit val bindingModule: BindingModule) extends Filter with Injectable with Results {
-  val logger = LoggerFactory.getLogger(classOf[AuthorizedFilter])
 
   val accessiblePagesRegexpList = injectProperty[List[String]]("auth.accessible.pages") map { regex => new Regex(s"${regex}$$") }
   val dataManagerApiClient : DataManagerApiClient = new DataManagerRestClient
@@ -77,13 +79,14 @@ class AuthorizedFilter(implicit val bindingModule: BindingModule) extends Filter
       isKnownUser(request, dataManagerApiClient) flatMap { isKnown =>
          if(isKnown) {
            if(hasValidatedPwd(request)) {
+             Logger.debug( s"Recognised user with validated password in cache ${request.path}")
              next(request)
            } else {
-             logger.debug("Recognised user but no validated password in cache {}", request.path)
-             successful(Redirect(routes.RegistrationController.passwordRequest(request.uri).absoluteURL(false), Map("redirectTo" -> Seq(request.uri))))
+             Logger.debug( s"Recognised user but no validated password in cache ${request.path}")
+             successful(Redirect(routes.RegistrationController.passwordRequest(request.uri).absoluteURL(false)))
            }
          } else {
-           logger.debug("Not a recognised user {}", request.path)
+           Logger.debug( s"Not a recognised user ${request.path}")
            successful(Redirect(routes.RegistrationController.register.absoluteURL(false)).withSession())
         }
       }
@@ -92,13 +95,13 @@ class AuthorizedFilter(implicit val bindingModule: BindingModule) extends Filter
     }
   }
 
-  private def hasValidatedPwd(request: RequestHeader): Boolean = request.session.get("pwd").isDefined
+  private def hasValidatedPwd(request: RequestHeader): Boolean = request.session.get("password").isDefined
 
   private def authorizationRequired(request: RequestHeader): Boolean = {
     val actionInvoked: String = request.path
     accessiblePagesRegexpList.collectFirst {
       case regex if(regex.findFirstIn(actionInvoked).isDefined) =>
-        logger.debug(s"In white list $actionInvoked for regex ${regex.pattern.pattern}")
+        Logger.debug(s"In white list $actionInvoked for regex ${regex.pattern.pattern}")
         Some(regex)
     }.isEmpty
   }

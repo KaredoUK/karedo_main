@@ -28,13 +28,6 @@ import userAccountMongoUtils._
 
 
 class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends UserAccountDAO with MongoConnection with Injectable  {
-
-//  lazy val mongoHost: String = injectProperty[String]("mongo.server.host")
-//  lazy val mongoPort: Int = injectProperty[Int]("mongo.server.port")
-//  lazy val mongoDbName: String = injectProperty[String]("mongo.db.name")
-//  lazy val mongoDbUser: String = injectProperty[String]("mongo.db.user")
-//  lazy val mongoDbPwd: String = injectProperty[String]("mongo.db.pwd")
-
   implicit def mongoUserAccountToUserAccount(mongoUserAccount: MongoUserAccount) : UserAccount = mongoUserAccount.toUserAccount
   implicit def mongoUserAccountOptionToUserAccountOption(mongoUserAccount: Option[MongoUserAccount]) : Option[UserAccount] = mongoUserAccount map { _.toUserAccount }
 
@@ -182,12 +175,6 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
 }
 
 class ClientApplicationMongoDAO(implicit val bindingModule: BindingModule)  extends ClientApplicationDAO with MongoConnection with Injectable {
-//  lazy val mongoHost: String = injectProperty[String]("mongo.server.host")
-//  lazy val mongoPort: Int = injectProperty[Int]("mongo.server.port")
-//  lazy val mongoDbName: String = injectProperty[String]("mongo.db.name")
-//  lazy val mongoDbUser: String = injectProperty[String]("mongo.db.user")
-//  lazy val mongoDbPwd: String = injectProperty[String]("mongo.db.pwd")
-
   val dao = new SalatDAO[MongoUserAccount, UUID](collection = db("UserAccount")) {}
 
   override def getById(applicationId: UUID): Future[Option[ClientApplication]] =
@@ -222,7 +209,7 @@ class ClientApplicationMongoDAO(implicit val bindingModule: BindingModule)  exte
       dao.update(
         byId(clientApp.accountId),
         $push(
-          "applications" -> grater[ClientApplication].asDBObject(clientApp)
+          "applications" -> grater[MongoUserApplicationInfo].asDBObject( MongoUserApplicationInfo.fromClientApplication(clientApp) )
           // Don't use the MongoUserApplicationInfo direct otherwise will try to add a list of Any into applications and fuck up the object
         )
       )

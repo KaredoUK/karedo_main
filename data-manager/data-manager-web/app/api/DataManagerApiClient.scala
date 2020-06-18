@@ -84,7 +84,7 @@ class DataManagerRestClient(implicit val bindingModule: BindingModule) extends D
 
   def validatePassword(accountId: UUID, password: String): Future[Boolean] = {
     validatePwdPipeline {
-      Get(Uri(s"/$apiBaseUri/account/$accountId/authenticate").copy(query = Uri.Query("password" -> password)))
+      Get(Uri(s"$apiBaseUri/account/$accountId/authenticate").copy(query = Uri.Query("pwd" -> password)))
     } map { _.status.isSuccess }
   }
 
