@@ -1,17 +1,58 @@
 @(message: String)
 
-@main("Welcome to Data Manager Web UI") {
+@main("Karedo", true) {
 
     <script type='text/javascript' src='@routes.Assets.at("javascripts/index.min.js")'></script>
     <script type="text/javascript" src='@routes.Assets.at("sylesheets/sign-in-scripts.js")'></script>
 
-    <style>
-    </style>
-    
-    <div class="well">
+    <div class="lead text-center">
         <h1>@message</h1>
     </div>
 
-    <a id="registerAppButton" class="btn btn-default" role="button" href="@routes.ProfileController.editProfile.url" >Edit your profile</a>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-6">
+                <img src='@routes.Assets.at("images/my_stores.png")'><p/>
+                <a id="myStores" href="@routes.ProfileController.editProfile.url" >
+                    My stores
+                </a>
+            </div>
+            <div class="col-xs-6">
+                <img src='@routes.Assets.at("images/discover_more.png")'><p/>
+                <a id="discoverMore" href="@routes.ProfileController.editProfile.url" >
+                    Discover More
+                </a>
+            </div>
+        </div>
 
+        <div class="row">
+            <div class="col-xs-6">
+                <img src='@routes.Assets.at("images/shopping.png")'><p/>
+                <a id="shopping" href="@routes.ProfileController.editProfile.url" >
+                    Shopping
+                </a>
+            </div>
+            <div class="col-xs-6">
+                <img src='@routes.Assets.at("images/my_rewards.png")'><p/>
+                <a id="myRewards" href="@routes.ProfileController.editProfile.url" >
+                    My Rewards
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-6">
+                <img src='@routes.Assets.at("images/people.png")'><p/>
+                <a id="people" href="@routes.ProfileController.editProfile.url" >
+                    People
+                </a>
+            </div>
+            <div class="col-xm-6">
+                <img src='@routes.Assets.at("images/my_profile.png")'><p/>
+                <a id="myProfile" href="@routes.ProfileController.editProfile.url" >
+                    My profile
+                </a>
+            </div>
+        </div>
+    </div>
 }

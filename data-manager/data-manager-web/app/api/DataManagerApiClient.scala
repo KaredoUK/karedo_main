@@ -37,7 +37,6 @@ trait DataManagerApiClient {
 
   def updateUserProfile(userProfile: UserProfile): Future[Unit]
 
-  def validatePassword(accountId: UUID, password: String): Future[Boolean]
 }
 
 
@@ -80,12 +79,6 @@ class DataManagerRestClient(implicit val bindingModule: BindingModule) extends D
 
   def updateUserProfile(userProfile: UserProfile): Future[Unit] = {
     updateProfilePipeline { Put(apiBaseUri + s"/account/${userProfile.info.userId}", userProfile) }
-  }
-
-  def validatePassword(accountId: UUID, password: String): Future[Boolean] = {
-    validatePwdPipeline {
-      Get(Uri(s"$apiBaseUri/account/$accountId/authenticate").copy(query = Uri.Query("pwd" -> password)))
-    } map { _.status.isSuccess }
   }
 
   def unitIfSuccess(response: HttpResponse): Unit =

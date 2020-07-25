@@ -41,7 +41,7 @@ class EditAccountActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : C
       }
 
     case FindAccount(applicationIdOp, msisdnOp, emailOp) =>
-      log.info("Trying to find account with msisdn {} or email {} sender is {}", msisdnOp, emailOp, sender)
+      log.info("Trying to find account for appId {}, msisdn {} or email {} sender is {}", applicationIdOp, msisdnOp, emailOp, sender)
       replyToSender {
         userAccountDAO.findByAnyOf(applicationIdOp, msisdnOp, emailOp) map { _ map { userAccountToUserProfile } }
       }
@@ -51,7 +51,7 @@ class EditAccountActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : C
       userAccountDAO.update(userProfileToUserAccount(userProfile))
 
     case CheckAccountPassword(accountId, password) =>
-      log.info("Validationg password for account with id {}", accountId)
+      log.info("Validating password for account with id {}", accountId)
       replyToSender {
         userAccountDAO.getById(accountId) map { _ match {
           case Some(account) => account.password == Some(password)

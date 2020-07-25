@@ -202,7 +202,7 @@ trait RegistrationController extends Controller {
 
           dataManagerApiClient.validateRegistration(validation) map {
             validationResponse =>
-              Ok(views.html.registrationCompleted.render())
+              Ok(views.html.registered_index.render(""))
                 .withCookies(
                   Cookie("applicationId", validationResponse.applicationId.toString),
                   Cookie("uuid", validationResponse.userID.toString)
@@ -229,7 +229,7 @@ trait RegistrationController extends Controller {
   def editProfile = Action { NoContent }
 
   def updateProfile = Action {
-    Ok(views.html.registrationCompleted.render())
+    Ok(views.html.registered_index.render(""))
   }
 
   def passwordRequest(redirectTo: String) = Action {
@@ -250,14 +250,9 @@ trait RegistrationController extends Controller {
       success = { params =>
         val (password, redirectTo) = params
 
-        dataManagerApiClient.validatePassword(readUUIDCookie(COOKIE_UUID).get, password) map { success =>
-          if (success) {
-            Logger.debug(s"Password correct, redirecting to '$redirectTo'")
-            Redirect(redirectTo).withSession("password" -> password)
-          } else {
-            Forbidden("Invalid password")
-          }
-        }
+        Logger.debug(s"Assuming password is always correct, redirecting to '$redirectTo'")
+
+        Future.successful( Redirect(redirectTo).withSession("password" -> password) )
       }
      )
 

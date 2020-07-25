@@ -1,28 +1,28 @@
 @(applicationId: String, registerAction: String, title: String)
 
-@main("Register") {
+@main(title, true) {
 
-    <div class="container">
-        <div class="well">
-            <h1>@title</h1>
-        </div>
+    <div class="container-fluid">
 
-        <form name="register" action="@registerAction" method="post">
-            <div>
-                <label>Insert Email</label><input type="email" name="email" id="email"/>
+        <form role="form" name="register" action="@registerAction" method="post" >
+            <div class="form-group">
+                <label>Insert Email</label>
+                <input type="email" class="form-control" name="email" id="email"/>
             </div>
 
-            <div>
-                <label>Insert Mobile Number</label><input type="text" name="msisdn" id="msisdn"/>
+            <div class="form-group">
+                <label>Insert Mobile Number</label>
+                <input type="text" class="form-control" name="msisdn" id="msisdn"/>
             </div>
 
-            <div>
-                <label>Choose a password</label><input type="password" name="password" id="password" required="true"/>
+            <div class="form-group">
+                <label>Choose a password</label>
+                <input type="password" class="form-control" name="password" id="password" required="true"/>
             </div>
 
             <input type="hidden" name="applicationId" id="applicationId" value="@applicationId"/>
 
-            <input type="submit" value="Register"/>
+            <input type="submit" class="form-control btn btn-lg" value="Register"/>
         </form>
 
     </div>

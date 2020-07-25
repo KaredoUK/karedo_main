@@ -74,24 +74,7 @@ class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(im
             ""
         }
       }
-    } ~
-    pathPrefix( "account" / JavaUUID  ) { accountId: UserID =>
-      path("authenticate") {
-        get {
-          parameter("pwd") { password =>
-            complete {
-              (editAccountActor ? CheckAccountPassword(accountId, password)).mapTo[Boolean] map { validPwd =>
-                if (validPwd) {
-                  OK
-                } else {
-                  Unauthorized
-                }
-              }
-            }
-          }
-        }
-      }
-    } ~
+    }  ~
     path("account" / "application" / "validation") {
       post {
         handleWith {
