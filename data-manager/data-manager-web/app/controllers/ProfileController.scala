@@ -42,9 +42,11 @@ object profileForms {
       ),
 
       "settings" -> mapping(
-        "maxAdsPerWeek" -> number,
-        "password" -> nonEmptyText
-      )(UserSettings.apply)(UserSettings.unapply)
+        "maxAdsPerWeek" -> number
+      )(UserSettings.apply)(UserSettings.unapply),
+
+      "totalPoints" -> longNumber
+
     )
     (UserProfile.apply) (UserProfile.unapply )
   )

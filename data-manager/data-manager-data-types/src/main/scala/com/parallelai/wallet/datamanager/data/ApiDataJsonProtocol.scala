@@ -30,13 +30,13 @@ object ApiDataJsonProtocol extends DefaultJsonProtocol {
     }
   }
 
-  implicit val registrationRequestJson = jsonFormat4(RegistrationRequest)
+  implicit val registrationRequestJson = jsonFormat3(RegistrationRequest)
   implicit val registrationValidationJson = jsonFormat2(RegistrationValidation)
   implicit val registrationResponseJson = jsonFormat3(RegistrationResponse)
   implicit val registrationValidationResponseJson = jsonFormat2(RegistrationValidationResponse)
 
-  implicit val userSettingsJson = jsonFormat2(UserSettings)
+  implicit val userSettingsJson = jsonFormat1(UserSettings)
   implicit val userInfoJson = jsonFormat8(UserInfo)
-  implicit val userProfileJson = jsonFormat2(UserProfile)
+  implicit val userProfileJson = jsonFormat3(UserProfile)
 
 }

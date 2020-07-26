@@ -21,7 +21,7 @@ object MainController extends Controller with AppConfigInjection {
     isKnownUser(request, dataManagerApiClient) flatMap { knownUser =>
       if(knownUser) {
         dataManagerApiClient.getUserProfile(readUUIDCookie(COOKIE_UUID).get) map { _ match {
-            case Some(userProfile) => Ok(views.html.registered_index.render ( s"${userProfile.info.fullName}") )
+            case Some(userProfile) => Ok(views.html.registered_index.render ( s"${userProfile.info.fullName}", userProfile.totalPoints) )
             case None => InternalServerError
           }
         }

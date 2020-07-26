@@ -17,7 +17,6 @@ object EditAccountActor {
 
   case class UpdateAccount(userAccount: UserProfile)
 
-  case class CheckAccountPassword(accountId: UserID, password: String)
 }
 
 import EditAccountActor._
@@ -50,15 +49,6 @@ class EditAccountActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : C
       log.info("Trying to update account with id {}", userProfile.info.userId)
       userAccountDAO.update(userProfileToUserAccount(userProfile))
 
-    case CheckAccountPassword(accountId, password) =>
-      log.info("Validating password for account with id {}", accountId)
-      replyToSender {
-        userAccountDAO.getById(accountId) map { _ match {
-          case Some(account) => account.password == Some(password)
-          case None => false
-          }
-        }
-      }
   }
 
   def userAccountToUserProfile(userAccount: UserAccount): UserProfile =
@@ -74,9 +64,9 @@ class EditAccountActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : C
         gender = userAccount.personalInfo.gender
       ),
       UserSettings(
-        userAccount.settings.maxMessagesPerWeek,
-        userAccount.password.getOrElse("")
-      )
+        userAccount.settings.maxMessagesPerWeek
+      ),
+      totalPoints = userAccount.totalPoints
     )
 
   def userProfileToUserAccount(userProfile: UserProfile): UserAccount =
@@ -84,13 +74,13 @@ class EditAccountActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : C
       userProfile.info.userId,
       userProfile.info.msisdn,
       userProfile.info.email,
-      Some(userProfile.settings.password),
       UserPersonalInfo(
         userProfile.info.fullName,
         userProfile.info.postCode,
         userProfile.info.birthDate,
         userProfile.info.gender
       ),
-      AccountSettings(userProfile.settings.maxAdsPerWeek)
+      AccountSettings(userProfile.settings.maxAdsPerWeek),
+      totalPoints = userProfile.totalPoints
     )
 }

@@ -1,15 +1,16 @@
-@(message: String)
+@(message: String, userCredit: Long)
 
 @main("Karedo", true) {
-
-    <script type='text/javascript' src='@routes.Assets.at("javascripts/index.min.js")'></script>
-    <script type="text/javascript" src='@routes.Assets.at("sylesheets/sign-in-scripts.js")'></script>
 
     <div class="lead text-center">
         <h1>@message</h1>
     </div>
 
     <div class="container-fluid">
+        <div class="row">
+            <label class="lead test-right">Karedo Points: @userCredit</label>
+        </div>
+
         <div class="row">
             <div class="col-xs-6">
                 <img src='@routes.Assets.at("images/my_stores.png")'><p/>

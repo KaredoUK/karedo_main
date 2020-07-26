@@ -15,13 +15,13 @@ case class MongoUserAccount(
                 @Key("_id") id: UUID,
                 msisdn: Option[String],
                 email: Option[String],
-                password: Option[String],
                 personalInfo: UserPersonalInfo = defaultUserPersonalInfo,
                 settings: AccountSettings = defaultAccountSettings,
                 active: Boolean = false,
+                totalPoints: Long = 0,
                 applications: List[MongoUserApplicationInfo]
   ) {
-  def toUserAccount : UserAccount = UserAccount(id, msisdn, email, password, personalInfo, settings, active)
+  def toUserAccount : UserAccount = UserAccount(id, msisdn, email, personalInfo, settings, active, totalPoints)
 
   def toClientApplicationList : List[ClientApplication] = applications map { _.toClientApplication(id)  }
 }

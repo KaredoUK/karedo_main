@@ -15,6 +15,11 @@
             <label>Insert Activation Code</label><input type="text" name="activationCode" id="activationCode" value="@activationCode"/>
         </div>
 
+        <div class="form-group">
+            <label>Choose a password</label>
+            <input type="password" class="form-control" name="password" id="password" required="true"/>
+        </div>
+
         <input type="hidden" name="applicationId" id="applicationId" value="@{applicationId.toString}"/>
 
         <input type="submit" >Register</input>

@@ -2,8 +2,8 @@
 
 @main("Edit Profile") {
 
-    <div class="well">
-        <h1>Register your account</h1>
+    <div class="lead test-center">
+        <h1>Edit Profile</h1>
     </div>
 
     <form name="editProfile" action="@controllers.routes.ProfileController.updateProfile.url" method="post">
@@ -12,7 +12,7 @@
                 <input type="hidden" name="info.userId" id="id" value="@userProfile.info.userId"/>
             </div>
 
-            <div>
+            <div class="form-group">
                 <label>Email</label>
                 @if(userProfile.info.email.isDefined) {
                     <input type="email" name="info.email" id="email" readonly="true" value="@userProfile.info.email" />
@@ -21,7 +21,7 @@
                 }
             </div>
 
-            <div>
+            <div class="form-group">
                 <label>Mobile Number</label>
                 @if(userProfile.info.msisdn.isDefined) {
                     <input type="text" name="info.msisdn" id="msisdn" readonly="true" value="@userProfile.info.msisdn" />
@@ -30,21 +30,22 @@
                 }
             </div>
 
-            <div>
-                <label>Name</label><input type="text" name="info.fullName" id="name" value="@userProfile.info.fullName"/>
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" name="info.fullName" id="name" value="@userProfile.info.fullName"/>
             </div>
 
-            <div>
+            <div class="form-group">
                 <label>Birth Date</label><input type="text" class="span2" name="info.birthDate" id="birthDate" value="@userProfile.info.birthDate"/>
             </div>
-            <div>
+            <div class="form-group">
                 <label>Post Code</label><input type="text" name="info.postCode" id="postCode" value="@userProfile.info.postCode"/>
             </div>
-            <div>
+            <div class="form-group">
                 <label>Country</label><input type="text" name="info.country" id="country" value="@userProfile.info.country"/>
             </div>
 
-            <div>
+            <div class="form-group">
                 @if(userProfile.info.gender == Some("M")) {
                     <input type="checkbox" name="info.gender" id="gender.male" value="M" checked="true"/>
 
@@ -59,20 +60,26 @@
             </div>
         </div>
 
-        <div id="userSettings" class="container">
-            <label>Settings</label>
+        <div id="userSettings" class="form-group">
+            <label class="lead">Settings</label>
             <div>
-                <label>Mobile Number</label>
+                <label>Max Messages Per Week</label>
                 <input type="number" name="settings.maxAdsPerWeek" id="maxAdsPerWeek" value="@userProfile.settings.maxAdsPerWeek"/>
             </div>
 
             <div>
-                <label>Mobile Number</label>
-                <input type="password" name="settings.password" id="password" value="@userProfile.settings.password"/>
+                <label>Password</label>
+                <input type="password" name="password" id="password" value=""/>
             </div>
         </div>
 
-        <input type="submit" value="Update"/>
+        <div id="totalPointsDiv" class="form-group">
+            <label class="lead">Total Karedo Points</label>
+            <input type="number" name="totalPoints" id="totalPoints" value="@userProfile.totalPoints" readonly="true"/>
+        </div>
+
+        <input class="btn-primary btn-lg" type="Submit" value="Update"/>
+        <a class="btn btn-lg" href="@routes.MainController.index.url">Cancel</a>
     </form>
     <script src="/assets/javascripts/bootstrap-datepicker.js"></script>
     <script>

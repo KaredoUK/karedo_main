@@ -27,7 +27,7 @@ class ClientApplicationMongoDAOSpec extends Specification with EmbedConnection w
     val accountDAO = new UserAccountMongoDAO
     val clientAppDAO = new ClientApplicationMongoDAO
 
-    val userAccount = UserAccount(UUID.randomUUID(), Some("12345678"), Some("user@email.com"))
+    val userAccount = UserAccount(UUID.randomUUID(), Some("12345678"), Some("user@email.com"), totalPoints = 10l)
     val clientApplication = ClientApplication(UUID.randomUUID(), userAccount.id, "ACT_CODE")
 
 

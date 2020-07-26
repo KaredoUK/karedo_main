@@ -152,8 +152,7 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
     withValidations(registrationRequest) ( validUserIdentification, applicationNotRegistered, noActiveAccountForMsisdnOrEmail ) { request =>
 
       log.debug("Creating new account for request {}", request)
-      val account = UserAccount( id = UUID.randomUUID(), email = request.email, msisdn = request.msisdn,
-          password = Some(registrationRequest.password) )
+      val account = UserAccount( id = UUID.randomUUID(), email = request.email, msisdn = request.msisdn )
 
       val activationCode = newActivationCode
 

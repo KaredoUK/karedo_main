@@ -44,18 +44,17 @@ object registrationForms {
     mapping(
       "applicationId" -> nonEmptyText,
       "email" -> optional(email),
-      "msisdn" -> optional(text),
-      "password" -> nonEmptyText
+      "msisdn" -> optional(text)
   )
     (formToRegistrationRequest)
     ( { registrationRequest : RegistrationRequest =>
-        Some(registrationRequest.applicationId.toString, registrationRequest.email, registrationRequest.msisdn, registrationRequest.password)
+        Some(registrationRequest.applicationId.toString, registrationRequest.email, registrationRequest.msisdn)
       }
     )
     verifying (
       "You must provide your email or phone number.", {
         _ match {
-          case RegistrationRequest(_, None, None, _) => false
+          case RegistrationRequest(_, None, None) => false
           case _ => true
         }
       }
@@ -96,8 +95,8 @@ object registrationForms {
     )
   )
 
-  def formToRegistrationRequest(appId: String, email: Option[String], msisdn: Option[String], password: String) : RegistrationRequest =  {
-    RegistrationRequest(applicationIdFromString(appId), msisdn, email, password)
+  def formToRegistrationRequest(appId: String, email: Option[String], msisdn: Option[String]) : RegistrationRequest =  {
+    RegistrationRequest(applicationIdFromString(appId), msisdn, email)
   }
 
   def formToAddApplicationRequest(appId: String, email: Option[String], msisdn: Option[String]) : AddApplicationRequest =  {
@@ -202,11 +201,13 @@ trait RegistrationController extends Controller {
 
           dataManagerApiClient.validateRegistration(validation) map {
             validationResponse =>
-              Ok(views.html.registered_index.render(""))
+              Ok(views.html.registered_index.render("", 0l))
                 .withCookies(
                   Cookie("applicationId", validationResponse.applicationId.toString),
                   Cookie("uuid", validationResponse.userID.toString)
                 )
+                .withSession("password" -> "true" )
+
           } recoverWith {
              redirectToForFailedRequestAndFailForOtherCases(routes.RegistrationController.confirmActivation)
           }
@@ -228,8 +229,8 @@ trait RegistrationController extends Controller {
 
   def editProfile = Action { NoContent }
 
-  def updateProfile = Action {
-    Ok(views.html.registered_index.render(""))
+  def updateProfile = Action { implicit request: Request[_] =>
+    Redirect(routes.MainController.index.absoluteURL(false))
   }
 
   def passwordRequest(redirectTo: String) = Action {
@@ -252,7 +253,7 @@ trait RegistrationController extends Controller {
 
         Logger.debug(s"Assuming password is always correct, redirecting to '$redirectTo'")
 
-        Future.successful( Redirect(redirectTo).withSession("password" -> password) )
+        Future.successful( Redirect(redirectTo).withSession("password" -> "true" ) )
       }
      )
 
