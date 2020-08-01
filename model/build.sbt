@@ -10,6 +10,8 @@ val phantomVersion = "0.5.0"
 
 parallelExecution in Test := false
 
+resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases/" 
+
 libraryDependencies ++= Seq(
   "com.newzly"              %% "phantom-dsl"            % phantomVersion,
   "org.scala-lang.modules"  %% "scala-async"            % "0.9.0",
