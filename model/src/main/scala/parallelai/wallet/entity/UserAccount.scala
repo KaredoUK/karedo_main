@@ -17,8 +17,8 @@ case class UserAccount(id: UUID, msisdn: Option[String], email: Option[String],
 case class UserAds(userId: UUID, readAds: Set[UUID])
 case class UserRewards(userId: UUID, rewards: Set[UUID])
 
-case class Reward(id: UUID, brandId: UUID, description: String, image: Array[Byte], qrCode: Array[Byte], value: Long)
+case class Reward(id: UUID, brandId: UUID, description: String, imagePath: String, qrCodePath: String, value: Long)
 
 case class AdvertisementMetadata(detailId: UUID, publishedDate: DateTime)
-case class AdvertisementDetail(id: UUID, text: String, image: Array[Byte], value: Int)
-case class Store(id: UUID, name: String, icon: Array[Byte], ads: List[AdvertisementMetadata])
+case class AdvertisementDetail(id: UUID, text: String, imagePath: String, value: Int)
+case class Brand(id: UUID, name: String, iconPath: String, ads: List[AdvertisementMetadata])
