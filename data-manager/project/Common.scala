@@ -29,6 +29,6 @@ object Common {
   val sprayJson = "io.spray" %% "spray-json" % sprayJsonVersion
   val sprayClient = "io.spray" % "spray-client" % sprayVersion
   val subcutExt = "com.pragmasoft" % "subcut_ext" % "2.0"
-  val scalaAsync = "org.scala-lang.modules" %% "scala-async" % "0.9.0"
+  val scalaAsync = "org.scala-lang.modules" %% "scala-async" % "0.9.2"
   val walletCommon = "parallelai.wallet" %% "common" % "1.0" changing()
 }

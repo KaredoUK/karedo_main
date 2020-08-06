@@ -53,32 +53,60 @@ class DataManagerRestClient(implicit val bindingModule: BindingModule) extends D
   val updateProfilePipeline = sendReceive ~> unitIfSuccess
   val validatePwdPipeline = sendReceive
 
-  override def register(request: RegistrationRequest): Future[RegistrationResponse] = registerPipeline { Post(apiBaseUri + "/account", request) }
-
-  override def addApplication(accountId: UUID, applicationId: ApplicationID) : Future[RegistrationResponse] = {
-    println(s"Calling  PUT $apiBaseUri/account/$accountId/application/$applicationId")
-    registerPipeline { Put( s"$apiBaseUri/account/$accountId/application/$applicationId") }
+  override def register(request: RegistrationRequest): Future[RegistrationResponse] = {
+    val url=s"$apiBaseUri/account"
+    println(s"DataManagerRestClient.register: Calling  POST $url $request")
+    registerPipeline {
+      Post(url, request)
+    }
   }
 
-  override def validateRegistration(validation: RegistrationValidation): Future[RegistrationValidationResponse] = validatePipeline { Post( s"$apiBaseUri/account/application/validation", validation) }
+  override def addApplication(accountId: UUID, applicationId: ApplicationID) : Future[RegistrationResponse] = {
+    val url=s"$apiBaseUri/account/$accountId/application/$applicationId"
+    println(s"DataManagerRestClient.addApplication: Calling  PUT $url")
+    registerPipeline { Put( url ) }
+  }
 
-  override def getUserProfile(accountId: UUID) : Future[Option[UserProfile]] = retrieveUserProfilePipeline { Get(s"$apiBaseUri/account/$accountId")}
+  override def validateRegistration(validation: RegistrationValidation): Future[RegistrationValidationResponse] = {
+    val url=s"$apiBaseUri/account/application/validation"
+    println(s"DataManagerRestClient.validateRegistration: Calling  POST $url $validation")
+    validatePipeline { Post( url, validation) }
+  }
+
+  override def getUserProfile(accountId: UUID) : Future[Option[UserProfile]] = {
+    val url=s"$apiBaseUri/account/$accountId"
+    println(s"DataManagerRestClient.getUserProfile: Calling  GET $url")
+    retrieveUserProfilePipeline {
+      Get(url)
+    }
+  }
+
 
   override def findUserByMsisdnOrEmail(msisdnOp: Option[String], emailOp: Option[String]): Future[Option[UserProfile]] = {
     val findBy = msisdnOp map { msisdn => s"msisdn=$msisdn" } orElse ( emailOp map { email => s"email=$email" } )
 
     findBy match {
-      case Some(query) => retrieveUserProfilePipeline { Get(apiBaseUri + s"/account?$query") }
+      case Some(query) => {
+        val url=s"$apiBaseUri/account?$query"
+        println(s"DataManagerRestClient.findUserByMsisdnOrEmail: Calling  GET $url")
+        retrieveUserProfilePipeline {
+          Get(url)
+        }
+      }
       case None => Future.failed(new IllegalArgumentException("Invalid identification, need to provide at least one of msisdn and email"))
     }
   }
 
   def findUserForApplication(applicationId: UUID): Future[Option[UserProfile]] = {
-    retrieveUserProfilePipeline { Get(apiBaseUri + s"/account?applicationId=$applicationId") }
+    val url=s"$apiBaseUri/account?applicationId=$applicationId"
+    println(s"DataManagerRestClient.findUserForApplication: Calling  GET $url")
+    retrieveUserProfilePipeline { Get(url) }
   }
 
   def updateUserProfile(userProfile: UserProfile): Future[Unit] = {
-    updateProfilePipeline { Put(apiBaseUri + s"/account/${userProfile.info.userId}", userProfile) }
+    val url=s"$apiBaseUri/account/${userProfile.info.userId}"
+    println(s"DataManagerRestClient.updateUserProfile: Calling  PUT $url $userProfile")
+    updateProfilePipeline { Put(url, userProfile) }
   }
 
   def unitIfSuccess(response: HttpResponse): Unit =

@@ -2,6 +2,7 @@ package controllers
 
 import api.{DataManagerRestClient, DataManagerApiClient}
 import parallelai.wallet.config.AppConfigInjection
+import play.api.Logger
 import play.api.mvc.Action._
 import play.api.mvc.Results._
 import play.mvc.Controller
@@ -20,12 +21,14 @@ object MainController extends Controller with AppConfigInjection {
 
     isKnownUser(request, dataManagerApiClient) flatMap { knownUser =>
       if(knownUser) {
+        Logger.debug( "MainController.index: Known user found")
         dataManagerApiClient.getUserProfile(readUUIDCookie(COOKIE_UUID).get) map { _ match {
             case Some(userProfile) => Ok(views.html.registered_index.render ( s"${userProfile.info.fullName}", userProfile.totalPoints) )
             case None => InternalServerError
           }
         }
       } else {
+        Logger.debug( "MainController.index: Unknown user found")
         successful( Ok(views.html.index.render()) )
       }
     }

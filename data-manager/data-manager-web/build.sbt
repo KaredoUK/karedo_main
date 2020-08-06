@@ -10,7 +10,10 @@ libraryDependencies ++= Seq(
   "org.webjars" % "bootstrap" % "2.3.1",
   Common.sprayClient,
   Common.subcutExt,
-  Common.walletCommon
+  Common.walletCommon,
+  "parallelai.wallet" %% "model" % "1.0" changing(),
+  Common.scalaAsync,
+  "org.mongodb" %% "casbah" % "2.7.4-SNAPSHOT",
 )
 
 

@@ -5,7 +5,7 @@ import spray.http._
 import spray.routing._
 import directives.{CompletionMagnet, RouteDirectives}
 import spray.util.{SprayActorLogging, LoggingContext}
-import util.control.NonFatal
+import scala.util.control.NonFatal
 import spray.httpx.marshalling.Marshaller
 import spray.http.HttpHeaders.RawHeader
 import akka.actor.{ActorLogging, Actor}

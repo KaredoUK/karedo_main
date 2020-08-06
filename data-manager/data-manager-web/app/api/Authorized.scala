@@ -33,7 +33,7 @@ object authorization {
     val userId = readUUIDCookie(COOKIE_UUID)
     val applicationId = readUUIDCookie(COOKIE_APP_ID)
 
-    Logger.debug( s"Userid ${userId} applicationID ${applicationId}")
+    Logger.debug( s"IsKnownUser: Userid ${userId} applicationID ${applicationId}")
 
     (userId, applicationId) match {
       case (Some(userId), Some(applicationId)) =>

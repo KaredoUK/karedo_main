@@ -20,6 +20,9 @@ POST    /editProfile                controllers.ProfileController.updateProfile
 
 # Edit Profile
 
+# Testing
+GET		/test						controllers.TestController.index
+
 
 # Infrastructure, I18N and JS
 GET     /message                    controllers.MessageController.getMessage()

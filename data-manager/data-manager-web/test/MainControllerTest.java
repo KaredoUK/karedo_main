@@ -8,7 +8,7 @@ import org.junit.Test;
  *
  */
 public class MainControllerTest {
-  @Test
+  @Test 
     public void indexTemplateShouldContainTheStringThatIsPassedToIt() {
 //        running(fakeApplication(), new Runnable() {
 //            public void run() {

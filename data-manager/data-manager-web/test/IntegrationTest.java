@@ -12,7 +12,7 @@ public class IntegrationTest {
     /**
      * This integration test uses Selenium to test the app with a browser
      */   
-    @Test
+    @Test 
     public void test() {
         running(testServer(3333, fakeApplication(inMemoryDatabase())), HTMLUNIT, new Callback<TestBrowser>() {
             public void invoke(TestBrowser browser) {
