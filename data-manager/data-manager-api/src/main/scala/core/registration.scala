@@ -160,8 +160,6 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
 
       userAccountDAO.insertNew(account, firstApplication)
 
-      (account.id, activationCode)
-
       successful( activateApplication(request.applicationId, account.id, request, activationCode) )
     }
 
@@ -240,8 +238,8 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
         log.warning("Internal error: {}", t)
         Left(InternalError(t))
     } foreach {
-      response : Either[RegistrationError, T] =>
-        replyTo ! response
+      responseContent : Either[RegistrationError, T] =>
+        replyTo ! responseContent
     }
   }
 

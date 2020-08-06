@@ -14,8 +14,6 @@ import spray.httpx.SprayJsonSupport
  */
 trait DefaultJsonFormats extends DefaultJsonProtocol with SprayJsonSupport with MetaMarshallers {
 
-  import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
-
   /**
    * Computes ``RootJsonFormat`` for type ``A`` if ``A`` is object
    */
