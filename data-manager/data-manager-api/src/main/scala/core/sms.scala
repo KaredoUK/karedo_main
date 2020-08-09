@@ -52,6 +52,9 @@ class SMSActor(implicit val bindingModule : BindingModule) extends Actor with Ac
   }
 
   def sendSMS(to: String, body: String): Future[Unit] = {
+    if(user==""){
+      Future(println(s"Dummy sending sms to: $to, body: $body"))
+    } else
     pipeline {
       Get(
         Uri(serverEndpoint).copy(

@@ -13,12 +13,14 @@ libraryDependencies ++= Seq(
   Common.walletCommon,
   "parallelai.wallet" %% "model" % "1.0" changing(),
   Common.scalaAsync,
-  "org.mongodb" %% "casbah" % "2.7.4-SNAPSHOT",
+  "org.mongodb" %% "casbah" % "2.7.3"
 )
 
 
 resolvers ++= Common.sprayResolvers
 
 resolvers += Common.conjarResolver
+
+//resolvers ++= "casbah" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 play.Project.playScalaSettings
