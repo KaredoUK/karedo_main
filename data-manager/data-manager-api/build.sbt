@@ -35,4 +35,6 @@ scalacOptions ++= Seq(
   "-encoding", "UTF-8"
 )
 
+// test
+
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
