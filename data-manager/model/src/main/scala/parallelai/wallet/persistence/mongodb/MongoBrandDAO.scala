@@ -3,17 +3,18 @@ package parallelai.wallet.persistence.mongodb
 import java.util.UUID
 
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
-import com.mongodb.casbah.Imports._
-import com.novus.salat._
-import com.novus.salat.dao.SalatDAO
+
+
 import parallelai.wallet.entity.{AdvertisementMetadata, UserPersonalInfo, AccountSettings, Brand}
 import parallelai.wallet.persistence.BrandDAO
 
-import com.mongodb.casbah.Imports._
-import com.novus.salat.global._
-import com.novus.salat.dao._
 
+
+import com.novus.salat._
+import com.novus.salat.dao.SalatDAO
+import com.novus.salat.global._
 import com.mongodb.casbah.Imports._
+
 
 
 import scala.concurrent.Future
@@ -26,9 +27,9 @@ class MongoBrandDAO (implicit val bindingModule: BindingModule) extends BrandDAO
 
   val dao = new SalatDAO[Brand, UUID](collection = db("Brand")) {}
 
-  def byId(brandId: UUID) = MongoDBObject("_id" -> brandId)
+  def byId(id: UUID) = MongoDBObject("_id" -> id)
 
-  override def getById(brandId: UUID): Future[Option[Brand]] = successful { dao.findOneById(brandId)}
+  override def getById(id: UUID): Future[Option[Brand]] = successful { dao.findOneById(id)}
 
   override def update(brand: Brand): Future[Unit] = successful {
 
@@ -37,8 +38,6 @@ class MongoBrandDAO (implicit val bindingModule: BindingModule) extends BrandDAO
       byId(brand.id),
       $set(
        "name" -> brand.name,
-
-
         "iconPath" -> brand.iconPath,
         "ads" -> brand.ads.map { ad => grater[AdvertisementMetadata].asDBObject(ad)}
 
@@ -48,14 +47,14 @@ class MongoBrandDAO (implicit val bindingModule: BindingModule) extends BrandDAO
 
 
   override def insertNew(brand: Brand): Future[Brand] = successful {
-    val result = brand.copy(id = UUID.randomUUID() )
-    dao.insert( result )
-    result
+
+    dao.insert( brand )
+    brand
   }
 
-  override def delete(brandId: UUID): Future[Unit] = {
+  override def delete(id: UUID): Future[Unit] = {
     successful {
-      dao.removeById(brandId, WriteConcern.Safe)
+      dao.removeById(id, WriteConcern.Safe)
     }
   }
 
