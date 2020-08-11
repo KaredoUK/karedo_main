@@ -13,6 +13,8 @@ object EditAccountActor {
 
   case class GetAccount(accountId: UserID)
 
+  case class GetAccountPoints(accountId: UserID)
+
   case class FindAccount(applicationId: Option[UserID], msisdn: Option[String], email: Option[String]) extends WithUserContacts
 
   case class UpdateAccount(userAccount: UserProfile)
@@ -37,6 +39,12 @@ class EditAccountActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : C
       log.info("Trying to get account with account ID {}, sender is {}", accountId, sender)
       replyToSender {
         userAccountDAO.getById(accountId) map { _ map { userAccountToUserProfile } }
+      }
+
+    case GetAccountPoints(accountId) =>
+      log.info("Trying to get account with account ID {}, sender is {}", accountId, sender)
+      replyToSender {
+        userAccountDAO.getById(accountId) map { _ map { accountInfo => UserPoints(accountInfo.id, accountInfo.totalPoints) } }
       }
 
     case FindAccount(applicationIdOp, msisdnOp, emailOp) =>
