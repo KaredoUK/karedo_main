@@ -12,7 +12,7 @@ import com.parallelai.wallet.datamanager.data._
 import ApiDataJsonProtocol._
 import RegistrationActor.AddApplication
 import parallelai.wallet.entity.UserAccount
-import core.EditAccountActor.{UpdateAccount, FindAccount, GetAccount}
+import core.EditAccountActor.{GetAccountPoints, UpdateAccount, FindAccount, GetAccount}
 import java.util.UUID
 
 class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(implicit executionContext: ExecutionContext)
@@ -79,6 +79,15 @@ class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(im
       post {
         handleWith {
           registrationValidation: RegistrationValidation =>  (registrationActor ? registrationValidation).mapTo[Either[RegistrationError, RegistrationValidationResponse]]
+        }
+      }
+    } ~
+    path( "account" / JavaUUID / "points" ) { accountId: UserID =>
+      rejectEmptyResponse {
+        get {
+          complete {
+            (editAccountActor ? GetAccountPoints(accountId)).mapTo[Option[UserPoints]]
+          }
         }
       }
     }

@@ -39,4 +39,6 @@ object ApiDataJsonProtocol extends DefaultJsonProtocol {
   implicit val userInfoJson = jsonFormat8(UserInfo)
   implicit val userProfileJson = jsonFormat3(UserProfile)
 
+  implicit val userPointsJson = jsonFormat2(UserPoints)
+
 }

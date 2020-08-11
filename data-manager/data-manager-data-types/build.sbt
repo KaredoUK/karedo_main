@@ -2,9 +2,7 @@ name := """data-manager-data-types"""
 
 Common.settings
 
-version := "1.0"
-
-resolvers ++= Common.sprayResolvers 
+resolvers ++= Common.sprayResolvers
 
 libraryDependencies ++= Seq(
   Common.sprayJson
