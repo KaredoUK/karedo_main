@@ -36,10 +36,13 @@ import scala.concurrent.duration._
   val route =
     path("brand") {
       post {
+
         handleWith {
           brandData: BrandData =>
-            //(brandActor ? brandData).mapTo[Option[UUIDData]]
-            UUIDData(UUID.randomUUID())
+
+              (brandActor ? brandData).mapTo[UUIDData]
+              //UUIDData(UUID.randomUUID())
+
         }
       }
     }

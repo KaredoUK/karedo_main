@@ -9,7 +9,7 @@ resolvers ++= Common.sprayResolvers
 libraryDependencies ++= Seq(
   "com.typesafe.akka"  %% "akka-actor"       % Common.akkaVersion,
   "com.typesafe.akka"  %% "akka-slf4j"       % Common.akkaVersion,
-  "ch.qos.logback"      % "logback-classic"  % "1.0.13",
+  "ch.qos.logback"      % "logback-classic"  % "2.2.3",
   "io.spray"            % "spray-can"        % Common.sprayVersion,
   "io.spray"            % "spray-routing"    % Common.sprayVersion,
   "commons-lang"        % "commons-lang"     % "2.3",
@@ -22,6 +22,8 @@ libraryDependencies ++= Seq(
   "com.novocode"        % "junit-interface"  % "0.7"                  % "test->default",
   "parallelai.wallet" %% "model" % "1.0" changing(),
   "com.github.tomakehurst" % "wiremock" % "1.38" % "test",
+
+
   Common.walletCommon
 )
 

@@ -51,7 +51,7 @@ class BrandActor(brandDAO : BrandDAO)(implicit val bindingModule : BindingModule
 
   def createBrand(request: BrandData ): UUIDData =
      {
-      log.debug("Creating new brand for request {}", request)
+      log.info("Creating new brand for request {}", request)
       val newbrand = Brand( name=request.name, iconPath=request.iconPath,ads=List[AdvertisementMetadata]()  )
       brandDAO.insertNew(newbrand)
       UUIDData(newbrand.id)
