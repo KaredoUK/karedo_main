@@ -49,12 +49,24 @@ class BrandActor(brandDAO : BrandDAO)(implicit val bindingModule : BindingModule
     case request: BrandData =>  sender ! createBrand(request)
   }
 
-  def createBrand(request: BrandData ): UUIDData =
+  def createBrand(request: BrandData ): Either[BrandError,BrandResponse] =
      {
-      log.info("Creating new brand for request {}", request)
-      val newbrand = Brand( name=request.name, iconPath=request.iconPath,ads=List[AdvertisementMetadata]()  )
-      brandDAO.insertNew(newbrand)
-      UUIDData(newbrand.id)
+       validateBrand(request) match {
+         case Some(error) => Left(BrandInvalidRequest(error))
+         case _ =>
+           log.info("Creating new brand for request {}", request)
+           val newbrand = Brand(name = request.name, iconPath = request.iconPath, ads = List[AdvertisementMetadata]())
+           brandDAO.insertNew(newbrand)
+           Right(BrandResponse(newbrand.id))
+       }
     }
 
+  def validateBrand(brand: BrandData):Option[String] = {
+    brand match {
+      case BrandData("",_) => Some("Empty name not accepted")
+      case BrandData(_,"") => Some("IconPath empty not accepted")
+      case _ => None
+    }
+
+  }
 }

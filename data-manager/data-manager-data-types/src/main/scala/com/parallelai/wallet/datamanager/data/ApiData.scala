@@ -31,4 +31,4 @@ case class UserContacts(email: Option[String], msisdn: Option[String]) extends W
 
 // BRAND
 case class BrandData(name: String, iconPath: String )
-case class UUIDData(id: UUID)
+case class BrandResponse(id: UUID)

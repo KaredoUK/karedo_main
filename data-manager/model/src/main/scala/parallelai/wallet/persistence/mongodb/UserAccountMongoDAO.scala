@@ -1,5 +1,6 @@
 package parallelai.wallet.persistence.mongodb
 
+
 import parallelai.wallet.persistence.{ClientApplicationDAO, UserAccountDAO}
 import scala.concurrent.Future
 import scala.concurrent.Future._
@@ -32,6 +33,7 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
   implicit def mongoUserAccountOptionToUserAccountOption(mongoUserAccount: Option[MongoUserAccount]) : Option[UserAccount] = mongoUserAccount map { _.toUserAccount }
 
   val dao = new SalatDAO[MongoUserAccount, UUID](collection = db("UserAccount")) {}
+
 
   override def getById(userId: UUID): Future[Option[UserAccount]] = successful { dao.findOneById(userId) }
 
@@ -172,6 +174,26 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
     successful {
       dao.removeById(userId, WriteConcern.Safe)
     }
+
+  override def addBrand(userId: UUID, brandId: UUID): Future[Unit] =
+  successful {
+    dao.update(byId(userId),
+      $push("subscribedBrands" -> brandId)
+    )
+  }
+
+  override def deleteBrand(userId: UUID, brandId: UUID): Future[Unit] =
+  successful {
+    dao.update(
+      byId(userId),
+      $pull("subscribedBrands.0" -> brandId)
+    )
+  }
+
+  override def listUserSubscribedBrands(userId: UUID): Future[List[SubscribedBrands]] =
+  successful {
+    dao.projections[SubscribedBrands](byId(userId),"subscribedBrands")
+  }
 }
 
 class ClientApplicationMongoDAO(implicit val bindingModule: BindingModule)  extends ClientApplicationDAO with MongoConnection with Injectable {

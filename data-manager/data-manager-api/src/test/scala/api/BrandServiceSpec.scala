@@ -2,7 +2,7 @@ package api
 
 
 import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
-import com.parallelai.wallet.datamanager.data.{BrandData, UUIDData}
+import com.parallelai.wallet.datamanager.data.{BrandData, BrandResponse}
 
 import org.specs2.mutable.Specification
 import org.specs2.time.NoTimeConversions
@@ -26,7 +26,7 @@ class BrandServiceSpec extends Specification with NoTimeConversions {
 
   // execution context for futures
   val pipeline = {
-    sendReceive ~> unmarshal[UUIDData]
+    sendReceive ~> unmarshal[BrandResponse]
   }
   val url = "http://localhost:8080/"
 

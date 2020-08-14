@@ -8,6 +8,8 @@ object MongoUserApplicationInfo {
   def fromClientApplication(clientApp: ClientApplication): MongoUserApplicationInfo = MongoUserApplicationInfo(clientApp.id, clientApp.activationCode, clientApp.active)
 }
 
+case class SubscribedBrands(id:UUID)
+
 case class MongoUserApplicationInfo(@Key("_id")id: UUID, activationCode: String, active: Boolean = false) {
   def toClientApplication(accountId: UUID) = ClientApplication(id, accountId, activationCode, active)
 }

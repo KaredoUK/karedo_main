@@ -22,9 +22,7 @@ libraryDependencies ++= Seq(
   "com.novocode"        % "junit-interface"  % "0.7"                  % "test->default",
   "parallelai.wallet" %% "model" % "1.0" changing(),
   "com.github.tomakehurst" % "wiremock" % "1.38" % "test",
-
-
-  Common.walletCommon
+ Common.walletCommon
 )
 
 scalacOptions ++= Seq(

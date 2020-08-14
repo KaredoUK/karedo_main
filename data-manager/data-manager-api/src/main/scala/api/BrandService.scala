@@ -14,6 +14,7 @@ import spray.routing.Directives
 
 import scala.concurrent.ExecutionContext
 
+
 class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionContext)
   extends Directives with DefaultJsonFormats {
 
@@ -23,7 +24,7 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
 import scala.concurrent.duration._
   implicit val timeout = Timeout(20.seconds)
 
-  implicit object EitherErrorSelector extends ErrorSelector[RegistrationError] {
+  implicit object EitherErrorSelector extends ErrorSelector[BrandError] {
     def apply(error: RegistrationError): StatusCode = error match {
       case InvalidRequest(reason) => BadRequest
       case ApplicationAlreadyRegistered => BadRequest
@@ -40,7 +41,7 @@ import scala.concurrent.duration._
         handleWith {
           brandData: BrandData =>
 
-              (brandActor ? brandData).mapTo[UUIDData]
+              (brandActor ? brandData).mapTo[BrandResponse]
               //UUIDData(UUID.randomUUID())
 
         }

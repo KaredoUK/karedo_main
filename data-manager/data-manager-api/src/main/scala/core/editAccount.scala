@@ -1,5 +1,7 @@
 package core
 
+import java.util.UUID
+
 import akka.actor.{Props, ActorLogging, Actor}
 import akka.actor.Actor.Receive
 import parallelai.wallet.persistence.{ClientApplicationDAO, UserAccountDAO}
@@ -18,6 +20,8 @@ object EditAccountActor {
   case class FindAccount(applicationId: Option[UserID], msisdn: Option[String], email: Option[String]) extends WithUserContacts
 
   case class UpdateAccount(userAccount: UserProfile)
+
+  case class AddBrand(accountId:UserID, brandId:UUID)
 
 }
 
@@ -57,6 +61,8 @@ class EditAccountActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : C
       log.info("Trying to update account with id {}", userProfile.info.userId)
       userAccountDAO.update(userProfileToUserAccount(userProfile))
 
+    case AddBrand(accountId, brandId) =>
+      userAccountDAO.addBrand(accountId,brandId)
   }
 
   def userAccountToUserProfile(userAccount: UserAccount): UserProfile =

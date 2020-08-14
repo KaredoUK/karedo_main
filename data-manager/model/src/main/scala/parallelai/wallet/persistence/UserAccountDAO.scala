@@ -2,9 +2,11 @@ package parallelai.wallet.persistence
 
 import java.util.UUID
 import parallelai.wallet.entity.{AccountSettings, UserPersonalInfo, ClientApplication, UserAccount}
+import parallelai.wallet.persistence.mongodb.SubscribedBrands
 import scala.concurrent.Future
 
 trait UserAccountDAO {
+
 
   def getById(userId: UUID) : Future[Option[UserAccount]]
 
@@ -31,6 +33,13 @@ trait UserAccountDAO {
   def findByAnyOf(applicationId: Option[UUID], msisdn: Option[String], email: Option[String]) : Future[Option[UserAccount]]
 
   def delete(userId: UUID) : Future[Unit]
+
+  def addBrand(userId: UUID, brandId: UUID): Future[Unit]
+
+  def deleteBrand(userId: UUID, brandId: UUID): Future[Unit]
+
+  def listUserSubscribedBrands(userId: UUID): Future[List[SubscribedBrands]]
+
 }
 
 
