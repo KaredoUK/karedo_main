@@ -5,16 +5,16 @@ object Common {
 
   val settings: Seq[Setting[_]] = Seq (
     version := "1.0",
-    scalaVersion := "2.10.2",
+    scalaVersion := "2.11.2",
     organization := "parallelai.wallet"
   )
 
-  val akkaVersion = "2.2.3"
+  val akkaVersion = "2.3.2"
 
   val sl4jVersion = "1.7.5"
 
   val sprayVersion = "1.3.1"
-  val sprayJsonVersion = "1.2.3"
+  val sprayJsonVersion = "1.3.0"
 
   val sprayResolvers = Seq (
     "spray repo" at "http://repo.spray.io",
@@ -27,8 +27,8 @@ object Common {
 
   val specs2 = "org.specs2" %% "specs2" % "2.3.13"
   val sprayJson = "io.spray" %% "spray-json" % sprayJsonVersion
-  val sprayClient = "io.spray" % "spray-client" % sprayVersion
-  val subcutExt = "com.pragmasoft" % "subcut_ext" % "2.0"
+  val sprayClient = "io.spray" %% "spray-client" % sprayVersion
+  val subcutExt = "com.pragmasoft" %% "subcut_ext" % "2.0"
   val scalaAsync = "org.scala-lang.modules" %% "scala-async" % "0.9.2"
   val walletCommon = "parallelai.wallet" %% "common" % "1.0" changing()
 }
