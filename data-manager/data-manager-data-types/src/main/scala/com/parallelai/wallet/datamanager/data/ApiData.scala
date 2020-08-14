@@ -28,3 +28,7 @@ case class UserProfile(info: UserInfo, settings: UserSettings, totalPoints: Long
 case class UserPoints(userId: UserID, totalPoints: Long)
 
 case class UserContacts(email: Option[String], msisdn: Option[String]) extends WithUserContacts
+
+// BRAND
+case class BrandData(name: String, iconPath: String )
+case class UUIDData(id: UUID)

@@ -1,13 +1,18 @@
 package core
 
+import java.util.UUID
+
 import akka.actor.{ActorDSL, Props, ActorSystem}
 import ActorDSL._
 import akka.routing.RoundRobinRouter
-import parallelai.wallet.persistence.{ClientApplicationDAO, UserAccountDAO}
+import parallelai.wallet.entity.Brand
+import parallelai.wallet.persistence.{BrandDAO, ClientApplicationDAO, UserAccountDAO}
 import parallelai.wallet.config.AppConfigPropertySource
 import com.typesafe.config.ConfigFactory
 import com.escalatesoft.subcut.inject.NewBindingModule._
-import parallelai.wallet.persistence.mongodb.{ClientApplicationMongoDAO, UserAccountMongoDAO}
+import parallelai.wallet.persistence.mongodb.{MongoBrandDAO, ClientApplicationMongoDAO, UserAccountMongoDAO}
+
+import scala.concurrent.Future
 
 /**
  * Core is type containing the ``system: ActorSystem`` member. This enables us to use it in our
@@ -50,6 +55,8 @@ trait CoreActors {
 
   val userAccountDAO : UserAccountDAO = new UserAccountMongoDAO()
 
+  val brandDAO : BrandDAO = new MongoBrandDAO()
+
   val emailActor = system.actorOf(EmailActor.props.withRouter( RoundRobinRouter(nrOfInstances = 2) ) )
   val smsActor = system.actorOf(SMSActor.props .withRouter( RoundRobinRouter(nrOfInstances = 2) ) )
 
@@ -59,6 +66,10 @@ trait CoreActors {
   // This should be an actor pool at least if we don't want to use a one actor per request strategy
   val registration = system.actorOf(
     RegistrationActor.props(userAccountDAO, clientApplicationDAO, messenger)
+      .withRouter( RoundRobinRouter(nrOfInstances = 3) )
+  )
+  val brand = system.actorOf(
+    BrandActor.props(brandDAO)
       .withRouter( RoundRobinRouter(nrOfInstances = 3) )
   )
 

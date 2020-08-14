@@ -3,7 +3,9 @@ package api
 import spray.http.StatusCodes._
 import spray.http._
 import spray.routing._
-import directives.{CompletionMagnet, RouteDirectives}
+import spray.routing.directives.RouteDirectives
+
+
 import spray.util.{SprayActorLogging, LoggingContext}
 import scala.util.control.NonFatal
 import spray.httpx.marshalling.Marshaller
@@ -93,11 +95,11 @@ class RoutedHttpService(route: Route) extends Actor with HttpService with SprayA
  */
 trait CrossLocationRouteDirectives extends RouteDirectives {
 
-  implicit def fromObjectCross[T : Marshaller](origin: String)(obj: T) =
-    new CompletionMagnet {
-      def route: StandardRoute = new CompletionRoute(OK,
-        RawHeader("Access-Control-Allow-Origin", origin) :: Nil, obj)
-    }
+//  implicit def fromObjectCross[T : Marshaller](origin: String)(obj: T) =
+  //    new CompletionMagnet {
+  //      def route: StandardRoute = new CompletionRoute(OK,
+  //        RawHeader("Access-Control-Allow-Origin", origin) :: Nil, obj)
+  //    }
 
   private class CompletionRoute[T : Marshaller](status: StatusCode, headers: List[HttpHeader], obj: T)
     extends StandardRoute {
