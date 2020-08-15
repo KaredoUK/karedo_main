@@ -26,11 +26,11 @@ class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(im
 
   implicit object EitherErrorSelector extends ErrorSelector[RegistrationError] {
     def apply(error: RegistrationError): StatusCode = error match {
-      case InvalidRequest(reason) => BadRequest
+      case InvalidRegistrationRequest(reason) => BadRequest
       case ApplicationAlreadyRegistered => BadRequest
       case UserAlreadyRegistered => BadRequest
       case InvalidValidationCode => Unauthorized
-      case InternalError(_) => InternalServerError
+      case InternalRegistrationError(_) => InternalServerError
     }
   }
 

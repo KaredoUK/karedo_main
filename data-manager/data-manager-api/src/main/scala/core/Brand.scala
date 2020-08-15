@@ -3,6 +3,7 @@ package core
 import java.net.URI
 
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
+import core.BrandActor.{InvalidBrandRequest, BrandError}
 import core.MessengerActor.SendMessage
 import parallelai.wallet.persistence.{BrandDAO, ClientApplicationDAO, UserAccountDAO}
 import akka.actor.{Props, ActorLogging, ActorRef, Actor}
@@ -39,8 +40,12 @@ import scala.concurrent.Future.successful
  */
 object BrandActor {
 
-  def props( brandDAO : BrandDAO)(implicit bindingModule : BindingModule) : Props =
-    Props( classOf[BrandActor], brandDAO, bindingModule)
+  def props( brandDAO : BrandDAO)(implicit bindingModule : BindingModule) : Props = Props( new BrandActor(brandDAO) )
+
+  sealed trait BrandError
+  case class InvalidBrandRequest(description: String) extends BrandError
+  case class InternalBrandError(throwable: Throwable) extends BrandError
+
 }
 
 class BrandActor(brandDAO : BrandDAO)(implicit val bindingModule : BindingModule) extends Actor with ActorLogging with Injectable {
@@ -49,10 +54,11 @@ class BrandActor(brandDAO : BrandDAO)(implicit val bindingModule : BindingModule
     case request: BrandData =>  sender ! createBrand(request)
   }
 
+
   def createBrand(request: BrandData ): Either[BrandError,BrandResponse] =
      {
        validateBrand(request) match {
-         case Some(error) => Left(BrandInvalidRequest(error))
+         case Some(error) => Left(InvalidBrandRequest(error))
          case _ =>
            log.info("Creating new brand for request {}", request)
            val newbrand = Brand(name = request.name, iconPath = request.iconPath, ads = List[AdvertisementMetadata]())

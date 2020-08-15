@@ -44,25 +44,25 @@ import scala.concurrent.Future.successful
 object RegistrationActor {
 
   def props( userAccountDAO : UserAccountDAO, clientApplicationDAO : ClientApplicationDAO, messengerActor: ActorRef)(implicit bindingModule : BindingModule) : Props =
-    Props( classOf[RegistrationActor], userAccountDAO, clientApplicationDAO, messengerActor, bindingModule)
+    Props( new RegistrationActor(userAccountDAO, clientApplicationDAO, messengerActor) )
 
   sealed trait RegistrationError
   case object ApplicationAlreadyRegistered extends RegistrationError
   case object UserAlreadyRegistered extends RegistrationError
-  case class InvalidRequest(reason: String) extends RegistrationError
+  case class InvalidRegistrationRequest(reason: String) extends RegistrationError
   case object InvalidValidationCode extends RegistrationError
-  case class InternalError(throwable: Throwable) extends RegistrationError
+  case class InternalRegistrationError(throwable: Throwable) extends RegistrationError
 
   implicit object RegistrationErrorJsonFormat extends RootJsonFormat[RegistrationError] {
     def write(error: RegistrationError) =  error match {
       case ApplicationAlreadyRegistered => JsString("ApplicationAlreadyRegistered")
       case UserAlreadyRegistered => JsString("UserAlreadyRegistered")
       case InvalidValidationCode => JsString("InvalidValidationCode")
-      case InvalidRequest(reason) => JsObject(
+      case InvalidRegistrationRequest(reason) => JsObject(
         "type" -> JsString("InvalidRequest"),
         "data" -> JsObject { "reason" -> JsString(reason)  }
       )
-      case InternalError(throwable) => JsObject(
+      case InternalRegistrationError(throwable) => JsObject(
         "type" -> JsString("InternalError"),
         "data" -> JsObject (
           "errorClass" -> JsString(throwable.getClass.getName),
@@ -78,25 +78,25 @@ object RegistrationActor {
             case Some(JsString("InvalidRequest")) =>
               val data = attributes.get("data") map { _.asInstanceOf[JsObject] }
               data match {
-                case None => InvalidRequest("Unknown reason")
+                case None => InvalidRegistrationRequest("Unknown reason")
                 case Some(errorData) =>
                   val reason = errorData.fields.get("reason") map { _.toString } getOrElse ("Unknown")
-                  InvalidRequest(reason)
+                  InvalidRegistrationRequest(reason)
               }
             case Some(JsString("InternalError")) =>
               val data = attributes.get("data") map { _.asInstanceOf[JsObject] }
               data match {
-                case None => InternalError (new Exception (s"Exception of class Unknown, message: Unknown") )
+                case None => InternalRegistrationError (new Exception (s"Exception of class Unknown, message: Unknown") )
                 case Some(errorData) =>
                   val errorClass = errorData.fields.get("errorClass") map { _.toString } getOrElse ("Unknown")
                   val errorMessage = errorData.fields.get("errorMessage") map { _.toString } getOrElse ("Unknown")
-                  InternalError (new Exception (s"Exception of class $errorClass, message: '$errorMessage'") )
+                  InternalRegistrationError (new Exception (s"Exception of class $errorClass, message: '$errorMessage'") )
               }
-            case _ => InternalError(new Exception(s"Unmapped error '$value'"))
+            case _ => InternalRegistrationError(new Exception(s"Unmapped error '$value'"))
           }
         }
-        case JsString(errorName) => InternalError(new Exception(s"Unmapped error '$errorName'"))
-        case _ => InternalError(new Exception(s"Unmapped error '$value'"))
+        case JsString(errorName) => InternalRegistrationError(new Exception(s"Unmapped error '$errorName'"))
+        case _ => InternalRegistrationError(new Exception(s"Unmapped error '$value'"))
       }
 
     }
@@ -169,7 +169,7 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
 
       userAccountDAO.getById(request.accountId) map {
         _ match {
-          case None => Left(InvalidRequest(s"User with ID ${registrationRequest.accountId} doesn't exist"))
+          case None => Left(InvalidRegistrationRequest(s"User with ID ${registrationRequest.accountId} doesn't exist"))
 
           case Some(userAccount) =>
             val activationCode = newActivationCode
@@ -192,7 +192,7 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
     }
 
     clientAppOption match {
-      case None => Left(InvalidRequest(s"Unable to find client application with ID '${validation.applicationId}'"))
+      case None => Left(InvalidRegistrationRequest(s"Unable to find client application with ID '${validation.applicationId}'"))
 
       case Some(clientApplication) =>
         // I don't care if the user validates twice. I just check the validation code
@@ -205,7 +205,7 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
 
             Right(RegistrationValidationResponse(validation.applicationId, user.id))
           } getOrElse {
-            Left(InternalError(new IllegalStateException(s"Unable to find user for valid application ID '${validation.applicationId}'")))
+            Left(InternalRegistrationError(new IllegalStateException(s"Unable to find user for valid application ID '${validation.applicationId}'")))
           }
         } else {
           Left(InvalidValidationCode)
@@ -236,7 +236,7 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
     response recover {
       case t =>
         log.warning("Internal error: {}", t)
-        Left(InternalError(t))
+        Left(InternalRegistrationError(t))
     } foreach {
       responseContent : Either[RegistrationError, T] =>
         replyTo ! responseContent
@@ -247,7 +247,7 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
     clientApplicationDAO.getById(withApplicationId.applicationId) map { _  map { _ => ApplicationAlreadyRegistered } }
 
   def validUserIdentification(userIdentification : WithUserContacts) : Future[Option[RegistrationError]] =
-    successful { if(userIdentification.isValid) None else Some(InvalidRequest("Invalid user identification")) }
+    successful { if(userIdentification.isValid) None else Some(InvalidRegistrationRequest("Invalid user identification")) }
 
   // This validation has side effects!!!
   def noActiveAccountForMsisdnOrEmail(userIdentification : WithUserContacts) : Future[Option[RegistrationError]] =

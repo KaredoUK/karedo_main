@@ -9,7 +9,6 @@ import com.parallelai.wallet.datamanager.data.RegistrationRequest
 import ApiDataJsonProtocol._
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
 import spray.http._
-import org.apache.http.HttpStatus
 import spray.json._
 import spray.httpx.{UnsuccessfulResponseException, SprayJsonSupport}
 import spray.client.pipelining._
@@ -88,7 +87,7 @@ class DataManagerRestClient(implicit val bindingModule: BindingModule) extends D
     findBy match {
       case Some(query) => {
         val url=s"$apiBaseUri/account?$query"
-        println(s"DataManagerRestClient.findUserByMsisdnOrEmail: Calling  GET $url")
+        println(s"DataManagernRestClient.findUserByMsisdnOrEmail: Calling  GET $url")
         retrieveUserProfilePipeline {
           Get(url)
         }

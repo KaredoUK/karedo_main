@@ -216,7 +216,7 @@ trait RegistrationController extends Controller {
     )
   }
 
-  def redirectToForFailedRequestAndFailForOtherCases(targetEndPoint: Call)(implicit request : Request[_]) : PartialFunction[Throwable, Future[SimpleResult]] = {
+  def redirectToForFailedRequestAndFailForOtherCases(targetEndPoint: Call)(implicit request : Request[_]) : PartialFunction[Throwable, Future[Result]] = {
     case unsuccessfulResponse : UnsuccessfulResponseException =>
       Future.successful {
         unsuccessfulResponse.responseStatus match {

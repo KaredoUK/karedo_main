@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory
 import parallelai.wallet.config.ConfigConversions._
 import play.api.Logger
 import play.api.mvc.{Filter, RequestHeader, Results, SimpleResult}
+import play.api.mvc.Result
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -71,7 +72,7 @@ class AuthorizedFilter(implicit val bindingModule: BindingModule) extends Filter
   val accessiblePagesRegexpList = injectProperty[List[String]]("auth.accessible.pages") map { regex => new Regex(s"${regex}$$") }
   val dataManagerApiClient : DataManagerApiClient = new DataManagerRestClient
 
-  override def apply(next: RequestHeader => Future[SimpleResult])(request: RequestHeader): Future[SimpleResult] = {
+  override def apply(next: RequestHeader => Future[Result])(request: RequestHeader): Future[Result] = {
 
     implicit val header = request
 
