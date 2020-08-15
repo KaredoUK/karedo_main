@@ -11,15 +11,15 @@ import scala.concurrent.Future
  */
 trait BrandDAO {
 
-  def getById(brandId: UUID) : Future[Option[Brand]]
+  def getById(brandId: UUID) : Option[Brand]
 
-  def list : Future[List[Brand]]
+  def list : List[Brand]
 
-  def insertNew(brand: Brand) : Future[Brand]
+  def insertNew(brand: Brand) : Brand
 
-  def update(brand:Brand) : Future[Unit]
+  def update(brand:Brand) : Unit
 
-  def delete(brandId: UUID) : Future[Unit]
+  def delete(brandId: UUID) : Unit
 
 
 

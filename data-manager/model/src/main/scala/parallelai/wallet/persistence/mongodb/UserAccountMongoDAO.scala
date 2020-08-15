@@ -1,5 +1,6 @@
 package parallelai.wallet.persistence.mongodb
 
+
 import parallelai.wallet.persistence.{ClientApplicationDAO, UserAccountDAO}
 import scala.concurrent.Future
 import scala.concurrent.Future._
@@ -33,22 +34,23 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
 
   val dao = new SalatDAO[MongoUserAccount, UUID](collection = db("UserAccount")) {}
 
+
   override def getById(userId: UUID): Future[Option[UserAccount]] = successful { dao.findOneById(userId) }
 
   override def update(userAccount: UserAccount): Future[Unit] =
-   successful {
+    successful {
 
-    dao.update(
-      byId(userAccount.id),
-      $set(
-        "active" -> userAccount.active,
-        "email" -> userAccount.email,
-        "msisdn" -> userAccount.msisdn,
-        "personalInfo" -> grater[UserPersonalInfo].asDBObject(userAccount.personalInfo),
-        "settings" -> grater[AccountSettings].asDBObject(userAccount.settings)
+      dao.update(
+        byId(userAccount.id),
+        $set(
+          "active" -> userAccount.active,
+          "email" -> userAccount.email,
+          "msisdn" -> userAccount.msisdn,
+          "personalInfo" -> grater[UserPersonalInfo].asDBObject(userAccount.personalInfo),
+          "settings" -> grater[AccountSettings].asDBObject(userAccount.settings)
+        )
       )
-    )
-  }
+    }
 
   def updateSubInfo(id: UUID, userInfo: UserPersonalInfo, personalSettings: AccountSettings): Future[Unit] =
     successful {
@@ -122,7 +124,7 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
         case (Some(_), None) => queryAccumulator
         case (None, Some(_)) => currentQuery
         case (None, None) => None
-        }
+      }
       }
 
       queryOp flatMap { query => dao.findOne(query) map { _.toUserAccount } }
@@ -171,6 +173,26 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
   override def delete(userId: UUID) : Future[Unit] =
     successful {
       dao.removeById(userId, WriteConcern.Safe)
+    }
+
+  override def addBrand(userId: UUID, brandId: UUID): Future[Unit] =
+    successful {
+      dao.update(byId(userId),
+        $push("subscribedBrands" -> brandId)
+      )
+    }
+
+  override def deleteBrand(userId: UUID, brandId: UUID): Future[Unit] =
+    successful {
+      dao.update(
+        byId(userId),
+        $pull("subscribedBrands.0" -> brandId)
+      )
+    }
+
+  override def listUserSubscribedBrands(userId: UUID): Future[List[SubscribedBrands]] =
+    successful {
+      dao.projections[SubscribedBrands](byId(userId),"subscribedBrands")
     }
 }
 

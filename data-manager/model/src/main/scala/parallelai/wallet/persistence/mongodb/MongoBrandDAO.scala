@@ -29,10 +29,9 @@ class MongoBrandDAO (implicit val bindingModule: BindingModule) extends BrandDAO
 
   def byId(id: UUID) = MongoDBObject("_id" -> id)
 
-  override def getById(id: UUID): Future[Option[Brand]] = successful { dao.findOneById(id)}
+  override def getById(id: UUID): Option[Brand] = dao.findOneById(id)
 
-  override def update(brand: Brand): Future[Unit] = successful {
-
+  override def update(brand: Brand): Unit =
 
     dao.update(
       byId(brand.id),
@@ -43,22 +42,21 @@ class MongoBrandDAO (implicit val bindingModule: BindingModule) extends BrandDAO
 
       )
     )
-  }
 
 
-  override def insertNew(brand: Brand): Future[Brand] = successful {
-
+  override def insertNew(brand: Brand): Brand =
+  {
     dao.insert( brand )
     brand
   }
 
-  override def delete(id: UUID): Future[Unit] = {
-    successful {
+  override def delete(id: UUID): Unit = {
+
       dao.removeById(id, WriteConcern.Safe)
-    }
+
   }
 
-  override def list: Future[List[Brand]] = successful {
+  override def list: List[Brand] =
       dao.find(MongoDBObject.empty).toList
-  }
+
 }

@@ -5,6 +5,7 @@ import java.util.UUID
 import akka.actor.ActorRef
 import akka.util.Timeout
 import com.parallelai.wallet.datamanager.data._
+import core.BrandActor.{BrandInvalidRequest, BrandError}
 import core.EditAccountActor.{FindAccount, GetAccount, GetAccountPoints, UpdateAccount}
 import core.RegistrationActor
 import core.RegistrationActor.{AddApplication, _}
@@ -23,13 +24,9 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
 import scala.concurrent.duration._
   implicit val timeout = Timeout(20.seconds)
 
-  implicit object EitherErrorSelector extends ErrorSelector[RegistrationError] {
-    def apply(error: RegistrationError): StatusCode = error match {
-      case InvalidRequest(reason) => BadRequest
-      case ApplicationAlreadyRegistered => BadRequest
-      case UserAlreadyRegistered => BadRequest
-      case InvalidValidationCode => Unauthorized
-      case InternalError(_) => InternalServerError
+  implicit object EitherErrorSelector extends ErrorSelector[BrandError] {
+    def apply(error: BrandError): StatusCode = error match {
+      case BrandInvalidRequest(reason) => BadRequest
     }
   }
 
@@ -40,7 +37,7 @@ import scala.concurrent.duration._
         handleWith {
           brandData: BrandData =>
 
-              (brandActor ? brandData).mapTo[UUIDData]
+              (brandActor ? brandData).mapTo[Either[BrandError,BrandResponse]]
               //UUIDData(UUID.randomUUID())
 
         }
