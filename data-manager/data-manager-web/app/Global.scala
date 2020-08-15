@@ -14,7 +14,7 @@ object Global extends WithFilters(AuthorizedFilter( newBindingModuleWithConfig(A
     InternalServerError(views.html.errors.onError(throwable))
   }
 
-  override def onBadRequest(request: RequestHeader, error: String): Future[SimpleResult] = successful{
+  override def onBadRequest(request: RequestHeader, error: String): Future[Result] = successful{
     BadRequest(views.html.errors.onBadRequest(request, error))
   }
 

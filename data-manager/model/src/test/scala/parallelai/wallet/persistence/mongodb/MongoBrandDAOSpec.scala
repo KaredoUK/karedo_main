@@ -5,7 +5,6 @@ import java.util.UUID
 import com.github.athieriot.{CleanAfterExample, EmbedConnection}
 import com.mongodb.casbah.commons.MongoDBObject
 import com.mongodb.casbah.commons.ValidBSONType.DBObject
-
 import org.specs2.mutable.Specification
 import org.specs2.time.NoTimeConversions
 import parallelai.wallet.entity.{AdvertisementMetadata, Brand}
@@ -30,12 +29,19 @@ class MongoBrandDAOSpec extends Specification with NoTimeConversions with MongoT
         "mongo.db.pwd" -> ""
       )
     )
-
+//    implicit val bindingModule = newBindingModuleWithConfig(
+//      Map(
+//        "mongo.server.host" -> "localhost",
+//        "mongo.server.port" -> s"$embedConnectionPort",
+//        "mongo.db.name" -> "test",
+//        "mongo.db.user" -> "",
+//        "mongo.db.pwd" -> ""
+//      )
+//    )
 
     val brandDAO = new MongoBrandDAO
 
     def cleanbrands = brandDAO.mongoClient.getDB("wallet_data").getCollection("Brand").remove(MongoDBObject.empty)
-
 
     def mybrand=Brand(name = "brand X", iconPath="iconpath",ads=List[AdvertisementMetadata]() )
 
@@ -44,6 +50,8 @@ class MongoBrandDAOSpec extends Specification with NoTimeConversions with MongoT
 
       val insert =
         brandDAO.insertNew(mybrand)
+      }
+      
 
       val findAfterInsert = brandDAO.getById(insert.id).get
 
@@ -59,12 +67,13 @@ class MongoBrandDAOSpec extends Specification with NoTimeConversions with MongoT
 
       val insert = brandDAO.insertNew(mybrand)
 
+      
 
       brandDAO.delete(insert.id)
 
+      
 
       val findAfterDelete = brandDAO.getById(insert.id)
-
 
 
 
@@ -78,7 +87,7 @@ class MongoBrandDAOSpec extends Specification with NoTimeConversions with MongoT
 
       val insert = brandDAO.insertNew(mybrand)
 
-      // Thread.sleep(500)
+     // Thread.sleep(500)
 
       val list=brandDAO.list
 

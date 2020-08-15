@@ -6,7 +6,10 @@ resolvers += Common.conjarResolver
 
 libraryDependencies ++= Seq(
   Common.subcutExt,
-  "com.typesafe"    	% "config"      		% "1.2.1"
+  "com.typesafe"    	% "config"      		% "1.2.1",
+  "io.spray"           %% "spray-httpx"        % Common.sprayVersion,
+  "com.typesafe.akka"  %% "akka-actor"       % Common.akkaVersion,
+  Common.sprayJson
 )
 
 scalacOptions ++= Seq(

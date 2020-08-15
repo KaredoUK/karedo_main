@@ -8,9 +8,9 @@ import spray.routing.directives.RouteDirectives
 
 import spray.util.{SprayActorLogging, LoggingContext}
 import scala.util.control.NonFatal
-import spray.httpx.marshalling.Marshaller
+import spray.httpx.marshalling.{ToResponseMarshallingContext, Marshaller}
 import spray.http.HttpHeaders.RawHeader
-import akka.actor.{ActorLogging, Actor}
+import akka.actor.{ActorRef, ActorLogging, Actor}
 
 /**
  * Holds potential error response with the HTTP status and optional body
@@ -57,6 +57,7 @@ trait FailureHandling {
                                     error: StatusCode = InternalServerError)
                                    (implicit log: LoggingContext): Unit = {
     log.error(thrown, ctx.request.toString)
+    // Please ignore the warning about the tuple conversion (see https://groups.google.com/forum/#!msg/spray-user/klCO6y4Btmo/PBFXRswfjhoJ)
     ctx.complete(error, message)
   }
 
@@ -68,7 +69,7 @@ trait FailureHandling {
  *
  * @param route the (concatenated) route
  */
-class RoutedHttpService(route: Route) extends Actor with HttpService with SprayActorLogging {
+class RoutedHttpService(route: Route) extends Actor with HttpService with ActorLogging {
 
   implicit def actorRefFactory = context
 
@@ -89,22 +90,3 @@ class RoutedHttpService(route: Route) extends Actor with HttpService with SprayA
 
 }
 
-/**
- * Constructs ``CompletionMagnet``s that set the ``Access-Control-Allow-Origin`` header for modern browsers' AJAX
- * requests on different domains / ports.
- */
-trait CrossLocationRouteDirectives extends RouteDirectives {
-
- /* implicit def fromObjectCross[T : Marshaller](origin: String)(obj: T) =
-      new CompletionMagnet {
-        def route: StandardRoute = new CompletionRoute(OK,
-          RawHeader("Access-Control-Allow-Origin", origin) :: Nil, obj)
-      }*/
-
-  private class CompletionRoute[T : Marshaller](status: StatusCode, headers: List[HttpHeader], obj: T)
-    extends StandardRoute {
-    def apply(ctx: RequestContext): Unit = {
-      ctx.complete(status, headers, obj)
-    }
-  }
-}

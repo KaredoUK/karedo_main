@@ -31,32 +31,30 @@ class MongoBrandDAO (implicit val bindingModule: BindingModule) extends BrandDAO
 
   override def getById(id: UUID): Option[Brand] = dao.findOneById(id)
 
-  override def update(brand: Brand): Unit =
-
+  override def update(brand: Brand): Unit = {
     dao.update(
       byId(brand.id),
       $set(
-       "name" -> brand.name,
+        "name" -> brand.name,
         "iconPath" -> brand.iconPath,
         "ads" -> brand.ads.map { ad => grater[AdvertisementMetadata].asDBObject(ad)}
 
       )
     )
+  }
 
 
-  override def insertNew(brand: Brand): Brand =
-  {
-    dao.insert( brand )
+  override def insertNew(brand: Brand): Brand =  {
+
+    val result = dao.insert( brand )
     brand
   }
 
   override def delete(id: UUID): Unit = {
-
       dao.removeById(id, WriteConcern.Safe)
-
   }
 
-  override def list: List[Brand] =
+  override def list: List[Brand] = {
       dao.find(MongoDBObject.empty).toList
-
+  }
 }

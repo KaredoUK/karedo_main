@@ -5,41 +5,7 @@ import java.util.UUID
 import scala.reflect.ClassTag
 import spray.httpx.marshalling.{MetaMarshallers, Marshaller, CollectingMarshallingContext}
 import spray.http.StatusCode
-
-// PK 4.10.2014 workaround to make this work in new versions of spray
-// next comment and fixes are taken from https://groups.google.com/forum/#!msg/spray-user/oCKjHmUMDb0/i_hzGxDolskJ
-// and avoid the problem
-// java.lang.NoSuchMethodError: spray.json.JsonParser$.apply(Ljava/lang/String;)Lspray/json/JsValue;
-
-//import spray.httpx.SprayJsonSupport
-
-trait SprayJsonSupport {
-
-  import spray.httpx.marshalling.Marshaller
-  import spray.httpx.unmarshalling.Unmarshaller
-  import spray.json._
-  import spray.http._
-
-  implicit def sprayJsonUnmarshallerConverter[T](reader: RootJsonReader[T]) =
-    sprayJsonUnmarshaller(reader)
-  implicit def sprayJsonUnmarshaller[T: RootJsonReader] =
-    Unmarshaller[T](MediaTypes.`application/json`) {
-      case x: HttpEntity.NonEmpty ⇒
-        val json = JsonParser(x.asString(defaultCharset = HttpCharsets.`UTF-8`))
-        jsonReader[T].read(json)
-    }
- /* implicit def sprayJsonMarshallerConverter[T](writer: RootJsonWriter[T])(implicit printer: JsonPrinter = PrettyPrinter) =
-    sprayJsonMarshaller[T](writer, printer) */
-  implicit def sprayJsonMarshaller[T](implicit writer: RootJsonWriter[T], printer: JsonPrinter = PrettyPrinter) =
-    Marshaller.delegate[T, String](ContentTypes.`application/json`) { value ⇒
-      val json = writer.write(value)
-      printer(json)
-    }
-}
-
-object SprayJsonSupport extends SprayJsonSupport
-
-// END WORKAROUNF
+import parallelai.wallet.util.SprayJsonSupport
 
 /**
  * Contains useful JSON formats: ``j.u.Date``, ``j.u.UUID`` and others; it is useful
