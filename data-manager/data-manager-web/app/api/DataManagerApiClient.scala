@@ -1,6 +1,7 @@
 package api
 
 import com.parallelai.wallet.datamanager.data._
+import parallelai.wallet.util.SprayJsonSupport
 import scala.concurrent.Future
 import akka.actor.ActorSystem
 import com.parallelai.wallet.datamanager.data.RegistrationValidation
@@ -10,9 +11,8 @@ import ApiDataJsonProtocol._
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
 import spray.http._
 import spray.json._
-import spray.httpx.{UnsuccessfulResponseException, SprayJsonSupport}
+import spray.httpx.UnsuccessfulResponseException
 import spray.client.pipelining._
-import SprayJsonSupport._
 import java.util.UUID
 import com.parallelai.wallet.datamanager.data.RegistrationValidation
 import com.parallelai.wallet.datamanager.data.RegistrationResponse
@@ -23,7 +23,7 @@ import com.parallelai.wallet.datamanager.data.UserProfile
 import com.parallelai.wallet.datamanager.data.RegistrationRequest
 
 
-trait DataManagerApiClient {
+trait DataManagerApiClient extends SprayJsonSupport {
   def getUserProfile(accountId: UUID) : Future[Option[UserProfile]]
   def findUserByMsisdnOrEmail(msisdn: Option[String], email: Option[String]) : Future[Option[UserProfile]]
   
