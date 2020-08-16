@@ -23,7 +23,7 @@ import scala.collection.JavaConversions._
 import util._
 import scala.concurrent.duration._
 
-class SmsActorSpec extends TestKit(ActorSystem()) with SpecificationLike with CoreActors with Core
+class SmsActorSpec extends TestKit(ActorSystem()) with SpecificationLike with Core
   with ImplicitSender with ThrownExpectations with NoTimeConversions {
 
 
