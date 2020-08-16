@@ -63,7 +63,11 @@ class EditAccountActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : C
       userAccountDAO.update(userProfileToUserAccount(userProfile))
 
     case AddBrand(accountId, brandId) =>
-      userAccountDAO.addBrand(accountId,brandId)
+      log.info("Trying to add brand {}, to user {}, sender is ", brandId, accountId, sender)
+      replyToSender {
+        userAccountDAO.addBrand(accountId, brandId) map { s => StatusResponse(s) }
+      }
+
   }
 
   def userAccountToUserProfile(userAccount: UserAccount): UserProfile =

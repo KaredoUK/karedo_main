@@ -9,10 +9,7 @@ import com.novus.salat.dao.SalatDAO
 import com.mongodb.casbah.Imports._
 import com.novus.salat.global._
 import com.novus.salat.dao._
-
-import com.mongodb.casbah.Imports._
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
-import com.mongodb.casbah.Imports._
 import com.novus.salat._
 import com.novus.salat.global._
 
@@ -20,35 +17,42 @@ import com.novus.salat.global._
 object userAccountMongoUtils {
   def byId(userId: UUID) = MongoDBObject("_id" -> userId)
 
-  def byApplicationId(applicationId: UUID) = "applications" $elemMatch MongoDBObject( "_id" -> applicationId )
+  def bySubscribedBrands(brandId: UUID) = MongoDBObject("subscribedBrands" -> brandId)
+
+  def byApplicationId(applicationId: UUID) = "applications" $elemMatch MongoDBObject("_id" -> applicationId)
 }
 
 import userAccountMongoUtils._
 
 
+class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends UserAccountDAO with MongoConnection with Injectable {
+  implicit def mongoUserAccountToUserAccount(mongoUserAccount: MongoUserAccount): UserAccount = mongoUserAccount.toUserAccount
 
-class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends UserAccountDAO with MongoConnection with Injectable  {
-  implicit def mongoUserAccountToUserAccount(mongoUserAccount: MongoUserAccount) : UserAccount = mongoUserAccount.toUserAccount
-  implicit def mongoUserAccountOptionToUserAccountOption(mongoUserAccount: Option[MongoUserAccount]) : Option[UserAccount] = mongoUserAccount map { _.toUserAccount }
+  implicit def mongoUserAccountOptionToUserAccountOption(mongoUserAccount: Option[MongoUserAccount]): Option[UserAccount] = mongoUserAccount map {
+    _.toUserAccount
+  }
 
   val dao = new SalatDAO[MongoUserAccount, UUID](collection = db("UserAccount")) {}
+  val brandDao = new SalatDAO[Brand, UUID](collection = db("Brand")) {}
 
-  override def getById(userId: UUID): Future[Option[UserAccount]] = successful { dao.findOneById(userId) }
+  override def getById(userId: UUID): Future[Option[UserAccount]] = successful {
+    dao.findOneById(userId)
+  }
 
   override def update(userAccount: UserAccount): Future[Unit] =
-   successful {
+    successful {
 
-    dao.update(
-      byId(userAccount.id),
-      $set(
-        "active" -> userAccount.active,
-        "email" -> userAccount.email,
-        "msisdn" -> userAccount.msisdn,
-        "personalInfo" -> grater[UserPersonalInfo].asDBObject(userAccount.personalInfo),
-        "settings" -> grater[AccountSettings].asDBObject(userAccount.settings)
+      dao.update(
+        byId(userAccount.id),
+        $set(
+          "active" -> userAccount.active,
+          "email" -> userAccount.email,
+          "msisdn" -> userAccount.msisdn,
+          "personalInfo" -> grater[UserPersonalInfo].asDBObject(userAccount.personalInfo),
+          "settings" -> grater[AccountSettings].asDBObject(userAccount.settings)
+        )
       )
-    )
-  }
+    }
 
   def updateSubInfo(id: UUID, userInfo: UserPersonalInfo, personalSettings: AccountSettings): Future[Unit] =
     successful {
@@ -63,7 +67,7 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
 
   override def getByMsisdn(msisdn: String, mustBeActive: Boolean): Future[Option[UserAccount]] =
     successful {
-      dao.findOne( MongoDBObject( "msisdn" -> Some(msisdn) ) )
+      dao.findOne(MongoDBObject("msisdn" -> Some(msisdn)))
     }
 
   override def setEmail(userId: UUID, email: String): Future[Unit] =
@@ -75,7 +79,6 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
         )
       )
     }
-
 
 
   override def insertNew(userAccount: UserAccount, firstApplication: ClientApplication): Future[Unit] =
@@ -90,20 +93,20 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
       )
     }
 
-  def insertNew(userAccount: UserAccount, firstApplications: ClientApplication* ): Future[Unit] =
+  def insertNew(userAccount: UserAccount, firstApplications: ClientApplication*): Future[Unit] =
     successful {
       dao.insert(
         MongoUserAccount(userAccount.id, userAccount.msisdn, userAccount.email,
           userAccount.personalInfo, userAccount.settings, userAccount.active, userAccount.totalPoints,
-          firstApplications map { app => MongoUserApplicationInfo(app.id, app.activationCode, app.active) } toList
+          firstApplications map { app => MongoUserApplicationInfo(app.id, app.activationCode, app.active)} toList
         )
       )
     }
 
   override def getByApplicationId(applicationId: UUID, mustBeActive: Boolean): Future[Option[UserAccount]] =
-    successful{
-      val query = if(mustBeActive) {
-        $and(byApplicationId(applicationId), MongoDBObject( "active" -> true) )
+    successful {
+      val query = if (mustBeActive) {
+        $and(byApplicationId(applicationId), MongoDBObject("active" -> true))
       } else {
         byApplicationId(applicationId)
       }
@@ -113,19 +116,22 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
 
   override def findByAnyOf(applicationId: Option[UUID], msisdn: Option[String], email: Option[String]): Future[Option[UserAccount]] =
     successful {
-      val byAppIdOpt = applicationId map { value => byApplicationId(value) }
-      val byMsisdnOpt = msisdn map { value => MongoDBObject( "msisdn" -> value ) }
-      val byEmailOpt = email map { value => MongoDBObject( "email" -> value ) }
+      val byAppIdOpt = applicationId map { value => byApplicationId(value)}
+      val byMsisdnOpt = msisdn map { value => MongoDBObject("msisdn" -> value)}
+      val byEmailOpt = email map { value => MongoDBObject("email" -> value)}
 
       val queryOp = List(byAppIdOpt, byMsisdnOpt, byEmailOpt).foldLeft[Option[DBObject]](None) { (queryAccumulator, currentQuery) => (queryAccumulator, currentQuery) match {
-        case (Some(queryAcc), Some(currQuery)) => Some( $or(queryAcc, currQuery) )
+        case (Some(queryAcc), Some(currQuery)) => Some($or(queryAcc, currQuery))
         case (Some(_), None) => queryAccumulator
         case (None, Some(_)) => currentQuery
         case (None, None) => None
-        }
+      }
       }
 
-      queryOp flatMap { query => dao.findOne(query) map { _.toUserAccount } }
+      queryOp flatMap { query => dao.findOne(query) map {
+        _.toUserAccount
+      }
+      }
     }
 
 
@@ -147,7 +153,7 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
       )
     }
 
-  override def setPassword(userId: UUID, password: String) : Future[Unit] =
+  override def setPassword(userId: UUID, password: String): Future[Unit] =
     successful {
       dao.update(
         byId(userId),
@@ -159,55 +165,79 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
 
   override def getByEmail(email: String, mustBeActive: Boolean): Future[Option[UserAccount]] =
     successful {
-      val query = if(mustBeActive) {
-        $and(MongoDBObject( "email" -> Some(email) ), MongoDBObject( "active" -> true) )
+      val query = if (mustBeActive) {
+        $and(MongoDBObject("email" -> Some(email)), MongoDBObject("active" -> true))
       } else {
-        MongoDBObject( "email" -> Some(email) )
+        MongoDBObject("email" -> Some(email))
       }
 
-      dao.findOne( query )
+      dao.findOne(query)
     }
 
-  override def delete(userId: UUID) : Future[Unit] =
+  override def delete(userId: UUID): Future[Unit] =
     successful {
       dao.removeById(userId, WriteConcern.Safe)
     }
 
-  override def addBrand(userId: UUID, brandId: UUID): Future[Unit] =
-  successful {
-    dao.update(byId(userId),
-      $push("subscribedBrands" -> brandId)
-    )
-  }
+  override def addBrand(userId: UUID, brandId: UUID): Future[String] =
+    successful {
+      brandDao.findOneById(brandId) match {
+        case Some(_) => {
+
+          val query = $and(byId(userId), bySubscribedBrands(brandId))
+
+
+          dao.findOne(query) match {
+            case Some(_) => "Association already existed"
+            case None => {
+
+
+              dao.update(byId(userId),
+                $push("subscribedBrands" -> brandId)
+              )
+              "OK"
+            }
+          }
+        }
+        case None => "Brand must exist"
+      }
+
+
+    }
 
   override def deleteBrand(userId: UUID, brandId: UUID): Future[Unit] =
-  successful {
-    dao.update(
-      byId(userId),
-      $pull("subscribedBrands.0" -> brandId)
-    )
-  }
+    successful {
+
+      dao.update(
+        byId(userId),
+        $pull("subscribedBrands.0" -> brandId)
+      )
+    }
 
   override def listUserSubscribedBrands(userId: UUID): Future[List[SubscribedBrands]] =
-  successful {
-    dao.projections[SubscribedBrands](byId(userId),"subscribedBrands")
-  }
+    successful {
+      dao.projections[SubscribedBrands](byId(userId), "subscribedBrands")
+    }
 }
 
-class ClientApplicationMongoDAO(implicit val bindingModule: BindingModule)  extends ClientApplicationDAO with MongoConnection with Injectable {
+class ClientApplicationMongoDAO(implicit val bindingModule: BindingModule) extends ClientApplicationDAO with MongoConnection with Injectable {
   val dao = new SalatDAO[MongoUserAccount, UUID](collection = db("UserAccount")) {}
 
   override def getById(applicationId: UUID): Future[Option[ClientApplication]] =
-    successful{
-      dao.findOne( byApplicationId(applicationId) ) flatMap {
+    successful {
+      dao.findOne(byApplicationId(applicationId)) flatMap {
         account =>
-          account.applications.find(_.id == applicationId).map { _.toClientApplication(account.id) }
+          account.applications.find(_.id == applicationId).map {
+            _.toClientApplication(account.id)
+          }
       }
     }
 
   override def findByUserId(userId: UUID): Future[Seq[ClientApplication]] =
     successful {
-      dao.projections[MongoUserApplicationInfo](byId(userId), "applications") map { _.toClientApplication(userId)}
+      dao.projections[MongoUserApplicationInfo](byId(userId), "applications") map {
+        _.toClientApplication(userId)
+      }
     }
 
   override def update(clientApp: ClientApplication): Future[Unit] =
@@ -229,7 +259,7 @@ class ClientApplicationMongoDAO(implicit val bindingModule: BindingModule)  exte
       dao.update(
         byId(clientApp.accountId),
         $push(
-          "applications" -> grater[MongoUserApplicationInfo].asDBObject( MongoUserApplicationInfo.fromClientApplication(clientApp) )
+          "applications" -> grater[MongoUserApplicationInfo].asDBObject(MongoUserApplicationInfo.fromClientApplication(clientApp))
           // Don't use the MongoUserApplicationInfo direct otherwise will try to add a list of Any into applications and fuck up the object
         )
       )
