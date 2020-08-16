@@ -1,5 +1,6 @@
 package api
 
+import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
 import com.parallelai.wallet.datamanager.data._
 import parallelai.wallet.util.SprayJsonSupport
 import scala.concurrent.Future
@@ -8,7 +9,6 @@ import com.parallelai.wallet.datamanager.data.RegistrationValidation
 import com.parallelai.wallet.datamanager.data.RegistrationResponse
 import com.parallelai.wallet.datamanager.data.RegistrationRequest
 import ApiDataJsonProtocol._
-import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
 import spray.http._
 import spray.json._
 import spray.httpx.UnsuccessfulResponseException
