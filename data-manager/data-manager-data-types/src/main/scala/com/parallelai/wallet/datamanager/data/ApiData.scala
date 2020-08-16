@@ -1,5 +1,4 @@
 package com.parallelai.wallet.datamanager.data
-package com.parallelai.wallet.datamanager.data
 
 import java.util.UUID
 import org.joda.time.DateTime

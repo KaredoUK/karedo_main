@@ -4,7 +4,6 @@ import java.util.UUID
 
 import akka.actor.{Props, ActorLogging, Actor}
 import akka.actor.Actor.Receive
-import com.parallelai.wallet.datamanager.data.com.parallelai.wallet.datamanager.data._
 import parallelai.wallet.persistence.{ClientApplicationDAO, UserAccountDAO}
 import com.parallelai.wallet.datamanager.data._
 import parallelai.wallet.entity.{UserPersonalInfo, AccountSettings, UserAccount}
