@@ -44,10 +44,10 @@ class MongoBrandDAO (implicit val bindingModule: BindingModule) extends BrandDAO
   }
 
 
-  override def insertNew(brand: Brand): Brand =  {
+  override def insertNew(brand: Brand): Option[UUID] =  {
 
     val result = dao.insert( brand )
-    brand
+    result
   }
 
   override def delete(id: UUID): Unit = {

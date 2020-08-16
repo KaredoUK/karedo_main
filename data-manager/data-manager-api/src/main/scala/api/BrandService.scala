@@ -1,25 +1,30 @@
 package api
 
-import java.util.UUID
+
 
 import akka.actor.ActorRef
 import akka.util.Timeout
 import com.parallelai.wallet.datamanager.data._
+import com.parallelai.wallet.datamanager.data.BrandData
+import com.parallelai.wallet.datamanager.data.BrandResponse
 import core.BrandActor.{InternalBrandError, InvalidBrandRequest, BrandError}
-import core.EditAccountActor.{FindAccount, GetAccount, GetAccountPoints, UpdateAccount}
-import core.RegistrationActor
-import core.RegistrationActor.{AddApplication, _}
+import ApiDataJsonProtocol._
 import spray.http.StatusCodes._
 import spray.http._
 import spray.routing.Directives
 
 import scala.concurrent.ExecutionContext
 
+
+
 class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionContext)
   extends Directives with DefaultJsonFormats {
 
+
+
+
   import akka.pattern.ask
-  import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
+
 
 import scala.concurrent.duration._
   implicit val timeout = Timeout(20.seconds)
@@ -38,7 +43,7 @@ import scala.concurrent.duration._
         handleWith {
           brandData: BrandData =>
 
-              (brandActor ? brandData).mapTo[BrandResponse]
+              (brandActor ? brandData).mapTo[Either[BrandError,BrandResponse]]
               //UUIDData(UUID.randomUUID())
 
         }

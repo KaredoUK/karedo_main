@@ -1,5 +1,6 @@
 package api
 
+import com.parallelai.wallet.datamanager.data._
 import spray.routing.Directives
 import scala.concurrent.ExecutionContext
 import akka.actor.ActorRef
@@ -18,7 +19,7 @@ import java.util.UUID
 class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(implicit executionContext: ExecutionContext)
   extends Directives with DefaultJsonFormats {
 
-  import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
+  //import data.ApiDataJsonProtocol
 
   import akka.pattern.ask
   import scala.concurrent.duration._

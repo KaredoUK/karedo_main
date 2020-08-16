@@ -48,14 +48,13 @@ class MongoBrandDAOSpec extends Specification with NoTimeConversions with MongoT
     "create and retrieve a brand with a generated id " in {
 
 
-      val insert =
-        brandDAO.insertNew(mybrand)
-      }
+      val id = brandDAO.insertNew(mybrand).get
+
       
 
-      val findAfterInsert = brandDAO.getById(insert.id).get
+      val findAfterInsert = brandDAO.getById(id).get
 
-      findAfterInsert shouldEqual insert
+      findAfterInsert shouldEqual mybrand
 
       println("Passed 1")
 
@@ -65,15 +64,15 @@ class MongoBrandDAOSpec extends Specification with NoTimeConversions with MongoT
 
     "can delete one instance" in {
 
-      val insert = brandDAO.insertNew(mybrand)
+      val id = brandDAO.insertNew(mybrand).get
 
       
 
-      brandDAO.delete(insert.id)
+      brandDAO.delete(id)
 
       
 
-      val findAfterDelete = brandDAO.getById(insert.id)
+      val findAfterDelete = brandDAO.getById(id)
 
 
 
@@ -85,7 +84,7 @@ class MongoBrandDAOSpec extends Specification with NoTimeConversions with MongoT
 
       cleanbrands
 
-      val insert = brandDAO.insertNew(mybrand)
+      val id = brandDAO.insertNew(mybrand).get
 
      // Thread.sleep(500)
 
@@ -93,7 +92,7 @@ class MongoBrandDAOSpec extends Specification with NoTimeConversions with MongoT
 
       list.size shouldEqual( 1 )
 
-      list.map( brand => brandDAO.delete(brand.id))
+      list.map( brand => brandDAO.delete(id))
 
       val list2=brandDAO.list
 

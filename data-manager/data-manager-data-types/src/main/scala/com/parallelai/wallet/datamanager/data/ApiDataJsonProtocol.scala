@@ -1,5 +1,6 @@
 package com.parallelai.wallet.datamanager.data
 
+import com.parallelai.wallet.datamanager.data._
 import org.joda.time.DateTime
 import org.joda.time.format.{DateTimeFormat, ISODateTimeFormat}
 import spray.json._

@@ -15,7 +15,7 @@ trait BrandDAO {
 
   def list : List[Brand]
 
-  def insertNew(brand: Brand) : Brand
+  def insertNew(brand: Brand) : Option[UUID]
 
   def update(brand:Brand) : Unit
 
