@@ -34,7 +34,9 @@ trait UserAccountDAO {
 
   def delete(userId: UUID) : Future[Unit]
 
-  def addBrand(userId: UUID, brandId: UUID): Future[String]
+  def addBrand(userId: UUID, brandId: UUID): Future[Unit]
+
+  def getBrand(userId: UUID, brandId: UUID) : Future[Boolean]
 
   def deleteBrand(userId: UUID, brandId: UUID): Future[Unit]
 

@@ -98,7 +98,7 @@ trait CoreActors extends ServiceActors {
   )
 
   override val editAccount = system.actorOf(
-    EditAccountActor.props(userAccountDAO, clientApplicationDAO)
+    EditAccountActor.props(userAccountDAO, clientApplicationDAO, brandDAO)
       .withRouter( RoundRobinPool(nrOfInstances = editAccountActorPoolSize) )
   )
 }

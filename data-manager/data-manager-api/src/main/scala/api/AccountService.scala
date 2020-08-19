@@ -1,6 +1,8 @@
 package api
 
+import com.mongodb.casbah.Imports._
 import com.parallelai.wallet.datamanager.data._
+import core.EditAccountActor.EditAccountError
 import spray.routing.Directives
 import scala.concurrent.ExecutionContext
 import akka.actor.ActorRef
@@ -96,13 +98,17 @@ class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(im
       rejectEmptyResponse {
         post {
           handleWith {
-            brandIdRequest : BrandIDRequest =>
-              (editAccountActor ? AddBrand(accountId, brandIdRequest.brandId) ).mapTo[StatusResponse]
+          handleWith {
+            brandIdRequest: BrandIDRequest =>
+
+              (editAccountActor ? AddBrand(accountId, brandIdRequest.brandId)).mapTo[Either[EditAccountError, String]]
+
+
           }
         }
+
+
       }
-
-
     }
 
 

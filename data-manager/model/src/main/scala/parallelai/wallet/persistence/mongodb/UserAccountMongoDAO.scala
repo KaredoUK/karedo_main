@@ -179,30 +179,23 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
       dao.removeById(userId, WriteConcern.Safe)
     }
 
-  override def addBrand(userId: UUID, brandId: UUID): Future[String] =
+  override def addBrand(userId: UUID, brandId: UUID): Future[Unit] =
     successful {
-      brandDao.findOneById(brandId) match {
-        case Some(_) => {
 
-          val query = $and(byId(userId), bySubscribedBrands(brandId))
-
-
-          dao.findOne(query) match {
-            case Some(_) => "Association already existed"
-            case None => {
+      dao.update(byId(userId),
+        $push("subscribedBrands" -> brandId)
+      )
 
 
-              dao.update(byId(userId),
-                $push("subscribedBrands" -> brandId)
-              )
-              "OK"
-            }
-          }
-        }
-        case None => "Brand must exist"
+    }
+
+  override def getBrand(userId: UUID, brandId: UUID) : Future[Boolean] =
+    successful {
+      val query = $and(byId(userId), bySubscribedBrands(brandId))
+      dao.findOne(query) match {
+        case Some(_) => true
+        case None => false
       }
-
-
     }
 
   override def deleteBrand(userId: UUID, brandId: UUID): Future[Unit] =
