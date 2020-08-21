@@ -9,16 +9,20 @@ import parallelai.wallet.config.AppConfigPropertySource
 import parallelai.wallet.persistence.{BrandDAO, ClientApplicationDAO, UserAccountDAO}
 import web.Web
 
+import scala.util.Random
+
 // Using this trait you just need to define the DAO as mocked and start your rest server
 class RestServiceWithMockPersistence(
+  val servicePort: Int,
   override val brandDAO: BrandDAO,
   override val clientApplicationDAO: ClientApplicationDAO,
   override val userAccountDAO: UserAccountDAO) extends Injectable with BootedCore with Persistence with CoreActors with Api with Web {
 
+
   // Define The Configuration for the tests
   implicit def configProvider = AppConfigPropertySource(
     ConfigFactory.parseString(
-      """
+      s"""
         |notification {
         |  email {
         |    auth.user.key = "email.auth.user.key"
@@ -42,6 +46,11 @@ class RestServiceWithMockPersistence(
         |  web {
         |    server.address = "http://localhost:9000"
         |  }
+        |}
+        |
+        |service {
+        |   port = $servicePort
+        |   bindAddress = "0.0.0.0"
         |}
       """.stripMargin
     )

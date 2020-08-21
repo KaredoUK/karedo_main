@@ -1,5 +1,6 @@
 package web
 
+import com.escalatesoft.subcut.inject.Injectable
 import core.{ServiceActors, CoreActors, Core}
 import api.Api
 import akka.io.IO
@@ -17,8 +18,11 @@ import spray.can.Http
  * configuration, especially when it comes to the threading model.
  */
 trait Web {
-  this: Api with ServiceActors with Core =>
+  this: Api with ServiceActors with Core with Injectable =>
 
-  IO(Http)(system) ! Http.Bind(rootService, "0.0.0.0", port = 8080)
+  val bindPort = injectOptionalProperty[Int]("service.port") getOrElse 8080
+  val bindAddress = injectOptionalProperty[String]("service.bindAddress") getOrElse "0.0.0.0"
+
+  IO(Http)(system) ! Http.Bind(rootService, bindAddress, port = bindPort)
 
 }

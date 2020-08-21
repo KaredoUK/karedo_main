@@ -8,5 +8,5 @@ object TestMockPersistenceApp extends App with Mockito {
   val mockedClientApplicationDAO = mock[ClientApplicationDAO]
   val mockedUserAccountDAO = mock[UserAccountDAO]
 
-  val mockedServer = new RestServiceWithMockPersistence(mockedBrandDAO, mockedClientApplicationDAO, mockedUserAccountDAO)
+  val mockedServer = new RestServiceWithMockPersistence(8080, mockedBrandDAO, mockedClientApplicationDAO, mockedUserAccountDAO)
 }
