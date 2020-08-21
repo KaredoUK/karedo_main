@@ -98,7 +98,6 @@ class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(im
       rejectEmptyResponse {
         post {
           handleWith {
-          handleWith {
             brandIdRequest: BrandIDRequest =>
 
               (editAccountActor ? AddBrand(accountId, brandIdRequest.brandId)).mapTo[Either[EditAccountError, String]]
@@ -106,11 +105,7 @@ class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(im
 
           }
         }
-
-
       }
     }
-
-
 
 }

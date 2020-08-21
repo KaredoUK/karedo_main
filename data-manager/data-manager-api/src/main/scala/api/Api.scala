@@ -1,6 +1,6 @@
 package api
 
-import core.{CoreActors, Core}
+import core.{ServiceActors, CoreActors, Core}
 import akka.actor.Props
 import spray.routing.RouteConcatenation
 import com.mongodb.casbah.commons.conversions.scala._
@@ -12,7 +12,7 @@ import com.mongodb.casbah.commons.conversions.scala._
  * to the top-level actors that make up the system.
  */
 trait Api extends RouteConcatenation {
-  this: CoreActors with Core =>
+  this: ServiceActors with Core =>
 
   private implicit val _ = system.dispatcher
 

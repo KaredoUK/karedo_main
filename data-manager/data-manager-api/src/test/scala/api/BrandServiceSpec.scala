@@ -12,87 +12,68 @@ import core.{Persistence, CoreActors, ServiceActors, BootedCore}
 import org.specs2.mutable.Specification
 import org.specs2.time.NoTimeConversions
 
-import akka.actor.ActorSystem
+import akka.actor.{ActorRef, ActorSystem}
 import parallelai.wallet.config.AppConfigPropertySource
+import parallelai.wallet.entity.Brand
+import parallelai.wallet.persistence.{BrandDAO, ClientApplicationDAO, UserAccountDAO}
 import spray.client.pipelining._
-import spray.httpx.SprayJsonSupport._
+import util.RestServiceWithMockPersistence
+import web.Web
 
+import java.util.UUID
 import scala.concurrent.Await._
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-// Using this trait you just need to define the service actors as TestProbe and start the rest server
-trait MockedServiceActors extends BootedCore with ServiceActors
+import org.specs2.mock._
 
+class BrandServiceSpec extends Specification with NoTimeConversions with Mockito {
+  // Problems acting on same mocks when running in parallel
+  sequential
 
-// Using this trait you just need to define the DAO as mocked and start your rest server
-trait MockedPersistence extends Injectable with BootedCore with Persistence with CoreActors {
-  // Define The Configuration for the tests
-  implicit def configProvider = AppConfigPropertySource(
-    ConfigFactory.parseString(
-      """
-        |notification {
-        |  email {
-        |    auth.user.key = "email.auth.user.key"
-        |    server.endpoint = "http://localhost/email"
-        |    sender = "noreply@gokaredo.com"
-        |  }
-        |
-        |  sms {
-        |    auth {
-        |      user = "sms.usr"
-        |      pwd = "sms.pwd"
-        |    }
-        |
-        |    sender = "Karedo"
-        |
-        |    server.endpoint = "http://localhost/sms/"
-        |  }
-        |}
-        |
-        |ui {
-        |  web {
-        |    server.address = "http://localhost:9000"
-        |  }
-        |}
-      """.stripMargin
-    )
-  )
-
-  // Create a dependency injection module reading this configuration
-  override implicit val bindingModule : BindingModule = newBindingModuleWithConfig
-
-
-}
-
-
-class BrandServiceSpec extends Specification with NoTimeConversions {
+  import parallelai.wallet.util.SprayJsonSupport._
 
 
   def wait[T](future: Future[T]): T = result(future, 20.seconds)
 
-  implicit val system = ActorSystem()
-
-  import system.dispatcher
+  implicit val system = ActorSystem("testClient")
 
   // execution context for futures
-  val pipeline = {
-    sendReceive ~> unmarshal[BrandResponse]
-  }
-  val url = "http://localhost:8080/"
+  import system.dispatcher
 
+  val serviceUrl = "http://localhost:8080"
+
+  val mockedBrandDAO = mock[BrandDAO]
+  val mockedClientApplicationDAO = mock[ClientApplicationDAO]
+  val mockedUserAccountDAO = mock[UserAccountDAO]
+
+  val mockedServer = new RestServiceWithMockPersistence(mockedBrandDAO, mockedClientApplicationDAO, mockedUserAccountDAO)
 
   "Brand Service" >>  {
     "can create a new brand" in {
+      val pipeline = sendReceive ~> unmarshal[BrandResponse]
+
+      val newBrandUUID = UUID.randomUUID()
+      mockedBrandDAO.insertNew(any[Brand]) returns Some(newBrandUUID)
 
       val response = wait(pipeline {
-        Post(url+"brand", BrandData("brand X", "iconpath"))
+        Post( s"$serviceUrl/brand", BrandData("brand X", "iconpath"))
       })
 
-      println("Returned UUID: "+response.id)
+      response shouldEqual BrandResponse(newBrandUUID)
+    }
 
-      true
+    "can retrieve a brand in the DB" in {
+      val pipeline = sendReceive ~> unmarshal[BrandData]
 
+      val brand =  new Brand(UUID.randomUUID(), "brandName", "brandIcon", List.empty)
+      mockedBrandDAO.getById(any[UUID]) returns Some(brand)
+
+      val response = wait(pipeline {
+        Get( s"$serviceUrl/brand/${brand.id}")
+      })
+
+      response shouldEqual BrandData(brand.name, brand.iconPath)
     }
   }
 

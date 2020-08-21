@@ -27,3 +27,5 @@ trait SprayJsonSupport {
       printer(json)
     }
 }
+
+object SprayJsonSupport extends SprayJsonSupport

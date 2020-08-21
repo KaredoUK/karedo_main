@@ -1,6 +1,6 @@
 package web
 
-import core.{CoreActors, Core}
+import core.{ServiceActors, CoreActors, Core}
 import api.Api
 import akka.io.IO
 import spray.can.Http
@@ -17,7 +17,7 @@ import spray.can.Http
  * configuration, especially when it comes to the threading model.
  */
 trait Web {
-  this: Api with CoreActors with Core =>
+  this: Api with ServiceActors with Core =>
 
   IO(Http)(system) ! Http.Bind(rootService, "0.0.0.0", port = 8080)
 
