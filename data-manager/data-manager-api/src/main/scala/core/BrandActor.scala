@@ -23,7 +23,6 @@ object BrandActor {
 
 
   sealed trait BrandError
-
   case class InvalidBrandRequest(reason: String) extends BrandError
   case class InternalBrandError(reason: Throwable) extends BrandError
 
@@ -82,20 +81,20 @@ class BrandActor(brandDAO: BrandDAO)(implicit val bindingModule: BindingModule) 
     case ListBrands => sender ! listBrands
   }
 
-  def replyToSender[T <: Any](response: Future[Either[BrandError, T]]): Unit = {
+  def replyToSender[T <: Any](response: Future[ResponseWithFailure[BrandError, T]]): Unit = {
     val replyTo = sender
 
     response recover {
       case t =>
         log.warning("Internal error: {}", t)
-        Left(InternalBrandError(t))
+        FailureResponse(InternalBrandError(t))
     } foreach {
-      responseContent : Either[BrandError, T] =>
+      responseContent : ResponseWithFailure[BrandError, T] =>
         replyTo ! responseContent
     }
   }
 
-  def createBrand(request: BrandData): Future[Either[BrandError, BrandResponse]] = successful {
+  def createBrand(request: BrandData): Future[ResponseWithFailure[BrandError, BrandResponse]] = successful {
 
     validateBrand(request) match {
       case None =>
@@ -103,11 +102,11 @@ class BrandActor(brandDAO: BrandDAO)(implicit val bindingModule: BindingModule) 
         val newbrand = Brand(name = request.name, iconPath = request.iconPath, ads = List[AdvertisementMetadata]())
         val uuid=brandDAO.insertNew(newbrand).get
         val response=BrandResponse(uuid)
-        Right(response)
+        SuccessResponse(response)
 
       case Some(error) =>
         log.info("Validation failed "+error)
-        Left(InvalidBrandRequest(error))
+        FailureResponse(InvalidBrandRequest(error))
     }
   }
   def listBrands: List[BrandRecord]= {

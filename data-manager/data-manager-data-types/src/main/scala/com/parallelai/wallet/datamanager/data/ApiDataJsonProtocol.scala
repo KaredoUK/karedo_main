@@ -4,10 +4,12 @@ import com.parallelai.wallet.datamanager.data._
 
 import org.joda.time.DateTime
 import org.joda.time.format.{DateTimeFormat, ISODateTimeFormat}
+import spray.http.StatusCode
+import spray.http.StatusCodes._
 import spray.json._
 import java.util.UUID
 
-object ApiDataJsonProtocol extends DefaultJsonProtocol {
+object ApiDataJsonProtocol extends DefaultJsonProtocol  {
 
   implicit object UuidJsonFormat extends RootJsonFormat[UUID] {
     def write(x: UUID) = JsString(x.toString)

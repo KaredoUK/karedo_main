@@ -5,7 +5,7 @@ import api.Api
 import com.escalatesoft.subcut.inject.NewBindingModule._
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import com.typesafe.config.ConfigFactory
-import core.{BootedCore, ServiceActors}
+import core.{MessageActors, BootedCore, ServiceActors}
 import parallelai.wallet.config.AppConfigPropertySource
 import web.Web
 
@@ -16,7 +16,7 @@ class RestServiceWithMockServiceActors(
   override val editAccount: ActorRef,
   override val brand: ActorRef,
   override val registration: ActorRef
-) extends Injectable with BootedCore with ServiceActors with Api with Web {
+) extends Injectable with BootedCore with ServiceActors with MessageActors with Api with Web {
   // Define The Configuration for the tests
   implicit def configProvider = AppConfigPropertySource(
     ConfigFactory.parseString(

@@ -42,7 +42,7 @@ object RegistrationActor {
   case object InvalidValidationCode extends RegistrationError
   case class InternalRegistrationError(throwable: Throwable) extends RegistrationError
 
-  implicit object RegistrationErrorJsonFormat extends RootJsonFormat[RegistrationError] {
+  implicit object registrationErrorJsonFormat extends RootJsonFormat[RegistrationError] {
     def write(error: RegistrationError) =  error match {
       case ApplicationAlreadyRegistered => JsString("ApplicationAlreadyRegistered")
       case UserAlreadyRegistered => JsString("UserAlreadyRegistered")
@@ -94,9 +94,9 @@ object RegistrationActor {
   case class AddApplication(applicationId: ApplicationID, accountId: UserID)
 
   def withValidations[Request, Error, Response](request: Request)(validations: (Request => Future[Option[Error]])*)
-                                               (successFlow: Request => Future[Either[Error, Response]])
+                                               (successFlow: Request => Future[ResponseWithFailure[Error, Response]])
                                                (implicit executionContext: ExecutionContext)
-    : Future[Either[Error, Response]] = {
+    : Future[ResponseWithFailure[Error, Response]] = {
     val validationResult = validations.foldLeft[Future[Option[Error]]](successful(None)) {
       case (currStatus, currFunction) =>
         currStatus flatMap { _ match {
@@ -107,7 +107,7 @@ object RegistrationActor {
     }
     validationResult flatMap {
       _ match {
-        case Some(validationError) => successful(Left(validationError))
+        case Some(validationError) => successful(FailureResponse(validationError))
         case None => successFlow(request)
       }
     }
@@ -137,7 +137,7 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
     case validation: RegistrationValidation => replyToSender { validateUser(validation) }
   }
 
-  def registerUser(registrationRequest: RegistrationRequest): Future[Either[RegistrationError, RegistrationResponse]] =
+  def registerUser(registrationRequest: RegistrationRequest): Future[ResponseWithFailure[RegistrationError, RegistrationResponse]] =
     withValidations(registrationRequest) ( validUserIdentification, applicationNotRegistered, noActiveAccountForMsisdnOrEmail ) { request =>
 
       log.debug("Creating new account for request {}", request)
@@ -153,12 +153,12 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
     }
 
 
-  def registerApplication(registrationRequest: AddApplication): Future[Either[RegistrationError, RegistrationResponse]] =
+  def registerApplication(registrationRequest: AddApplication): Future[ResponseWithFailure[RegistrationError, RegistrationResponse]] =
     withValidations(registrationRequest) ( applicationNotRegistered ) { request =>
 
       userAccountDAO.getById(request.accountId) map {
         _ match {
-          case None => Left(InvalidRegistrationRequest(s"User with ID ${registrationRequest.accountId} doesn't exist"))
+          case None => FailureResponse(InvalidRegistrationRequest(s"User with ID ${registrationRequest.accountId} doesn't exist"))
 
           case Some(userAccount) =>
             val activationCode = newActivationCode
@@ -175,13 +175,13 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
       }
     }
 
-  def validateUser(validation: RegistrationValidation) : Future[Either[RegistrationError, RegistrationValidationResponse]] = async {
+  def validateUser(validation: RegistrationValidation) : Future[ResponseWithFailure[RegistrationError, RegistrationValidationResponse]] = async {
     val clientAppOption = await {
       clientApplicationDAO.getById(validation.applicationId)
     }
 
     clientAppOption match {
-      case None => Left(InvalidRegistrationRequest(s"Unable to find client application with ID '${validation.applicationId}'"))
+      case None => FailureResponse(InvalidRegistrationRequest(s"Unable to find client application with ID '${validation.applicationId}'"))
 
       case Some(clientApplication) =>
         // I don't care if the user validates twice. I just check the validation code
@@ -192,18 +192,18 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
             clientApplicationDAO.update(clientApplication copy (active = true))
             userAccountDAO.setActive(user.id)
 
-            Right(RegistrationValidationResponse(validation.applicationId, user.id))
+            SuccessResponse(RegistrationValidationResponse(validation.applicationId, user.id))
           } getOrElse {
-            Left(InternalRegistrationError(new IllegalStateException(s"Unable to find user for valid application ID '${validation.applicationId}'")))
+            FailureResponse(InternalRegistrationError(new IllegalStateException(s"Unable to find user for valid application ID '${validation.applicationId}'")))
           }
         } else {
-          Left(InvalidValidationCode)
+          FailureResponse(InvalidValidationCode)
         }
     }
 
   }
 
-  private def activateApplication(applicationId: ApplicationID, accountId: UserID, userContacts: WithUserContacts, validationCode: String) : Either[RegistrationError, RegistrationResponse] = {
+  private def activateApplication(applicationId: ApplicationID, accountId: UserID, userContacts: WithUserContacts, validationCode: String) : ResponseWithFailure[RegistrationError, RegistrationResponse] = {
     log.info("Validation code for registration request of application {} is '{}'", applicationId, validationCode)
 
     val activationMessage = s"Welcome to Karedo, your activation code is $validationCode. " +
@@ -211,23 +211,23 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
 
     if(userContacts.msisdn.isDefined) {
       messengerActor ! SendMessage(URI.create(s"sms:${userContacts.msisdn.get}"), activationMessage)
-      Right(RegistrationResponse(applicationId, "msisdn", userContacts.msisdn.get))
+      SuccessResponse(RegistrationResponse(applicationId, "msisdn", userContacts.msisdn.get))
     }
     else {
       messengerActor ! SendMessage(URI.create(s"mailto:${userContacts.email.get}"), activationMessage, "Welcome to Karedo")
-      Right(RegistrationResponse(applicationId, "email", userContacts.email.get))
+      SuccessResponse(RegistrationResponse(applicationId, "email", userContacts.email.get))
     }
   }
 
-  def replyToSender[T <: Any](response: Future[Either[RegistrationError, T]]): Unit = {
+  def replyToSender[T <: Any](response: Future[ResponseWithFailure[RegistrationError, T]]): Unit = {
     val replyTo = sender
 
     response recover {
       case t =>
         log.warning("Internal error: {}", t)
-        Left(InternalRegistrationError(t))
+        FailureResponse(InternalRegistrationError(t))
     } foreach {
-      responseContent : Either[RegistrationError, T] =>
+      responseContent : ResponseWithFailure[RegistrationError, T] =>
         replyTo ! responseContent
     }
   }

@@ -2,13 +2,17 @@ package api
 
 import com.mongodb.casbah.Imports._
 import com.parallelai.wallet.datamanager.data._
+import core.BrandActor.{InternalBrandError, InvalidBrandRequest, BrandError}
 import core.EditAccountActor.EditAccountError
+import spray.httpx.marshalling.{CollectingMarshallingContext, Marshaller}
+import spray.json.RootJsonFormat
 import spray.routing.Directives
 import scala.concurrent.ExecutionContext
 import akka.actor.ActorRef
-import core.{User, RegistrationActor}
+import core.{EditAccountActor, ResponseWithFailure, User, RegistrationActor}
 import akka.util.Timeout
 import RegistrationActor._
+import EditAccountActor._
 import spray.http._
 import spray.http.StatusCodes._
 import com.parallelai.wallet.datamanager.data._
@@ -18,31 +22,20 @@ import parallelai.wallet.entity.UserAccount
 import core.EditAccountActor._
 import java.util.UUID
 
-class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(implicit executionContext: ExecutionContext)
-  extends Directives with DefaultJsonFormats {
 
-  //import data.ApiDataJsonProtocol
+class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(implicit executionContext: ExecutionContext)
+  extends Directives with DefaultJsonFormats with ApiErrorsJsonProtocol {
 
   import akka.pattern.ask
   import scala.concurrent.duration._
   implicit val timeout = Timeout(20.seconds)
-
-  implicit object EitherErrorSelector extends ErrorSelector[RegistrationError] {
-    def apply(error: RegistrationError): StatusCode = error match {
-      case InvalidRegistrationRequest(reason) => BadRequest
-      case ApplicationAlreadyRegistered => BadRequest
-      case UserAlreadyRegistered => BadRequest
-      case InvalidValidationCode => Unauthorized
-      case InternalRegistrationError(_) => InternalServerError
-    }
-  }
 
   val route =
     path("account") {
       post {
         handleWith {
           registrationRequest: RegistrationRequest =>
-            (registrationActor ? registrationRequest).mapTo[Either[RegistrationError, RegistrationResponse]]
+            (registrationActor ? registrationRequest).mapTo[ResponseWithFailure[RegistrationError, RegistrationResponse]]
         }
       } ~
       get {
@@ -58,7 +51,7 @@ class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(im
     path("account" / JavaUUID / "application" / JavaUUID ) { (accountId: UserID, applicationId: ApplicationID) =>
       put {
         complete {
-          (registrationActor ? AddApplication(applicationId, accountId)).mapTo[Either[RegistrationError, RegistrationResponse]]
+          (registrationActor ? AddApplication(applicationId, accountId)).mapTo[ResponseWithFailure[RegistrationError, RegistrationResponse]]
         }
       }
     } ~
@@ -81,7 +74,7 @@ class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(im
     path("account" / "application" / "validation") {
       post {
         handleWith {
-          registrationValidation: RegistrationValidation =>  (registrationActor ? registrationValidation).mapTo[Either[RegistrationError, RegistrationValidationResponse]]
+          registrationValidation: RegistrationValidation =>  (registrationActor ? registrationValidation).mapTo[ResponseWithFailure[RegistrationError, RegistrationValidationResponse]]
         }
       }
     } ~
@@ -99,10 +92,7 @@ class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(im
         post {
           handleWith {
             brandIdRequest: BrandIDRequest =>
-
-              (editAccountActor ? AddBrand(accountId, brandIdRequest.brandId)).mapTo[Either[EditAccountError, String]]
-
-
+              (editAccountActor ? AddBrand(accountId, brandIdRequest.brandId)).mapTo[ResponseWithFailure[EditAccountError, String]]
           }
         }
       }

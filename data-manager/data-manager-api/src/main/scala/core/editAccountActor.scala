@@ -7,7 +7,7 @@ import akka.actor.Actor.Receive
 import parallelai.wallet.persistence.{BrandDAO, ClientApplicationDAO, UserAccountDAO}
 import com.parallelai.wallet.datamanager.data._
 import parallelai.wallet.entity.{UserPersonalInfo, AccountSettings, UserAccount}
-import spray.json.{JsValue, JsString, JsObject, RootJsonFormat}
+import spray.json._
 import scala.async.Async._
 import scala.concurrent.Future._
 import scala.concurrent.{ExecutionContext, Future}
@@ -27,9 +27,9 @@ object EditAccountActor {
   case class AddBrand(accountId: UserID, brandId: UUID)
 
   def withValidations[Request, Error, Response](request: Request)(validations: (Request => Future[Option[Error]])*)
-                                               (successFlow: Request => Future[Either[Error, Response]])
+                                               (successFlow: Request => Future[ResponseWithFailure[Error, Response]])
                                                (implicit executionContext: ExecutionContext)
-  : Future[Either[Error, Response]] = {
+  : Future[ResponseWithFailure[Error, Response]] = {
     val validationResult = validations.foldLeft[Future[Option[Error]]](successful(None)) {
       case (currStatus, currFunction) =>
         currStatus flatMap {
@@ -41,25 +41,19 @@ object EditAccountActor {
     }
     validationResult flatMap {
       _ match {
-        case Some(validationError) => successful(Left(validationError))
+        case Some(validationError) => successful(FailureResponse(validationError))
         case None => successFlow(request)
       }
     }
   }
 
   sealed trait EditAccountError
-
   case class UserNotExistent(user: UserID) extends EditAccountError
-
   case class BrandNotExistent(brand: UUID) extends EditAccountError
-
   case class BrandAlreadySubscribed(brand: UUID) extends EditAccountError
-
   case class InternalEditAccountError(throwable: Throwable) extends EditAccountError
 
-  case object Empty extends EditAccountError
-
-  implicit object EditAccountErrorJsonFormat extends RootJsonFormat[EditAccountError] {
+  implicit object editAccountErrorJsonFormat extends RootJsonWriter[EditAccountError] {
     def write(error: EditAccountError) = error match {
       case UserNotExistent(user) => JsObject(
         "type" -> JsString("UserNotExistent"),
@@ -85,10 +79,7 @@ object EditAccountActor {
           "reason" -> JsString(reason.toString)
         }
       )
-      case Empty => JsString("Empty")
     }
-
-    override def read(json: JsValue): EditAccountError = Empty
   }
 
 }
@@ -168,7 +159,7 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
     }
   }
 
-  def addBrand(request: AddBrand): Future[Either[EditAccountError, Unit]] =
+  def addBrand(request: AddBrand): Future[ResponseWithFailure[EditAccountError, String]] =
 
     withValidations(request)(validAddBrand) {
       request => {
@@ -178,7 +169,7 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
 
         userAccountDAO.addBrand(user, brand)
 
-        successful(Right(""))
+        successful(SuccessResponse(""))
       }
     }
 
