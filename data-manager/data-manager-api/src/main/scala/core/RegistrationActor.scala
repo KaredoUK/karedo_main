@@ -36,7 +36,7 @@ import scala.util.Try
 object RegistrationActor {
 
   def props( userAccountDAO : UserAccountDAO, clientApplicationDAO : ClientApplicationDAO, messengerActor: ActorRef)(implicit bindingModule : BindingModule) : Props =
-    Props( classOf[RegistrationActor], userAccountDAO, clientApplicationDAO, messengerActor, bindingModule)
+    Props( new RegistrationActor(userAccountDAO, clientApplicationDAO, messengerActor) )
 
   sealed trait RegistrationError
   case object ApplicationAlreadyRegistered extends RegistrationError

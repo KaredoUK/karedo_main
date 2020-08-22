@@ -17,8 +17,8 @@ class RestServiceWithMockPersistence(
   val servicePort: Int,
   override val brandDAO: BrandDAO,
   override val clientApplicationDAO: ClientApplicationDAO,
-  override val userAccountDAO: UserAccountDAO) extends Injectable with BootedCore with Persistence with BaseCoreActors with MessageActors with Api with Web {
-
+  override val userAccountDAO: UserAccountDAO,
+  override val messenger: ActorRef) extends Injectable with BootedCore with Persistence with MessageActors with BaseCoreActors with Api with Web {
 
   // Define The Configuration for the tests
   implicit def configProvider = AppConfigPropertySource(
@@ -66,6 +66,4 @@ class RestServiceWithMockPersistence(
   // Create a dependency injection module reading this configuration
   // don't use val otherwise you'll have a null pointer exception
   override implicit lazy val bindingModule : BindingModule = newBindingModuleWithConfig
-
-  override val messenger: ActorRef = ActorRef.noSender
 }

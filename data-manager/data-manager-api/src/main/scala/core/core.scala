@@ -88,8 +88,8 @@ trait RestMessageActors extends MessageActors {
  * This trait contains the actors that make up our application; it can be mixed in with
  * ``BootedCore`` for running code or ``TestKit`` for unit and integration tests.
  */
-trait BaseCoreActors extends ServiceActors with MessageActors {
-  this: Core with Persistence with Injectable  =>
+trait BaseCoreActors extends ServiceActors  {
+  this: Core with Persistence with Injectable with MessageActors =>
 
   val brandActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.brand") getOrElse 3
   val registrationActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.registration") getOrElse 3

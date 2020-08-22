@@ -1,6 +1,7 @@
 package util
 
 import akka.actor.ActorSystem
+import akka.testkit.TestProbe
 import org.specs2.mock.Mockito
 import org.specs2.mutable.SpecificationLike
 import org.specs2.specification.{Step, Fragments}
@@ -34,7 +35,8 @@ trait ApiHttpClientSpec extends SpecificationLike with NoTimeConversions with Mo
   val mockedClientApplicationDAO = mock[ClientApplicationDAO]
   val mockedUserAccountDAO = mock[UserAccountDAO]
 
-  lazy val server = new RestServiceWithMockPersistence(servicePort, mockedBrandDAO, mockedClientApplicationDAO, mockedUserAccountDAO)
+  val messagerActor = TestProbe()
+  lazy val server = new RestServiceWithMockPersistence(servicePort, mockedBrandDAO, mockedClientApplicationDAO, mockedUserAccountDAO, messagerActor.ref)
 
   def stopServer(): Unit = {
     println("Shutting down actor context")
