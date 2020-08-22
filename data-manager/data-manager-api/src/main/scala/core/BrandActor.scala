@@ -1,27 +1,16 @@
 package core
 
-import java.net.URI
-
-import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
-import core.BrandActor.{InvalidBrandRequest, BrandError}
-import core.MessengerActor.SendMessage
-import parallelai.wallet.persistence.{BrandDAO, ClientApplicationDAO, UserAccountDAO}
-import akka.actor.{Props, ActorLogging, ActorRef, Actor}
+import akka.actor.{Actor, ActorLogging, Props}
+import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import com.parallelai.wallet.datamanager.data._
-import sun.management.jdp.JdpJmxPacket
-import scala.concurrent.{ExecutionContext, Future}
-import scala.async.Async._
-import java.util.UUID
+import core.BrandActor.{BrandError, InternalBrandError, InvalidBrandRequest}
+import parallelai.wallet.entity.{Brand, _}
+import parallelai.wallet.persistence.BrandDAO
 import spray.json._
-import parallelai.wallet.entity._
-import com.parallelai.wallet.datamanager.data._
-import scala.Some
-import org.apache.commons.lang.math.RandomUtils
-import org.apache.commons.lang.RandomStringUtils
-import javax.management.InvalidApplicationException
-import scala.Some
-import scala.Some
+
+import scala.concurrent.Future
 import scala.concurrent.Future.successful
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  * We use the companion object to hold all the messages that the ``BrandActor``
@@ -36,7 +25,7 @@ object BrandActor {
   sealed trait BrandError
 
   case class InvalidBrandRequest(reason: String) extends BrandError
-  case class InternalBrandError(reason: String) extends BrandError
+  case class InternalBrandError(reason: Throwable) extends BrandError
 
   implicit object brandErrorJsonFormat extends RootJsonFormat[BrandError] {
     def write(error: BrandError) = error match {
@@ -49,7 +38,7 @@ object BrandActor {
       case InternalBrandError(reason) => JsObject(
         "type" -> JsString("InternalBrandError"),
         "data" -> JsObject {
-          "reason" -> JsString(reason)
+          "reason" -> JsString(reason.getMessage)
         }
       )
     }
@@ -74,7 +63,7 @@ object BrandActor {
               InvalidBrandRequest(readReasonFromData(attributes))
 
             case Some(JsString("InternalBrandError")) =>
-              InternalBrandError(readReasonFromData(attributes))
+              InternalBrandError(new Throwable(readReasonFromData(attributes)))
 
             case _ => throw new IllegalArgumentException(s"Unable to unmarshall BrandError from JSON value ${value.prettyPrint}, invalid type field value")
           }
@@ -89,10 +78,24 @@ object BrandActor {
 class BrandActor(brandDAO: BrandDAO)(implicit val bindingModule: BindingModule) extends Actor with ActorLogging with Injectable {
 
   def receive: Receive = {
-    case request: BrandData => sender ! createBrand(request)
+    case request: BrandData => replyToSender(createBrand(request))
+    case ListBrands => sender ! listBrands
   }
 
-  def createBrand(request: BrandData): Either[BrandError, BrandResponse] = {
+  def replyToSender[T <: Any](response: Future[Either[BrandError, T]]): Unit = {
+    val replyTo = sender
+
+    response recover {
+      case t =>
+        log.warning("Internal error: {}", t)
+        Left(InternalBrandError(t))
+    } foreach {
+      responseContent : Either[BrandError, T] =>
+        replyTo ! responseContent
+    }
+  }
+
+  def createBrand(request: BrandData): Future[Either[BrandError, BrandResponse]] = successful {
 
     validateBrand(request) match {
       case None =>
@@ -106,6 +109,11 @@ class BrandActor(brandDAO: BrandDAO)(implicit val bindingModule: BindingModule) 
         log.info("Validation failed "+error)
         Left(InvalidBrandRequest(error))
     }
+  }
+  def listBrands: List[BrandRecord]= {
+
+    brandDAO.list.map(b => BrandRecord(b.id,b.name, b.iconPath))
+
   }
 
   def validateBrand(request: BrandData): Option[String] = request match {

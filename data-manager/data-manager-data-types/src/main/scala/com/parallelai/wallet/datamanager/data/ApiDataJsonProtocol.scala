@@ -1,6 +1,7 @@
 package com.parallelai.wallet.datamanager.data
 
 import com.parallelai.wallet.datamanager.data._
+
 import org.joda.time.DateTime
 import org.joda.time.format.{DateTimeFormat, ISODateTimeFormat}
 import spray.json._
@@ -43,6 +44,7 @@ object ApiDataJsonProtocol extends DefaultJsonProtocol {
   implicit val userPointsJson = jsonFormat2(UserPoints)
 
   implicit val brandDataJson = jsonFormat2(BrandData)
+  implicit val brandRecordJson = jsonFormat3(BrandRecord)
   implicit val uuidJson = jsonFormat1(BrandResponse)
   implicit val brandIdJson = jsonFormat1(BrandIDRequest)
   implicit val statusJson = jsonFormat1(StatusResponse)

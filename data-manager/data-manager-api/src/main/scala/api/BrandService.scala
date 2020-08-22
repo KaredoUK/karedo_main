@@ -9,6 +9,7 @@ import com.parallelai.wallet.datamanager.data.BrandData
 import com.parallelai.wallet.datamanager.data.BrandResponse
 import core.BrandActor.{InternalBrandError, InvalidBrandRequest, BrandError}
 import ApiDataJsonProtocol._
+import parallelai.wallet.entity.Brand
 import spray.http.StatusCodes._
 import spray.http._
 import spray.routing.Directives
@@ -38,6 +39,15 @@ import scala.concurrent.duration._
 
   val route =
     path("brand") {
+
+      rejectEmptyResponse {
+        get {
+          complete {
+
+            (brandActor ? ListBrands).mapTo[List[BrandRecord]]
+          }
+        }
+      } ~
       post {
 
         handleWith {
@@ -48,5 +58,6 @@ import scala.concurrent.duration._
 
         }
       }
+
     }
 }
