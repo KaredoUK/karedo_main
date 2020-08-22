@@ -51,7 +51,7 @@ object TestController extends Controller with AppConfigInjection {
     // assert results
     // val ua = Await.result(userAccountDAO.getByApplicationId(applicationId), 10 seconds).get
 
-    val ca = Await.result(clientApplicationDAO.getById(applicationId), TOUT).get
+    val ca = clientApplicationDAO.getById(applicationId).get
     val registration = RegistrationValidation(applicationId, ca.activationCode)
     val validated = Await.result(client.validateRegistration(registration),TOUT)
     validated.userID

@@ -8,39 +8,39 @@ import scala.concurrent.Future
 trait UserAccountDAO {
 
 
-  def getById(userId: UUID) : Future[Option[UserAccount]]
+  def getById(userId: UUID) : Option[UserAccount]
 
-  def getByMsisdn(msisdn: String, mustBeActive: Boolean = false) : Future[Option[UserAccount]]
+  def getByMsisdn(msisdn: String, mustBeActive: Boolean = false) : Option[UserAccount]
 
-  def getByEmail(email: String, mustBeActive: Boolean = false) : Future[Option[UserAccount]]
+  def getByEmail(email: String, mustBeActive: Boolean = false) : Option[UserAccount]
 
-  def getByApplicationId(applicationId: UUID, mustBeActive: Boolean = false) : Future[Option[UserAccount]]
+  def getByApplicationId(applicationId: UUID, mustBeActive: Boolean = false) : Option[UserAccount]
 
-  def insertNew(userAccount: UserAccount, firstApplication: ClientApplication) : Future[Unit]
+  def insertNew(userAccount: UserAccount, firstApplication: ClientApplication) : Unit
 
-  def update(userAccount: UserAccount): Future[Unit]
+  def update(userAccount: UserAccount): Unit
 
-  def updateSubInfo(id: UUID, userInfo: UserPersonalInfo, personalSettings: AccountSettings): Future[Unit]
+  def updateSubInfo(id: UUID, userInfo: UserPersonalInfo, personalSettings: AccountSettings): Unit
 
-  def setActive(userId : UUID): Future[Unit]
+  def setActive(userId : UUID): Unit
 
-  def setEmail(userId: UUID, email: String) : Future[Unit]
+  def setEmail(userId: UUID, email: String) : Unit
 
-  def setMsisdn(userId: UUID, msisdn: String) : Future[Unit]
+  def setMsisdn(userId: UUID, msisdn: String) : Unit
 
-  def setPassword(userId: UUID, password: String) : Future[Unit]
+  def setPassword(userId: UUID, password: String) : Unit
 
-  def findByAnyOf(applicationId: Option[UUID], msisdn: Option[String], email: Option[String]) : Future[Option[UserAccount]]
+  def findByAnyOf(applicationId: Option[UUID], msisdn: Option[String], email: Option[String]) : Option[UserAccount]
 
-  def delete(userId: UUID) : Future[Unit]
+  def delete(userId: UUID) : Unit
 
-  def addBrand(userId: UUID, brandId: UUID): Future[Unit]
+  def addBrand(userId: UUID, brandId: UUID): Unit
 
-  def getBrand(userId: UUID, brandId: UUID) : Future[Boolean]
+  def getBrand(userId: UUID, brandId: UUID) : Boolean
 
-  def deleteBrand(userId: UUID, brandId: UUID): Future[Unit]
+  def deleteBrand(userId: UUID, brandId: UUID): Unit
 
-  def listUserSubscribedBrands(userId: UUID): Future[List[SubscribedBrands]]
+  def listUserSubscribedBrands(userId: UUID): List[SubscribedBrands]
 
 }
 

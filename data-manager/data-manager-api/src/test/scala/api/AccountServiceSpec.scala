@@ -9,11 +9,14 @@ import parallelai.wallet.entity.{UserAccount, ClientApplication}
 import spray.client.pipelining._
 import util.ApiHttpClientSpec
 import scala.concurrent.Future._
+import scala.concurrent.duration._
 
 class AccountServiceSpec extends ApiHttpClientSpec {
   import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
   import parallelai.wallet.util.SprayJsonSupport._
 
+
+  override def responseTimeout = 30.seconds
 
 //  val inactiveApp = new Matcher[ClientApplication] {
 //    override def apply[S <: ClientApplication](t: Expectable[S]): MatchResult[S] = {
@@ -25,8 +28,8 @@ class AccountServiceSpec extends ApiHttpClientSpec {
     "Register a new user using MSISDN inserting a new account with validation code in the DB" in {
       val pipeline = sendReceive ~> unmarshal[RegistrationResponse]
 
-      mockedClientApplicationDAO.getById(any[UUID]) returns successful(None)
-      mockedUserAccountDAO.findByAnyOf(any[Option[UUID]], any[Option[String]], any[Option[String]])
+      mockedClientApplicationDAO.getById(any[UUID]) returns None
+      mockedUserAccountDAO.findByAnyOf(any[Option[UUID]], any[Option[String]], any[Option[String]]) returns None
 
       val applicationId = UUID.randomUUID()
       val msisdn = "00123123123"

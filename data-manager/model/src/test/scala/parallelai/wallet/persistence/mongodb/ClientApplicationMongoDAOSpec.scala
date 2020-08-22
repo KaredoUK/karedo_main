@@ -32,69 +32,56 @@ class ClientApplicationMongoDAOSpec extends Specification with EmbedConnection w
 
 
     "Find a user's application" in {
-      val findAfterInsert = for {
-          createNew <- accountDAO.insertNew(userAccount, clientApplication)
-          getAppById <- clientAppDAO.getById(clientApplication.id)
-        } yield getAppById
+      accountDAO.insertNew(userAccount, clientApplication)
+      val findAfterInsert = clientAppDAO.getById(clientApplication.id)
 
-      fromFuture(findAfterInsert) shouldEqual Some(clientApplication)
+      findAfterInsert shouldEqual Some(clientApplication)
     }
 
     "Find a user by app id" in {
-      val findUserByAppId = for {
-        createNew <- accountDAO.insertNew(userAccount, clientApplication)
-        findUserByAppId <- accountDAO.getByApplicationId(clientApplication.id)
-      } yield findUserByAppId
+      accountDAO.insertNew(userAccount, clientApplication)
+      val findUserByAppId = accountDAO.getByApplicationId(clientApplication.id)
 
-      fromFuture(findUserByAppId) shouldEqual Some(userAccount)
+      findUserByAppId shouldEqual Some(userAccount)
     }
 
     "Update an application" in {
       val updated = clientApplication.copy(activationCode = "new activation code", active = true)
-      val findAfterUpdate = for {
-        createNew <- accountDAO.insertNew(userAccount, clientApplication)
-        update <- clientAppDAO.update(updated)
-        updated <- clientAppDAO.getById(clientApplication.id)
-      } yield updated
+      accountDAO.insertNew(userAccount, clientApplication)
+      clientAppDAO.update(updated)
+      val findAfterUpdate = clientAppDAO.getById(clientApplication.id)
 
-      fromFuture(findAfterUpdate) shouldEqual Some(updated)
+      findAfterUpdate shouldEqual Some(updated)
     }
 
     "Add a new application to an existing user, shoud be in the DB" in {
       val secondClientApplication = ClientApplication(UUID.randomUUID(), userAccount.id, "ACT_CODE")
 
-      val findAfterAddingToUser = for {
-        createNew <- accountDAO.insertNew(userAccount, clientApplication)
-        update <- clientAppDAO.insertNew(secondClientApplication)
-        inserted <- clientAppDAO.getById(secondClientApplication.id)
-      } yield inserted
+      accountDAO.insertNew(userAccount, clientApplication)
+      clientAppDAO.insertNew(secondClientApplication)
+      val findAfterAddingToUser = clientAppDAO.getById(secondClientApplication.id)
 
-      fromFuture(findAfterAddingToUser) shouldEqual Some(secondClientApplication)
-      None shouldEqual None
+      findAfterAddingToUser shouldEqual Some(secondClientApplication)
     }
 
     "Load an account with two apps" in {
       val secondClientApplication = ClientApplication(UUID.randomUUID(), userAccount.id, "ACT_CODE")
 
-      val findAfterAddingToUser = for {
-        createNew <- accountDAO.insertNew(userAccount, clientApplication, secondClientApplication)
-        user <- accountDAO.getById(userAccount.id)
-        inserted <- clientAppDAO.getById(secondClientApplication.id)
-      } yield inserted
+      accountDAO.insertNew(userAccount, clientApplication, secondClientApplication)
+      accountDAO.getById(userAccount.id)
+      val findAfterAddingToUser = clientAppDAO.getById(secondClientApplication.id)
 
-      fromFuture(findAfterAddingToUser) shouldEqual Some(secondClientApplication)
+      findAfterAddingToUser shouldEqual Some(secondClientApplication)
     }
 
     "Add a new application to an existing user, should be associeted to the user" in {
       val secondClientApplication = ClientApplication(UUID.randomUUID(), userAccount.id, "ACT_CODE")
 
-      val findUserAfterAddingNewApp = for {
-        createNew <- accountDAO.insertNew(userAccount, clientApplication)
-        update <- clientAppDAO.insertNew(secondClientApplication)
-        findUserByAppId <- accountDAO.getByApplicationId(secondClientApplication.id)
-      } yield findUserByAppId
+      accountDAO.insertNew(userAccount, clientApplication)
+      clientAppDAO.insertNew(secondClientApplication)
+      val findUserAfterAddingNewApp = accountDAO.getByApplicationId(secondClientApplication.id)
 
-      fromFuture(findUserAfterAddingNewApp) shouldEqual Some(userAccount)
+      findUserAfterAddingNewApp shouldEqual Some(userAccount)
     }
 
   }

@@ -59,7 +59,7 @@ class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(im
       rejectEmptyResponse {
         get {
           complete {
-            (editAccountActor ? GetAccount(accountId)).mapTo[Option[UserProfile]]
+            (editAccountActor ? GetAccount(accountId)).mapTo[ResponseWithFailure[EditAccountError, Option[UserProfile]]]
           }
         }
       } ~

@@ -18,7 +18,9 @@ trait ApiHttpClientSpec extends SpecificationLike with NoTimeConversions with Mo
   // Problems acting on same mocks when running in parallel
   sequential
 
-  def wait[T](future: Future[T]): T = result(future, 5.seconds)
+  def responseTimeout = 5.seconds
+
+  def wait[T](future: Future[T]): T = result(future, responseTimeout)
 
   implicit val system = ActorSystem(s"${getClass.getSimpleName}ClientSystem")
 
