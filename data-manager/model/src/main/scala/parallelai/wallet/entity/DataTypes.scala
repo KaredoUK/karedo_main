@@ -22,5 +22,5 @@ case class UserOffers(userId: UUID, rewards: Set[UUID])
 case class Offer(id: UUID, brandId: UUID, description: String, imagePath: String, qrCodePath: String, value: Long)
 
 case class AdvertisementMetadata(detailId: UUID, publishedDate: DateTime)
-case class AdvertisementDetail(id: UUID, text: String, imagePath: String, value: Int)
+case class AdvertisementDetail(@Key("_id") id: UUID = UUID.randomUUID(), text: String, imagePath: String, value: Int)
 case class Brand(@Key("_id") id: UUID = UUID.randomUUID(), name: String, iconPath: String, ads: List[AdvertisementMetadata])

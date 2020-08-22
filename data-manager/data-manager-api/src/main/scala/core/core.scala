@@ -11,7 +11,7 @@ import parallelai.wallet.persistence.{BrandDAO, ClientApplicationDAO, UserAccoun
 import parallelai.wallet.config.AppConfigPropertySource
 import com.typesafe.config.ConfigFactory
 import com.escalatesoft.subcut.inject.NewBindingModule._
-import parallelai.wallet.persistence.mongodb.{MongoBrandDAO, ClientApplicationMongoDAO, UserAccountMongoDAO}
+import parallelai.wallet.persistence.mongodb.{BrandMongoDAO, ClientApplicationMongoDAO, UserAccountMongoDAO}
 
 import scala.concurrent.Future
 
@@ -58,7 +58,7 @@ trait MongoPersistence extends Persistence {
   self : Injectable =>
   
   override val userAccountDAO : UserAccountDAO = new UserAccountMongoDAO() 
-  override val brandDAO : BrandDAO = new MongoBrandDAO()
+  override val brandDAO : BrandDAO = new BrandMongoDAO()
   override val clientApplicationDAO : ClientApplicationDAO = new ClientApplicationMongoDAO()
 }
 

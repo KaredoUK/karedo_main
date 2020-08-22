@@ -3,6 +3,7 @@ package parallelai.wallet.persistence.mongodb
 import java.util.UUID
 
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
+import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
 
 
 import parallelai.wallet.entity.{AdvertisementMetadata, UserPersonalInfo, AccountSettings, Brand}
@@ -17,14 +18,18 @@ import com.mongodb.casbah.Imports._
 
 
 
+
+
+
 import scala.concurrent.Future
 import scala.concurrent.Future._
 
 /**
  * Created by pakkio on 29/09/2014.
  */
-class MongoBrandDAO (implicit val bindingModule: BindingModule) extends BrandDAO with MongoConnection with Injectable   {
+class BrandMongoDAO (implicit val bindingModule: BindingModule) extends BrandDAO with MongoConnection with Injectable   {
 
+  RegisterJodaTimeConversionHelpers()
   val dao = new SalatDAO[Brand, UUID](collection = db("Brand")) {}
 
   def byId(id: UUID) = MongoDBObject("_id" -> id)
@@ -56,5 +61,20 @@ class MongoBrandDAO (implicit val bindingModule: BindingModule) extends BrandDAO
 
   override def list: List[Brand] = {
       dao.find(MongoDBObject.empty).toList
+  }
+
+  override def addAdvertisement(brandId: UUID, adv: AdvertisementMetadata): Unit = {
+      dao.update(
+        byId(brandId),
+        $push("ads" -> grater[AdvertisementMetadata].asDBObject(adv))
+      )
+  }
+
+  override def listAds(brandId: UUID) = {
+    dao.findOneById(brandId) match {
+      case Some(b) => b.ads
+      case None => List[AdvertisementMetadata]()
+    }
+
   }
 }
