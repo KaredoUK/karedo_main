@@ -45,7 +45,7 @@ class RestServiceWithMockPersistence(
         |
         |ui {
         |  web {
-        |    server.address = "http://localhost:9000"
+        |    server.address = "http://localhost:$servicePort"
         |  }
         |}
         |

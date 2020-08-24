@@ -3,7 +3,7 @@ package util
 import akka.actor.ActorSystem
 import akka.testkit.TestProbe
 import org.specs2.mock.Mockito
-import org.specs2.mutable.SpecificationLike
+import org.specs2.mutable.{After, SpecificationLike}
 import org.specs2.specification.{Step, Fragments}
 import org.specs2.time.NoTimeConversions
 import parallelai.wallet.persistence.{BrandDAO, ClientApplicationDAO, UserAccountDAO}
@@ -16,34 +16,30 @@ import scala.util.Random
 
 
 trait ApiHttpClientSpec extends SpecificationLike with NoTimeConversions with Mockito {
-  // Problems acting on same mocks when running in parallel
-  sequential
-
   def responseTimeout = 5.seconds
 
-  def wait[T](future: Future[T]): T = result(future, responseTimeout)
+  sequential
 
-  implicit val system = ActorSystem(s"${getClass.getSimpleName}ClientSystem")
+  trait WithMockedPersistenceRestService extends After {
+    val servicePort : Int = Math.abs( Random.nextInt(3000) ) + 10000
+    val serviceUrl = s"http://localhost:$servicePort"
 
-  // execution context for futures
+    implicit val system = ActorSystem(s"${getClass.getSimpleName}ClientSystem".replace('$', 'S'))
 
-  lazy val servicePort : Int = Math.abs( Random.nextInt(2000) ) + 10000
+    def wait[T](future: Future[T]): T = result(future, responseTimeout)
 
-  val serviceUrl = s"http://localhost:$servicePort"
+    lazy val mockedBrandDAO = mock[BrandDAO]
+    lazy val mockedClientApplicationDAO = mock[ClientApplicationDAO]
+    lazy val mockedUserAccountDAO = mock[UserAccountDAO]
 
-  val mockedBrandDAO = mock[BrandDAO]
-  val mockedClientApplicationDAO = mock[ClientApplicationDAO]
-  val mockedUserAccountDAO = mock[UserAccountDAO]
+    lazy val messagerActor = TestProbe()
+    val server = new RestServiceWithMockPersistence(servicePort, mockedBrandDAO, mockedClientApplicationDAO, mockedUserAccountDAO, messagerActor.ref)
 
-  val messagerActor = TestProbe()
-  lazy val server = new RestServiceWithMockPersistence(servicePort, mockedBrandDAO, mockedClientApplicationDAO, mockedUserAccountDAO, messagerActor.ref)
+    def after = stopServer()
 
-  def stopServer(): Unit = {
-    println("Shutting down actor context")
-    system.shutdown()
+    def stopServer(): Unit = {
+      println("Shutting down actor context")
+      system.shutdown()
+    }
   }
-
-  override def map(fs: =>Fragments) = Step(server) ^ fs ^ Step(stopServer())
-
-
 }

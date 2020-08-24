@@ -14,7 +14,7 @@ class BrandServiceSpec extends ApiHttpClientSpec {
   import parallelai.wallet.util.SprayJsonSupport._
 
   "Brand Service" >>  {
-    "can create a new brand" in {
+    "can create a new brand" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[BrandResponse]
 
       val newBrandUUID = UUID.randomUUID()
@@ -27,7 +27,7 @@ class BrandServiceSpec extends ApiHttpClientSpec {
       response shouldEqual BrandResponse(newBrandUUID)
     }
 
-    "can retrieve a brand in the DB" in {
+    "can retrieve a brand in the DB" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[BrandData]
 
       val brand =  new Brand(UUID.randomUUID(), "brandName", "brandIcon", List.empty)
