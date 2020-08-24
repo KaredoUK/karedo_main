@@ -32,9 +32,11 @@ case class UserContacts(email: Option[String], msisdn: Option[String]) extends W
 
 // BRAND
 case object ListBrands
+case class ListBrandsAdverts(brandId: UUID)
 case class BrandRecord(id: UUID, name: String, iconPath: String)
 case class BrandData(name: String, iconPath: String )
 case class BrandResponse(id: UUID)
+case class AdvertisementDetailResponse(id: UUID, text: String, imagePath: String, value: Int)
 
 // add Brand to user
 case class BrandIDRequest(brandId: UUID)

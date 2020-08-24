@@ -1,19 +1,15 @@
 package api
 
 
+import java.util.UUID
 
 import akka.actor.ActorRef
 import akka.util.Timeout
-import com.parallelai.wallet.datamanager.data._
-import com.parallelai.wallet.datamanager.data.BrandData
-import com.parallelai.wallet.datamanager.data.BrandResponse
-import core.BrandActor.{InternalBrandError, InvalidBrandRequest, BrandError}
-import ApiDataJsonProtocol._
-import core.{SuccessResponse, FailureResponse, ResponseWithFailure}
-import parallelai.wallet.entity.Brand
-import spray.http.StatusCodes._
-import spray.http._
-import spray.httpx.marshalling.{CollectingMarshallingContext, Marshaller}
+import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
+import com.parallelai.wallet.datamanager.data.{BrandData, BrandResponse, ListBrandsAdverts, _}
+import core.BrandActor.BrandError
+import core.ResponseWithFailure
+
 import spray.routing.Directives
 
 import scala.concurrent.ExecutionContext
@@ -25,7 +21,8 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
 
 
   import akka.pattern.ask
- import scala.concurrent.duration._
+
+import scala.concurrent.duration._
   implicit val timeout = Timeout(20.seconds)
 
 
@@ -46,7 +43,19 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
           brandData: BrandData =>
               (brandActor ? brandData).mapTo[ResponseWithFailure[BrandError,BrandResponse]]
         }
+      } ~
+      path("brand" / JavaUUID / "advert") { brandId: UUID =>
+        rejectEmptyResponse {
+          get {
+            complete {
+              (brandActor ? ListBrandsAdverts(brandId)).mapTo[ResponseWithFailure[BrandError, List[AdvertisementDetailResponse]]]
+            }
+          }
+        }
+
+
       }
+
 
     }
 }
