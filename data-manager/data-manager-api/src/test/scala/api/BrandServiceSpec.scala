@@ -4,17 +4,20 @@ import com.parallelai.wallet.datamanager.data.{BrandData, BrandResponse}
 import org.specs2.mutable.Specification
 import parallelai.wallet.entity.Brand
 import spray.client.pipelining._
-import util.ApiHttpClientSpec
+import util.{RestApiSpecMatchers, ApiHttpClientSpec}
 
 import java.util.UUID
+import scala.concurrent.duration._
+import org.mockito.Matchers.{eq => argEq}
 
-
-class BrandServiceSpec extends ApiHttpClientSpec {
+class BrandServiceSpec extends ApiHttpClientSpec with RestApiSpecMatchers {
   import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
   import parallelai.wallet.util.SprayJsonSupport._
 
-  "Brand Service" >>  {
-    "can create a new brand" in new WithMockedPersistenceRestService {
+  override def responseTimeout = 30.seconds
+
+  "Brand Service" should  {
+    "create a new brand" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[BrandResponse]
 
       val newBrandUUID = UUID.randomUUID()

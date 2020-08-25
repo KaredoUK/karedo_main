@@ -79,6 +79,7 @@ class BrandActor(brandDAO: BrandDAO)(implicit val bindingModule: BindingModule) 
   def receive: Receive = {
     case request: BrandData => replyToSender(createBrand(request))
     case ListBrands => sender ! listBrands
+    case request: BrandIDRequest => replyToSender(getBrand(request))
   }
 
   def replyToSender[T <: Any](response: Future[ResponseWithFailure[BrandError, T]]): Unit = {
@@ -107,6 +108,13 @@ class BrandActor(brandDAO: BrandDAO)(implicit val bindingModule: BindingModule) 
       case Some(error) =>
         log.info("Validation failed "+error)
         FailureResponse(InvalidBrandRequest(error))
+    }
+  }
+
+  def getBrand(request: BrandIDRequest): Future[ResponseWithFailure[BrandError, BrandRecord]] = successful {
+    brandDAO.getById(request.brandId) match {
+      case Some(b) => SuccessResponse(BrandRecord(b.id,b.name,b.iconPath))
+      case None => FailureResponse(InvalidBrandRequest("Invalid id"))
     }
   }
   def listBrands: List[BrandRecord]= {

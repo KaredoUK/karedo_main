@@ -15,47 +15,62 @@ import spray.routing.Directives
 import scala.concurrent.ExecutionContext
 
 
-
 class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionContext)
   extends Directives with DefaultJsonFormats with ApiErrorsJsonProtocol {
 
 
   import akka.pattern.ask
 
-import scala.concurrent.duration._
+  import scala.concurrent.duration._
+
   implicit val timeout = Timeout(20.seconds)
 
 
-
-  val route =
+  val route1 =
     path("brand") {
 
-      rejectEmptyResponse {
-        get {
-          complete {
-
-            (brandActor ? ListBrands).mapTo[List[BrandRecord]]
-          }
-        }
-      } ~
       post {
         handleWith {
           brandData: BrandData =>
-              (brandActor ? brandData).mapTo[ResponseWithFailure[BrandError,BrandResponse]]
+            (brandActor ? brandData).mapTo[ResponseWithFailure[BrandError, BrandResponse]]
         }
       } ~
-      path("brand" / JavaUUID / "advert") { brandId: UUID =>
-        rejectEmptyResponse {
-          get {
+        get {
+          rejectEmptyResponse {
+
             complete {
-              (brandActor ? ListBrandsAdverts(brandId)).mapTo[ResponseWithFailure[BrandError, List[AdvertisementDetailResponse]]]
+
+              (brandActor ? ListBrands).mapTo[List[BrandRecord]]
             }
           }
         }
 
-
-      }
-
-
     }
+
+  val route2 =
+
+    path("brand" / JavaUUID) { brandId: UUID =>
+      rejectEmptyResponse {
+        get {
+          complete {
+
+            (brandActor ? BrandIDRequest(brandId)).mapTo[ResponseWithFailure[BrandError, BrandRecord]]
+          }
+        }
+      }
+    }
+
+  val route3 =
+
+    path("brand" / JavaUUID / "advert") { brandId: UUID =>
+      rejectEmptyResponse {
+        get {
+          complete {
+            (brandActor ? ListBrandsAdverts(brandId)).mapTo[ResponseWithFailure[BrandError, List[AdvertisementDetailResponse]]]
+          }
+        }
+      }
+    }
+
+  val route = route1 ~ route2 ~ route3
 }
