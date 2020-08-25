@@ -57,6 +57,11 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
             (brandActor ? BrandIDRequest(brandId)).mapTo[ResponseWithFailure[BrandError, BrandRecord]]
           }
         }
+
+      } ~ delete {
+        complete {
+          (brandActor ? DeleteBrandRequest(brandId)).mapTo[ResponseWithFailure[BrandError, String]]
+        }
       }
     }
 

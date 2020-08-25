@@ -37,7 +37,7 @@ case class BrandRecord(id: UUID, name: String, iconPath: String)
 case class BrandData(name: String, iconPath: String )
 case class BrandResponse(id: UUID)
 case class AdvertisementDetailResponse(id: UUID, text: String, imagePath: String, value: Int)
-
-// add Brand to user
+case class DeleteBrandRequest(brandId: UUID)
 case class BrandIDRequest(brandId: UUID)
+
 case class StatusResponse(status: String)

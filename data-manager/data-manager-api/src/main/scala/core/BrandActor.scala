@@ -26,7 +26,7 @@ object BrandActor {
   case class InvalidBrandRequest(reason: String) extends BrandError
   case class InternalBrandError(reason: Throwable) extends BrandError
 
-  implicit object brandErrorJsonFormat extends RootJsonFormat[BrandError] {
+  implicit object brandErrorJsonFormat extends RootJsonWriter[BrandError] {
     def write(error: BrandError) = error match {
       case InvalidBrandRequest(reason) => JsObject(
         "type" -> JsString("BrandInvalidRequest"),
@@ -42,34 +42,7 @@ object BrandActor {
       )
     }
 
-    def read(value: JsValue) = {
-      def readReasonFromData(attributes: Map[String, JsValue]): String = {
-        val data = attributes.get("data") map { _.asInstanceOf[JsObject] }
-        data match {
-          case None =>
-            "Unknown reason"
 
-          case Some(errorData) =>
-            errorData.fields.get("reason") map { _.toString } getOrElse "Unknown reason"
-        }
-      }
-
-
-      value match {
-        case JsObject(attributes) =>
-          attributes.get("type") match {
-            case Some(JsString("BrandInvalidRequest")) =>
-              InvalidBrandRequest(readReasonFromData(attributes))
-
-            case Some(JsString("InternalBrandError")) =>
-              InternalBrandError(new Throwable(readReasonFromData(attributes)))
-
-            case _ => throw new IllegalArgumentException(s"Unable to unmarshall BrandError from JSON value ${value.prettyPrint}, invalid type field value")
-          }
-
-        case _ => throw new IllegalArgumentException(s"Unable to unmarshal BrandError from JSON value ${value.prettyPrint}")
-      }
-    }
   }
 
 }
@@ -80,20 +53,9 @@ class BrandActor(brandDAO: BrandDAO)(implicit val bindingModule: BindingModule) 
     case request: BrandData => replyToSender(createBrand(request))
     case ListBrands => sender ! listBrands
     case request: BrandIDRequest => replyToSender(getBrand(request))
+    case request: DeleteBrandRequest => replyToSender(deleteBrand(request))
   }
 
-  def replyToSender[T <: Any](response: Future[ResponseWithFailure[BrandError, T]]): Unit = {
-    val replyTo = sender
-
-    response recover {
-      case t =>
-        log.warning("Internal error: {}", t)
-        FailureResponse(InternalBrandError(t))
-    } foreach {
-      responseContent : ResponseWithFailure[BrandError, T] =>
-        replyTo ! responseContent
-    }
-  }
 
   def createBrand(request: BrandData): Future[ResponseWithFailure[BrandError, BrandResponse]] = successful {
 
@@ -111,21 +73,60 @@ class BrandActor(brandDAO: BrandDAO)(implicit val bindingModule: BindingModule) 
     }
   }
 
-  def getBrand(request: BrandIDRequest): Future[ResponseWithFailure[BrandError, BrandRecord]] = successful {
-    brandDAO.getById(request.brandId) match {
-      case Some(b) => SuccessResponse(BrandRecord(b.id,b.name,b.iconPath))
-      case None => FailureResponse(InvalidBrandRequest("Invalid id"))
-    }
-  }
   def listBrands: List[BrandRecord]= {
 
-    brandDAO.list.map(b => BrandRecord(b.id,b.name, b.iconPath))
+    val list=brandDAO.list.map(b => BrandRecord(b.id,b.name, b.iconPath))
+    log.info(s" returning a list of ${list.size} brands")
+    list
 
   }
+
+
+  def getBrand(request: BrandIDRequest): Future[ResponseWithFailure[BrandError, BrandRecord]] = successful {
+    brandDAO.getById(request.brandId) match {
+      case Some(b) => {
+        log.info(s"getting brand ${b.id}")
+        SuccessResponse(BrandRecord(b.id,b.name,b.iconPath))
+      }
+      case None => {
+        log.info(s" cannot get brand ${request.brandId}")
+        FailureResponse(InvalidBrandRequest("Invalid id"))
+      }
+    }
+  }
+
+  def deleteBrand(request: DeleteBrandRequest): Future[ResponseWithFailure[BrandError, String]] = successful {
+    brandDAO.getById(request.brandId) match {
+      case Some(b) => {
+        log.info(s"deleting brand ${request.brandId}")
+        brandDAO.delete(request.brandId)
+        SuccessResponse("")
+      }
+      case None => {
+        log.info(s"cannot delete brand ${request.brandId}")
+        FailureResponse(InvalidBrandRequest("Invalid id"))
+      }
+    }
+  }
+
 
   def validateBrand(request: BrandData): Option[String] = request match {
     case BrandData("", _) => Some("Name must be not empty")
     case BrandData(_, "") => Some("IconPath must be not empty")
     case _ => None
   }
+
+  def replyToSender[T <: Any](response: Future[ResponseWithFailure[BrandError, T]]): Unit = {
+    val replyTo = sender
+
+    response recover {
+      case t =>
+        log.warning("Internal error: {}", t)
+        FailureResponse(InternalBrandError(t))
+    } foreach {
+      responseContent : ResponseWithFailure[BrandError, T] =>
+        replyTo ! responseContent
+    }
+  }
+
 }
