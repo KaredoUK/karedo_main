@@ -40,26 +40,28 @@ class EmailActor(implicit val bindingModule : BindingModule) extends Actor with 
   def sendEmail(to: String, body: String, subject: String)(implicit actorRefFactory: ActorRefFactory): Future[Unit] = {
     if(userKey=="")
     {
-      Future(println(s"dummy sending email to $to, subject: $subject, body: $body"))
+      Future(println(s"(((((dummy sending email to $to, subject: $subject, body: $body)))))"))
     }
-    else
-    requestPipeline {
-      Post(
-        serverEndpoint,
-        FormData(
-          Map(
-            "from" -> from,
-            "to" -> to,
-            "subject" -> subject,
-            "text" -> body
+    else {
+      println(s"======> actual sending email to $to")
+      requestPipeline {
+        Post(
+          serverEndpoint,
+          FormData(
+            Map(
+              "from" -> from,
+              "to" -> to,
+              "subject" -> subject,
+              "text" -> body
+            )
           )
         )
-      )
-    } map { httpResponse: HttpResponse =>
-      if (httpResponse.status.isFailure) {
-        throw new IOException(s"Request failed for reason ${httpResponse.status.value}:${httpResponse.status.defaultMessage}")
-      } else {
-        ()
+      } map { httpResponse: HttpResponse =>
+        if (httpResponse.status.isFailure) {
+          throw new IOException(s"Request failed for reason ${httpResponse.status.value}:${httpResponse.status.defaultMessage}")
+        } else {
+          ()
+        }
       }
     }
   }

@@ -1,3 +1,0 @@
-#!/bin/sh
-. PARALLELAI67-95.sh
-. PARALLELAI68.sh

@@ -28,6 +28,7 @@ class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(im
 
   import akka.pattern.ask
   import scala.concurrent.duration._
+
   implicit val timeout = Timeout(20.seconds)
 
   val route =
@@ -38,64 +39,71 @@ class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(im
             (registrationActor ? registrationRequest).mapTo[ResponseWithFailure[RegistrationError, RegistrationResponse]]
         }
       } ~
-      get {
-        parameters('email.?, 'msisdn.?, 'applicationId.?) { (email, msisdn, applicationId) =>
-          rejectEmptyResponse {
+        get {
+          parameters('email.?, 'msisdn.?, 'applicationId.?) { (email, msisdn, applicationId) =>
+            rejectEmptyResponse {
+              complete {
+                (editAccountActor ? FindAccount(applicationId map {
+                  UUID.fromString(_)
+                }, msisdn, email)).mapTo[Option[UserProfile]]
+              }
+            }
+          }
+        }
+    } ~
+      path("account" / JavaUUID / "application" / JavaUUID / "reset") { (accountId: UserID, applicationId: ApplicationID) =>
+        put {
+          complete {
+            (registrationActor ? AddApplication(applicationId, accountId)).mapTo[ResponseWithFailure[RegistrationError, RegistrationResponse]]
+          }
+        }
+      } ~
+      path("account" / JavaUUID) { accountId: UserID =>
+        rejectEmptyResponse {
+          get {
             complete {
-              (editAccountActor ? FindAccount(applicationId map { UUID.fromString(_) }, msisdn, email)).mapTo[Option[UserProfile]]
+              (editAccountActor ? GetAccount(accountId)).mapTo[ResponseWithFailure[EditAccountError, Option[UserProfile]]]
+            }
+          }
+        } ~
+          put {
+            handleWith {
+              userProfile: UserProfile =>
+                editAccountActor ! UpdateAccount(userProfile)
+                ""
+            }
+          } ~
+          delete {
+            complete {
+              (editAccountActor ? DeleteAccount(accountId)).mapTo[ResponseWithFailure[EditAccountError, String]]
+            }
+          }
+      } ~
+      path("account" / "application" / "validation") {
+        post {
+          handleWith {
+            registrationValidation: RegistrationValidation => (registrationActor ? registrationValidation).mapTo[ResponseWithFailure[RegistrationError, RegistrationValidationResponse]]
+          }
+        }
+      } ~
+      path("account" / JavaUUID / "points") { accountId: UserID =>
+        rejectEmptyResponse {
+          get {
+            complete {
+              (editAccountActor ? GetAccountPoints(accountId)).mapTo[ResponseWithFailure[RegistrationError,Option[UserPoints]]]
+            }
+          }
+        }
+      } ~
+      path("account" / JavaUUID / "brand") { accountId: UserID =>
+        rejectEmptyResponse {
+          post {
+            handleWith {
+              brandIdRequest: BrandIDRequest =>
+                (editAccountActor ? AddBrand(accountId, brandIdRequest.brandId)).mapTo[ResponseWithFailure[EditAccountError, String]]
             }
           }
         }
       }
-    } ~
-    path("account" / JavaUUID / "application" / JavaUUID ) { (accountId: UserID, applicationId: ApplicationID) =>
-      put {
-        complete {
-          (registrationActor ? AddApplication(applicationId, accountId)).mapTo[ResponseWithFailure[RegistrationError, RegistrationResponse]]
-        }
-      }
-    } ~
-    path( "account" / JavaUUID ) { accountId: UserID =>
-      rejectEmptyResponse {
-        get {
-          complete {
-            (editAccountActor ? GetAccount(accountId)).mapTo[ResponseWithFailure[EditAccountError, Option[UserProfile]]]
-          }
-        }
-      } ~
-      put {
-        handleWith {
-          userProfile: UserProfile =>
-            editAccountActor ! UpdateAccount(userProfile)
-            ""
-        }
-      }
-    }  ~
-    path("account" / "application" / "validation") {
-      post {
-        handleWith {
-          registrationValidation: RegistrationValidation =>  (registrationActor ? registrationValidation).mapTo[ResponseWithFailure[RegistrationError, RegistrationValidationResponse]]
-        }
-      }
-    } ~
-    path( "account" / JavaUUID / "points" ) { accountId: UserID =>
-      rejectEmptyResponse {
-        get {
-          complete {
-            (editAccountActor ? GetAccountPoints(accountId)).mapTo[Option[UserPoints]]
-          }
-        }
-      }
-    } ~
-    path ("account" / JavaUUID / "brand") { accountId: UserID =>
-      rejectEmptyResponse {
-        post {
-          handleWith {
-            brandIdRequest: BrandIDRequest =>
-              (editAccountActor ? AddBrand(accountId, brandIdRequest.brandId)).mapTo[ResponseWithFailure[EditAccountError, String]]
-          }
-        }
-      }
-    }
 
 }

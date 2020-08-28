@@ -8,6 +8,7 @@ import core.common.RequestValidationChaining
 import parallelai.wallet.persistence.{BrandDAO, ClientApplicationDAO, UserAccountDAO}
 import com.parallelai.wallet.datamanager.data._
 import parallelai.wallet.entity.{UserPersonalInfo, AccountSettings, UserAccount}
+import spray.http.parser.HttpParser
 import spray.json._
 import scala.async.Async._
 import scala.concurrent.Future._
@@ -16,7 +17,7 @@ import scala.util.Try
 
 object EditAccountActor {
   def props(userAccountDAO: UserAccountDAO, clientApplicationDAO: ClientApplicationDAO, brandDAO: BrandDAO): Props =
-    Props( new EditAccountActor(userAccountDAO, clientApplicationDAO, brandDAO) )
+    Props(new EditAccountActor(userAccountDAO, clientApplicationDAO, brandDAO))
 
   case class GetAccount(accountId: UserID)
 
@@ -26,12 +27,18 @@ object EditAccountActor {
 
   case class UpdateAccount(userAccount: UserProfile)
 
+  case class DeleteAccount(accountId: UserID)
+
   case class AddBrand(accountId: UserID, brandId: UUID)
 
   sealed trait EditAccountError
+
   case class UserNotExistent(user: UserID) extends EditAccountError
+
   case class BrandNotExistent(brand: UUID) extends EditAccountError
+
   case class BrandAlreadySubscribed(brand: UUID) extends EditAccountError
+
   case class InternalEditAccountError(throwable: Throwable) extends EditAccountError
 
   implicit object editAccountErrorJsonFormat extends RootJsonWriter[EditAccountError] {
@@ -42,13 +49,13 @@ object EditAccountActor {
           "accountID" -> JsString(user.toString)
         }
       )
-      case BrandNotExistent(brand)  => JsObject(
+      case BrandNotExistent(brand) => JsObject(
         "type" -> JsString("BrandNotExistent"),
         "data" -> JsObject {
           "brandID" -> JsString(brand.toString)
         }
       )
-      case BrandAlreadySubscribed(brand)  => JsObject(
+      case BrandAlreadySubscribed(brand) => JsObject(
         "type" -> JsString("BrandAlreadySubscribed"),
         "data" -> JsObject {
           "brandID" -> JsString(brand.toString)
@@ -81,7 +88,7 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
         log.warning("Internal error: {}", t)
         FailureResponse(InternalEditAccountError(t))
     } foreach {
-      responseContent : ResponseWithFailure[EditAccountError, T] =>
+      responseContent: ResponseWithFailure[EditAccountError, T] =>
         log.debug("Returning {}", responseContent)
         sender ! responseContent
     }
@@ -91,8 +98,11 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
   override def receive: Receive = {
     case GetAccount(accountId) =>
       log.info("Trying to get account with account ID {}, sender is {}", accountId, sender)
-      replyToSender { SuccessResponse(
-        userAccountDAO.getById(accountId) map { userAccountToUserProfile }
+      replyToSender {
+        SuccessResponse(
+          userAccountDAO.getById(accountId) map {
+            userAccountToUserProfile
+          }
         )
       }
 
@@ -108,7 +118,8 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
 
     case FindAccount(applicationIdOp, msisdnOp, emailOp) =>
       log.info("Trying to find account for appId {}, msisdn {} or email {} sender is {}", applicationIdOp, msisdnOp, emailOp, sender)
-      replyToSender { SuccessResponse(
+      replyToSender {
+        SuccessResponse(
           userAccountDAO.findByAnyOf(applicationIdOp, msisdnOp, emailOp) map {
             userAccountToUserProfile
           }
@@ -119,12 +130,22 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
       log.info("Trying to update account with id {}", userProfile.info.userId)
       userAccountDAO.update(userProfileToUserAccount(userProfile))
 
+    case DeleteAccount(accountId) =>
+      log.info("Trying to delete account for userId {} sender is {}", accountId, sender)
+
+      replyToSender (
+        SuccessResponse {
+          userAccountDAO.delete(accountId)
+          ""
+        }
+      )
+
     case request@AddBrand(accountId, brandId) => replyToSender(addBrand(request))
 
 
   }
 
-  def validAddBrand(addBrand: AddBrand): Option[EditAccountError] =  {
+  def validAddBrand(addBrand: AddBrand): Option[EditAccountError] = {
     val AddBrand(user, brand) = addBrand
 
     userAccountDAO.getById(user) match {
@@ -135,7 +156,7 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
           case None => Some(BrandNotExistent(brand))
           case _ => {
 
-            if ( userAccountDAO.getBrand(user, brand) )
+            if (userAccountDAO.getBrand(user, brand))
               Some(BrandAlreadySubscribed(brand))
             else None
           }
@@ -143,6 +164,7 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
       }
     }
   }
+
 
   def addBrand(request: AddBrand): ResponseWithFailure[EditAccountError, String] =
 

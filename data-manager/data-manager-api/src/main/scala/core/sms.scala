@@ -53,12 +53,13 @@ class SMSActor(implicit val bindingModule : BindingModule) extends Actor with Ac
 
   def sendSMS(to: String, body: String): Future[Unit] = {
     if(user==""){
-      Future(println(s"Dummy sending sms to: $to, body: $body"))
-    } else
-    pipeline {
-      Get(
-        Uri(serverEndpoint).copy(
-          query = Query(
+      Future(println(s"(((((Dummy sending sms to: $to, body: $body)))))"))
+    } else {
+      println(s"=====> Actual sending sms to $to")
+      pipeline {
+        Get(
+          Uri(serverEndpoint).copy(
+            query = Query(
               Map(
                 "username" -> user,
                 "password" -> pwd,
@@ -68,12 +69,13 @@ class SMSActor(implicit val bindingModule : BindingModule) extends Actor with Ac
               )
             )
           )
-      )
-    } map { httpResponse: HttpResponse =>
-      if (httpResponse.status.isFailure) {
-        throw new IOException(s"Request failed for reason ${httpResponse.status.value}:${httpResponse.status.defaultMessage}")
-      } else {
-        ()
+        )
+      } map { httpResponse: HttpResponse =>
+        if (httpResponse.status.isFailure) {
+          throw new IOException(s"Request failed for reason ${httpResponse.status.value}:${httpResponse.status.defaultMessage}")
+        } else {
+          ()
+        }
       }
     }
   }
