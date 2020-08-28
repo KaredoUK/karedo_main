@@ -1,52 +1,81 @@
 package api
 
 
+import java.util.UUID
 
 import akka.actor.ActorRef
 import akka.util.Timeout
-import com.parallelai.wallet.datamanager.data._
-import com.parallelai.wallet.datamanager.data.BrandData
-import com.parallelai.wallet.datamanager.data.BrandResponse
-import core.BrandActor.{InternalBrandError, InvalidBrandRequest, BrandError}
-import ApiDataJsonProtocol._
-import spray.http.StatusCodes._
-import spray.http._
+import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
+import com.parallelai.wallet.datamanager.data.{BrandData, BrandResponse, ListBrandsAdverts, _}
+import core.BrandActor.BrandError
+import core.ResponseWithFailure
+
 import spray.routing.Directives
 
 import scala.concurrent.ExecutionContext
 
 
-
 class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionContext)
-  extends Directives with DefaultJsonFormats {
-
-
+  extends Directives with DefaultJsonFormats with ApiErrorsJsonProtocol {
 
 
   import akka.pattern.ask
 
+  import scala.concurrent.duration._
 
-import scala.concurrent.duration._
   implicit val timeout = Timeout(20.seconds)
 
-  implicit object EitherErrorSelector extends ErrorSelector[BrandError] {
-    def apply(error: BrandError): StatusCode = error match {
-      case InvalidBrandRequest(reason) => BadRequest
-      case InternalBrandError(_) => InternalServerError
-    }
-  }
 
-  val route =
+  val route1 =
     path("brand") {
-      post {
 
+      post {
         handleWith {
           brandData: BrandData =>
+            (brandActor ? brandData).mapTo[ResponseWithFailure[BrandError, BrandResponse]]
+        }
+      } ~
+        get {
+          rejectEmptyResponse {
 
-              (brandActor ? brandData).mapTo[Either[BrandError,BrandResponse]]
-              //UUIDData(UUID.randomUUID())
+            complete {
 
+              (brandActor ? ListBrands).mapTo[List[BrandRecord]]
+            }
+          }
+        }
+
+    }
+
+  val route2 =
+
+    path("brand" / JavaUUID) { brandId: UUID =>
+      rejectEmptyResponse {
+        get {
+          complete {
+
+            (brandActor ? BrandIDRequest(brandId)).mapTo[ResponseWithFailure[BrandError, BrandRecord]]
+          }
+        }
+
+      } ~ delete {
+        complete {
+          (brandActor ? DeleteBrandRequest(brandId)).mapTo[ResponseWithFailure[BrandError, String]]
         }
       }
     }
+
+  val route3 =
+
+    path("brand" / JavaUUID / "advert") { brandId: UUID =>
+      rejectEmptyResponse {
+        get {
+          complete {
+            (brandActor ? ListBrandsAdverts(brandId)).mapTo[ResponseWithFailure[BrandError, List[AdvertisementDetailResponse]]]
+          }
+        }
+      }
+    }
+
+  val route = route1 ~ route2 ~ route3
 }

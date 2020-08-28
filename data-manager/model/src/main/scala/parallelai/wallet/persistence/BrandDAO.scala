@@ -2,7 +2,7 @@ package parallelai.wallet.persistence
 
 import java.util.UUID
 
-import parallelai.wallet.entity.{Brand, UserAccount}
+import parallelai.wallet.entity.{AdvertisementMetadata, Brand, UserAccount}
 
 import scala.concurrent.Future
 
@@ -18,6 +18,11 @@ trait BrandDAO {
   def insertNew(brand: Brand) : Option[UUID]
 
   def update(brand:Brand) : Unit
+
+  def addAdvertisement(brandId: UUID, adv: AdvertisementMetadata): Unit
+
+  def listAds(brandId:UUID): List[AdvertisementMetadata]
+
 
   def delete(brandId: UUID) : Unit
 

@@ -31,9 +31,13 @@ case class UserPoints(userId: UserID, totalPoints: Long)
 case class UserContacts(email: Option[String], msisdn: Option[String]) extends WithUserContacts
 
 // BRAND
+case object ListBrands
+case class ListBrandsAdverts(brandId: UUID)
+case class BrandRecord(id: UUID, name: String, iconPath: String)
 case class BrandData(name: String, iconPath: String )
 case class BrandResponse(id: UUID)
-
-// add Brand to user
+case class AdvertisementDetailResponse(id: UUID, text: String, imagePath: String, value: Int)
+case class DeleteBrandRequest(brandId: UUID)
 case class BrandIDRequest(brandId: UUID)
+
 case class StatusResponse(status: String)

@@ -1,10 +1,11 @@
 package util
 
+import akka.actor.ActorRef
 import api.Api
 import com.escalatesoft.subcut.inject.NewBindingModule._
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import com.typesafe.config.ConfigFactory
-import core.{BootedCore, CoreActors, Persistence}
+import core._
 import parallelai.wallet.config.AppConfigPropertySource
 import parallelai.wallet.persistence.{BrandDAO, ClientApplicationDAO, UserAccountDAO}
 import web.Web
@@ -16,8 +17,8 @@ class RestServiceWithMockPersistence(
   val servicePort: Int,
   override val brandDAO: BrandDAO,
   override val clientApplicationDAO: ClientApplicationDAO,
-  override val userAccountDAO: UserAccountDAO) extends Injectable with BootedCore with Persistence with CoreActors with Api with Web {
-
+  override val userAccountDAO: UserAccountDAO,
+  override val messenger: ActorRef) extends Injectable with BootedCore with Persistence with MessageActors with BaseCoreActors with Api with Web {
 
   // Define The Configuration for the tests
   implicit def configProvider = AppConfigPropertySource(
@@ -44,13 +45,19 @@ class RestServiceWithMockPersistence(
         |
         |ui {
         |  web {
-        |    server.address = "http://localhost:9000"
+        |    server.address = "http://localhost:$servicePort"
         |  }
         |}
         |
         |service {
         |   port = $servicePort
         |   bindAddress = "0.0.0.0"
+        |}
+        |
+        |akka {
+        | log-dead-letters-during-shutdown = off
+        | loglevel = DEBUG
+        | loggers = ["akka.event.slf4j.Slf4jLogger"]
         |}
       """.stripMargin
     )

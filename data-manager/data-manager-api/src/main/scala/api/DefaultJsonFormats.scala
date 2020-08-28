@@ -1,9 +1,10 @@
 package api
 
+import core.{SuccessResponse, FailureResponse, ResponseWithFailure}
 import spray.json._
 import java.util.UUID
 import scala.reflect.ClassTag
-import spray.httpx.marshalling.{MetaMarshallers, Marshaller, CollectingMarshallingContext}
+import spray.httpx.marshalling.{MarshallingContext, MetaMarshallers, Marshaller, CollectingMarshallingContext}
 import spray.http.StatusCode
 import parallelai.wallet.util.SprayJsonSupport
 
@@ -12,7 +13,7 @@ import parallelai.wallet.util.SprayJsonSupport
  * when creating traits that contain the ``JsonReader`` and ``JsonWriter`` instances
  * for types that contain ``Date``s, ``UUID``s and such like.
  */
-trait DefaultJsonFormats extends DefaultJsonProtocol with SprayJsonSupport with MetaMarshallers {
+trait DefaultJsonFormats extends DefaultJsonProtocol with SprayJsonSupport with MetaMarshallers  {
 
   /**
    * Computes ``RootJsonFormat`` for type ``A`` if ``A`` is object
@@ -42,14 +43,14 @@ trait DefaultJsonFormats extends DefaultJsonProtocol with SprayJsonSupport with 
    * @tparam B the right projection
    * @return marshaller
    */
-  implicit def errorSelectingEitherMarshaller[A, B](implicit ma: Marshaller[A], mb: Marshaller[B], esa: ErrorSelector[A]): Marshaller[Either[A, B]] =
-    Marshaller[Either[A, B]] { (value, ctx) =>
+  implicit def errorSelectingEitherMarshaller[A, B](implicit ma: Marshaller[A], mb: Marshaller[B], esa: ErrorSelector[A]): Marshaller[ResponseWithFailure[A, B]] =
+    Marshaller[ResponseWithFailure[A, B]] { (value, ctx) =>
       value match {
-        case Left(a) =>
+        case FailureResponse(a) =>
           val mc = new CollectingMarshallingContext()
           ma(a, mc)
           ctx.handleError(ErrorResponseException(esa(a), mc.entity))
-        case Right(b) =>
+        case SuccessResponse(b) =>
           mb(b, ctx)
       }
     }

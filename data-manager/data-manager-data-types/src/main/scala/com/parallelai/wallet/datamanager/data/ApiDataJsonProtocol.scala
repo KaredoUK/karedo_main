@@ -1,12 +1,16 @@
 package com.parallelai.wallet.datamanager.data
 
 import com.parallelai.wallet.datamanager.data._
+
 import org.joda.time.DateTime
 import org.joda.time.format.{DateTimeFormat, ISODateTimeFormat}
+
+import spray.http.StatusCode
+import spray.http.StatusCodes._
 import spray.json._
 import java.util.UUID
 
-object ApiDataJsonProtocol extends DefaultJsonProtocol {
+object ApiDataJsonProtocol extends DefaultJsonProtocol  {
 
   implicit object UuidJsonFormat extends RootJsonFormat[UUID] {
     def write(x: UUID) = JsString(x.toString)
@@ -43,9 +47,13 @@ object ApiDataJsonProtocol extends DefaultJsonProtocol {
   implicit val userPointsJson = jsonFormat2(UserPoints)
 
   implicit val brandDataJson = jsonFormat2(BrandData)
+  implicit val brandRecordJson = jsonFormat3(BrandRecord)
   implicit val uuidJson = jsonFormat1(BrandResponse)
   implicit val brandIdJson = jsonFormat1(BrandIDRequest)
+  implicit val DeleteBrandRequestJson = jsonFormat1(DeleteBrandRequest)
+
   implicit val statusJson = jsonFormat1(StatusResponse)
+  implicit val advDetailJson = jsonFormat4(AdvertisementDetailResponse)
 
 
 }

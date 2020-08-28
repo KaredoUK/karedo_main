@@ -4,6 +4,7 @@ import java.net.URI
 
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
 import core.MessengerActor.SendMessage
+import core.common.RequestValidationChaining
 import parallelai.wallet.persistence.{ClientApplicationDAO, UserAccountDAO}
 import akka.actor.{Props, ActorLogging, ActorRef, Actor}
 import com.parallelai.wallet.datamanager.data._
@@ -25,6 +26,8 @@ import parallelai.wallet.entity.ClientApplication
 import scala.Some
 import parallelai.wallet.entity.UserAccount
 import scala.concurrent.Future.successful
+import scala.util.Try
+
 
 /**
  * We use the companion object to hold all the messages that the ``RegistrationActor``
@@ -33,7 +36,7 @@ import scala.concurrent.Future.successful
 object RegistrationActor {
 
   def props( userAccountDAO : UserAccountDAO, clientApplicationDAO : ClientApplicationDAO, messengerActor: ActorRef)(implicit bindingModule : BindingModule) : Props =
-    Props( classOf[RegistrationActor], userAccountDAO, clientApplicationDAO, messengerActor, bindingModule)
+    Props( new RegistrationActor(userAccountDAO, clientApplicationDAO, messengerActor) )
 
   sealed trait RegistrationError
   case object ApplicationAlreadyRegistered extends RegistrationError
@@ -42,7 +45,7 @@ object RegistrationActor {
   case object InvalidValidationCode extends RegistrationError
   case class InternalRegistrationError(throwable: Throwable) extends RegistrationError
 
-  implicit object RegistrationErrorJsonFormat extends RootJsonFormat[RegistrationError] {
+  implicit object registrationErrorJsonFormat extends RootJsonFormat[RegistrationError] {
     def write(error: RegistrationError) =  error match {
       case ApplicationAlreadyRegistered => JsString("ApplicationAlreadyRegistered")
       case UserAlreadyRegistered => JsString("UserAlreadyRegistered")
@@ -93,25 +96,7 @@ object RegistrationActor {
 
   case class AddApplication(applicationId: ApplicationID, accountId: UserID)
 
-  def withValidations[Request, Error, Response](request: Request)(validations: (Request => Future[Option[Error]])*)
-                                               (successFlow: Request => Future[Either[Error, Response]])
-                                               (implicit executionContext: ExecutionContext)
-    : Future[Either[Error, Response]] = {
-    val validationResult = validations.foldLeft[Future[Option[Error]]](successful(None)) {
-      case (currStatus, currFunction) =>
-        currStatus flatMap { _ match {
-          case Some(_) => currStatus
-          case None => currFunction(request)
-        }
-        }
-    }
-    validationResult flatMap {
-      _ match {
-        case Some(validationError) => successful(Left(validationError))
-        case None => successFlow(request)
-      }
-    }
-  }
+
 
   def newActivationCode: String = {
     RandomStringUtils.randomAlphanumeric(6)
@@ -122,7 +107,9 @@ object RegistrationActor {
  * Registers the users. Replies with
  */
 class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : ClientApplicationDAO,
-                        messengerActor: ActorRef)(implicit val bindingModule : BindingModule) extends Actor with ActorLogging with Injectable {
+                        messengerActor: ActorRef)(implicit val bindingModule : BindingModule)
+  extends Actor with ActorLogging with Injectable with RequestValidationChaining {
+
   import RegistrationActor._
 
   import context.dispatcher
@@ -137,7 +124,7 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
     case validation: RegistrationValidation => replyToSender { validateUser(validation) }
   }
 
-  def registerUser(registrationRequest: RegistrationRequest): Future[Either[RegistrationError, RegistrationResponse]] =
+  def registerUser(registrationRequest: RegistrationRequest): ResponseWithFailure[RegistrationError, RegistrationResponse] =
     withValidations(registrationRequest) ( validUserIdentification, applicationNotRegistered, noActiveAccountForMsisdnOrEmail ) { request =>
 
       log.debug("Creating new account for request {}", request)
@@ -149,61 +136,57 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
 
       userAccountDAO.insertNew(account, firstApplication)
 
-      successful( activateApplication(request.applicationId, account.id, request, activationCode) )
+      activateApplication(request.applicationId, account.id, request, activationCode)
     }
 
 
-  def registerApplication(registrationRequest: AddApplication): Future[Either[RegistrationError, RegistrationResponse]] =
+  def registerApplication(registrationRequest: AddApplication): ResponseWithFailure[RegistrationError, RegistrationResponse] =
     withValidations(registrationRequest) ( applicationNotRegistered ) { request =>
 
-      userAccountDAO.getById(request.accountId) map {
-        _ match {
-          case None => Left(InvalidRegistrationRequest(s"User with ID ${registrationRequest.accountId} doesn't exist"))
+      userAccountDAO.getById(request.accountId) match {
+        case None => FailureResponse(InvalidRegistrationRequest(s"User with ID ${registrationRequest.accountId} doesn't exist"))
 
-          case Some(userAccount) =>
-            val activationCode = newActivationCode
+        case Some(userAccount) =>
+          val activationCode = newActivationCode
 
-            clientApplicationDAO.insertNew(ClientApplication(registrationRequest.applicationId, registrationRequest.accountId, activationCode))
+          clientApplicationDAO.insertNew(ClientApplication(registrationRequest.applicationId, registrationRequest.accountId, activationCode))
 
-            activateApplication(
-              registrationRequest.applicationId,
-              userAccount.id,
-              UserContacts(userAccount.email, userAccount.msisdn),
-              activationCode
-            )
-        }
+          activateApplication(
+            registrationRequest.applicationId,
+            userAccount.id,
+            UserContacts(userAccount.email, userAccount.msisdn),
+            activationCode
+          )
       }
     }
 
-  def validateUser(validation: RegistrationValidation) : Future[Either[RegistrationError, RegistrationValidationResponse]] = async {
-    val clientAppOption = await {
-      clientApplicationDAO.getById(validation.applicationId)
-    }
+  def validateUser(validation: RegistrationValidation) : ResponseWithFailure[RegistrationError, RegistrationValidationResponse] =  {
+    val clientAppOption = clientApplicationDAO.getById(validation.applicationId)
 
     clientAppOption match {
-      case None => Left(InvalidRegistrationRequest(s"Unable to find client application with ID '${validation.applicationId}'"))
+      case None => FailureResponse(InvalidRegistrationRequest(s"Unable to find client application with ID '${validation.applicationId}'"))
 
       case Some(clientApplication) =>
         // I don't care if the user validates twice. I just check the validation code
         if(clientApplication.activationCode == validation.validationCode) {
-          val userOpt = await { userAccountDAO.getByApplicationId(validation.applicationId) }
+          val userOpt = userAccountDAO.getByApplicationId(validation.applicationId)
 
           userOpt map { user => 
             clientApplicationDAO.update(clientApplication copy (active = true))
             userAccountDAO.setActive(user.id)
 
-            Right(RegistrationValidationResponse(validation.applicationId, user.id))
+            SuccessResponse(RegistrationValidationResponse(validation.applicationId, user.id))
           } getOrElse {
-            Left(InternalRegistrationError(new IllegalStateException(s"Unable to find user for valid application ID '${validation.applicationId}'")))
+            FailureResponse(InternalRegistrationError(new IllegalStateException(s"Unable to find user for valid application ID '${validation.applicationId}'")))
           }
         } else {
-          Left(InvalidValidationCode)
+          FailureResponse(InvalidValidationCode)
         }
     }
 
   }
 
-  private def activateApplication(applicationId: ApplicationID, accountId: UserID, userContacts: WithUserContacts, validationCode: String) : Either[RegistrationError, RegistrationResponse] = {
+  private def activateApplication(applicationId: ApplicationID, accountId: UserID, userContacts: WithUserContacts, validationCode: String) : ResponseWithFailure[RegistrationError, RegistrationResponse] = {
     log.info("Validation code for registration request of application {} is '{}'", applicationId, validationCode)
 
     val activationMessage = s"Welcome to Karedo, your activation code is $validationCode. " +
@@ -211,46 +194,47 @@ class RegistrationActor(userAccountDAO : UserAccountDAO, clientApplicationDAO : 
 
     if(userContacts.msisdn.isDefined) {
       messengerActor ! SendMessage(URI.create(s"sms:${userContacts.msisdn.get}"), activationMessage)
-      Right(RegistrationResponse(applicationId, "msisdn", userContacts.msisdn.get))
+      SuccessResponse(RegistrationResponse(applicationId, "msisdn", userContacts.msisdn.get))
     }
     else {
       messengerActor ! SendMessage(URI.create(s"mailto:${userContacts.email.get}"), activationMessage, "Welcome to Karedo")
-      Right(RegistrationResponse(applicationId, "email", userContacts.email.get))
+      SuccessResponse(RegistrationResponse(applicationId, "email", userContacts.email.get))
     }
   }
 
-  def replyToSender[T <: Any](response: Future[Either[RegistrationError, T]]): Unit = {
-    val replyTo = sender
-
-    response recover {
+  def replyToSender[T <: Any](response: => ResponseWithFailure[RegistrationError, T] ): Unit = {
+    Try {
+      response
+    } recover {
       case t =>
         log.warning("Internal error: {}", t)
-        Left(InternalRegistrationError(t))
+        FailureResponse(InternalRegistrationError(t))
     } foreach {
-      responseContent : Either[RegistrationError, T] =>
-        replyTo ! responseContent
+      responseContent : ResponseWithFailure[RegistrationError, T] =>
+        sender ! responseContent
     }
   }
 
-  def applicationNotRegistered(withApplicationId: { def applicationId: ApplicationID }) : Future[Option[RegistrationError]] =
-    clientApplicationDAO.getById(withApplicationId.applicationId) map { _  map { _ => ApplicationAlreadyRegistered } }
+  def applicationNotRegistered(withApplicationId: { def applicationId: ApplicationID }) : Option[RegistrationError] =
+    clientApplicationDAO.getById(withApplicationId.applicationId) map {  _ => ApplicationAlreadyRegistered }
 
-  def validUserIdentification(userIdentification : WithUserContacts) : Future[Option[RegistrationError]] =
-    successful { if(userIdentification.isValid) None else Some(InvalidRegistrationRequest("Invalid user identification")) }
+  def validUserIdentification(userIdentification : WithUserContacts) : Option[RegistrationError] =
+    if(userIdentification.isValid) None else Some(InvalidRegistrationRequest("Invalid user identification"))
 
   // This validation has side effects!!!
-  def noActiveAccountForMsisdnOrEmail(userIdentification : WithUserContacts) : Future[Option[RegistrationError]] =
-    userAccountDAO.findByAnyOf(None, userIdentification.msisdn, userIdentification.email) map { existingAccountOp =>
-      if (existingAccountOp.filter( { _.active } ).isDefined) {
-        Some(UserAlreadyRegistered)
-      } else {
-        if (existingAccountOp.isDefined) {
-          log.debug("Removing account of already registered but not active user {}", existingAccountOp.get)
-          userAccountDAO.delete(existingAccountOp.get.id)
-        }
+  def noActiveAccountForMsisdnOrEmail(userIdentification : WithUserContacts) : Option[RegistrationError] = {
+    val existingAccountOp = userAccountDAO.findByAnyOf(None, userIdentification.msisdn, userIdentification.email)
 
-        None
+    if (existingAccountOp.filter({ _.active }).isDefined) {
+      Some(UserAlreadyRegistered)
+    } else {
+      if (existingAccountOp.isDefined) {
+        log.debug("Removing account of already registered but not active user {}", existingAccountOp.get)
+        userAccountDAO.delete(existingAccountOp.get.id)
       }
+
+      None
     }
+  }
 
 }

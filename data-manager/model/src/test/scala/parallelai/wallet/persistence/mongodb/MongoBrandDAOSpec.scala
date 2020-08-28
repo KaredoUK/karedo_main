@@ -29,17 +29,9 @@ class MongoBrandDAOSpec extends Specification with NoTimeConversions with MongoT
         "mongo.db.pwd" -> ""
       )
     )
-//    implicit val bindingModule = newBindingModuleWithConfig(
-//      Map(
-//        "mongo.server.host" -> "localhost",
-//        "mongo.server.port" -> s"$embedConnectionPort",
-//        "mongo.db.name" -> "test",
-//        "mongo.db.user" -> "",
-//        "mongo.db.pwd" -> ""
-//      )
-//    )
+//
 
-    val brandDAO = new MongoBrandDAO
+    val brandDAO = new BrandMongoDAO
 
     def cleanbrands = brandDAO.mongoClient.getDB("wallet_data").getCollection("Brand").remove(MongoDBObject.empty)
 

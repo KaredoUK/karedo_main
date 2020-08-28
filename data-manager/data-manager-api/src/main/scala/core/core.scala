@@ -11,7 +11,7 @@ import parallelai.wallet.persistence.{BrandDAO, ClientApplicationDAO, UserAccoun
 import parallelai.wallet.config.AppConfigPropertySource
 import com.typesafe.config.ConfigFactory
 import com.escalatesoft.subcut.inject.NewBindingModule._
-import parallelai.wallet.persistence.mongodb.{MongoBrandDAO, ClientApplicationMongoDAO, UserAccountMongoDAO}
+import parallelai.wallet.persistence.mongodb.{BrandMongoDAO, ClientApplicationMongoDAO, UserAccountMongoDAO}
 
 import scala.concurrent.Future
 
@@ -58,34 +58,43 @@ trait MongoPersistence extends Persistence {
   self : Injectable =>
   
   override val userAccountDAO : UserAccountDAO = new UserAccountMongoDAO() 
-  override val brandDAO : BrandDAO = new MongoBrandDAO()
+  override val brandDAO : BrandDAO = new BrandMongoDAO()
   override val clientApplicationDAO : ClientApplicationDAO = new ClientApplicationMongoDAO()
 }
 
 trait ServiceActors {
-  def messenger: ActorRef
   def registration: ActorRef
   def brand: ActorRef
   def editAccount: ActorRef
+}
+
+trait MessageActors {
+  def messenger: ActorRef
+}
+
+trait RestMessageActors extends MessageActors {
+  this: Core with Persistence with Injectable =>
+
+  val emailActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.email") getOrElse 2
+  val smsActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.sms") getOrElse 2
+
+  val emailActor = system.actorOf(EmailActor.props.withRouter( RoundRobinPool(nrOfInstances = emailActorPoolSize) ) )
+  val smsActor = system.actorOf(SMSActor.props .withRouter( RoundRobinPool(nrOfInstances = smsActorPoolSize) ) )
+
+  override val messenger = system.actorOf(MessengerActor.props(emailActor, smsActor))
 }
 
 /**
  * This trait contains the actors that make up our application; it can be mixed in with
  * ``BootedCore`` for running code or ``TestKit`` for unit and integration tests.
  */
-trait CoreActors extends ServiceActors {
-  this: Core with Persistence with Injectable =>
+trait BaseCoreActors extends ServiceActors  {
+  this: Core with Persistence with Injectable with MessageActors =>
 
-  val emailActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.email") getOrElse 2
-  val smsActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.sms") getOrElse 2
   val brandActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.brand") getOrElse 3
   val registrationActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.registration") getOrElse 3
   val editAccountActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.editAccount") getOrElse 3
 
-  val emailActor = system.actorOf(EmailActor.props.withRouter( RoundRobinPool(nrOfInstances = emailActorPoolSize) ) )
-  val smsActor = system.actorOf(SMSActor.props .withRouter( RoundRobinPool(nrOfInstances = smsActorPoolSize) ) )
-
-  override val messenger = system.actorOf(MessengerActor.props(emailActor, smsActor))
 
   // This should be an actor pool at least if we don't want to use a one actor per request strategy
   override val registration = system.actorOf(
@@ -101,4 +110,8 @@ trait CoreActors extends ServiceActors {
     EditAccountActor.props(userAccountDAO, clientApplicationDAO, brandDAO)
       .withRouter( RoundRobinPool(nrOfInstances = editAccountActorPoolSize) )
   )
+}
+
+trait CoreActors extends BaseCoreActors with RestMessageActors {
+  this: Core with Persistence with Injectable =>
 }

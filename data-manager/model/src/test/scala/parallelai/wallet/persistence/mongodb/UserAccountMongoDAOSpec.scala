@@ -37,131 +37,104 @@ class UserAccountMongoDAOSpec extends Specification with EmbedConnection with Cl
     val activeClientApplication = ClientApplication(UUID.randomUUID(), activeAccount.id, "ACT_CODE_1", active = true)
 
     "Save and retreive a user account" in {
-      val findAfterInsert =
-           for {
-             insert <- accountDAO.insertNew(userAccount, clientApplication)
-             read <- accountDAO.getById(userAccount.id)
-           } yield read
+      accountDAO.insertNew(userAccount, clientApplication)
+      val findAfterInsert =accountDAO.getById(userAccount.id)
 
-
-      fromFuture(findAfterInsert) shouldEqual Some(userAccount)
-
+      findAfterInsert shouldEqual Some(userAccount)
     }
 
 
     "Find account by application ID" in {
-      val findAfterInsert =
-        for {
-          insert <- accountDAO.insertNew(userAccount, clientApplication)
-          read <- accountDAO.getByApplicationId(clientApplication.id)
-        } yield read
+      accountDAO.insertNew(userAccount, clientApplication)
+      val findAfterInsert =accountDAO.getByApplicationId(clientApplication.id)
 
-      fromFuture(findAfterInsert) shouldEqual Some(userAccount)
+      findAfterInsert shouldEqual Some(userAccount)
     }
 
     "Don't find anything with wrong ID" in {
-      val findAfterInsert =
-        for {
-          insert <- accountDAO.insertNew(userAccount, clientApplication)
-          read <- accountDAO.getById(UUID.randomUUID())
-        } yield read
+      accountDAO.insertNew(userAccount, clientApplication)
 
-
-      fromFuture(findAfterInsert) shouldEqual None
+      accountDAO.getById(UUID.randomUUID()) shouldEqual None
     }
 
     "Not Find account using wrong application ID" in {
-      val findAfterInsert =
-        for {
-          insert <- accountDAO.insertNew(userAccount, clientApplication)
-          read <- accountDAO.getByApplicationId(UUID.randomUUID())
-        } yield read
+      accountDAO.insertNew(userAccount, clientApplication)
 
-      fromFuture(findAfterInsert) shouldEqual None
+      accountDAO.getByApplicationId(UUID.randomUUID()) shouldEqual None
     }
 
     "Find by email" in {
-      val findAfterInsert =
-        for {
-          insert <- accountDAO.insertNew(userAccount, clientApplication)
-          read <- accountDAO.getByEmail(userAccount.email.get)
-        } yield read
+      accountDAO.insertNew(userAccount, clientApplication)
+      val findAfterInsert = accountDAO.getByEmail(userAccount.email.get)
 
-      fromFuture(findAfterInsert) shouldEqual Some(userAccount)
+      findAfterInsert shouldEqual Some(userAccount)
     }
 
     "Find by email filtering with active status" in {
-      val findAfterInsert =
-        for {
-          insert <- accountDAO.insertNew(userAccount, clientApplication)
-          insert1 <- accountDAO.insertNew(activeAccount, activeClientApplication)
 
-          inactive <- accountDAO.getByEmail(userAccount.email.get, true)
-          active <- accountDAO.getByEmail(activeAccount.email.get, true)
-        } yield (inactive, active)
+      accountDAO.insertNew(userAccount, clientApplication)
+      accountDAO.insertNew(activeAccount, activeClientApplication)
 
-      fromFuture(findAfterInsert) shouldEqual (None, Some(activeAccount))
+      val inactive = accountDAO.getByEmail(userAccount.email.get, true)
+      val active = accountDAO.getByEmail(activeAccount.email.get, true)
+
+      inactive shouldEqual None
+      active shouldEqual Some(activeAccount)
     }
 
     "Find by application_id filtering with active status" in {
-      val findAfterInsert =
-        for {
-          insert <- accountDAO.insertNew(userAccount, clientApplication)
-          insert1 <- accountDAO.insertNew(activeAccount, activeClientApplication)
+      accountDAO.insertNew(userAccount, clientApplication)
+      accountDAO.insertNew(activeAccount, activeClientApplication)
 
-          inactive <- accountDAO.getByApplicationId(clientApplication.id, true)
-          active <- accountDAO.getByApplicationId(activeClientApplication.id, true)
-        } yield (inactive, active)
+      val inactive = accountDAO.getByApplicationId(clientApplication.id, true)
+      val active = accountDAO.getByApplicationId(activeClientApplication.id, true)
 
-      fromFuture(findAfterInsert) shouldEqual (None, Some(activeAccount))
+      inactive shouldEqual None
+      active shouldEqual Some(activeAccount)
     }
 
     "Find by any of id, email, application id" in {
-      val findAfterInsert =
-        for {
-          insert <- accountDAO.insertNew(userAccount, clientApplication)
+      accountDAO.insertNew(userAccount, clientApplication)
 
-          byMsisdn <- accountDAO.findByAnyOf(Some(UUID.randomUUID()), userAccount.msisdn, None)
-          byEmail <- accountDAO.findByAnyOf(None, Some("-----"), userAccount.email)
-          byApplicationId <- accountDAO.findByAnyOf(Some(clientApplication.id), Some("____"), Some("____"))
-          shouldntFind <- accountDAO.findByAnyOf(Some(UUID.randomUUID()), Some("-----"), Some("notanemail"))
-        } yield (byMsisdn, byEmail, byApplicationId, shouldntFind)
+      val byMsisdn = accountDAO.findByAnyOf(Some(UUID.randomUUID()), userAccount.msisdn, None)
+      val byEmail = accountDAO.findByAnyOf(None, Some("-----"), userAccount.email)
+      val byApplicationId = accountDAO.findByAnyOf(Some(clientApplication.id), Some("____"), Some("____"))
+      val shouldntFind = accountDAO.findByAnyOf(Some(UUID.randomUUID()), Some("-----"), Some("notanemail"))
 
-      fromFuture(findAfterInsert) shouldEqual (Some(userAccount), Some(userAccount), Some(userAccount), None)
+      byMsisdn shouldEqual Some(userAccount)
+      byEmail shouldEqual Some(userAccount)
+      byApplicationId shouldEqual Some(userAccount)
+      shouldntFind shouldEqual None
     }
 
     "Find by any of id, email, application id, passing only one param" in {
-      val findAfterInsert =
-        for {
-          insert <- accountDAO.insertNew(userAccount, clientApplication)
+      accountDAO.insertNew(userAccount, clientApplication)
 
-          byMsisdn <- accountDAO.findByAnyOf(None, userAccount.msisdn, None)
-          byEmail <- accountDAO.findByAnyOf(None, None, userAccount.email)
-          byApplicationId <- accountDAO.findByAnyOf(Some(clientApplication.id), None, None)
-          shouldntFind <- accountDAO.findByAnyOf(None, None, None)
-        } yield (byMsisdn, byEmail, byApplicationId, shouldntFind)
+      val byMsisdn = accountDAO.findByAnyOf(None, userAccount.msisdn, None)
+      val byEmail = accountDAO.findByAnyOf(None, None, userAccount.email)
+      val byApplicationId = accountDAO.findByAnyOf(Some(clientApplication.id), None, None)
+      val shouldntFind = accountDAO.findByAnyOf(None, None, None)
 
-      fromFuture(findAfterInsert) shouldEqual (Some(userAccount), Some(userAccount), Some(userAccount), None)
+      byMsisdn shouldEqual Some(userAccount)
+      byEmail shouldEqual Some(userAccount)
+      byApplicationId shouldEqual Some(userAccount)
+      shouldntFind shouldEqual None
     }
 
     "Delete by ID" in {
-      val findAfterDelete = for {
-        insert <- accountDAO.insertNew(userAccount, clientApplication)
-        delete <- accountDAO.delete(userAccount.id)
-        read <- accountDAO.getById(userAccount.id)
-      } yield read
+      accountDAO.insertNew(userAccount, clientApplication)
+      accountDAO.delete(userAccount.id)
 
-      fromFuture(findAfterDelete) shouldEqual None
+      accountDAO.getById(userAccount.id) shouldEqual None
     }
 
     "Set account active" in {
-      val findAfterSettingActive = for {
-        insert <- accountDAO.insertNew(userAccount, clientApplication)
-        active <- accountDAO.setActive(userAccount.id)
-        read <- accountDAO.getById(userAccount.id)
-      } yield read
+      accountDAO.insertNew(userAccount, clientApplication)
+      accountDAO.setActive(userAccount.id)
 
-      fromFuture(findAfterSettingActive) map { _.active } shouldEqual Some(true)
+      val activeStatus = accountDAO.getById(userAccount.id) map { _.active }
+
+      activeStatus shouldEqual Some(true)
     }
 
   }
