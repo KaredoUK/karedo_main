@@ -45,7 +45,7 @@ class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(im
               complete {
                 (editAccountActor ? FindAccount(applicationId map {
                   UUID.fromString(_)
-                }, msisdn, email)).mapTo[Option[UserProfile]]
+                }, msisdn, email)).mapTo[ResponseWithFailure[RegistrationError, Option[UserProfile]]]
               }
             }
           }
