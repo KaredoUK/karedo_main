@@ -170,11 +170,10 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
   }
 
   def listBrands(accountId: UserID): ResponseWithFailure[EditAccountError,List[BrandRecord]] = {
-    val list=userAccountDAO.listUserSubscribedBrands(accountId).map(id=>{
+    val list=userAccountDAO.listUserSubscribedBrands(accountId).map { id =>
+      brandDAO getById(id) map { brand =>  BrandRecord(brand.id, brand.name, brand.iconId) }
+    } filter { _.isDefined } map { _.get }
 
-      val brand=brandDAO.getById(id).getOrElse(Brand())
-      BrandRecord(brand.id, brand.name, brand.iconPath)
-    })
     SuccessResponse(list)
   }
 

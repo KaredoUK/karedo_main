@@ -77,7 +77,7 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
       } ~ post {
         handleWith {
           request: AdvertDetail => {
-            (brandActor ? AddAdvertCommand(brandId, request.text, request.imagePaths, request.value)).mapTo[ResponseWithFailure[BrandError, AdvertDetailResponse]]
+            (brandActor ? AddAdvertCommand(brandId, request.text, request.imageIds, request.value)).mapTo[ResponseWithFailure[BrandError, AdvertDetailResponse]]
           }
         }
       }

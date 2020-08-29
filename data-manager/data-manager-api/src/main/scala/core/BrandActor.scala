@@ -69,10 +69,10 @@ class BrandActor(brandDAO: BrandDAO, advDAO: AdvDAO)(implicit val bindingModule:
 
   def addAdvert(request: AddAdvertCommand): Future[ResponseWithFailure[BrandError,AdvertDetailResponse]] = successful {
 
-    advDAO.insertNew(AdvertisementDetail(text=request.text,imagePaths = request.imagePaths, value=request.value)) match {
+    advDAO.insertNew(AdvertisementDetail(text=request.text,imageIds = request.imageIds, value=request.value)) match {
       case Some(id) => {
         brandDAO.addAdvertisement(request.brandId, AdvertisementMetadata(id, new DateTime))
-        SuccessResponse(AdvertDetailResponse(id,request.text,request.imagePaths,request.value))
+        SuccessResponse(AdvertDetailResponse(id,request.text,request.imageIds,request.value))
       }
       case None => FailureResponse(InvalidBrandRequest("Can't add advertise"))
     }
@@ -85,7 +85,7 @@ class BrandActor(brandDAO: BrandDAO, advDAO: AdvDAO)(implicit val bindingModule:
     validateBrand(request) match {
       case None =>
         log.info("Creating new brand for request {}", request)
-        val newbrand = Brand(name = request.name, iconPath = request.iconPath, ads = List[AdvertisementMetadata]())
+        val newbrand = Brand(name = request.name, iconId = request.iconId, ads = List[AdvertisementMetadata]())
         val uuid=brandDAO.insertNew(newbrand).get
         val response=BrandResponse(uuid)
         SuccessResponse(response)
@@ -98,7 +98,7 @@ class BrandActor(brandDAO: BrandDAO, advDAO: AdvDAO)(implicit val bindingModule:
 
   def listBrands: List[BrandRecord]= {
 
-    val list=brandDAO.list.map(b => BrandRecord(b.id,b.name, b.iconPath))
+    val list=brandDAO.list.map(b => BrandRecord(b.id,b.name, b.iconId))
     log.info(s" returning a list of ${list.size} brands")
     list
 
@@ -109,7 +109,7 @@ class BrandActor(brandDAO: BrandDAO, advDAO: AdvDAO)(implicit val bindingModule:
     brandDAO.getById(request.brandId) match {
       case Some(b) => {
         log.info(s"getting brand ${b.id}")
-        SuccessResponse(BrandRecord(b.id,b.name,b.iconPath))
+        SuccessResponse(BrandRecord(b.id,b.name,b.iconId))
       }
       case None => {
         log.info(s" cannot get brand ${request.brandId}")
@@ -135,7 +135,6 @@ class BrandActor(brandDAO: BrandDAO, advDAO: AdvDAO)(implicit val bindingModule:
 
   def validateBrand(request: BrandData): Option[String] = request match {
     case BrandData("", _) => Some("Name must be not empty")
-    case BrandData(_, "") => Some("IconPath must be not empty")
     case _ => None
   }
 

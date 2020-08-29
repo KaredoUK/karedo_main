@@ -48,7 +48,7 @@ class BrandMongoDAO (implicit val bindingModule: BindingModule) extends BrandDAO
       byId(brand.id),
       $set(
         "name" -> brand.name,
-        "iconPath" -> brand.iconPath,
+        "iconId" -> brand.iconId,
         "ads" -> brand.ads.map { ad => grater[AdvertisementMetadata].asDBObject(ad)}
 
       )
