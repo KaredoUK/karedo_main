@@ -130,8 +130,11 @@ class TestBrand(unittest.TestCase):
         r=get("account/"+userId+"/brand")
         self.assertEqual(r.status_code, 200)
 
+        js=json.loads(r.text)
+        self.assertEqual(len(js),2)
 
-
+        self.assertEqual(js[0]["name"],"brandX")
+        self.assertEqual(js[1]["name"],"brandY")
 
 
 
