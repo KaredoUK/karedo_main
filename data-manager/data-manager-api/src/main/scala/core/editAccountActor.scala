@@ -7,7 +7,7 @@ import akka.actor.Actor.Receive
 import core.common.RequestValidationChaining
 import parallelai.wallet.persistence.{BrandDAO, ClientApplicationDAO, UserAccountDAO}
 import com.parallelai.wallet.datamanager.data._
-import parallelai.wallet.entity.{UserPersonalInfo, AccountSettings, UserAccount}
+import parallelai.wallet.entity.{Brand, UserPersonalInfo, AccountSettings, UserAccount}
 import spray.http.parser.HttpParser
 import spray.json._
 import scala.async.Async._
@@ -30,6 +30,8 @@ object EditAccountActor {
   case class DeleteAccount(accountId: UserID)
 
   case class AddBrand(accountId: UserID, brandId: UUID)
+
+  case class ListBrandsRequest(brandId: UUID)
 
   sealed trait EditAccountError
 
@@ -142,8 +144,10 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
 
     case request@AddBrand(accountId, brandId) => replyToSender(addBrand(request))
 
-
+    case ListBrandsRequest(accountId) => replyToSender(listBrands(accountId))
   }
+
+
 
   def validAddBrand(addBrand: AddBrand): Option[EditAccountError] = {
     val AddBrand(user, brand) = addBrand
@@ -165,6 +169,14 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
     }
   }
 
+  def listBrands(accountId: UserID): ResponseWithFailure[EditAccountError,List[BrandRecord]] = {
+    val list=userAccountDAO.listUserSubscribedBrands(accountId).map(id=>{
+
+      val brand=brandDAO.getById(id).getOrElse(Brand())
+      BrandRecord(brand.id, brand.name, brand.iconPath)
+    })
+    SuccessResponse(list)
+  }
 
   def addBrand(request: AddBrand): ResponseWithFailure[EditAccountError, String] =
 
@@ -176,7 +188,7 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
 
         userAccountDAO.addBrand(user, brand)
 
-        SuccessResponse("")
+        SuccessResponse("OK")
       }
     }
 

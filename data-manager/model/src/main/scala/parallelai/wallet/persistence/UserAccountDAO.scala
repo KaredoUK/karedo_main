@@ -40,7 +40,7 @@ trait UserAccountDAO {
 
   def deleteBrand(userId: UUID, brandId: UUID): Unit
 
-  def listUserSubscribedBrands(userId: UUID): List[SubscribedBrands]
+  def listUserSubscribedBrands(userId: UUID): List[UUID]
 
 }
 

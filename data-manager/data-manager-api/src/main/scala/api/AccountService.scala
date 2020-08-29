@@ -96,14 +96,18 @@ class AccountService(registrationActor: ActorRef, editAccountActor: ActorRef)(im
         }
       } ~
       path("account" / JavaUUID / "brand") { accountId: UserID =>
-        rejectEmptyResponse {
+
           post {
             handleWith {
               brandIdRequest: BrandIDRequest =>
                 (editAccountActor ? AddBrand(accountId, brandIdRequest.brandId)).mapTo[ResponseWithFailure[EditAccountError, String]]
             }
+          } ~ get {
+            complete {
+              (editAccountActor ? ListBrandsRequest(accountId)).mapTo[ResponseWithFailure[EditAccountError,List[BrandRecord]]]
+            }
           }
-        }
+
       }
 
 }

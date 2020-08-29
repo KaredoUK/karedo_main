@@ -8,12 +8,12 @@ import com.mongodb.casbah.commons.MongoDBObject
 import com.novus.salat.dao.SalatDAO
 import com.novus.salat.global._
 import parallelai.wallet.entity.{AdvertisementDetail, Brand}
-import parallelai.wallet.persistence.{AdvertisementDetailDAO, BrandDAO}
+import parallelai.wallet.persistence.{AdvDAO, BrandDAO}
 
 /**
  * Created by pakkio on 29/09/2014.
  */
-class AdvertisementDetailMongoDAO (implicit val bindingModule: BindingModule) extends AdvertisementDetailDAO with MongoConnection with Injectable   {
+class AdvMongoDAO (implicit val bindingModule: BindingModule) extends AdvDAO with MongoConnection with Injectable   {
 
   val dao = new SalatDAO[AdvertisementDetail, UUID](collection = db("AdvertisementDetail")) {}
 

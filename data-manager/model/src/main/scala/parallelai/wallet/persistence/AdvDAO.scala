@@ -9,7 +9,7 @@ import scala.concurrent.Future
 /**
  * Created by pakkio on 29/09/2014.
  */
-trait AdvertisementDetailDAO {
+trait AdvDAO {
   def getById(detailId: UUID): Option[AdvertisementDetail]
   def insertNew(detail: AdvertisementDetail): Option[UUID]
   def delete(detailId: UUID): Unit

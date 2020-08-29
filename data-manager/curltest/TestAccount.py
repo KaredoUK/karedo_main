@@ -8,7 +8,9 @@ import unittest, json
 # Look for Question### for doubts
 #
 
+
 class TestAccount(unittest.TestCase):
+
     def test01CreateAccount(self):
         global userId, applicationId
 
@@ -16,7 +18,6 @@ class TestAccount(unittest.TestCase):
 
         r = post("account", {"applicationId": applicationId, "msisdn": "0044712345678", "email": "pakkio@gmail.com"})
 
-        info(r.text)
         self.assertEqual(r.status_code, 200)
 
         js = json.loads(r.text)
@@ -28,7 +29,6 @@ class TestAccount(unittest.TestCase):
         title("PARALLELAI-53API: Validate/Activate Account Application")
         r = post("account/application/validation", {"applicationId": applicationId, "validationCode": activationCode})
 
-        info(r.text)
         self.assertEqual(r.status_code, 200)
 
         js = json.loads(r.text)
@@ -45,7 +45,6 @@ class TestAccount(unittest.TestCase):
         info("Question001: /reset is needed? doc is specifying it but original implementation didn't")
         r = put("account/" + userId + "/application/" + applicationId + "/reset")
 
-        info(r.text)
         self.assertEqual(r.status_code, 200)
 
 
@@ -56,7 +55,6 @@ class TestAccount(unittest.TestCase):
 
         r = post("account/application/validation", {"applicationId": applicationId, "validationCode": activationCode})
 
-        info(r.text)
         self.assertEqual(r.status_code, 200)
 
     def test03UpdateInfo(self):
@@ -86,7 +84,6 @@ class TestAccount(unittest.TestCase):
             "totalPoints": 100 # Question004: not present in documentation and NOT actually working
         }
         r=put("account/"+userId,data)
-        info(r.text)
         self.assertEqual(r.status_code, 200)
 
 
@@ -96,7 +93,6 @@ class TestAccount(unittest.TestCase):
         title("PARALLELAI-51API: Get Account Settings ")
 
         r=get("account/"+userId)
-        info(r.text)
         self.assertEqual(r.status_code, 200)
         js = json.loads(r.text)
         self.assertEqual(js["info"]["postCode"],"EC1")
@@ -111,7 +107,6 @@ class TestAccount(unittest.TestCase):
         title("PARALLELAI-54API: Get User Points")
 
         r=get("account/"+userId+"/points")
-        info(r.text)
         self.assertEqual(r.status_code, 200)
         js = json.loads(r.text)
         self.assertEqual(js["totalPoints"],0) # Question006: cfr Questions 004 and 005: how can we read something different from 0?
@@ -121,7 +116,6 @@ class TestAccount(unittest.TestCase):
         global userId
         title("PARALLELAI-52API: Delete Account")
         r=delete("account/"+userId)
-        info(r.text)
         self.assertEqual(r.status_code, 200)
         found=ua.find_one({ "email" : "pakkio@gmail.com" })
         self.assertEqual(found,None)

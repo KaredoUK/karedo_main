@@ -7,11 +7,11 @@ import ActorDSL._
 import akka.routing.{RoundRobinPool, RoundRobinRouter}
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import parallelai.wallet.entity.Brand
-import parallelai.wallet.persistence.{BrandDAO, ClientApplicationDAO, UserAccountDAO}
+import parallelai.wallet.persistence.{AdvDAO, BrandDAO, ClientApplicationDAO, UserAccountDAO}
 import parallelai.wallet.config.AppConfigPropertySource
 import com.typesafe.config.ConfigFactory
 import com.escalatesoft.subcut.inject.NewBindingModule._
-import parallelai.wallet.persistence.mongodb.{BrandMongoDAO, ClientApplicationMongoDAO, UserAccountMongoDAO}
+import parallelai.wallet.persistence.mongodb.{AdvMongoDAO, BrandMongoDAO, ClientApplicationMongoDAO, UserAccountMongoDAO}
 
 import scala.concurrent.Future
 
@@ -49,7 +49,8 @@ trait DependencyInjection extends Injectable {
 }
 
 trait Persistence {
-  def brandDAO : BrandDAO  
+  def brandDAO : BrandDAO
+  def advDAO : AdvDAO
   def userAccountDAO : UserAccountDAO
   def clientApplicationDAO : ClientApplicationDAO
 }
@@ -59,6 +60,7 @@ trait MongoPersistence extends Persistence {
   
   override val userAccountDAO : UserAccountDAO = new UserAccountMongoDAO() 
   override val brandDAO : BrandDAO = new BrandMongoDAO()
+  override val advDAO : AdvDAO = new AdvMongoDAO()
   override val clientApplicationDAO : ClientApplicationDAO = new ClientApplicationMongoDAO()
 }
 
@@ -102,7 +104,7 @@ trait BaseCoreActors extends ServiceActors with RestMessageActors  {
       .withRouter( RoundRobinPool(nrOfInstances = registrationActorPoolSize) )
   )
   override val brand = system.actorOf(
-    BrandActor.props(brandDAO)
+    BrandActor.props(brandDAO, advDAO)
       .withRouter( RoundRobinPool(nrOfInstances = brandActorPoolSize) )
   )
 

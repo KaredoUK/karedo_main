@@ -36,6 +36,13 @@ class BrandMongoDAO (implicit val bindingModule: BindingModule) extends BrandDAO
 
   override def getById(id: UUID): Option[Brand] = dao.findOneById(id)
 
+  override def delAdvertisement(brandId: UUID, id: UUID): Unit = {
+    dao.update(byId(brandId), $pull("ads" -> MongoDBObject("detailId" -> id)))
+    None
+
+  }
+
+
   override def update(brand: Brand): Unit = {
     dao.update(
       byId(brand.id),

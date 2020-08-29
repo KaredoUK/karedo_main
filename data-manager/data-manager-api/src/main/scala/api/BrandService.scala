@@ -26,7 +26,7 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
   implicit val timeout = Timeout(20.seconds)
 
 
-  val route1 =
+  val routebrand =
     path("brand") {
 
       post {
@@ -47,7 +47,7 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
 
     }
 
-  val route2 =
+  val routebrandWithId =
 
     path("brand" / JavaUUID) { brandId: UUID =>
       rejectEmptyResponse {
@@ -65,17 +65,37 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
       }
     }
 
-  val route3 =
+  val routebrandWithIdAdvert =
 
     path("brand" / JavaUUID / "advert") { brandId: UUID =>
       rejectEmptyResponse {
         get {
           complete {
-            (brandActor ? ListBrandsAdverts(brandId)).mapTo[ResponseWithFailure[BrandError, List[AdvertisementDetailResponse]]]
+            (brandActor ? ListBrandsAdverts(brandId)).mapTo[ResponseWithFailure[BrandError, List[AdvertDetailResponse]]]
+          }
+        }
+      } ~ post {
+        handleWith {
+          request: AdvertDetail => {
+            (brandActor ? AddAdvertCommand(brandId, request.text, request.imagePaths, request.value)).mapTo[ResponseWithFailure[BrandError, AdvertDetailResponse]]
           }
         }
       }
     }
 
-  val route = route1 ~ route2 ~ route3
+  val routebrandWithIdAdvertWithId =
+
+    path("brand" / JavaUUID / "advert" / JavaUUID) {
+      (brandId: UUID, advId: UUID) =>
+        delete {
+          complete {
+          (brandActor ? DeleteAdvRequest (brandId, advId) ).mapTo[ResponseWithFailure[BrandError, String]]
+
+
+          }
+        }
+    }
+
+
+  val route = routebrand ~ routebrandWithId ~ routebrandWithIdAdvert ~ routebrandWithIdAdvertWithId
 }

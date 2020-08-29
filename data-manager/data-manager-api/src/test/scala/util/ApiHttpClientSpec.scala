@@ -6,7 +6,7 @@ import org.specs2.mock.Mockito
 import org.specs2.mutable.{After, SpecificationLike}
 import org.specs2.specification.{Step, Fragments}
 import org.specs2.time.NoTimeConversions
-import parallelai.wallet.persistence.{BrandDAO, ClientApplicationDAO, UserAccountDAO}
+import parallelai.wallet.persistence.{AdvDAO, BrandDAO, ClientApplicationDAO, UserAccountDAO}
 import spray.testkit.TestUtils
 
 import scala.concurrent.Await._
@@ -31,9 +31,10 @@ trait ApiHttpClientSpec extends SpecificationLike with NoTimeConversions with Mo
     lazy val mockedBrandDAO = mock[BrandDAO]
     lazy val mockedClientApplicationDAO = mock[ClientApplicationDAO]
     lazy val mockedUserAccountDAO = mock[UserAccountDAO]
+    lazy val mockedAdvDAO = mock[AdvDAO]
 
     lazy val messagerActor = TestProbe()
-    val server = new RestServiceWithMockPersistence(servicePort, mockedBrandDAO, mockedClientApplicationDAO, mockedUserAccountDAO, messagerActor.ref)
+    val server = new RestServiceWithMockPersistence(servicePort, mockedBrandDAO, mockedAdvDAO, mockedClientApplicationDAO, mockedUserAccountDAO, messagerActor.ref)
 
     def after = stopServer()
 

@@ -10,8 +10,10 @@ import scala.concurrent.Future
  * Created by pakkio on 29/09/2014.
  */
 trait BrandDAO {
+  def delAdvertisement(brandId: UUID, uuid: UUID): Unit
 
-  def getById(brandId: UUID) : Option[Brand]
+
+  def getById(id: UUID) : Option[Brand]
 
   def list : List[Brand]
 

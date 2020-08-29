@@ -74,6 +74,7 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
       dao.insert(
         MongoUserAccount(userAccount.id, userAccount.msisdn, userAccount.email,
           userAccount.personalInfo, userAccount.settings, userAccount.active, userAccount.totalPoints,
+          List(),
           List(
             MongoUserApplicationInfo(firstApplication.id, firstApplication.activationCode, firstApplication.active)
           )
@@ -84,6 +85,7 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
       dao.insert(
         MongoUserAccount(userAccount.id, userAccount.msisdn, userAccount.email,
           userAccount.personalInfo, userAccount.settings, userAccount.active, userAccount.totalPoints,
+          List(),
           firstApplications map { app => MongoUserApplicationInfo(app.id, app.activationCode, app.active)} toList
         )
       )
@@ -172,8 +174,13 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
         $pull("subscribedBrands.0" -> brandId)
       )
 
-  override def listUserSubscribedBrands(userId: UUID): List[SubscribedBrands] =
-      dao.projections[SubscribedBrands](byId(userId), "subscribedBrands")
+  override def listUserSubscribedBrands(userId: UUID): List[UUID] = {
+    val list=getById(userId) match {
+      case None => List()
+      case Some(account) => account.subscribedBrands
+    }
+    list
+  }
 }
 
 class ClientApplicationMongoDAO(implicit val bindingModule: BindingModule) extends ClientApplicationDAO with MongoConnection with Injectable {

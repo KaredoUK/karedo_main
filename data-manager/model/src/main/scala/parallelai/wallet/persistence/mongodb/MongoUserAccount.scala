@@ -21,9 +21,10 @@ case class MongoUserAccount(
                              settings: AccountSettings = defaultAccountSettings,
                              active: Boolean = false,
                              totalPoints: Long = 0,
+                             subscribedBrands: List[UUID],
                              applications: List[MongoUserApplicationInfo]
                              ) {
-  def toUserAccount : UserAccount = UserAccount(id, msisdn, email, personalInfo, settings, active, totalPoints)
+  def toUserAccount : UserAccount = UserAccount(id, msisdn, email, personalInfo, settings, active, totalPoints, subscribedBrands)
 
   def toClientApplicationList : List[ClientApplication] = applications map { _.toClientApplication(id)  }
 }

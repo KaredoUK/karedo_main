@@ -1,11 +1,14 @@
 package core
 
+import java.util.UUID
+
 import akka.actor.{Actor, ActorLogging, Props}
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import com.parallelai.wallet.datamanager.data._
 import core.BrandActor.{BrandError, InternalBrandError, InvalidBrandRequest}
+import org.joda.time.DateTime
 import parallelai.wallet.entity.{Brand, _}
-import parallelai.wallet.persistence.BrandDAO
+import parallelai.wallet.persistence.{AdvDAO, BrandDAO}
 import spray.json._
 
 import scala.concurrent.Future
@@ -18,8 +21,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
  */
 object BrandActor {
 
-  def props(brandDAO: BrandDAO)(implicit bindingModule: BindingModule): Props =
-    Props(classOf[BrandActor], brandDAO, bindingModule)
+  def props(brandDAO: BrandDAO, advDAO: AdvDAO)(implicit bindingModule: BindingModule): Props =
+    Props(classOf[BrandActor], brandDAO, advDAO, bindingModule)
 
 
   sealed trait BrandError
@@ -47,13 +50,33 @@ object BrandActor {
 
 }
 
-class BrandActor(brandDAO: BrandDAO)(implicit val bindingModule: BindingModule) extends Actor with ActorLogging with Injectable {
+class BrandActor(brandDAO: BrandDAO, advDAO: AdvDAO)(implicit val bindingModule: BindingModule) extends Actor with ActorLogging with Injectable {
 
   def receive: Receive = {
     case request: BrandData => replyToSender(createBrand(request))
+    case request: AddAdvertCommand => replyToSender(addAdvert(request))
     case ListBrands => sender ! listBrands
     case request: BrandIDRequest => replyToSender(getBrand(request))
     case request: DeleteBrandRequest => replyToSender(deleteBrand(request))
+    case request: DeleteAdvRequest => replyToSender(deleteAdv(request))
+  }
+
+  def deleteAdv(request: DeleteAdvRequest): Future[ResponseWithFailure[BrandError,String]] = successful {
+    brandDAO.delAdvertisement(request.brandId,request.advId)
+    advDAO.delete(request.advId)
+    SuccessResponse("OK")
+  }
+
+  def addAdvert(request: AddAdvertCommand): Future[ResponseWithFailure[BrandError,AdvertDetailResponse]] = successful {
+
+    advDAO.insertNew(AdvertisementDetail(text=request.text,imagePaths = request.imagePaths, value=request.value)) match {
+      case Some(id) => {
+        brandDAO.addAdvertisement(request.brandId, AdvertisementMetadata(id, new DateTime))
+        SuccessResponse(AdvertDetailResponse(id,request.text,request.imagePaths,request.value))
+      }
+      case None => FailureResponse(InvalidBrandRequest("Can't add advertise"))
+    }
+
   }
 
 
