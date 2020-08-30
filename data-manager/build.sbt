@@ -13,4 +13,4 @@ lazy val web = (project.in(file("./data-manager-web"))).enablePlugins(PlayScala)
 
 
 lazy val root = project.in( file(".") )
-  .aggregate(data,api, web)
+  .aggregate(data,api, web, model)

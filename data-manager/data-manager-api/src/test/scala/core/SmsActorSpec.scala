@@ -22,14 +22,15 @@ import org.specs2.time.NoTimeConversions
 import scala.collection.JavaConversions._
 import util._
 import scala.concurrent.duration._
+import scala.util.Random
 
 class SmsActorSpec extends TestKit(ActorSystem()) with SpecificationLike with Core
   with ImplicitSender with ThrownExpectations with NoTimeConversions {
 
 
-  val mockServiceListeningPort = 39999
 
   trait WithWireMockServer extends After {
+    lazy val mockServiceListeningPort = 30000 + Random.nextInt(3000)
 
     implicit val bindingModule = newBindingModuleWithConfig( PropertiesConfigPropertySource(
         Map(

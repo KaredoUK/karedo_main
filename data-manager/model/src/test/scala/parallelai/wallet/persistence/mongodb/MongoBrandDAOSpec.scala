@@ -32,8 +32,6 @@ class MongoBrandDAOSpec extends Specification with EmbedConnection with CleanAft
 
     val brandDAO = new BrandMongoDAO
 
-    def cleanBrands() = brandDAO.mongoClient.getDB("wallet_data").getCollection("Brand").remove(MongoDBObject.empty)
-
     lazy val mybrand = Brand(name = "brand X", iconId= UUID.randomUUID(), ads=List[AdvertisementMetadata]() )
 
     "create and retrieve a brand with a generated id " in {
@@ -43,11 +41,6 @@ class MongoBrandDAOSpec extends Specification with EmbedConnection with CleanAft
       val findAfterInsert = brandDAO.getById(id).get
 
       findAfterInsert shouldEqual mybrand
-
-      println("Passed 1")
-
-      true
-
     }
 
     "can delete one instance" in {
@@ -58,13 +51,11 @@ class MongoBrandDAOSpec extends Specification with EmbedConnection with CleanAft
 
       val findAfterDelete = brandDAO.getById(id)
 
-      findAfterDelete == None
+      findAfterDelete should be(None)
 
     }
 
     "can delete all instances" in {
-      cleanBrands()
-
       val id = brandDAO.insertNew(mybrand).get
 
       val list=brandDAO.list
