@@ -8,7 +8,7 @@ import unittest, json
 # Look for Question### for doubts
 #
 
-
+brandId=""
 
 
 class TestBrand(unittest.TestCase):
@@ -32,7 +32,7 @@ class TestBrand(unittest.TestCase):
         title("PARALLELAI-67API: Create Brand")
 
         iconId=newUUID()
-        r = post("brand", {"name": "brandX", "iconPath": iconId})
+        r = post("brand", {"name": "brandX", "iconId": iconId})
 
 
         self.assertEqual(r.status_code, 200)
@@ -40,7 +40,7 @@ class TestBrand(unittest.TestCase):
         js = json.loads(r.text)
         brandId=js["id"]
 
-        doc = br.find_one({"iconPath": iconPath})
+        doc = br.find_one({"name": "brandX"})
         self.assertNotEqual(doc,None)
 
     def test02findBrands(self):
