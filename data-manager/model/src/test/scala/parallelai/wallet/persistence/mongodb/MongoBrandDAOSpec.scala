@@ -32,7 +32,7 @@ class MongoBrandDAOSpec extends Specification with EmbedConnection with CleanAft
 
     val brandDAO = new BrandMongoDAO
 
-    lazy val mybrand = Brand(name = "brand X", iconId= UUID.randomUUID(), ads=List[AdvertisementMetadata]() )
+    lazy val mybrand = Brand(name = "brand X", iconId= "iconId", ads=List[AdvertisementMetadata]() )
 
     "create and retrieve a brand with a generated id " in {
 

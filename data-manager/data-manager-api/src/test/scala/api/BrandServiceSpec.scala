@@ -24,7 +24,7 @@ class BrandServiceSpec extends ApiHttpClientSpec with RestApiSpecMatchers {
       mockedBrandDAO.insertNew(any[Brand]) returns Some(newBrandUUID)
 
       val response = wait(pipeline {
-        Post( s"$serviceUrl/brand", BrandData("brand X", UUID.randomUUID()))
+        Post( s"$serviceUrl/brand", BrandData("brand X", "iconID"))
       })
 
       response shouldEqual BrandResponse(newBrandUUID)
@@ -33,7 +33,7 @@ class BrandServiceSpec extends ApiHttpClientSpec with RestApiSpecMatchers {
     "can retrieve a brand in the DB" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[BrandData]
 
-      val brand =  new Brand(UUID.randomUUID(), "brandName", UUID.randomUUID(), List.empty)
+      val brand =  new Brand(UUID.randomUUID(), "brandName", "iconID", List.empty)
       mockedBrandDAO.getById(any[UUID]) returns Some(brand)
 
       val response = wait(pipeline {

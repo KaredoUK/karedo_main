@@ -31,7 +31,7 @@ class TestBrand(unittest.TestCase):
 
         title("PARALLELAI-67API: Create Brand")
 
-        iconId=newUUID()
+        iconId="iconId"
         r = post("brand", {"name": "brandX", "iconId": iconId})
 
 
@@ -47,7 +47,7 @@ class TestBrand(unittest.TestCase):
         global brandId,brandId2
         title("PARALLELAI 95 API: Get Brands")
 
-        r = post("brand", {"name": "brandY", "iconId": newUUID()})
+        r = post("brand", {"name": "brandY", "iconId": "iconId"})
         self.assertEqual(r.status_code, 200)
         js = json.loads(r.text)
         brandId2=js["id"]
@@ -83,7 +83,7 @@ class TestBrand(unittest.TestCase):
         global brandId,advId
         title("PARALLELAI-65API: Create Ad")
 
-        data={ "text":"adtext", "imageIds": [newUUID(), newUUID()], "value":5}
+        data={ "text":"adtext", "imageIds": ["iconId", "iconId"], "value":5}
         r=post("brand/"+brandId+"/advert",data)
         self.assertEqual(r.status_code, 200)
 
@@ -94,7 +94,7 @@ class TestBrand(unittest.TestCase):
         global brandId
 
         title("PARALLELAI-66API: Disable Ad")
-        data={ "text":"adtext1", "imageIds": [newUUID(), newUUID()], "value":5}
+        data={ "text":"adtext1", "imageIds": ["iconId", "iconId"], "value":5}
         r=post("brand/"+brandId+"/advert",data)
 
         self.assertEqual(r.status_code, 200)
@@ -110,7 +110,7 @@ class TestBrand(unittest.TestCase):
 
         title("PARALLELAI-90API: Add Brand to User")
 
-        r = post("brand", {"name": "brandY", "iconId": newUUID()})
+        r = post("brand", {"name": "brandY", "iconId": "iconId"})
         self.assertEqual(r.status_code, 200)
         js = json.loads(r.text)
         brandId2=js["id"]

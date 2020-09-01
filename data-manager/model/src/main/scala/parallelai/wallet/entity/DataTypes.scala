@@ -24,8 +24,8 @@ case class UserOffers(userId: UUID, rewards: Set[UUID])
 case class Offer(id: UUID, brandId: UUID, description: String, imagePath: String, qrCodeId: UUID, value: Long)
 
 case class AdvertisementMetadata(detailId: UUID, publishedDate: DateTime)
-case class AdvertisementDetail(@Key("_id") id: UUID = UUID.randomUUID(), text: String, imageIds: List[UUID], value: Int)
-case class Brand(@Key("_id") id: UUID = UUID.randomUUID(), name: String = "", iconId: UUID, ads: List[AdvertisementMetadata]=List())
+case class AdvertisementDetail(@Key("_id") id: UUID = UUID.randomUUID(), text: String, imageIds: List[String], value: Int)
+case class Brand(@Key("_id") id: UUID = UUID.randomUUID(), name: String = "", iconId: String, ads: List[AdvertisementMetadata]=List())
 
 case class MediaContentDescriptor(name: String, contentType: String, id: String = "")
 case class MediaContent(descriptor: MediaContentDescriptor, inputStream: InputStream)

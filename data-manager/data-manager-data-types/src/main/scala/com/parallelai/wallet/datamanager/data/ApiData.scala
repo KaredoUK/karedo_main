@@ -33,12 +33,12 @@ case class UserContacts(email: Option[String], msisdn: Option[String]) extends W
 // BRAND
 case object ListBrands
 case class ListBrandsAdverts(brandId: UUID)
-case class BrandRecord(id: UUID, name: String, iconId: UUID)
-case class BrandData(name: String, iconId: UUID )
+case class BrandRecord(id: UUID, name: String, iconId: String)
+case class BrandData(name: String, iconId: String )
 case class BrandResponse(id: UUID)
-case class AddAdvertCommand(brandId: UUID, text: String, imageIds: List[UUID], value: Int)
-case class AdvertDetail(text: String, imageIds: List[UUID], value: Int)
-case class AdvertDetailResponse(id: UUID, text: String, imageIds: List[UUID], value: Int)
+case class AddAdvertCommand(brandId: UUID, text: String, imageIds: List[String], value: Int)
+case class AdvertDetail(text: String, imageIds: List[String], value: Int)
+case class AdvertDetailResponse(id: UUID, text: String, imageIds: List[String], value: Int)
 case class DeleteBrandRequest(brandId: UUID)
 case class DeleteAdvRequest(brandId: UUID, advId: UUID)
 case class BrandIDRequest(brandId: UUID)

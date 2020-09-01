@@ -22,7 +22,7 @@ trait CleanGridFsAfterExample extends CleanAfterExample {
   val cleanGridFs = new CleanGridFS(bindingModule)
 
   // Looks like the CleanAfterExample is not working properly with GridFS
-  override def after(): Any = {
+  override def after(): Unit = {
     super.after()
 
     cleanGridFs.clean()
