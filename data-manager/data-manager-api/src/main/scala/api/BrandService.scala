@@ -1,6 +1,7 @@
 package api
 
 
+import java.io.ByteArrayInputStream
 import java.util.UUID
 
 import akka.actor.ActorRef
@@ -8,7 +9,8 @@ import akka.util.Timeout
 import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
 import com.parallelai.wallet.datamanager.data.{BrandData, BrandResponse, ListBrandsAdverts, _}
 import core.BrandActor.BrandError
-import core.ResponseWithFailure
+import core.{SuccessResponse, ResponseWithFailure}
+import spray.http.MultipartFormData
 
 import spray.routing.Directives
 
@@ -29,6 +31,7 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
   val routebrand =
     path("brand") {
 
+
       post {
         handleWith {
           brandData: BrandData =>
@@ -40,6 +43,7 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
 
             complete {
 
+
               (brandActor ? ListBrands).mapTo[List[BrandRecord]]
             }
           }
@@ -49,7 +53,9 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
 
   val routebrandWithId =
 
-    path("brand" / JavaUUID) { brandId: UUID =>
+    path("brand" / JavaUUID) {
+
+      brandId: UUID =>
       rejectEmptyResponse {
         get {
           complete {
@@ -67,10 +73,13 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
 
   val routebrandWithIdAdvert =
 
-    path("brand" / JavaUUID / "advert") { brandId: UUID =>
+    path("brand" / JavaUUID / "advert") {
+
+      brandId: UUID =>
       rejectEmptyResponse {
         get {
           complete {
+
             (brandActor ? ListBrandsAdverts(brandId)).mapTo[ResponseWithFailure[BrandError, List[AdvertDetailResponse]]]
           }
         }
@@ -86,6 +95,7 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
   val routebrandWithIdAdvertWithId =
 
     path("brand" / JavaUUID / "advert" / JavaUUID) {
+
       (brandId: UUID, advId: UUID) =>
         delete {
           complete {
@@ -96,6 +106,18 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
         }
     }
 
+  val routeMedia =
+    (path("media") & post) {
+      entity(as[MultipartFormData]) { formData: MultipartFormData =>
 
-  val route = routebrand ~ routebrandWithId ~ routebrandWithIdAdvert ~ routebrandWithIdAdvertWithId
+        complete {
+          val details = formData.fields
+          "{ \"mediaId\":\"25\" }"
+
+        }
+      }
+    }
+
+
+  val route = routebrand ~ routebrandWithId ~ routebrandWithIdAdvert ~ routebrandWithIdAdvertWithId ~ routeMedia
 }
