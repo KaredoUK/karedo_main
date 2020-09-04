@@ -55,6 +55,8 @@ object ApiDataJsonProtocol extends DefaultJsonProtocol  {
   implicit val statusJson = jsonFormat1(StatusResponse)
   implicit val advDetailResponseJson = jsonFormat4(AdvertDetailResponse)
   implicit val advDetailJson = jsonFormat3(AdvertDetail)
+  implicit val addMediaRequestJson = jsonFormat3(AddMediaRequest)
+  implicit val addMediaResponseJson = jsonFormat1(AddMediaResponse)
 
 
 }

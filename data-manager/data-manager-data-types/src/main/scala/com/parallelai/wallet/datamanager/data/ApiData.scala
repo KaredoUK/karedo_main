@@ -42,5 +42,7 @@ case class AdvertDetailResponse(id: UUID, text: String, imageIds: List[String], 
 case class DeleteBrandRequest(brandId: UUID)
 case class DeleteAdvRequest(brandId: UUID, advId: UUID)
 case class BrandIDRequest(brandId: UUID)
+case class AddMediaRequest(name: String, contentType: String, bytes: Array[Byte])
+case class AddMediaResponse(mediaId: String)
 
 case class StatusResponse(status: String)
