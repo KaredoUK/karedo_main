@@ -12,7 +12,7 @@ import parallelai.wallet.persistence._
 import parallelai.wallet.config.AppConfigPropertySource
 import com.typesafe.config.ConfigFactory
 import com.escalatesoft.subcut.inject.NewBindingModule._
-import parallelai.wallet.persistence.mongodb.{AdvMongoDAO, BrandMongoDAO, OfferMongoDAO, ClientApplicationMongoDAO, UserAccountMongoDAO}
+import parallelai.wallet.persistence.mongodb._
 
 import scala.concurrent.Future
 
@@ -53,6 +53,7 @@ trait Persistence {
   def brandDAO : BrandDAO
   def offerDAO : OfferDAO
   def advDAO : AdvDAO
+  def mediaDAO : MediaDAO
   def userAccountDAO : UserAccountDAO
   def clientApplicationDAO : ClientApplicationDAO
 }
@@ -64,6 +65,7 @@ trait MongoPersistence extends Persistence {
   override val brandDAO : BrandDAO = new BrandMongoDAO()
   override val offerDAO : OfferDAO = new OfferMongoDAO()
   override val advDAO : AdvDAO = new AdvMongoDAO()
+  override val mediaDAO : MediaDAO = new MongoMediaDAO()
   override val clientApplicationDAO : ClientApplicationDAO = new ClientApplicationMongoDAO()
 }
 
@@ -109,7 +111,7 @@ trait BaseCoreActors extends ServiceActors with RestMessageActors  {
       .withRouter( RoundRobinPool(nrOfInstances = registrationActorPoolSize) )
   )
   override val brand = system.actorOf(
-    BrandActor.props(brandDAO, advDAO)
+    BrandActor.props(brandDAO, advDAO, mediaDAO)
       .withRouter( RoundRobinPool(nrOfInstances = brandActorPoolSize) )
   )
 

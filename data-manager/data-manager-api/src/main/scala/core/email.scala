@@ -38,12 +38,11 @@ class EmailActor(implicit val bindingModule : BindingModule) extends Actor with 
   }
 
   def sendEmail(to: String, body: String, subject: String)(implicit actorRefFactory: ActorRefFactory): Future[Unit] = {
-    if(userKey=="")
-    {
-      Future(println(s"(((((dummy sending email to $to, subject: $subject, body: $body)))))"))
-    }
-    else {
-      println(s"======> actual sending email to $to")
+    if(userKey=="") {
+      log.info(s"(((((dummy sending email to $to, subject: $subject, body: $body)))))")
+      Future.successful()
+    } else {
+      log.debug(s"======> actual sending email to $to")
       requestPipeline {
         Post(
           serverEndpoint,

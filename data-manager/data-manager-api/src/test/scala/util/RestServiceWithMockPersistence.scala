@@ -7,7 +7,7 @@ import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import com.typesafe.config.ConfigFactory
 import core._
 import parallelai.wallet.config.AppConfigPropertySource
-import parallelai.wallet.persistence.{AdvDAO, BrandDAO, ClientApplicationDAO, UserAccountDAO}
+import parallelai.wallet.persistence._
 import web.Web
 
 import scala.util.Random
@@ -19,6 +19,7 @@ class RestServiceWithMockPersistence(
   override val advDAO: AdvDAO,
   override val clientApplicationDAO: ClientApplicationDAO,
   override val userAccountDAO: UserAccountDAO,
+  override val mediaDAO: MediaDAO,
   override val messenger: ActorRef) extends Injectable with BootedCore with Persistence with MessageActors with BaseCoreActors with Api with Web {
 
   // Define The Configuration for the tests

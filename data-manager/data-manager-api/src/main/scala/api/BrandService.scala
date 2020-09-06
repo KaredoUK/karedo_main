@@ -1,22 +1,31 @@
 package api
 
 
+import java.io.ByteArrayInputStream
 import java.util.UUID
 
-import akka.actor.ActorRef
+import akka.actor.{ActorLogging, ActorRef}
+import akka.event.slf4j.Logger
 import akka.util.Timeout
 import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
 import com.parallelai.wallet.datamanager.data.{BrandData, BrandResponse, ListBrandsAdverts, _}
-import core.BrandActor.BrandError
-import core.ResponseWithFailure
+import core.BrandActor.{InternalBrandError, BrandError}
+import core.{FailureResponse, SuccessResponse, ResponseWithFailure}
+import org.slf4j.LoggerFactory
+import spray.http.{HttpEntity, BodyPart, MultipartFormData}
 
 import spray.routing.Directives
+import spray.util.{SprayActorLogging, LoggingContext}
 
 import scala.concurrent.ExecutionContext
 
+import api.BrandService.logger
+object BrandService {
+  val logger = Logger("BrandService")
+}
 
 class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionContext)
-  extends Directives with DefaultJsonFormats with ApiErrorsJsonProtocol {
+  extends Directives with DefaultJsonFormats with ApiErrorsJsonProtocol  {
 
 
   import akka.pattern.ask
@@ -29,6 +38,7 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
   val routebrand =
     path("brand") {
 
+
       post {
         handleWith {
           brandData: BrandData =>
@@ -40,6 +50,7 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
 
             complete {
 
+
               (brandActor ? ListBrands).mapTo[List[BrandRecord]]
             }
           }
@@ -49,7 +60,9 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
 
   val routebrandWithId =
 
-    path("brand" / JavaUUID) { brandId: UUID =>
+    path("brand" / JavaUUID) {
+
+      brandId: UUID =>
       rejectEmptyResponse {
         get {
           complete {
@@ -67,10 +80,13 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
 
   val routebrandWithIdAdvert =
 
-    path("brand" / JavaUUID / "advert") { brandId: UUID =>
+    path("brand" / JavaUUID / "advert") {
+
+      brandId: UUID =>
       rejectEmptyResponse {
         get {
           complete {
+
             (brandActor ? ListBrandsAdverts(brandId)).mapTo[ResponseWithFailure[BrandError, List[AdvertDetailResponse]]]
           }
         }
@@ -86,6 +102,7 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
   val routebrandWithIdAdvertWithId =
 
     path("brand" / JavaUUID / "advert" / JavaUUID) {
+
       (brandId: UUID, advId: UUID) =>
         delete {
           complete {
@@ -96,6 +113,30 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
         }
     }
 
+  val routeMedia =
+    (path("media") & post) {
+      entity(as[MultipartFormData]) { formData: MultipartFormData =>
 
-  val route = routebrand ~ routebrandWithId ~ routebrandWithIdAdvert ~ routebrandWithIdAdvertWithId
+        complete {
+
+          formData.get("media") match {
+            case Some(p) => {
+              val file_entity: HttpEntity = p.entity
+              val file_bin = file_entity.data.toByteArray
+
+              logger.info(s"Found a file with ${file_bin.length} bytes")
+
+              (brandActor ? AddMediaRequest("media", "contenttype", file_bin)).mapTo[ResponseWithFailure[BrandError, AddMediaResponse]]
+
+            }
+            case _ => ""
+
+          }
+
+        }
+      }
+    }
+
+
+  val route = routebrand ~ routebrandWithId ~ routebrandWithIdAdvert ~ routebrandWithIdAdvertWithId ~ routeMedia
 }
