@@ -7,11 +7,12 @@ import ActorDSL._
 import akka.routing.{RoundRobinPool, RoundRobinRouter}
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import parallelai.wallet.entity.Brand
-import parallelai.wallet.persistence.{AdvDAO, BrandDAO, ClientApplicationDAO, UserAccountDAO}
+import parallelai.wallet.entity.api.offermanager.RetailOffer
+import parallelai.wallet.persistence._
 import parallelai.wallet.config.AppConfigPropertySource
 import com.typesafe.config.ConfigFactory
 import com.escalatesoft.subcut.inject.NewBindingModule._
-import parallelai.wallet.persistence.mongodb.{AdvMongoDAO, BrandMongoDAO, ClientApplicationMongoDAO, UserAccountMongoDAO}
+import parallelai.wallet.persistence.mongodb.{AdvMongoDAO, BrandMongoDAO, OfferMongoDAO, ClientApplicationMongoDAO, UserAccountMongoDAO}
 
 import scala.concurrent.Future
 
@@ -50,6 +51,7 @@ trait DependencyInjection extends Injectable {
 
 trait Persistence {
   def brandDAO : BrandDAO
+  def offerDAO : OfferDAO
   def advDAO : AdvDAO
   def userAccountDAO : UserAccountDAO
   def clientApplicationDAO : ClientApplicationDAO
@@ -60,6 +62,7 @@ trait MongoPersistence extends Persistence {
   
   override val userAccountDAO : UserAccountDAO = new UserAccountMongoDAO() 
   override val brandDAO : BrandDAO = new BrandMongoDAO()
+  override val offerDAO : OfferDAO = new OfferMongoDAO()
   override val advDAO : AdvDAO = new AdvMongoDAO()
   override val clientApplicationDAO : ClientApplicationDAO = new ClientApplicationMongoDAO()
 }
@@ -67,6 +70,7 @@ trait MongoPersistence extends Persistence {
 trait ServiceActors {
   def registration: ActorRef
   def brand: ActorRef
+  def offer: ActorRef
   def editAccount: ActorRef
 }
 
@@ -94,6 +98,7 @@ trait BaseCoreActors extends ServiceActors with RestMessageActors  {
   this: Core with Persistence with Injectable with MessageActors =>
 
   val brandActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.brand") getOrElse 3
+  val offerActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.offer") getOrElse 3
   val registrationActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.registration") getOrElse 3
   val editAccountActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.editAccount") getOrElse 3
 
@@ -105,6 +110,11 @@ trait BaseCoreActors extends ServiceActors with RestMessageActors  {
   )
   override val brand = system.actorOf(
     BrandActor.props(brandDAO, advDAO)
+      .withRouter( RoundRobinPool(nrOfInstances = brandActorPoolSize) )
+  )
+
+  override val offer = system.actorOf(
+    OfferActor.props(offerDAO)
       .withRouter( RoundRobinPool(nrOfInstances = brandActorPoolSize) )
   )
 

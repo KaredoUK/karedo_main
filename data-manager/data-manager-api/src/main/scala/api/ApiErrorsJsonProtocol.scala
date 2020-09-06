@@ -2,6 +2,7 @@ package api
 
 import core.BrandActor.{InternalBrandError, InvalidBrandRequest, BrandError}
 import core.EditAccountActor._
+import core.OfferActor.{InternalOfferError, InvalidOfferRequest, OfferError}
 import core.RegistrationActor._
 import spray.http.StatusCode
 import spray.http.StatusCodes._
@@ -22,6 +23,15 @@ trait ApiErrorsJsonProtocol extends DefaultJsonFormats {
       case InvalidBrandRequest(reason) =>
         BadRequest
       case InternalBrandError(_) =>
+        InternalServerError
+    }
+  }
+
+  implicit object offerErrorSelector extends ErrorSelector[OfferError] {
+    def apply(error: OfferError): StatusCode = error match {
+      case InvalidOfferRequest(reason) =>
+        BadRequest
+      case InternalOfferError(_) =>
         InternalServerError
     }
   }

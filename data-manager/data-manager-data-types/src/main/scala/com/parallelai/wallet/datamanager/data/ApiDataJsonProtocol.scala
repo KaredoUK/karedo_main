@@ -52,6 +52,9 @@ object ApiDataJsonProtocol extends DefaultJsonProtocol  {
   implicit val brandIdJson = jsonFormat1(BrandIDRequest)
   implicit val DeleteBrandRequestJson = jsonFormat1(DeleteBrandRequest)
 
+  implicit val offerDataJson = jsonFormat6(OfferData)
+  implicit val offerResponseJson = jsonFormat1(OfferResponse)
+
   implicit val statusJson = jsonFormat1(StatusResponse)
   implicit val advDetailResponseJson = jsonFormat4(AdvertDetailResponse)
   implicit val advDetailJson = jsonFormat3(AdvertDetail)

@@ -1,0 +1,31 @@
+package api
+
+import akka.actor.ActorRef
+import akka.util.Timeout
+import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
+import com.parallelai.wallet.datamanager.data.{OfferData, OfferResponse}
+import core.OfferActor._
+import core.ResponseWithFailure
+import spray.routing.Directives
+import akka.pattern.ask
+
+import scala.concurrent.ExecutionContext
+
+
+class OfferService(offerActor: ActorRef)(implicit executionContext: ExecutionContext)
+  extends Directives with DefaultJsonFormats with ApiErrorsJsonProtocol {
+
+  import scala.concurrent.duration._
+
+  implicit val timeout = Timeout(20.seconds)
+
+  val route =
+    path("offer") {
+      post {
+        handleWith {
+          offerData: OfferData =>
+            (offerActor ? offerData).mapTo[ResponseWithFailure[OfferError, OfferResponse]]
+        }
+      }
+    }
+}

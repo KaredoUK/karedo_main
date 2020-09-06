@@ -43,4 +43,8 @@ case class DeleteBrandRequest(brandId: UUID)
 case class DeleteAdvRequest(brandId: UUID, advId: UUID)
 case class BrandIDRequest(brandId: UUID)
 
+// Offer types
+case class OfferData(name: String, brandID: UUID, desc: String, imagePath: String, qrCodeId: UUID, value: Long)
+case class OfferResponse(id: UUID)
+
 case class StatusResponse(status: String)

@@ -20,7 +20,7 @@ case class UserAccount(id: UUID, msisdn: Option[String], email: Option[String],
 case class UserAds(userId: UUID, readAds: Set[UUID])
 case class UserOffers(userId: UUID, rewards: Set[UUID])
 
-case class Offer(id: UUID, brandId: UUID, description: String, imagePath: String, qrCodeId: UUID, value: Long)
+case class Offer(@Key("_id") id: UUID = UUID.randomUUID(), name: String = "", brandId: UUID, description: String, imagePath: String, qrCodeId: UUID, value: Long)
 
 case class AdvertisementMetadata(detailId: UUID, publishedDate: DateTime)
 case class AdvertisementDetail(@Key("_id") id: UUID = UUID.randomUUID(), text: String, imageIds: List[UUID], value: Int)
