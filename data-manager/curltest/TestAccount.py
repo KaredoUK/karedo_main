@@ -9,7 +9,10 @@ import unittest, json
 #
 
 
+
 class TestAccount(unittest.TestCase):
+
+
 
     def test01CreateAccount(self):
         global userId, applicationId
@@ -56,6 +59,9 @@ class TestAccount(unittest.TestCase):
         r = post("account/application/validation", {"applicationId": applicationId, "validationCode": activationCode})
 
         self.assertEqual(r.status_code, 200)
+
+    def assertNotIn(self, member, container, msg=None):
+        super(TestAccount, self).assertNotIn(member, container, msg)
 
     def test03UpdateInfo(self):
         global userId
@@ -119,6 +125,9 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(r.status_code, 200)
         found=ua.find_one({ "email" : "pakkio@gmail.com" })
         self.assertEqual(found,None)
+
+
+suite = unittest.TestLoader().loadTestsFromTestCase(TestAccount)
 
 
 if __name__ == '__main__':

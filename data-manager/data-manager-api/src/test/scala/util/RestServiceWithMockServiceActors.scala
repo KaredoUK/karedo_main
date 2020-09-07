@@ -15,6 +15,7 @@ class RestServiceWithMockServiceActors(
   override val messenger: ActorRef,
   override val editAccount: ActorRef,
   override val brand: ActorRef,
+  override val offer: ActorRef,
   override val registration: ActorRef
 ) extends Injectable with BootedCore with ServiceActors with MessageActors with Api with Web {
   // Define The Configuration for the tests

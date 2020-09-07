@@ -136,7 +136,7 @@ class TestBrand(unittest.TestCase):
         self.assertEqual(js[0]["name"],"brandX")
         self.assertEqual(js[1]["name"],"brandY")
 
-
+suite = unittest.TestLoader().loadTestsFromTestCase(TestBrand)
 
 if __name__ == '__main__':
     unittest.main()
