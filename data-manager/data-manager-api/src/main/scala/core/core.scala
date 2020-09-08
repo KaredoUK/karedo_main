@@ -73,6 +73,7 @@ trait ServiceActors {
   def registration: ActorRef
   def brand: ActorRef
   def offer: ActorRef
+  def media: ActorRef
   def editAccount: ActorRef
 }
 
@@ -99,6 +100,7 @@ trait RestMessageActors extends MessageActors {
 trait BaseCoreActors extends ServiceActors with RestMessageActors  {
   this: Core with Persistence with Injectable with MessageActors =>
 
+  val mediaActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.media") getOrElse 3
   val brandActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.brand") getOrElse 3
   val offerActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.offer") getOrElse 3
   val registrationActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.registration") getOrElse 3
@@ -111,9 +113,15 @@ trait BaseCoreActors extends ServiceActors with RestMessageActors  {
       .withRouter( RoundRobinPool(nrOfInstances = registrationActorPoolSize) )
   )
   override val brand = system.actorOf(
-    BrandActor.props(brandDAO, advDAO, mediaDAO)
+    BrandActor.props(brandDAO, advDAO)
       .withRouter( RoundRobinPool(nrOfInstances = brandActorPoolSize) )
   )
+
+  override val media = system.actorOf(
+    MediaContentActor.props(mediaDAO)
+      .withRouter( RoundRobinPool(nrOfInstances = mediaActorPoolSize) )
+  )
+
 
   override val offer = system.actorOf(
     OfferActor.props(offerDAO)

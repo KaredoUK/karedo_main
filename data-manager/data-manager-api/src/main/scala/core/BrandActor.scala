@@ -22,8 +22,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
  */
 object BrandActor {
 
-  def props(brandDAO: BrandDAO, advDAO: AdvDAO, mediaDAO: MediaDAO)(implicit bindingModule: BindingModule): Props =
-    Props(classOf[BrandActor], brandDAO, advDAO, mediaDAO, bindingModule)
+  def props(brandDAO: BrandDAO, advDAO: AdvDAO)(implicit bindingModule: BindingModule): Props =
+    Props(classOf[BrandActor], brandDAO, advDAO, bindingModule)
 
 
   sealed trait BrandError
@@ -51,7 +51,7 @@ object BrandActor {
 
 }
 
-class BrandActor(brandDAO: BrandDAO, advDAO: AdvDAO, mediaDAO: MediaDAO)
+class BrandActor(brandDAO: BrandDAO, advDAO: AdvDAO)
                 (implicit val bindingModule: BindingModule) extends Actor with ActorLogging with Injectable {
 
   def receive: Receive = {
@@ -61,15 +61,10 @@ class BrandActor(brandDAO: BrandDAO, advDAO: AdvDAO, mediaDAO: MediaDAO)
     case request: BrandIDRequest => replyToSender(getBrand(request))
     case request: DeleteBrandRequest => replyToSender(deleteBrand(request))
     case request: DeleteAdvRequest => replyToSender(deleteAdv(request))
-    case request: AddMediaRequest => replyToSender(addMediaRequest(request))
+
   }
   
-  def addMediaRequest(request: AddMediaRequest): Future[ResponseWithFailure[BrandError,AddMediaResponse]] = successful {
-    val descriptor = MediaContentDescriptor(name=request.name, contentType = request.contentType)
-    val is = new ByteArrayInputStream(request.bytes)
-    val id = mediaDAO.createNew(MediaContent(descriptor,is))
-    SuccessResponse(AddMediaResponse(id))
-  }
+
 
   def deleteAdv(request: DeleteAdvRequest): Future[ResponseWithFailure[BrandError,String]] = successful {
     brandDAO.delAdvertisement(request.brandId,request.advId)
