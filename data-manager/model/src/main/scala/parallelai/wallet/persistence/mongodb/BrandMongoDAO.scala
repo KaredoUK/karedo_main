@@ -4,9 +4,10 @@ import java.util.UUID
 
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
 import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
+import com.novus.salat.dao
 
 
-import parallelai.wallet.entity.{AdvertisementMetadata, UserPersonalInfo, AccountSettings, Brand}
+import parallelai.wallet.entity._
 import parallelai.wallet.persistence.BrandDAO
 
 
@@ -27,18 +28,29 @@ import scala.concurrent.Future._
 /**
  * Created by pakkio on 29/09/2014.
  */
-class BrandMongoDAO (implicit val bindingModule: BindingModule) extends BrandDAO with MongoConnection with Injectable   {
+class BrandMongoDAO (implicit val bindingModule: BindingModule)
+  extends BrandDAO with MongoConnection with Injectable   {
+
+
 
   RegisterJodaTimeConversionHelpers()
   val dao = new SalatDAO[Brand, UUID](collection = db("Brand")) {}
 
   def byId(id: UUID) = MongoDBObject("_id" -> id)
+  def adById(id: UUID) = MongoDBObject("ads.detailId" -> id)
 
   override def getById(id: UUID): Option[Brand] = dao.findOneById(id)
 
-  override def delAdvertisement(brandId: UUID, id: UUID): Unit = {
-    dao.update(byId(brandId), $pull("ads" -> MongoDBObject("detailId" -> id)))
+  override def delAd(id: UUID): Unit = {
+    dao.update(adById(id), $pull("ads" -> MongoDBObject("detailId" -> id)))
     None
+
+  }
+  override def getAdById(adId: UUID): Option[AdvertisementDetail] = {
+    dao.findOne(adById(adId))
+    dao.projection[MongoBrandAd](adById(adId), "ads") map {
+      _.toBrandAd()
+    }
 
   }
 
@@ -49,7 +61,7 @@ class BrandMongoDAO (implicit val bindingModule: BindingModule) extends BrandDAO
       $set(
         "name" -> brand.name,
         "iconId" -> brand.iconId,
-        "ads" -> brand.ads.map { ad => grater[AdvertisementMetadata].asDBObject(ad)}
+        "ads" -> brand.ads.map { ad => grater[AdvertisementDetail].asDBObject(ad)}
 
       )
     )
@@ -70,17 +82,17 @@ class BrandMongoDAO (implicit val bindingModule: BindingModule) extends BrandDAO
       dao.find(MongoDBObject.empty).toList
   }
 
-  override def addAdvertisement(brandId: UUID, adv: AdvertisementMetadata): Unit = {
+  override def addAd(brandId: UUID, ad: AdvertisementDetail): Unit = {
       dao.update(
         byId(brandId),
-        $push("ads" -> grater[AdvertisementMetadata].asDBObject(adv))
+        $push("ads" -> grater[AdvertisementDetail].asDBObject(ad))
       )
   }
 
   override def listAds(brandId: UUID) = {
     dao.findOneById(brandId) match {
       case Some(b) => b.ads
-      case None => List[AdvertisementMetadata]()
+      case None => List[AdvertisementDetail]()
     }
 
   }

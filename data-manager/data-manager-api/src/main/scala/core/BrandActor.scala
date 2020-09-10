@@ -63,7 +63,7 @@ class BrandActor(brandDAO: BrandDAO, advDAO: AdvDAO)
     case request: DeleteAdvRequest => replyToSender(deleteAdv(request))
 
   }
-  
+
 
 
   def deleteAdv(request: DeleteAdvRequest): Future[ResponseWithFailure[BrandError,String]] = successful {
@@ -74,14 +74,11 @@ class BrandActor(brandDAO: BrandDAO, advDAO: AdvDAO)
 
   def addAdvert(request: AddAdvertCommand): Future[ResponseWithFailure[BrandError,AdvertDetailResponse]] = successful {
 
-    advDAO.insertNew(AdvertisementDetail(text=request.text,imageIds = request.imageIds, value=request.value)) match {
-      case Some(id) => {
-        brandDAO.addAdvertisement(request.brandId, AdvertisementMetadata(id, new DateTime))
-        SuccessResponse(AdvertDetailResponse(id,request.text,request.imageIds,request.value))
-      }
-      case None => FailureResponse(InvalidBrandRequest("Can't add advertise"))
-    }
+        val id=brandDAO.addAdvertisement(request.brandId, AdvertisementMetadata(id, new DateTime),
+          AdvertisementDetail(text=request.text,imageIds = request.imageIds, value=request.value)
 
+
+        SuccessResponse(AdvertDetailResponse(id,request.text,request.imageIds,request.value))
   }
 
 

@@ -7,7 +7,7 @@ import com.mongodb.casbah.commons.MongoDBObject
 import com.mongodb.casbah.commons.ValidBSONType.DBObject
 import org.specs2.mutable.Specification
 import org.specs2.time.NoTimeConversions
-import parallelai.wallet.entity.{AdvertisementMetadata, Brand}
+import parallelai.wallet.entity.{AdvertisementDetail, Brand}
 import com.escalatesoft.subcut.inject.NewBindingModule
 import NewBindingModule._
 
@@ -32,7 +32,7 @@ class MongoBrandDAOSpec extends Specification with EmbedConnection with CleanAft
 
     val brandDAO = new BrandMongoDAO
 
-    lazy val mybrand = Brand(name = "brand X", iconId= "iconId", ads=List[AdvertisementMetadata]() )
+    lazy val mybrand = Brand(name = "brand X", iconId= "iconId", ads=List[AdvertisementDetail]() )
 
     "create and retrieve a brand with a generated id " in {
 

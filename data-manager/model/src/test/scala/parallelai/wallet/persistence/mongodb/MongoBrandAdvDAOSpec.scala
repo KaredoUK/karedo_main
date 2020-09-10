@@ -8,7 +8,7 @@ import com.mongodb.casbah.commons.MongoDBObject
 import org.joda.time.DateTime
 import org.specs2.mutable.Specification
 import org.specs2.time.NoTimeConversions
-import parallelai.wallet.entity.{AdvertisementDetail, AdvertisementMetadata, Brand}
+import parallelai.wallet.entity.{AdvertisementDetail, Brand}
 
 
 /**
@@ -43,37 +43,38 @@ class MongoBrandAdvDAOSpec extends Specification with NoTimeConversions with Mon
     }
 
 
-    def mybrand = Brand(UUID.randomUUID(),name = "brand X", iconId = "iconX", ads = List[AdvertisementMetadata]())
+    def mybrand = Brand(UUID.randomUUID(),name = "brand X", iconId = "iconX", ads = List[AdvertisementDetail]())
 
     "add two advertisings to brand and fetching them back" in {
 
       clean
       val brandId = brandDAO.insertNew(mybrand).get
-      val text1: String = "adtext"
-      val ad = AdvertisementDetail(text = text1, imageIds = List("image1","image2"), value = 100)
-      val adId = advDAO.insertNew(ad).get
 
-      val advertiseMeta = AdvertisementMetadata(adId, new DateTime)
-      brandDAO.addAdvertisement(brandId, advertiseMeta)
 
-      val text2: String = "adtext2"
-      val ad2 = AdvertisementDetail(text = text2, imageIds = List("image3"), value = 200)
-      val adId2 = advDAO.insertNew(ad2).get
+      val text1= "adtext"
+      val ad1 = AdvertisementDetail(
+        text = text1, imageIds = List("image1","image2"), value = 100)
 
-      val advertiseMeta2 = AdvertisementMetadata(adId2, new DateTime)
-      brandDAO.addAdvertisement(brandId, advertiseMeta2)
+
+      val text2= "adtext2"
+      val ad2 = AdvertisementDetail(
+        text = text2, imageIds = List("image3"), value = 200)
+
+      brandDAO.addAd(brandId, ad1)
+      brandDAO.addAd(brandId, ad2)
+
 
       val list = brandDAO.listAds(brandId)
       list.size must beEqualTo(2)
-      val meta1=list(0)
-      val ads1=advDAO.getById(meta1.detailId).get
+
+      val ads1=brandDAO.getAdById(ad1.id).get
       ads1.text must beEqualTo(text1)
 
-      val meta2=list(0)
-      val ads2=advDAO.getById(meta2.detailId).get
+
+      val ads2=advDAO.getById(ad2.id).get
       ads2.text must beEqualTo(text1)
 
-      brandDAO.delAdvertisement(brandId,meta2.detailId)
+      brandDAO.delAd(ads2.id)
       print("deleted 2nd adv")
       true
     }
