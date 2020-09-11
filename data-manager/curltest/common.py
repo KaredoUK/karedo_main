@@ -12,6 +12,7 @@ ua.remove()
 br.remove()
 ad.remove()
 
+DEBUG=False
 
 def newUUID(): return str(uuid.uuid1())
 
@@ -22,12 +23,12 @@ applicationId = newUUID()
 
 def title(x):
     global a
-    #print("==========================================================================\n=======> " + x + "\n==========================================================================")
+    if(DEBUG):print("==========================================================================\n=======> " + x + "\n==========================================================================")
 
 
 def info(x):
     global a
-    #print("         " + x)
+    if(DEBUG):print("         " + x)
 
 def httproute(x):
     r=("http://localhost:8080/"+x)
@@ -67,7 +68,7 @@ def put(route, data={}):
     printr(r)
     return r
 
-def get(route, params={}):
+def get(route):
     info("METHOD: GET")
     r=requests.get(httproute(route), #data=json.dumps(data),
                         headers={'content-type': 'application/json'})

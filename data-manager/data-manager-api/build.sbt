@@ -13,6 +13,8 @@ libraryDependencies ++= Seq(
   "io.spray"           %% "spray-can"        % Common.sprayVersion,
   "io.spray"           %% "spray-routing"    % Common.sprayVersion,
   "commons-lang"        % "commons-lang"     % "2.3",
+  "commons-io"          % "commons-io"       % "2.3",
+  "commons-codec"       % "commons-codec"    % "1.9",
   Common.sprayClient,
   Common.sprayJson,
   Common.scalaAsync,

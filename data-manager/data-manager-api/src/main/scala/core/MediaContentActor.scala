@@ -4,12 +4,14 @@ import java.io.ByteArrayInputStream
 
 import akka.actor.Actor.Receive
 import akka.actor.{Props, ActorLogging, Actor}
-import com.parallelai.wallet.datamanager.data.{AddMediaResponse, AddMediaRequest}
+import com.parallelai.wallet.datamanager.data.{GetMediaResponse, GetMediaRequest, AddMediaResponse, AddMediaRequest}
 import core.MediaContentActor.{InvalidContentId, MediaHandlingError}
 import core.common.RequestValidationChaining
 import parallelai.wallet.entity.{MediaContent, MediaContentDescriptor}
 import parallelai.wallet.persistence.MediaDAO
 import spray.json.{JsString, JsObject, RootJsonWriter}
+import org.apache.commons.io.IOUtils
+import org.apache.commons.codec.binary.{ Base64 => B64 }
 
 import scala.concurrent.Future
 import scala.concurrent.Future._
@@ -50,6 +52,7 @@ class MediaContentActor(mediaDAO: MediaDAO) extends Actor with ActorLogging with
 
   override def receive: Receive = {
     case request: AddMediaRequest => replyToSender(addMediaRequest(request))
+    case request: GetMediaRequest => replyToSender(getMediaRequest(request))
   }
 
 
@@ -58,6 +61,19 @@ class MediaContentActor(mediaDAO: MediaDAO) extends Actor with ActorLogging with
     val is = new ByteArrayInputStream(request.bytes)
     val id = mediaDAO.createNew(MediaContent(descriptor,is))
     SuccessResponse(AddMediaResponse(id))
+  }
+
+  def getMediaRequest(request: GetMediaRequest): Future[ResponseWithFailure[MediaHandlingError,GetMediaResponse]] =
+    successful {
+    mediaDAO.findById(request.mediaId) match {
+      case Some(media) => {
+        val bytes: Array[Byte] = IOUtils.toByteArray(media.inputStream)
+        val base64: String = new String((new B64().encode(bytes)))
+        SuccessResponse(GetMediaResponse(base64))
+      }
+      case _ => FailureResponse(InvalidContentId(new Throwable("Id not existent")))
+    }
+
   }
 
   def replyToSender[T <: Any](response: Future[ResponseWithFailure[MediaHandlingError, T]]): Unit = {

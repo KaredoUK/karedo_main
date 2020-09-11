@@ -44,6 +44,8 @@ case class DeleteAdvRequest(brandId: UUID, advId: UUID)
 case class BrandIDRequest(brandId: UUID)
 case class AddMediaRequest(name: String, contentType: String, bytes: Array[Byte])
 case class AddMediaResponse(mediaId: String)
+case class GetMediaRequest(mediaId: String)
+case class GetMediaResponse(content: String)
 
 // Offer types
 case class OfferData(name: String, brandID: UUID, desc: String, imagePath: String, qrCodeId: UUID, value: Long)

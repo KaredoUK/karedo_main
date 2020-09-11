@@ -1,11 +1,11 @@
 from common import *
-import unittest, json
+import unittest, json, base64
 import re
 #
 # This is testing Media upload and download
 #
 
-brandId=""
+mediaId=newUUID()
 
 
 class TestMedia(unittest.TestCase):
@@ -26,6 +26,25 @@ class TestMedia(unittest.TestCase):
         mediaId=js["mediaId"]
 
         self.assertEqual(len(mediaId),24,"Should be a valid Id")
+
+    def test02GetMedia(self):
+        global mediaId
+
+        title("PARALLELAI-97: API: Retrieve Media File")
+
+        r = get("media/"+mediaId)
+        self.assertEqual(r.status_code, 200)
+
+        js=json.loads(r.text)
+        mediaencoded=js["content"]
+        media=base64.b64decode(mediaencoded)
+
+        theimage = open('image.png','rb').read()
+
+        self.assertEqual(media,theimage)
+
+
+
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestMedia)
 
