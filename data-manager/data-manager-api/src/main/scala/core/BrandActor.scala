@@ -9,7 +9,7 @@ import com.parallelai.wallet.datamanager.data._
 import core.BrandActor.{BrandError, InternalBrandError, InvalidBrandRequest}
 import org.joda.time.DateTime
 import parallelai.wallet.entity.{Brand, _}
-import parallelai.wallet.persistence.{MediaDAO, AdvDAO, BrandDAO}
+import parallelai.wallet.persistence.{MediaDAO, BrandDAO}
 import spray.json._
 
 import scala.concurrent.Future
@@ -22,8 +22,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
  */
 object BrandActor {
 
-  def props(brandDAO: BrandDAO, advDAO: AdvDAO)(implicit bindingModule: BindingModule): Props =
-    Props(classOf[BrandActor], brandDAO, advDAO, bindingModule)
+  def props(brandDAO: BrandDAO)(implicit bindingModule: BindingModule): Props =
+    Props(classOf[BrandActor], brandDAO, bindingModule)
 
 
   sealed trait BrandError
@@ -51,7 +51,7 @@ object BrandActor {
 
 }
 
-class BrandActor(brandDAO: BrandDAO, advDAO: AdvDAO)
+class BrandActor(brandDAO: BrandDAO)
                 (implicit val bindingModule: BindingModule) extends Actor with ActorLogging with Injectable {
 
   def receive: Receive = {
@@ -67,18 +67,16 @@ class BrandActor(brandDAO: BrandDAO, advDAO: AdvDAO)
 
 
   def deleteAdv(request: DeleteAdvRequest): Future[ResponseWithFailure[BrandError,String]] = successful {
-    brandDAO.delAdvertisement(request.brandId,request.advId)
-    advDAO.delete(request.advId)
+    brandDAO.delAd(request.advId)
+
     SuccessResponse("OK")
   }
 
   def addAdvert(request: AddAdvertCommand): Future[ResponseWithFailure[BrandError,AdvertDetailResponse]] = successful {
 
-        val id=brandDAO.addAdvertisement(request.brandId, AdvertisementMetadata(id, new DateTime),
-          AdvertisementDetail(text=request.text,imageIds = request.imageIds, value=request.value)
-
-
-        SuccessResponse(AdvertDetailResponse(id,request.text,request.imageIds,request.value))
+    val detail: AdvertisementDetail = AdvertisementDetail(text = request.text, imageIds = request.imageIds, value = request.value)
+    brandDAO.addAd(request.brandId,detail)
+    SuccessResponse(AdvertDetailResponse(detail.id,request.text,request.imageIds,request.value))
   }
 
 
@@ -87,7 +85,7 @@ class BrandActor(brandDAO: BrandDAO, advDAO: AdvDAO)
     validateBrand(request) match {
       case None =>
         log.info("Creating new brand for request {}", request)
-        val newbrand = Brand(name = request.name, iconId = request.iconId, ads = List[AdvertisementMetadata]())
+        val newbrand = Brand(name = request.name, iconId = request.iconId, ads = List[AdvertisementDetail]())
         val uuid=brandDAO.insertNew(newbrand).get
         val response=BrandResponse(uuid)
         SuccessResponse(response)

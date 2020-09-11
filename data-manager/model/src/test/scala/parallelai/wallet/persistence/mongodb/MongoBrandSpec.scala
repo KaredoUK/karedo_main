@@ -5,7 +5,7 @@ import org.specs2.mutable._
 /**
  * Created by user on 10/30/14.
  */
-class MongoBrand extends Specification {
+class MongoBrandSpec extends Specification {
   sequential
 
   "MongoBrand" should {

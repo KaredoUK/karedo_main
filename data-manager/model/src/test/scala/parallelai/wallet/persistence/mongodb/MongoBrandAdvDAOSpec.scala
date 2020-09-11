@@ -32,7 +32,7 @@ class MongoBrandAdvDAOSpec extends Specification with NoTimeConversions with Mon
     //
 
     val brandDAO = new BrandMongoDAO
-    val advDAO = new AdvMongoDAO
+
     val mongoClient = brandDAO.mongoClient
 
     def cleanCollection(name: String) = mongoClient.getDB("wallet_data").getCollection(name).remove(MongoDBObject.empty)
@@ -71,12 +71,17 @@ class MongoBrandAdvDAOSpec extends Specification with NoTimeConversions with Mon
       ads1.text must beEqualTo(text1)
 
 
-      val ads2=advDAO.getById(ad2.id).get
-      ads2.text must beEqualTo(text1)
+
+      val ads2=brandDAO.getAdById(ad2.id).get
+      ads2.text must beEqualTo(text2)
+      ads2.imageIds(0) must beEqualTo("image3")
+      ads2.value must beEqualTo(200)
 
       brandDAO.delAd(ads2.id)
-      print("deleted 2nd adv")
-      true
+
+      val ads2bis=brandDAO.getAdById(ad2.id)
+      ads2bis must beNone
+
     }
   }
 

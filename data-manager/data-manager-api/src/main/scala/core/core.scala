@@ -52,7 +52,6 @@ trait DependencyInjection extends Injectable {
 trait Persistence {
   def brandDAO : BrandDAO
   def offerDAO : OfferDAO
-  def advDAO : AdvDAO
   def mediaDAO : MediaDAO
   def userAccountDAO : UserAccountDAO
   def clientApplicationDAO : ClientApplicationDAO
@@ -64,7 +63,6 @@ trait MongoPersistence extends Persistence {
   override val userAccountDAO : UserAccountDAO = new UserAccountMongoDAO() 
   override val brandDAO : BrandDAO = new BrandMongoDAO()
   override val offerDAO : OfferDAO = new OfferMongoDAO()
-  override val advDAO : AdvDAO = new AdvMongoDAO()
   override val mediaDAO : MediaDAO = new MongoMediaDAO()
   override val clientApplicationDAO : ClientApplicationDAO = new ClientApplicationMongoDAO()
 }
@@ -113,7 +111,7 @@ trait BaseCoreActors extends ServiceActors with RestMessageActors  {
       .withRouter( RoundRobinPool(nrOfInstances = registrationActorPoolSize) )
   )
   override val brand = system.actorOf(
-    BrandActor.props(brandDAO, advDAO)
+    BrandActor.props(brandDAO)
       .withRouter( RoundRobinPool(nrOfInstances = brandActorPoolSize) )
   )
 

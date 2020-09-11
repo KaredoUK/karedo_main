@@ -9,7 +9,7 @@ import core.BrandActor.{BrandError, InternalBrandError, InvalidBrandRequest}
 import core.OfferActor.{InvalidOfferRequest, InternalOfferError, OfferError}
 import org.joda.time.DateTime
 import parallelai.wallet.entity.{Brand, _}
-import parallelai.wallet.persistence.{OfferDAO, AdvDAO, BrandDAO}
+import parallelai.wallet.persistence.{OfferDAO, BrandDAO}
 import spray.json._
 
 import scala.concurrent.Future

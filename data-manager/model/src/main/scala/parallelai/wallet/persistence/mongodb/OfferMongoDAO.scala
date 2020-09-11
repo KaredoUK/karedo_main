@@ -8,7 +8,7 @@ import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHe
 import com.novus.salat._
 import com.novus.salat.dao.SalatDAO
 import com.novus.salat.global._
-import parallelai.wallet.entity.{Offer, AdvertisementMetadata, Brand}
+import parallelai.wallet.entity.{Offer, Brand}
 import parallelai.wallet.persistence.{OfferDAO, BrandDAO}
 
 class OfferMongoDAO (implicit val bindingModule: BindingModule) extends OfferDAO with MongoConnection with Injectable   {

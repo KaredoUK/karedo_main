@@ -22,6 +22,7 @@ import com.mongodb.casbah.Imports._
 
 
 
+
 import scala.concurrent.Future
 import scala.concurrent.Future._
 
@@ -37,21 +38,20 @@ class BrandMongoDAO (implicit val bindingModule: BindingModule)
   val dao = new SalatDAO[Brand, UUID](collection = db("Brand")) {}
 
   def byId(id: UUID) = MongoDBObject("_id" -> id)
-  def adById(id: UUID) = MongoDBObject("ads.detailId" -> id)
+  def adById(id: UUID) = MongoDBObject("ads._id" -> id)
 
   override def getById(id: UUID): Option[Brand] = dao.findOneById(id)
 
   override def delAd(id: UUID): Unit = {
-    dao.update(adById(id), $pull("ads" -> MongoDBObject("detailId" -> id)))
+    dao.update(adById(id), $pull("ads" -> MongoDBObject("_id" -> id)))
     None
 
   }
   override def getAdById(adId: UUID): Option[AdvertisementDetail] = {
-    dao.findOne(adById(adId))
-    dao.projection[MongoBrandAd](adById(adId), "ads") map {
-      _.toBrandAd()
+    dao.findOne(adById(adId)).flatMap{
+      brand =>
+        brand.ads.find( _.id == adId)
     }
-
   }
 
 
@@ -89,10 +89,10 @@ class BrandMongoDAO (implicit val bindingModule: BindingModule)
       )
   }
 
-  override def listAds(brandId: UUID) = {
+  override def listAds(brandId: UUID): List[AdvertisementDetail] = {
     dao.findOneById(brandId) match {
-      case Some(b) => b.ads
-      case None => List[AdvertisementDetail]()
+      case Some(brand) => brand.ads
+      case _ => List[AdvertisementDetail]()
     }
 
   }

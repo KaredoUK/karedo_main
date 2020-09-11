@@ -31,11 +31,10 @@ trait ApiHttpClientSpec extends SpecificationLike with NoTimeConversions with Mo
     lazy val mockedBrandDAO = mock[BrandDAO]
     lazy val mockedClientApplicationDAO = mock[ClientApplicationDAO]
     lazy val mockedUserAccountDAO = mock[UserAccountDAO]
-    lazy val mockedAdvDAO = mock[AdvDAO]
     lazy val mockedMediaDAO = mock[MediaDAO]
     lazy val mockedOfferDAO = mock[OfferDAO]
     lazy val messagerActor = TestProbe()
-    val server = new RestServiceWithMockPersistence(servicePort, mockedBrandDAO, mockedAdvDAO, mockedClientApplicationDAO, mockedUserAccountDAO, mockedMediaDAO, mockedOfferDAO, messagerActor.ref)
+    val server = new RestServiceWithMockPersistence(servicePort, mockedBrandDAO, mockedClientApplicationDAO, mockedUserAccountDAO, mockedMediaDAO, mockedOfferDAO, messagerActor.ref)
 
     def after = stopServer()
 
