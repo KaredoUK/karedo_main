@@ -31,6 +31,7 @@ object MediaContentActor {
 
   sealed trait MediaHandlingError
   case class InvalidContentId(t: Throwable) extends MediaHandlingError
+  case object MissingContent extends MediaHandlingError
 
   implicit object mediaErrorJsonFormat extends RootJsonWriter[MediaHandlingError] {
     def write(error: MediaHandlingError) = error match {
@@ -41,8 +42,11 @@ object MediaContentActor {
           "reason" -> JsString(reason.getMessage)
         }
       )
-    }
 
+      case MissingContent => JsObject(
+        "type" -> JsString("MissingContent")
+      )
+    }
 
   }
 }
@@ -63,15 +67,14 @@ class MediaContentActor(mediaDAO: MediaDAO) extends Actor with ActorLogging with
     SuccessResponse(AddMediaResponse(id))
   }
 
-  def getMediaRequest(request: GetMediaRequest): Future[ResponseWithFailure[MediaHandlingError,GetMediaResponse]] =
+  def getMediaRequest(request: GetMediaRequest): Future[ResponseWithFailure[MediaHandlingError, Option[GetMediaResponse]]] =
     successful {
     mediaDAO.findById(request.mediaId) match {
-      case Some(media) => {
+      case Some(media) =>
         val bytes: Array[Byte] = IOUtils.toByteArray(media.inputStream)
-        val base64: String = new String((new B64().encode(bytes)))
-        SuccessResponse(GetMediaResponse(base64))
-      }
-      case _ => FailureResponse(InvalidContentId(new Throwable("Id not existent")))
+        SuccessResponse( Some(GetMediaResponse(media.descriptor.contentType, bytes)) )
+
+      case None => SuccessResponse(None)
     }
 
   }

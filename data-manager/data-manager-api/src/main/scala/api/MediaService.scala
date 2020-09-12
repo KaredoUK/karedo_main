@@ -9,9 +9,9 @@ import akka.util.Timeout
 import api.MediaService.logger
 import com.parallelai.wallet.datamanager.data._
 
-import core.MediaContentActor.MediaHandlingError
-import core.{SuccessResponse, ResponseWithFailure}
-import spray.http.{HttpEntity, MultipartFormData}
+import core.MediaContentActor._
+import core.{FailureResponse, SuccessResponse, ResponseWithFailure}
+import spray.http._
 import spray.routing.Directives
 
 import scala.concurrent.{Await, ExecutionContext}
@@ -19,6 +19,7 @@ import core.MediaContentActor.{InvalidContentId, MediaHandlingError}
 import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol.addMediaResponseJson
 import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol.getMediaResponseJson
 import scala.util.{Success, Failure}
+import scala.concurrent.Future
 
 object MediaService {
   val logger = Logger("MediaService")
@@ -27,58 +28,58 @@ object MediaService {
 class MediaService(mediaActor: ActorRef)(implicit executionContext: ExecutionContext)
   extends Directives with DefaultJsonFormats with ApiErrorsJsonProtocol  {
 
-
   import akka.pattern.ask
 
 import scala.concurrent.duration._
 
   implicit val timeout = Timeout(20.seconds)
 
-
-
-
   val routeput =
     path("media") {
       post {
+        headerValueByName(HttpHeaders.`Content-Type`.name) { contentType =>
+          entity(as[MultipartFormData]) { formData: MultipartFormData =>
+            complete {
+              formData.get("media") match {
+                case Some(p) =>
+                  val file_entity: HttpEntity = p.entity
+                  val file_bin = file_entity.data.toByteArray
 
-        entity(as[MultipartFormData]) { formData: MultipartFormData =>
+                  logger.info(s"Found a file with ${file_bin.length} bytes")
 
-          complete {
+                  (mediaActor ? AddMediaRequest("media", contentType, file_bin))
+                    .mapTo[ResponseWithFailure[MediaHandlingError, AddMediaResponse]]
 
-            formData.get("media") match {
-              case Some(p) => {
-                val file_entity: HttpEntity = p.entity
-                val file_bin = file_entity.data.toByteArray
-
-                logger.info(s"Found a file with ${file_bin.length} bytes")
-
-                (mediaActor ? AddMediaRequest("media", "contenttype", file_bin))
-                  .mapTo[ResponseWithFailure[MediaHandlingError, AddMediaResponse]]
-
+                case None => Future.successful(FailureResponse[MediaHandlingError, AddMediaResponse](MissingContent))
 
               }
-              case _ => ""
-
             }
-
           }
         }
       }
     }
 
+    val routeget = path("media" / Segment) { mediaId: String =>
+      get {
+        detach() {
+          val mediaResponseFuture = (mediaActor ? GetMediaRequest(mediaId)).mapTo[ResponseWithFailure[MediaHandlingError, GetMediaResponse]]
 
-    val routeget = path("media" / Segment) {
+          val mediaResponse = Await.result(mediaResponseFuture, timeout.duration)
 
-      mediaId: String =>
-        rejectEmptyResponse {
-          get {
-            complete {
+          mediaResponse  match {
+            case FailureResponse(mediaHandlingError) => respondWithStatus(mediaHandlingError) { complete { "" } } // Taking advandate of the ErrorSelector implicit converter
 
-              (mediaActor ? GetMediaRequest(mediaId)).mapTo[ResponseWithFailure[MediaHandlingError, GetMediaResponse]]
-            }
+            case SuccessResponse(GetMediaResponse(contentType, content)) =>
+
+              val parts = contentType.split("/")
+              require(parts.length == 2, s"Invalid Content type $contentType for media with ID $mediaId")
+
+              respondWithMediaType(MediaTypes.getForKey((parts(0), parts(1))).get) {
+                complete { HttpData(content) }
+              }
           }
-
         }
+      }
     }
 
   val route = routeget ~ routeput
