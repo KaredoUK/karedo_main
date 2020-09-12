@@ -10,7 +10,8 @@ import akka.util.Timeout
 import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
 import com.parallelai.wallet.datamanager.data.{BrandData, BrandResponse, ListBrandsAdverts, _}
 import core.BrandActor.{InternalBrandError, BrandError}
-import core.{ResponseWithFailure}
+import core.{SuccessResponse, ResponseWithFailure}
+import parallelai.wallet.entity.AdvertisementDetail
 
 
 import spray.routing.Directives
@@ -86,6 +87,7 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
           complete {
 
             (brandActor ? ListBrandsAdverts(brandId)).mapTo[ResponseWithFailure[BrandError, List[AdvertDetailResponse]]]
+
           }
         }
       } ~ post {

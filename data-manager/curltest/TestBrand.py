@@ -12,7 +12,7 @@ brandId=""
 
 
 class TestBrand(unittest.TestCase):
-    def test00createAndValidateUser(self):
+    def test00_CreateAndValidateUser(self):
         title("Setting up an initial user...")
         global applicationId, userId
         r = post("account", {"applicationId": applicationId, "msisdn": "0044712345678", "email": "pakkio@gmail.com"})
@@ -26,7 +26,7 @@ class TestBrand(unittest.TestCase):
 
 
 
-    def test01CreateBrand(self):
+    def test01_CreateBrand(self):
         global brandId
 
         title("PARALLELAI-67API: Create Brand")
@@ -43,7 +43,7 @@ class TestBrand(unittest.TestCase):
         doc = br.find_one({"name": "brandX"})
         self.assertNotEqual(doc,None)
 
-    def test02findBrands(self):
+    def test02_FindBrands(self):
         global brandId,brandId2
         title("PARALLELAI 95 API: Get Brands")
 
@@ -67,7 +67,7 @@ class TestBrand(unittest.TestCase):
         js = json.loads(r.text)
         self.assertEqual(js["name"],"brandX")
 
-    def test03deactivateBrand(self):
+    def test03_DeactivateBrand(self):
         global brandId2
         title("PARALLELAI-68API: Deactivate Brand")
 
@@ -79,7 +79,7 @@ class TestBrand(unittest.TestCase):
         self.assertEqual(r.status_code, 400)
 
 
-    def test04createAdvert(self):
+    def test04_CreateAdvert(self):
         global brandId,advId
         title("PARALLELAI-65API: Create Ad")
 
@@ -90,7 +90,7 @@ class TestBrand(unittest.TestCase):
         js = json.loads(r.text)
         advId=js["id"]
 
-    def test05disableAdvert(self):
+    def test05_DisableAdvert(self):
         global brandId
 
         title("PARALLELAI-66API: Disable Ad")
@@ -104,8 +104,35 @@ class TestBrand(unittest.TestCase):
         r=delete("brand/"+brandId+"/advert/"+advId2)
         self.assertEqual(r.status_code, 200)
 
+    def test051_ListAdsByBrand(self):
+        global brandId
 
-    def test06addBrandtouser(self):
+        title("PARALLELAI-64API: List Ads per Brand")
+
+        data={ "text":"A", "imageIds": ["iconIdA", "iconIdA"], "value":6}
+        r=post("brand/"+brandId+"/advert",data)
+        self.assertEqual(r.status_code, 200)
+
+        data={ "text":"B", "imageIds": ["iconIdB", "iconIdB"], "value":7}
+        r=post("brand/"+brandId+"/advert",data)
+        self.assertEqual(r.status_code, 200)
+
+
+        r=get("brand/"+brandId+"/advert")
+        self.assertEqual(r.status_code, 200)
+
+        js=json.loads(r.text)
+        self.assertEqual(len(js),3)
+
+        self.assertEqual(js[2]['text'],'B')
+        self.assertEqual(js[2]['value'],7)
+
+
+
+
+
+
+    def test06_AddBrandtouser(self):
         global userId, brandId, brandId2
 
         title("PARALLELAI-90API: Add Brand to User")
@@ -122,7 +149,7 @@ class TestBrand(unittest.TestCase):
         self.assertEqual(r.status_code, 200)
 
 
-    def test07showuserbrands(self):
+    def test07_Showuserbrands(self):
         global userId,brandId,brandId2
 
         title("PARALLELAI-69API: Show User Brands")

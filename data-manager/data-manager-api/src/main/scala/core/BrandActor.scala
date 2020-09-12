@@ -54,6 +54,7 @@ object BrandActor {
 class BrandActor(brandDAO: BrandDAO)
                 (implicit val bindingModule: BindingModule) extends Actor with ActorLogging with Injectable {
 
+
   def receive: Receive = {
     case request: BrandData => replyToSender(createBrand(request))
     case request: AddAdvertCommand => replyToSender(addAdvert(request))
@@ -61,8 +62,18 @@ class BrandActor(brandDAO: BrandDAO)
     case request: BrandIDRequest => replyToSender(getBrand(request))
     case request: DeleteBrandRequest => replyToSender(deleteBrand(request))
     case request: DeleteAdvRequest => replyToSender(deleteAdv(request))
+    case request: ListBrandsAdverts => replyToSender(listBrandAdverts(request))
 
   }
+
+  def listBrandAdverts(adverts: ListBrandsAdverts): Future[ResponseWithFailure[BrandError, List[AdvertDetailResponse]]] =
+  successful {
+    SuccessResponse(
+      brandDAO.listAds(adverts.brandId).map{
+        detail => AdvertDetailResponse(id=detail.id, text=detail.text,imageIds = detail.imageIds, value=detail.value)
+      })
+  }
+
 
 
 
