@@ -53,9 +53,9 @@ def post(route, data={}):
     printr(r)
     return r
 
-def postfile(route, file):
+def postfile(route, file, headers={}):
     info("METHOD: POST MULTIPART")
-    r=requests.post(httproute(route), files=file)
+    r=requests.post(httproute(route), files=file, headers=headers)
     printr(r)
     return r
 
