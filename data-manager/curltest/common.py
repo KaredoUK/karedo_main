@@ -1,4 +1,7 @@
-import requests, json, pymongo, uuid
+import requests
+import json
+import pymongo
+import uuid
 import unittest
 
 from pymongo import MongoClient
@@ -8,6 +11,7 @@ db = client.wallet_data
 ua = db.UserAccount
 br = db.Brand
 ad = db.AdvertisementDetail
+of = db.Offer
 ua.remove()
 br.remove()
 ad.remove()

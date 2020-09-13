@@ -1,25 +1,26 @@
 from common import *
 import unittest
 import json
-
+import uuid
 
 class TestBrand(unittest.TestCase):
 
     def test01_CreateOffer(self):
         global brandId
 
-        title("PARALLELAI-67API: Create Offer")
+        title("PARALLELAI-91API: Create Offer")
 
-        r = post("offer", {"name": "offerName"})
+        offer = {"name": "offerTest7", "brandId": str(uuid.uuid4())}
+
+        r = post("offer", offer)
 
         self.assertEqual(r.status_code, 200)
 
         js = json.loads(r.text)
-        brandId=js["id"]
 
-        doc = br.find_one({"name": "offerName"})
-        self.assertNotEqual(doc,None)
+        doc = of.find_one({"_id": uuid.UUID(js["offerId"])})
 
+        self.assertNotEqual(doc, None)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestBrand)
 

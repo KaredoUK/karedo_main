@@ -60,7 +60,7 @@ class OfferActor(offerDAO: OfferDAO)(implicit val bindingModule: BindingModule) 
     validateOffer(request) match {
       case None =>
         log.info("Creating new offer for request {}", request)
-        val newoffer = Offer(name=request.name, brandId=request.brandID, description=request.desc,
+        val newoffer = Offer(name=request.name, brandId=request.brandId, description=request.desc,
           imagePath=request.imagePath, qrCodeId=request.qrCodeId, value=request.value)
         val uuid=offerDAO.insertNew(newoffer).get
         val response=OfferResponse(uuid)
