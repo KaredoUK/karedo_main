@@ -54,7 +54,7 @@ case class GetMediaRequest(mediaId: String)
 case class GetMediaResponse(contentType: String, content: Array[Byte])
 
 // Offer types
-case class OfferData(name: String, brandID: UUID, desc: String, imagePath: String, qrCodeId: UUID, value: Long)
+case class OfferData(name: String, brandID: UUID, desc: Option[String], imagePath: String, qrCodeId: UUID, value: Long)
 case class OfferResponse(id: UUID)
 
 case class StatusResponse(status: String)

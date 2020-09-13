@@ -1,6 +1,7 @@
 package api
 
 import akka.actor.ActorRef
+import akka.event.slf4j.Logger
 import akka.util.Timeout
 import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
 import com.parallelai.wallet.datamanager.data.{OfferData, OfferResponse}
@@ -11,6 +12,10 @@ import akka.pattern.ask
 
 import scala.concurrent.ExecutionContext
 
+
+object OfferService {
+  val logger = Logger("OfferService")
+}
 
 class OfferService(offerActor: ActorRef)(implicit executionContext: ExecutionContext)
   extends Directives with DefaultJsonFormats with ApiErrorsJsonProtocol {

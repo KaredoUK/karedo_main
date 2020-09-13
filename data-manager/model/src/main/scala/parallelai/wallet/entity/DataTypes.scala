@@ -21,7 +21,8 @@ case class UserAccount(id: UUID, msisdn: Option[String], email: Option[String],
 case class UserAds(userId: UUID, readAds: Set[UUID])
 case class UserOffers(userId: UUID, rewards: Set[UUID])
 
-case class Offer(@Key("_id") id: UUID = UUID.randomUUID(), name: String = "", brandId: UUID, description: String, imagePath: String, qrCodeId: UUID, value: Long)
+case class Offer(@Key("_id") id: UUID = UUID.randomUUID(), name: String = "", brandId: UUID, description: Option[String],
+                 imagePath: String, qrCodeId: UUID, value: Long)
 
 case class AdvertisementDetail(@Key("_id") id: UUID = UUID.randomUUID(), publishedDate: DateTime= new DateTime(), text: String="", imageIds: List[String]=List(), value: Int=0)
 case class Brand(@Key("_id") id: UUID = UUID.randomUUID(), name: String = "", iconId: String, ads: List[AdvertisementDetail]=List())

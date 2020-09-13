@@ -1,0 +1,27 @@
+from common import *
+import unittest
+import json
+
+
+class TestBrand(unittest.TestCase):
+
+    def test01_CreateOffer(self):
+        global brandId
+
+        title("PARALLELAI-67API: Create Offer")
+
+        r = post("offer", {"name": "offerName"})
+
+        self.assertEqual(r.status_code, 200)
+
+        js = json.loads(r.text)
+        brandId=js["id"]
+
+        doc = br.find_one({"name": "offerName"})
+        self.assertNotEqual(doc,None)
+
+
+suite = unittest.TestLoader().loadTestsFromTestCase(TestBrand)
+
+if __name__ == '__main__':
+    unittest.main()

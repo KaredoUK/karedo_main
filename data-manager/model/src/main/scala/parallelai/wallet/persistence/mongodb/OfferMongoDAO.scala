@@ -21,7 +21,6 @@ class OfferMongoDAO (implicit val bindingModule: BindingModule) extends OfferDAO
   override def getById(id: UUID): Option[Offer] = dao.findOneById(id)
 
   override def insertNew(offer: Offer): Option[UUID] =  {
-
     val result = dao.insert( offer )
     result
   }
