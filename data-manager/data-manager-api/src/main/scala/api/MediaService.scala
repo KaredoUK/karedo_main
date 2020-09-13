@@ -14,12 +14,15 @@ import core.{FailureResponse, SuccessResponse, ResponseWithFailure}
 import spray.http._
 import spray.routing.Directives
 
+import scala.Some
 import scala.concurrent.{Await, ExecutionContext}
 import core.MediaContentActor.{InvalidContentId, MediaHandlingError}
 import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol.addMediaResponseJson
 import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol.getMediaResponseJson
 import scala.util.{Success, Failure}
 import scala.concurrent.Future
+
+
 
 object MediaService {
   val logger = Logger("MediaService")
@@ -37,21 +40,23 @@ import scala.concurrent.duration._
   val routeput =
     path("media") {
       post {
-        headerValueByName(HttpHeaders.`Content-Type`.name) { contentType =>
-          entity(as[MultipartFormData]) { formData: MultipartFormData =>
-            complete {
-              formData.get("media") match {
-                case Some(p) =>
-                  val file_entity: HttpEntity = p.entity
-                  val file_bin = file_entity.data.toByteArray
+        headerValueByName("X-Upload-Content-Type") { contentType =>
+          headerValueByName("X-Upload-Name") { name =>
+            entity(as[MultipartFormData]) { formData: MultipartFormData =>
+              complete {
+                formData.get("media") match {
+                  case Some(p) =>
+                    val file_entity: HttpEntity = p.entity
+                    val file_bin = file_entity.data.toByteArray
 
-                  logger.info(s"Found a file with ${file_bin.length} bytes")
+                    logger.info(s"Found a file with ${file_bin.length} bytes")
 
-                  (mediaActor ? AddMediaRequest("media", contentType, file_bin))
-                    .mapTo[ResponseWithFailure[MediaHandlingError, AddMediaResponse]]
+                    (mediaActor ? AddMediaRequest(name, contentType, file_bin))
+                      .mapTo[ResponseWithFailure[MediaHandlingError, AddMediaResponse]]
 
-                case None => Future.successful(FailureResponse[MediaHandlingError, AddMediaResponse](MissingContent))
+                  case None => Future.successful(FailureResponse[MediaHandlingError, AddMediaResponse](MissingContent))
 
+                }
               }
             }
           }
@@ -62,14 +67,14 @@ import scala.concurrent.duration._
     val routeget = path("media" / Segment) { mediaId: String =>
       get {
         detach() {
-          val mediaResponseFuture = (mediaActor ? GetMediaRequest(mediaId)).mapTo[ResponseWithFailure[MediaHandlingError, GetMediaResponse]]
+          val mediaResponseFuture = (mediaActor ? GetMediaRequest(mediaId)).mapTo[ResponseWithFailure[MediaHandlingError, Option[GetMediaResponse]]]
 
           val mediaResponse = Await.result(mediaResponseFuture, timeout.duration)
 
           mediaResponse  match {
             case FailureResponse(mediaHandlingError) => respondWithStatus(mediaHandlingError) { complete { "" } } // Taking advandate of the ErrorSelector implicit converter
 
-            case SuccessResponse(GetMediaResponse(contentType, content)) =>
+            case SuccessResponse(Some(GetMediaResponse(contentType, content))) =>
 
               val parts = contentType.split("/")
               require(parts.length == 2, s"Invalid Content type $contentType for media with ID $mediaId")
@@ -77,6 +82,8 @@ import scala.concurrent.duration._
               respondWithMediaType(MediaTypes.getForKey((parts(0), parts(1))).get) {
                 complete { HttpData(content) }
               }
+
+            case SuccessResponse(None) => respondWithStatus(StatusCodes.NotFound) { complete { "" }}
           }
         }
       }
