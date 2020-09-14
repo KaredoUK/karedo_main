@@ -6,24 +6,31 @@ import unittest
 
 from pymongo import MongoClient
 
+# to enable extra printing from the tests
+DEBUG=True
+
 client = MongoClient()
 db = client.wallet_data
-ua = db.UserAccount
-br = db.Brand
-ad = db.AdvertisementDetail
-of = db.Offer
-ua.remove()
-br.remove()
-ad.remove()
+JAVA=5 # uuid_type to properly understand UUIDS from DB
 
-DEBUG=False
+# Users collection
+ua = db.UserAccount
+ua.uuid_subtype=JAVA
+ua.remove()
+
+# Brand collection
+br = db.Brand
+br.uuid_subtype=JAVA
+br.remove()
+
+# Offer collection
+of = db.Offer
+of.uuid_subtype=JAVA
 
 def newUUID(): return str(uuid.uuid1())
 
-
-userId = ""
+userId = newUUID()
 applicationId = newUUID()
-
 
 def title(x):
     global a

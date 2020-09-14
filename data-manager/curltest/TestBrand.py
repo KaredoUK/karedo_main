@@ -40,7 +40,8 @@ class TestBrand(unittest.TestCase):
         js = json.loads(r.text)
         brandId=js["id"]
 
-        doc = br.find_one({"name": "brandX"})
+        #doc = br.find_one({"name": "brandX"})
+        doc = br.find_one({"_id": uuid.UUID(brandId)})
         self.assertNotEqual(doc,None)
 
     def test02_FindBrands(self):
