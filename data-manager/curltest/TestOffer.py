@@ -22,6 +22,8 @@ class TestBrand(unittest.TestCase):
 
         self.assertNotEqual(doc, None)
 
+        self.assertEqual(str(doc["_id"]), js['offerId'])
+
 suite = unittest.TestLoader().loadTestsFromTestCase(TestBrand)
 
 if __name__ == '__main__':
