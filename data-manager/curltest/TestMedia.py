@@ -2,19 +2,20 @@ from common import *
 import unittest, json, base64
 import re
 import filecmp
-from os import *
+#from os import *
 #
 # This is testing Media upload and download
 #
-
 
 class TestMedia(unittest.TestCase):
 
     def test01CreateMedia(self):
         title("PARALLELAI-94: Create Media")
 
-        files = {'file': ('media', open('image.png','rb'), 'image/png', {'X-Upload-Content-Type': 'image/png', 'X-Upload-Name': 'image'} ) } 
-        r = postfile('media', files)
+
+        r = postfile('media',
+                     file={'file': ('media', open('image.png','rb'), 'image/png')},
+                     headers={'X-Upload-Content-Type': 'image/png', 'X-Upload-Name': 'image'} )
 
         self.assertEqual(r.status_code, 200)
 

@@ -7,7 +7,7 @@ import unittest
 from pymongo import MongoClient
 
 # to enable extra printing from the tests
-DEBUG=True
+DEBUG=False
 
 client = MongoClient()
 db = client.wallet_data

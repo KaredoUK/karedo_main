@@ -21,8 +21,8 @@ case class MongoUserAccount(
                              settings: AccountSettings = defaultAccountSettings,
                              active: Boolean = false,
                              totalPoints: Long = 0,
-                             subscribedBrands: List[UUID],
-                             applications: List[MongoUserApplicationInfo]
+                             subscribedBrands: List[UUID] = List[UUID](),
+                             applications: List[MongoUserApplicationInfo] = List[MongoUserApplicationInfo]()
                              ) {
   def toUserAccount : UserAccount = UserAccount(id, msisdn, email, personalInfo, settings, active, totalPoints, subscribedBrands)
 

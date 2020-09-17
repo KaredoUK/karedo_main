@@ -87,8 +87,9 @@ class SMSActor(implicit val bindingModule : BindingModule) extends Actor with Ac
       } map { httpResponse: HttpResponse =>
         if (httpResponse.status.isFailure) {
           throw new IOException(s"Request failed for reason ${httpResponse.status.value}:${httpResponse.status.defaultMessage}")
+
         } else {
-          ()
+          log.info(s"Sent a sms, response from service is $httpResponse")
         }
       }
     }

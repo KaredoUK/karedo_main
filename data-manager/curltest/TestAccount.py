@@ -19,7 +19,7 @@ class TestAccount(unittest.TestCase):
 
         title("PARALLELAI-77API: Create Account")
 
-        r = post("account", {"applicationId": applicationId, "msisdn": "0044712345678", "email": "pakkio@gmail.com"})
+        r = post("account", {"applicationId": applicationId, "msisdn": "00447909738629", "email": "pakkio@gmail.com"})
 
         self.assertEqual(r.status_code, 200)
 
