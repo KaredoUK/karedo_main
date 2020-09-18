@@ -1,5 +1,6 @@
 package api
 
+import java.io.ByteArrayInputStream
 import java.util.UUID
 
 import akka.actor.ActorRef
@@ -40,29 +41,33 @@ import scala.concurrent.duration._
   val routeput =
     path("media") {
       post {
-        headerValueByName("X-Upload-Content-Type") { contentType =>
-          headerValueByName("X-Upload-Name") { name =>
-            entity(as[MultipartFormData]) { formData: MultipartFormData =>
+        headerValueByName(HttpHeaders.`Content-Type`.name) { contentType =>
+          entity(as[MultipartFormData]) { formData: MultipartFormData =>
               complete {
-                formData.get("media") match {
-                  case Some(p) =>
-                    val file_entity: HttpEntity = p.entity
-                    val file_bin = file_entity.data.toByteArray
 
-                    logger.info(s"Found a file with ${file_bin.length} bytes")
 
-                    (mediaActor ? AddMediaRequest(name, contentType, file_bin))
+               formData.fields.head match {
+                  case (BodyPart(entity, headers)) =>
+                    val file_bin = entity.data.toByteArray
+
+                    val contentType = headers.find(h => h.is("content-type")).get.value
+                    val fileName = headers.find(h => h.is("content-disposition")).get.value.split("filename=").last
+
+
+                    logger.info(s"Found a media of type '${contentType}' named '${fileName}' with '${file_bin.length}' bytes")
+
+                    (mediaActor ? AddMediaRequest(fileName, contentType, file_bin))
                       .mapTo[ResponseWithFailure[MediaHandlingError, AddMediaResponse]]
 
-                  case None => Future.successful(FailureResponse[MediaHandlingError, AddMediaResponse](MissingContent))
-
+                  case _ => Future.successful[MediaHandlingError](InvalidContentId(new Exception("Missing bodypart")))
                 }
+
               }
             }
           }
         }
       }
-    }
+
 
     val routeget = path("media" / Segment) { mediaId: String =>
       get {
@@ -80,7 +85,10 @@ import scala.concurrent.duration._
               require(parts.length == 2, s"Invalid Content type $contentType for media with ID $mediaId")
 
               respondWithMediaType(MediaTypes.getForKey((parts(0), parts(1))).get) {
-                complete { HttpData(content) }
+                complete {
+                  logger.info(s"Transmitting content of length ${content.length}")
+                  HttpData(content)
+                }
               }
 
             case SuccessResponse(None) => respondWithStatus(StatusCodes.NotFound) { complete { "" }}
