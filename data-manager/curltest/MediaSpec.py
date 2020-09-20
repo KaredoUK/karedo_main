@@ -49,7 +49,7 @@ class TestMedia(unittest.TestCase):
         except OSError:
             pass
 
-        f = open('tmpFile', 'w')
+        f = open('tmpFile', 'wb')
         f.write(r.content)
         f.close()
 
