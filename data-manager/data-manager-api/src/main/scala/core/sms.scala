@@ -17,7 +17,7 @@ import scala.concurrent.Future
 object SMSActor {
   case class SendSMS(to: String, message: String, retryCount: Int = 3)
 
-  def props(implicit bindingModule : BindingModule) = Props(classOf[SMSActor], bindingModule)
+  def props(implicit bindingModule : BindingModule) = Props( new SMSActor )
 
   def normaliseMsisdn(msisdn: String): String = {
    val internationalWithPlus = """\+(\d+)""".r
@@ -33,8 +33,20 @@ object SMSActor {
   }
 }
 
+import SMSActor._
+
+class DummySMSActor(implicit val bindingModule : BindingModule) extends Actor with ActorLogging with Injectable {
+  def receive: Receive = {
+    case request@SendSMS(number, body, retryCount) =>
+      log.info(s"(((((Dummy sending sms to: $number, body: $body)))))")
+  }
+}
+
+class TextmarketerSMSActor(implicit val bindingModule : BindingModule) extends Actor with ActorLogging with Injectable {
+  def receive: Receive = ???
+}
+
 class SMSActor(implicit val bindingModule : BindingModule) extends Actor with ActorLogging with Injectable {
-  import SMSActor._
 
   //val user = injectProperty[String]("notification.sms.auth.user")
   //val pwd = injectProperty[String]("notification.sms.auth.pwd")
