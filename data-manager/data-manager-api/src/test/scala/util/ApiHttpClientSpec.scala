@@ -8,14 +8,14 @@ import org.specs2.specification.{Step, Fragments}
 import org.specs2.time.NoTimeConversions
 import parallelai.wallet.persistence._
 import spray.testkit.TestUtils
-
 import scala.concurrent.Await._
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.Random
+import org.specs2.mutable.Specification
 
 
-trait ApiHttpClientSpec extends SpecificationLike with NoTimeConversions with Mockito {
+trait ApiHttpClientSpec extends Specification with NoTimeConversions with Mockito {
   def responseTimeout = 5.seconds
 
   sequential

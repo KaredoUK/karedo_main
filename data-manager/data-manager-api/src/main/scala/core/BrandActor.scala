@@ -86,6 +86,7 @@ class BrandActor(brandDAO: BrandDAO)
   def addAdvert(request: AddAdvertCommand): Future[ResponseWithFailure[BrandError,AdvertDetailResponse]] = successful {
 
     val detail: AdvertisementDetail = AdvertisementDetail(text = request.text, imageIds = request.imageIds, value = request.value)
+    //log.info(s"XXX using detail uuid: ${detail.id}")
     brandDAO.addAd(request.brandId,detail)
     SuccessResponse(AdvertDetailResponse(detail.id,request.text,request.imageIds,request.value))
   }

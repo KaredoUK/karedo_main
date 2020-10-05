@@ -45,7 +45,10 @@ trait BootedCore extends Core {
 }
 
 trait DependencyInjection extends Injectable {
-  implicit val configProvider = AppConfigPropertySource( ConfigFactory.load().withFallback(ConfigFactory.parseResources("application.default.conf")) )
+  implicit val configProvider = {
+    println(s"Loading config from ${System.getProperty("config.resource")}")
+    AppConfigPropertySource( ConfigFactory.load().withFallback(ConfigFactory.parseResources("application.default.conf")) )
+  }
   override implicit val bindingModule : BindingModule = newBindingModuleWithConfig
 }
 
@@ -84,9 +87,11 @@ trait RestMessageActors extends MessageActors {
 
   val emailActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.email") getOrElse 2
   val smsActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.sms") getOrElse 2
-  val smsActorClassName = injectOptionalProperty[String]("notification.sms.actorClass") getOrElse classOf[SMSActor].getName
+  val smsActorClassName = injectOptionalProperty[String]("notification.sms.actor.class") getOrElse classOf[SMSActor].getName
+  val emailActorClassName = injectOptionalProperty[String]("notification.email.actor.class") getOrElse classOf[EmailActor].getName
 
-  val emailActor = system.actorOf(EmailActor.props.withRouter( RoundRobinPool(nrOfInstances = emailActorPoolSize) ) )
+  def emailActorProps = Props( Class.forName(emailActorClassName), bindingModule)
+  val emailActor = system.actorOf(emailActorProps.withRouter( RoundRobinPool(nrOfInstances = emailActorPoolSize) ) )
 
   def smsActorProps = Props( Class.forName(smsActorClassName), bindingModule )
   val smsActor = system.actorOf( smsActorProps.withRouter( RoundRobinPool(nrOfInstances = smsActorPoolSize) ) )

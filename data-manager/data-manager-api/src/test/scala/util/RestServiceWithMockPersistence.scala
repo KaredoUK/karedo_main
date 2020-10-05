@@ -34,9 +34,11 @@ class RestServiceWithMockPersistence(
         |  }
         |
         |  sms {
+        |    actor.class="core.DummySMSActor"
         |    auth {
         |      user = "sms.usr"
         |      pwd = "sms.pwd"
+        |      accesskey ="dummy"
         |    }
         |
         |    sender = "Karedo"
