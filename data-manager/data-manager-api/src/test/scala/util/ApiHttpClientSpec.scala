@@ -29,12 +29,13 @@ trait ApiHttpClientSpec extends Specification with NoTimeConversions with Mockit
     def wait[T](future: Future[T]): T = result(future, responseTimeout)
 
     lazy val mockedBrandDAO = mock[BrandDAO]
+    lazy val mockedHintDAO = mock[HintDAO]
     lazy val mockedClientApplicationDAO = mock[ClientApplicationDAO]
     lazy val mockedUserAccountDAO = mock[UserAccountDAO]
     lazy val mockedMediaDAO = mock[MediaDAO]
     lazy val mockedOfferDAO = mock[OfferDAO]
     lazy val messagerActor = TestProbe()
-    val server = new RestServiceWithMockPersistence(servicePort, mockedBrandDAO, mockedClientApplicationDAO, mockedUserAccountDAO, mockedMediaDAO, mockedOfferDAO, messagerActor.ref)
+    val server = new RestServiceWithMockPersistence(servicePort, mockedBrandDAO, mockedHintDAO, mockedClientApplicationDAO, mockedUserAccountDAO, mockedMediaDAO, mockedOfferDAO, messagerActor.ref)
 
     def after = stopServer()
 

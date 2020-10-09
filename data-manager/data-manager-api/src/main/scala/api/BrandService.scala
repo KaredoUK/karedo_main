@@ -11,7 +11,8 @@ import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
 import com.parallelai.wallet.datamanager.data.{BrandData, BrandResponse, ListBrandsAdverts, _}
 import core.BrandActor.{InternalBrandError, BrandError}
 import core.{SuccessResponse, ResponseWithFailure}
-import parallelai.wallet.entity.AdvertisementDetail
+import parallelai.wallet.entity.{AdvertisementDetail, SuggestedAdForUsersAndBrandModel}
+
 
 
 import spray.routing.Directives
@@ -113,7 +114,23 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
         }
     }
 
+  val routesuggestedBrands =
+    path("account" / JavaUUID / "brand" / JavaUUID / "ads" ) { (accountId: UUID, brandId: UUID) =>
+      get {
+        parameters('max.as[Int]) { max =>
+          rejectEmptyResponse {
+            complete {
+              (brandActor ? RequestSuggestedAdForUsersAndBrand(accountId,brandId,max)).
+                mapTo[List[SuggestedAdForUsersAndBrand]]
+
+            }
+          }
+        }
+      }
+    }
 
 
-  val route = routebrand ~ routebrandWithId ~ routebrandWithIdAdvert ~ routebrandWithIdAdvertWithId
+
+  val route = routebrand ~ routebrandWithId ~
+    routebrandWithIdAdvert ~ routebrandWithIdAdvertWithId ~ routesuggestedBrands
 }
