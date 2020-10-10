@@ -72,7 +72,12 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
   def returnSuggestedAds(request: RequestSuggestedAdForUsersAndBrand): List[SuggestedAdForUsersAndBrand] = {
 
     hintDAO.suggestedNAdsForUserAndBrandLimited(request.userId, request.brandId, request.max)
-      .map(x => SuggestedAdForUsersAndBrand(x.id, x.name, x.iconId))
+      .map(x => {
+
+      val adDetail = brandDAO.getAdById (x.ad).getOrElse(
+        AdvertisementDetail(id=new UUID(0,0),imageIds = List("empty")))
+      SuggestedAdForUsersAndBrand (x.ad, adDetail.text, adDetail.imageIds.mkString(","))
+    })
 
   }
 

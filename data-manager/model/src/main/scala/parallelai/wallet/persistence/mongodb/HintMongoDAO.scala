@@ -28,6 +28,9 @@ class HintMongoDAO (implicit val bindingModule: BindingModule)
   val dao = new SalatDAO[Hint,UUID](collection = db("Hint")) {}
 
 
+  override def clear() = {
+    dao.collection.remove(MongoDBObject.empty)
+  }
 
   override def insertNew(hint: Hint): Option[UUID] =  {
 
@@ -36,7 +39,12 @@ class HintMongoDAO (implicit val bindingModule: BindingModule)
   }
 
 
-  override def suggestedNAdsForUserAndBrandLimited(user: UUID, brand: UUID, numAds: Int) = ???
+  override def suggestedNAdsForUserAndBrandLimited(user: UUID, brand: UUID, numAds: Int) = {
+    val ret=dao.find(MongoDBObject("userId" -> user, "brandId" -> brand))
+      .sort(orderBy = MongoDBObject("score" -> -1))
+      .limit(numAds).toList
+    ret
+  }
 
   override def count:Long = {
     dao.count(DBObject())

@@ -2,7 +2,7 @@ package api
 
 import com.parallelai.wallet.datamanager.data._
 import org.specs2.mutable.Specification
-import parallelai.wallet.entity.{SuggestedAdForUsersAndBrandModel, Brand, AdvertisementDetail}
+import parallelai.wallet.entity.{Hint, SuggestedAdForUsersAndBrandModel, Brand, AdvertisementDetail}
 import spray.client.pipelining._
 import util.{ RestApiSpecMatchers, ApiHttpClientSpec }
 import java.util.UUID
@@ -94,22 +94,38 @@ class BrandServiceSpec extends ApiHttpClientSpec with RestApiSpecMatchers {
 
       mockedHintDAO.suggestedNAdsForUserAndBrandLimited(userId,brand.id,5)  returns
         List(
-          SuggestedAdForUsersAndBrandModel(ad1,"ad1","iconId1"),
-          SuggestedAdForUsersAndBrandModel(ad2,"ad2","iconId2"),
-          SuggestedAdForUsersAndBrandModel(ad3,"ad3","iconId3")
+          Hint(userId=userId,brandId=brand.id, ad=ad1, score=0.5),
+          Hint(userId=userId,brandId=brand.id, ad=ad2, score=0.6),
+          Hint(userId=userId,brandId=brand.id, ad=ad3, score=0.7)
         )
 
-
+      mockedBrandDAO.getAdById(ad1) returns Some(AdvertisementDetail(ad1, text="text1"))
+      mockedBrandDAO.getAdById(ad2) returns Some(AdvertisementDetail(ad2, text="text2"))
+      mockedBrandDAO.getAdById(ad3) returns Some(AdvertisementDetail(ad3, text="text3"))
 
       val response = wait(pipeline {
 
         Get(s"$serviceUrl/account/$userId/brand/${brand.id}/ads?max=5")
       })
 
-      response should beLike {
-        case List(_,_,_) => ok
+      response must have size(3)
+      response(0) match {
+        case SuggestedAdForUsersAndBrand(ad1,"text1",_) => ok
         case _ => ko
       }
+
+      response(1) match {
+        case SuggestedAdForUsersAndBrand(ad2,"text2",_) => ok
+        case _ => ko
+      }
+
+      response(2) match {
+        case SuggestedAdForUsersAndBrand(ad2,"text3",_) => ok
+        case _ => ko
+      }
+
+
+
 
     }
 
