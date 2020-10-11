@@ -129,8 +129,30 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
       }
     }
 
+  val routesuggestedBrandsDummy =
+
+    path("brand" / JavaUUID / "suggestedBrands") {
+
+      brandId: UUID =>
+        rejectEmptyResponse {
+          get {
+            complete {
+
+              (brandActor ? ListBrandsAdverts(brandId)).mapTo[ResponseWithFailure[BrandError, List[AdvertDetailResponse]]]
+
+            }
+          }
+        } ~ post {
+          handleWith {
+            request: AdvertDetail => {
+              (brandActor ? AddAdvertCommand(brandId, request.text, request.imageIds, request.value)).mapTo[ResponseWithFailure[BrandError, AdvertDetailResponse]]
+            }
+          }
+        }
+    }
+
 
 
   val route = routebrand ~ routebrandWithId ~
-    routebrandWithIdAdvert ~ routebrandWithIdAdvertWithId ~ routesuggestedBrands
+    routebrandWithIdAdvert ~ routebrandWithIdAdvertWithId ~ routesuggestedBrands ~ routesuggestedBrandsDummy
 }
