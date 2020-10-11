@@ -16,6 +16,7 @@ import scala.util.Random
 class RestServiceWithMockPersistence(
   val servicePort: Int,
   override val brandDAO: BrandDAO,
+  override val hintDAO: HintDAO,
   override val clientApplicationDAO: ClientApplicationDAO,
   override val userAccountDAO: UserAccountDAO,
   override val mediaDAO: MediaDAO,
@@ -34,9 +35,11 @@ class RestServiceWithMockPersistence(
         |  }
         |
         |  sms {
+        |    actor.class="core.DummySMSActor"
         |    auth {
         |      user = "sms.usr"
         |      pwd = "sms.pwd"
+        |      accesskey ="dummy"
         |    }
         |
         |    sender = "Karedo"

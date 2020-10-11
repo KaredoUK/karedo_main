@@ -5,6 +5,7 @@ import uuid
 import unittest
 
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 
 # to enable extra printing from the tests
 DEBUG=False
@@ -26,6 +27,17 @@ br.remove()
 # Offer collection
 of = db.Offer
 of.uuid_subtype=JAVA
+
+# media
+fs = db["fs.files"]
+#NO fs.uuid_subtype=JAVA
+fs.remove
+
+fs1 = db["fs.chunks"]
+# NO fs1.uuid_subtype=JAVA
+fs1.remove
+
+
 
 def newUUID(): return str(uuid.uuid1())
 
@@ -64,9 +76,9 @@ def post(route, data={}):
     printr(r)
     return r
 
-def postfile(route, file, headers={}):
+def postfile(route, file):
     info("METHOD: POST MULTIPART")
-    r=requests.post(httproute(route), files=file, headers=headers)
+    r=requests.post(httproute(route), files=file)
     printr(r)
     return r
 
@@ -83,6 +95,12 @@ def get(route):
     info("METHOD: GET")
     r=requests.get(httproute(route), #data=json.dumps(data),
                         headers={'content-type': 'application/json'})
+    printr(r)
+    return r
+
+def getstream(route):
+    info("METHOD: GETSTREAM")
+    r=requests.get(httproute(route), stream=True)
     printr(r)
     return r
 

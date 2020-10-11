@@ -14,7 +14,7 @@ class TestAccount(unittest.TestCase):
 
 
 
-    def test01CreateAccount(self):
+    def test01_CreateAccount(self):
         global userId, applicationId
 
         title("PARALLELAI-77API: Create Account")
@@ -38,7 +38,7 @@ class TestAccount(unittest.TestCase):
         userId = js["userID"]
         info("UserId returned: " + js["userID"])
 
-    def test02ResetApplication(self):
+    def test02_ResetApplication(self):
         global userId, applicationId
         applicationId = newUUID()
         title("PARALLELAI-49API: Reset Application for Account")
@@ -63,7 +63,7 @@ class TestAccount(unittest.TestCase):
     def assertNotIn(self, member, container, msg=None):
         super(TestAccount, self).assertNotIn(member, container, msg)
 
-    def test03UpdateInfo(self):
+    def test03_UpdateInfo(self):
         global userId
         title("PARALLELAI-50API: Update Account Settings")
 
@@ -94,7 +94,7 @@ class TestAccount(unittest.TestCase):
 
 
 
-    def test04GetInfo(self):
+    def test04_GetInfo(self):
         global userId
         title("PARALLELAI-51API: Get Account Settings ")
 
@@ -108,7 +108,7 @@ class TestAccount(unittest.TestCase):
         # this is failing (!)
         #self.assertEqual(js["totalPoints"],100) # Question005: cfr question004 how can we change this value from rest APIs?
 
-    def test05getUserPoints(self):
+    def test05_getUserPoints(self):
         global userId
         title("PARALLELAI-54API: Get User Points")
 
@@ -118,7 +118,7 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(js["totalPoints"],0) # Question006: cfr Questions 004 and 005: how can we read something different from 0?
 
 
-    def test06deleteAccount(self):
+    def test06_deleteAccount(self):
         global userId
         title("PARALLELAI-52API: Delete Account")
         r=delete("account/"+userId)
