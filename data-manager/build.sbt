@@ -18,5 +18,5 @@ lazy val api = (project.in(file("./data-manager-api"))).dependsOn(data,model,com
 //lazy val web = (project.in(file("./data-manager-web"))).enablePlugins(PlayScala).dependsOn(data,model,common).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
 lazy val root = project.in( file(".") )
-  .aggregate(data,api, web, model)
+  .aggregate(data, api, model)
 
