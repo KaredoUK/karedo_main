@@ -1,6 +1,13 @@
+import sbt._
+import Keys._
+import sbtassembly.Plugin._
+import AssemblyKeys._
+
 name := """data-manager-api"""
 
 Common.settings
+
+test in assembly := {}
 
 version := "1.0"
 
