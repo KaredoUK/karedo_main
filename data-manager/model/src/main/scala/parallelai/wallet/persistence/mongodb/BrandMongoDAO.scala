@@ -4,14 +4,14 @@ import java.util.UUID
 
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
 import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
-import com.novus.salat.dao
+
 
 
 import parallelai.wallet.entity._
 import parallelai.wallet.persistence.BrandDAO
 
 
-
+import com.novus.salat.dao
 import com.novus.salat._
 import com.novus.salat.dao.SalatDAO
 import com.novus.salat.global._
@@ -96,4 +96,5 @@ class BrandMongoDAO (implicit val bindingModule: BindingModule)
     }
 
   }
+
 }

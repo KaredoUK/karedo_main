@@ -45,12 +45,16 @@ trait BootedCore extends Core {
 }
 
 trait DependencyInjection extends Injectable {
-  implicit val configProvider = AppConfigPropertySource(ConfigFactory.load())
+  implicit val configProvider = {
+    println(s"Loading config from ${System.getProperty("config.resource")}")
+    AppConfigPropertySource( ConfigFactory.load().withFallback(ConfigFactory.parseResources("application.default.conf")) )
+  }
   override implicit val bindingModule : BindingModule = newBindingModuleWithConfig
 }
 
 trait Persistence {
   def brandDAO : BrandDAO
+  def hintDAO : HintDAO
   def offerDAO : OfferDAO
   def mediaDAO : MediaDAO
   def userAccountDAO : UserAccountDAO
@@ -62,6 +66,7 @@ trait MongoPersistence extends Persistence {
   
   override val userAccountDAO : UserAccountDAO = new UserAccountMongoDAO() 
   override val brandDAO : BrandDAO = new BrandMongoDAO()
+  override val hintDAO : HintDAO = new HintMongoDAO()
   override val offerDAO : OfferDAO = new OfferMongoDAO()
   override val mediaDAO : MediaDAO = new MongoMediaDAO()
   override val clientApplicationDAO : ClientApplicationDAO = new ClientApplicationMongoDAO()
@@ -84,9 +89,14 @@ trait RestMessageActors extends MessageActors {
 
   val emailActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.email") getOrElse 2
   val smsActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.sms") getOrElse 2
+  val smsActorClassName = injectOptionalProperty[String]("notification.sms.actor.class") getOrElse classOf[SMSActor].getName
+  val emailActorClassName = injectOptionalProperty[String]("notification.email.actor.class") getOrElse classOf[EmailActor].getName
 
-  val emailActor = system.actorOf(EmailActor.props.withRouter( RoundRobinPool(nrOfInstances = emailActorPoolSize) ) )
-  val smsActor = system.actorOf(SMSActor.props .withRouter( RoundRobinPool(nrOfInstances = smsActorPoolSize) ) )
+  def emailActorProps = Props( Class.forName(emailActorClassName), bindingModule)
+  val emailActor = system.actorOf(emailActorProps.withRouter( RoundRobinPool(nrOfInstances = emailActorPoolSize) ) )
+
+  def smsActorProps = Props( Class.forName(smsActorClassName), bindingModule )
+  val smsActor = system.actorOf( smsActorProps.withRouter( RoundRobinPool(nrOfInstances = smsActorPoolSize) ) )
 
   override val messenger = system.actorOf(MessengerActor.props(emailActor, smsActor))
 }
@@ -111,7 +121,7 @@ trait BaseCoreActors extends ServiceActors with RestMessageActors  {
       .withRouter( RoundRobinPool(nrOfInstances = registrationActorPoolSize) )
   )
   override val brand = system.actorOf(
-    BrandActor.props(brandDAO)
+    BrandActor.props(brandDAO, hintDAO)
       .withRouter( RoundRobinPool(nrOfInstances = brandActorPoolSize) )
   )
 

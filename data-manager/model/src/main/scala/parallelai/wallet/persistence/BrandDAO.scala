@@ -2,7 +2,7 @@ package parallelai.wallet.persistence
 
 import java.util.UUID
 
-import parallelai.wallet.entity.{AdvertisementDetail, Brand, UserAccount}
+import parallelai.wallet.entity.{AdvertisementDetail, Brand, UserAccount, SuggestedAdForUsersAndBrandModel}
 
 import scala.concurrent.Future
 
@@ -26,3 +26,5 @@ trait BrandDAO {
 
 
 }
+
+
