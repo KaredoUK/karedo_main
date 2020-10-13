@@ -10,6 +10,7 @@ import akka.util.Timeout
 import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
 import com.parallelai.wallet.datamanager.data.{BrandData, BrandResponse, ListBrandsAdverts, _}
 import core.BrandActor.{InternalBrandError, BrandError}
+import core.EditAccountActor.{ListBrandsRequest, EditAccountError, AddBrand}
 import core.{SuccessResponse, ResponseWithFailure}
 import parallelai.wallet.entity.{AdvertisementDetail, SuggestedAdForUsersAndBrandModel}
 
@@ -24,7 +25,7 @@ object BrandService {
   val logger = Logger("BrandService")
 }
 
-class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionContext)
+class BrandService(brandActor: ActorRef, editAccountActor: ActorRef)(implicit executionContext: ExecutionContext)
   extends Directives with DefaultJsonFormats with ApiErrorsJsonProtocol  {
 
 
@@ -129,8 +130,20 @@ class BrandService(brandActor: ActorRef)(implicit executionContext: ExecutionCon
       }
     }
 
-
+  val routesuggestedBrandsDummy =
+    path("account" / JavaUUID / "suggestedBrands") { accountId: UserID =>
+      post {
+        handleWith {
+          brandIdRequest: BrandIDRequest =>
+            (editAccountActor ? AddBrand(accountId, brandIdRequest.brandId)).mapTo[ResponseWithFailure[EditAccountError, String]]
+        }
+      } ~ get {
+        complete {
+          (editAccountActor ? ListBrandsRequest(accountId)).mapTo[ResponseWithFailure[EditAccountError, List[BrandRecord]]]
+        }
+      }
+    }
 
   val route = routebrand ~ routebrandWithId ~
-    routebrandWithIdAdvert ~ routebrandWithIdAdvertWithId ~ routesuggestedBrands
+    routebrandWithIdAdvert ~ routebrandWithIdAdvertWithId ~ routesuggestedBrands ~ routesuggestedBrandsDummy
 }
