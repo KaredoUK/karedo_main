@@ -82,3 +82,7 @@ case class OfferData(name: String, brandId: UUID, desc: Option[String], imagePat
 case class OfferResponse(offerId: UUID)
 
 case class StatusResponse(status: String) extends ApiDataResponse
+
+// Other types
+case class InteractionType(interactionType: String) extends ApiDataRequest
+case class InteractionResponse(userId: UUID, userTotalPoints: Int)

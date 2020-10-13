@@ -7,7 +7,7 @@ import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
 import com.parallelai.wallet.datamanager.data.{OfferData, OfferResponse}
 import core.OfferActor._
 import core.ResponseWithFailure
-import spray.routing.Directives
+import spray.routing.{Route, Directives}
 import akka.pattern.ask
 
 import scala.concurrent.ExecutionContext
@@ -24,7 +24,7 @@ class OfferService(offerActor: ActorRef)(implicit executionContext: ExecutionCon
 
   implicit val timeout = Timeout(20.seconds)
 
-  val route =
+  val route: Route =
     path("offer") {
       post {
         handleWith {
