@@ -8,22 +8,14 @@ import unittest, json
 # Look for Question### for doubts
 #
 
-brandId=""
+brandId=newUUID()
+advertId=newUUID()
+userId=newUUID()
+offerId=newUUID()
+
 
 
 class TestOther(unittest.TestCase):
-
-    def test00_CreateAndValidateUser(self):
-        title("Setting up an initial user...")
-        global applicationId, userId
-        r = post("account", {"applicationId": applicationId, "msisdn": "0044712345678", "email": "pakkio@gmail.com"})
-        self.assertEqual(r.status_code, 200)
-        doc = ua.find_one({"email": "pakkio@gmail.com"})
-        activationCode = doc["applications"][0]["activationCode"]
-        r = post("account/application/validation", {"applicationId": applicationId, "validationCode": activationCode})
-        self.assertEqual(r.status_code, 200)
-        js = json.loads(r.text)
-        userId = js["userID"]
 
 
 
@@ -33,18 +25,18 @@ class TestOther(unittest.TestCase):
         r = get("account/"+userId+"/suggestedBrands")
         self.assertEqual(r.status_code,200)
         js = json.loads(r.text)
-        for br in js:
-            info("id: {0:s}, name: {1:s}, iconId: {2:s}"
-                 .format(br["id"], br["name"], br["iconId"]))
+        for i in range(0,len(js)):
+            info("id: %s, name: %s, iconId: %s" %
+                 (js[i]["id"], js[i]["name"], js[i]["iconId"]))
 
     def test79(self):
         title("PARALLELAI-79API: Show Pending Ads Per User Per Brand")
         r = get("account/"+userId+"/brand/"+brandId+"/pendingAds")
         self.assertEqual(r.status_code,200)
         js = json.loads(r.text)
-        for br in js:
-            info("id: {0:s}, text: {1:s}, imageId: {2:s}, value: {3:s}"
-                 .format(br["id"], br["text"], br["imageId"],br["value"]))
+        for i in range(0,len(js)):
+            info("id: %s, text: %s, imageId: %s, value: %s" %
+                 (js[i]["id"], js[i]["text"], js[i]["imageId"],js[i]["value"]))
 
 
 
@@ -59,34 +51,34 @@ class TestOther(unittest.TestCase):
         r = get("account/"+userId+"/brand/"+brandId+"/ads?max=5")
         self.assertEqual(r.status_code,200)
         js = json.loads(r.text)
-        for br in js:
-            info("id: {0:s}, name: {1:s}, iconId: {2:s}"
-                 .format(br["id"], br["name"], br["iconId"]))
+        for i in range(0,len(js)):
+            info("id: %s, name: %s, iconId: %s" %
+                 (js[i]["id"], js[i]["name"], js[i]["iconId"]))
 
 
 
     def test61(self):
         title("PARALLELAI-61API: Get Ad Details")
-        advertId=newUUID()
+
         r = get("brand/"+brandId+"/advert/"+advertId)
         self.assertEqual(r.status_code,200)
         js = json.loads(r.text)
-        info("title: {0:s}, text: {1:s}, imageIds: {2:s"
-            .format(js["title"],js["text"],js["imageIds"]))
+        info("title: %s, text: %s, imageIds: %s" %
+            (js["title"],js["text"],js["imageIds"]))
 
     def test80(self):
         title("PARALLELAI-80API: List Offers For User")
         r = get("user/"+userId+"/recommendedOffers?start=0&maxCount=5")
         self.assertEqual(r.status_code,200)
         js = json.loads(r.text)
-        for of in js:
-            info("name: {0:s}, brandId: {1:s}, desc: {2:s}, imageId: {3,s}, qrCodeId: {4,s}, value: {5,s}"
-                 .format(of["name"],
-                         of["brandId"],
-                         of["desc"],
-                         of["imageId"],
-                         of["qrCodeId"],
-                         of["value"]))
+        for i in range(0,len(js)):
+            info("name: %s, brandId: %s, desc: %s, imageId: %s, qrCodeId: %s, value: %s" %
+                 (js[i]["name"],
+                  js[i]["brandId"],
+                  js[i]["desc"],
+                  js[i]["imageId"],
+                  js[i]["qrCodeId"],
+                  js[i]["value"]))
 
     def test81(self):
         title("PARALLELAI-81API: User Offer Interaction (like-dislike-share)")
@@ -118,13 +110,11 @@ class TestOther(unittest.TestCase):
 
     def test63(self):
         title("PARALLELAI-63API: User Buy Offer")
-
-        offerId = newUUID()
         r = post("user/"+userId+"/interaction/offer/"+offerId, { "interactionType":  "BUY"})
         self.assertEqual(r.status_code,200)
         js = json.loads(r.text)
-        info("userId: {0,s}, userTotalPoints: {1,s}"
-             .format(js["userId"],js["userTotalPoints"]))
+        info("userId: %s, userTotalPoints: %s" %
+             (js["userId"],js["userTotalPoints"]))
 
 
 
@@ -141,12 +131,11 @@ class TestOther(unittest.TestCase):
     def test55(self):
         title("PARALLELAI-55API: User Brand Interaction")
 
-
+        brandId=newUUID()
         r = post("user/"+userId+"/interaction/brand/"+brandId, { "interactionType":  "BUY"})
         self.assertEqual(r.status_code,200)
         js = json.loads(r.text)
-        info("userId: {0,s}, userTotalPoints: {1,s}"
-             .format(js["userId"],js["userTotalPoints"]))
+        info("userId: %s, userTotalPoints: %s" % (js["userId"],js["userTotalPoints"]))
 
 
     def test57(self):
@@ -162,8 +151,8 @@ class TestOther(unittest.TestCase):
 
         self.assertEqual(r.status_code,200)
         js = json.loads(r.text)
-        info("userId: {0,s}, userTotalPoints: {1,s}"
-             .format(js["userId"],js["userTotalPoints"]))
+        info("userId: %s, userTotalPoints: %s" %
+             (js["userId"],js["userTotalPoints"]))
 
 
 

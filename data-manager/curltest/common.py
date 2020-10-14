@@ -8,7 +8,7 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 
 # to enable extra printing from the tests
-DEBUG=False
+DEBUG=True
 
 client = MongoClient()
 db = client.wallet_data

@@ -145,5 +145,5 @@ class BrandService(brandActor: ActorRef, editAccountActor: ActorRef)(implicit ex
     }
 
   val route = routebrand ~ routebrandWithId ~
-    routebrandWithIdAdvert ~ routebrandWithIdAdvertWithId ~ routesuggestedBrands ~ routesuggestedBrandsDummy
+    routebrandWithIdAdvert ~ routebrandWithIdAdvertWithId ~ /* routesuggestedBrands ~ */ routesuggestedBrandsDummy
 }
