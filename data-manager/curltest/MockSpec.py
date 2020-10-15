@@ -2,10 +2,9 @@ from common import *
 import unittest, json
 
 #
-# This is testing many things in the
-# "My Stores: brands" section contained in
-# https://java.net/projects/parallelai/pages/RestAPISpecification
-# Look for Question### for doubts
+# This is mainly testing current mocked service features
+# it serves as a guide to understand what it is still missing
+# but how it should work
 #
 
 brandId=newUUID()
@@ -15,7 +14,7 @@ offerId=newUUID()
 
 
 
-class TestOther(unittest.TestCase):
+class TestMock(unittest.TestCase):
 
 
 
@@ -82,30 +81,27 @@ class TestOther(unittest.TestCase):
 
     def test81(self):
         title("PARALLELAI-81API: User Offer Interaction (like-dislike-share)")
-        offerId = newUUID()
         r = post("user/"+userId+"/interaction/offer/"+offerId, { "interactionType":  "LIKE"})
         self.assertEqual(r.status_code,200)
         js = json.loads(r.text)
-        info("userId: {0,s}, userTotalPoints: {1,s}"
-            .format(js["userId"],js["userTotalPoints"]))
+        info("userId: %s, userTotalPoints: %s" %
+            (js["userId"],js["userTotalPoints"]))
 
 
 
 
     def test82(self):
         title("PARALLELAI-82API: Get Offer Details")
-
-        offerId = newUUID()
         r = get("offer/"+offerId)
         self.assertEqual(r.status_code,200)
         js = json.loads(r.text)
-        info("name: {0:s}, brandId: {1:s}, desc: {2:s}, imageId: {3,s}, qrCodeId: {4,s}, value: {5,s}"
-             .format(of["name"],
-                     of["brandId"],
-                     of["desc"],
-                     of["imageId"],
-                     of["qrCodeId"],
-                     of["value"]))
+        info("name: %s, brandId: %s, desc: %s, imageId: %s, qrCodeId: %s, value: %s" %
+             (of["name"],
+             of["brandId"],
+             of["desc"],
+             of["imageId"],
+             of["qrCodeId"],
+             of["value"]))
 
 
     def test63(self):
@@ -120,8 +116,6 @@ class TestOther(unittest.TestCase):
 
     def test92(self):
         title("PARALLELAI-92API: Disable Offer")
-
-        offerId = newUUID()
         r = delete("offer/"+offerId)
         self.assertEqual(r.status_code,200)
         self.assertEqual(r.text,"{}")
@@ -157,7 +151,7 @@ class TestOther(unittest.TestCase):
 
 
 
-suite = unittest.TestLoader().loadTestsFromTestCase(TestOther)
+suite = unittest.TestLoader().loadTestsFromTestCase(TestMock)
 
 if __name__ == '__main__':
     unittest.main()

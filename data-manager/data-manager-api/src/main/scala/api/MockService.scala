@@ -16,11 +16,11 @@ import akka.pattern.ask
 import scala.concurrent.ExecutionContext
 
 
-object OtherService {
+object MockService {
   val logger = Logger("OtherService")
 }
 
-class OtherService(otherActor: ActorRef)(implicit executionContext: ExecutionContext)
+class MockService(otherActor: ActorRef)(implicit executionContext: ExecutionContext)
   extends Directives with DefaultJsonFormats with ApiErrorsJsonProtocol {
 
   import scala.concurrent.duration._
@@ -168,6 +168,50 @@ class OtherService(otherActor: ActorRef)(implicit executionContext: ExecutionCon
       }
     }
 
-  val route=route55 ~ route56 ~ /* 57 */ route59 ~ route61 ~ route63 ~ route71 ~ route79 ~ route80
+  //         title("PARALLELAI-81API: User Offer Interaction (like-dislike-share)")
+  // r = post("user/"+userId+"/interaction/offer/"+offerId, { "interactionType":  "LIKE"})
+  val route81 : Route =
+    path("user" / JavaUUID / "interaction" / "offer" / JavaUUID ) {
+      (user,offer) => {
+        post {
+          handleWith {
+            (s:String) =>
+              s"{${q}userId${q}: ${q}$user${q},${q}userTotalPoints${q}:${q}500${q}}"
+          }
+        }
+      }
+    }
+  // title("PARALLELAI-82API: Get Offer Details")
+  // r = get("offer/"+offerId)
+  val route82 : Route =
+    path("offer" / JavaUUID ) {
+      (offer) => {
+        get {
+          complete {
+            """
+              | {"name":"offername","brandId":"f135e16d-da0c-4b12-ab7f-d19ae1c7abe3","desc":"description","imageId":"imageid1","qrCodeId":"qrCodeId","value":"0.5555"}
+            """.stripMargin
+            //"name: %s, brandId: %s, desc: %s, imageId: %s, qrCodeId: %s, value: %s"
+          }
+        }
+      }
+    }
+
+  //         title("PARALLELAI-92API: Disable Offer")
+  // r = delete("offer/"+offerId)
+  val route92 : Route =
+    path("offer" / JavaUUID) {
+      (offer) => {
+        delete {
+          complete {
+            "{}"
+          }
+        }
+      }
+    }
+
+
+  val route=route55 ~ route56 ~ /* 57 */ route59 ~ route61 ~
+    route63 ~ route71 ~ route79 ~ route80 ~ route81 ~ route82 ~ route92
 
 }

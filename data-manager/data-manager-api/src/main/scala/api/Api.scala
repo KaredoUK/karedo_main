@@ -21,7 +21,7 @@ trait Api extends RouteConcatenation {
     new BrandService(brand, editAccount).route ~
     new MediaService(media).route ~
     new OfferService(offer).route ~
-    new OtherService(other).route
+    new MockService(other).route
 
   val rootService = system.actorOf(Props(new RoutedHttpService(routes)))
 
