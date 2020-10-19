@@ -84,7 +84,7 @@ class TestBrand(unittest.TestCase):
         global brandId,advId
         title("PARALLELAI-65API: Create Ad")
 
-        data={ "text":"adtext", "imageIds": ["iconId", "iconId"], "value":5}
+        data={ "text":"adtext", "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" } ], "value":5}
         r=post("brand/"+brandId+"/advert",data)
         self.assertEqual(r.status_code, 200)
 
@@ -95,7 +95,7 @@ class TestBrand(unittest.TestCase):
         global brandId
 
         title("PARALLELAI-66API: Disable Ad")
-        data={ "text":"adtext1", "imageIds": ["iconId", "iconId"], "value":5}
+        data={ "text":"adtext1", "imageIds": [ { "imageId" : "iconId" }, { "imageId" : "iconId" } ], "value":5}
         r=post("brand/"+brandId+"/advert",data)
 
         self.assertEqual(r.status_code, 200)
@@ -110,11 +110,11 @@ class TestBrand(unittest.TestCase):
 
         title("PARALLELAI-64API: List Ads per Brand")
 
-        data={ "text":"A", "imageIds": ["iconIdA", "iconIdA"], "value":6}
+        data={ "text":"A", "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" }], "value":6}
         r=post("brand/"+brandId+"/advert",data)
         self.assertEqual(r.status_code, 200)
 
-        data={ "text":"B", "imageIds": ["iconIdB", "iconIdB"], "value":7}
+        data={ "text":"B", "imageIds": [ { "imageId" : "iconIdB" }, { "imageId" : "iconIdB" }], "value":7}
         r=post("brand/"+brandId+"/advert",data)
         self.assertEqual(r.status_code, 200)
 

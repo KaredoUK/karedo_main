@@ -85,7 +85,7 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
     successful {
       SuccessResponse(
         brandDAO.listAds(adverts.brandId).map {
-          detail => AdvertDetailResponse(id = detail.id, text = detail.text, imageIds = detail.imageIds, value = detail.value)
+          detail => AdvertDetailResponse(id = detail.id, text = detail.text, imageIds = detail.imageIds map { ImageId } , value = detail.value)
         })
     }
 
@@ -98,7 +98,7 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
 
   def addAdvert(request: AddAdvertCommand): Future[ResponseWithFailure[BrandError, AdvertDetailResponse]] = successful {
 
-    val detail: AdvertisementDetail = AdvertisementDetail(text = request.text, imageIds = request.imageIds, value = request.value)
+    val detail: AdvertisementDetail = AdvertisementDetail(text = request.text, imageIds = request.imageIds map { _.imageId }, value = request.value)
     //log.info(s"XXX using detail uuid: ${detail.id}")
     brandDAO.addAd(request.brandId, detail)
     SuccessResponse(AdvertDetailResponse(detail.id, request.text, request.imageIds, request.value))
