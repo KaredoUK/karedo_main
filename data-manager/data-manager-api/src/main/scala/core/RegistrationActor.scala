@@ -73,7 +73,7 @@ object RegistrationActor {
 
   }
 
-  case class AddApplication(applicationId: ApplicationID, accountId: UserID)
+  case class AddApplicationToKnownUserRequest(applicationId: ApplicationID, accountId: UserID)
 
 
   def newActivationCode: String = {
@@ -100,11 +100,14 @@ class RegistrationActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cl
     case request: RegistrationRequest => replyToSender {
       registerUser(request)
     }
-    case request: AddApplication => replyToSender {
+    case request: AddApplicationToKnownUserRequest => replyToSender {
       registerApplication(request)
     }
     case validation: RegistrationValidation => replyToSender {
       validateUser(validation)
+    }
+    case addApplication: AddApplicationRequest => replyToSender {
+      addApplicationToUser(addApplication)
     }
   }
 
@@ -123,8 +126,25 @@ class RegistrationActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cl
       activateApplication(request.applicationId, account.id, request, activationCode)
     }
 
+  def addApplicationToUser(addApplicationRequest: AddApplicationRequest): ResponseWithFailure[RegistrationError, AddApplicationResponse] =
+    withValidations(addApplicationRequest)(validUserIdentification, applicationNotRegistered) { request =>
+      log.debug("Adding new application to user for request {}", request)
 
-  def registerApplication(registrationRequest: AddApplication): ResponseWithFailure[RegistrationError, RegistrationResponse] =
+      userAccountDAO.findByAnyOf(None, request.msisdn, request.email) match {
+        case None =>
+          log.debug("Cannot find any user with specified params {}", request)
+          FailureResponse(InvalidRegistrationRequest("Unable to find user with specified identification"))
+
+        case Some(userAccount) =>
+          log.debug("Adding new application {} to account {}", request.applicationId, userAccount.id)
+          val registrationResponse = registerApplication(AddApplicationToKnownUserRequest(request.applicationId, userAccount.id))
+
+          registrationResponse map { resp => AddApplicationResponse(resp.applicationId, resp.channel, resp.address)  }
+      }
+  }
+
+
+  def registerApplication(registrationRequest: AddApplicationToKnownUserRequest): ResponseWithFailure[RegistrationError, RegistrationResponse] =
     withValidations(registrationRequest)(applicationNotRegistered) { request =>
 
       userAccountDAO.getById(request.accountId) match {

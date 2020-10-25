@@ -2,7 +2,7 @@ package api
 
 import java.util.UUID
 
-import com.parallelai.wallet.datamanager.data.{RegistrationValidationResponse, RegistrationValidation, RegistrationRequest, RegistrationResponse}
+import com.parallelai.wallet.datamanager.data._
 import org.apache.commons.lang.StringUtils
 import org.specs2.matcher._
 import org.specs2.mutable.Specification
@@ -44,6 +44,29 @@ class AccountServiceSpec extends ApiHttpClientSpec with RestApiSpecMatchers {
         userAccount = argThat( haveMsisdn(msisdn) ),
         firstApplication = argThat( beInactive and haveActivationCode and beAnAppWithId(applicationId) )
       )
+    }
+
+    "Add an application to an existing account" in new WithMockedPersistenceRestService {
+      val pipeline = sendReceive ~> unmarshal[AddApplicationResponse]
+
+      val msisdn = "00123123123"
+      val userAccount = UserAccount(UUID.randomUUID(), Some(msisdn), Some("email"))
+
+      mockedClientApplicationDAO.getById(any[UUID]) returns None
+      mockedUserAccountDAO.findByAnyOf(any[Option[UUID]], any[Option[String]], any[Option[String]]) returns Some(userAccount)
+
+      val applicationId = UUID.randomUUID()
+
+      val registrationResponse = wait {
+        pipeline {
+          Post(s"$serviceUrl/account/application", AddApplicationRequest(applicationId, Some(msisdn), None))
+        }
+      }
+
+      registrationResponse shouldEqual AddApplicationResponse(applicationId, "msisdn", msisdn)
+
+      there was no(mockedUserAccountDAO).insertNew( any[UserAccount], any[ClientApplication] )
+      there was one(mockedClientApplicationDAO).insertNew(ClientApplication(applicationId, userAccount.id, anyString))
     }
 
     "Refuse registration with no MSISDN or email" in new WithMockedPersistenceRestService {

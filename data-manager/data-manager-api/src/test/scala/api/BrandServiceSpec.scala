@@ -66,7 +66,7 @@ class BrandServiceSpec extends ApiHttpClientSpec with RestApiSpecMatchers {
       val brand = new Brand(UUID.randomUUID(), "brandName", "iconID", List.empty)
       // mockedBrandDAO.getById(any[UUID]) returns Some(brand)
 
-      val ad = AdvertDetail(text = "text", imageIds = List("image1", "image2"), value = 100)
+      val ad = AdvertDetail(text = "text", imageIds = List(ImageId("image1"), ImageId("image2")), value = 100)
 
       val response = wait(pipeline {
 
@@ -78,7 +78,15 @@ class BrandServiceSpec extends ApiHttpClientSpec with RestApiSpecMatchers {
         case _ => ko
       }
       print(s"response.id: ${response.id}")
-      there was one(mockedBrandDAO).addAd(brand.id, AdvertisementDetail(id=any[UUID],publishedDate=any[DateTime], text=ad.text,imageIds=ad.imageIds,value=ad.value))
+      there was one(mockedBrandDAO).addAd(
+        brand.id,
+        AdvertisementDetail(id=any[UUID],
+          publishedDate=any[DateTime],
+          text=ad.text,
+          imageIds=ad.imageIds.map {_.imageId},
+          value=ad.value
+        )
+      )
 
     }
     "PARALLELAI-59API: Get Next N Ads For User For Brand" in new WithMockedPersistenceRestService {

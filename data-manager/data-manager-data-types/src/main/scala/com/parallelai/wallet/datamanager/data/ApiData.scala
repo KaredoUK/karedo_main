@@ -26,14 +26,20 @@ trait WithUserContacts {
 
 case class RegistrationRequest(applicationId: ApplicationID, msisdn: Option[String], email: Option[String])
   extends WithUserContacts with ApiDataRequest
+
 case class AddApplicationRequest(applicationId: ApplicationID, msisdn: Option[String], email: Option[String])
-  extends ApiDataRequest
+  extends WithUserContacts with ApiDataRequest
 
 case class RegistrationValidation(applicationId: ApplicationID, validationCode: String)
   extends ApiDataRequest
 
 case class RegistrationResponse(applicationId: ApplicationID, channel: String, address: String)
   extends ApiDataResponse
+
+case class AddApplicationResponse(applicationId: ApplicationID, channel: String, address: String)
+  extends ApiDataResponse
+
+
 case class RegistrationValidationResponse(applicationId: ApplicationID, userID: UUID)
   extends ApiDataResponse
 
