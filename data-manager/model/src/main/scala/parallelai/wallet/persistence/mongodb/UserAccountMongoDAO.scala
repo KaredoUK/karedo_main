@@ -25,7 +25,11 @@ object userAccountMongoUtils {
 import userAccountMongoUtils._
 
 
-class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends UserAccountDAO with MongoConnection with Injectable {
+class UserAccountMongoDAO(implicit val bindingModule: BindingModule)
+  extends UserAccountDAO
+  with MongoConnection
+  with Injectable
+{
   implicit def mongoUserAccountToUserAccount(mongoUserAccount: MongoUserAccount): UserAccount = mongoUserAccount.toUserAccount
 
   implicit def mongoUserAccountOptionToUserAccountOption(mongoUserAccount: Option[MongoUserAccount]): Option[UserAccount] = mongoUserAccount map {
@@ -33,7 +37,7 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
   }
 
   val dao = new SalatDAO[MongoUserAccount, UUID](collection = db("UserAccount")) {}
-  val brandDao = new SalatDAO[Brand, UUID](collection = db("Brand")) {}
+  //val brandDao = new SalatDAO[Brand, UUID](collection = db("Brand")) {}
 
   override def getById(userId: UUID): Option[UserAccount] = dao.findOneById(userId)
 
@@ -183,7 +187,11 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule) extends Use
   }
 }
 
-class ClientApplicationMongoDAO(implicit val bindingModule: BindingModule) extends ClientApplicationDAO with MongoConnection with Injectable {
+class ClientApplicationMongoDAO(implicit val bindingModule: BindingModule)
+  extends ClientApplicationDAO
+  with MongoConnection
+  with Injectable
+{
   val dao = new SalatDAO[MongoUserAccount, UUID](collection = db("UserAccount")) {}
 
   override def getById(applicationId: UUID): Option[ClientApplication] =

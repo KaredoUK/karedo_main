@@ -3,7 +3,7 @@ package api
 
 import core.objAPI.{InvalidRequest, APIError, InternalError}
 import core.EditAccountActor._
-import core.MediaContentActor.{InvalidContentId, MediaHandlingError}
+import core.MediaContentActor.{MissingContent, InvalidContentId, MediaHandlingError}
 import core.OfferActor.{InternalOfferError, InvalidOfferRequest, OfferError}
 import core.RegistrationActor._
 import spray.http.StatusCode
@@ -33,7 +33,8 @@ trait ApiErrorsJsonProtocol extends DefaultJsonFormats {
     def apply(error: MediaHandlingError): StatusCode = error match {
       case InvalidContentId(_) =>
         BadRequest
-
+      case MissingContent =>
+        BadRequest
     }
   }
 

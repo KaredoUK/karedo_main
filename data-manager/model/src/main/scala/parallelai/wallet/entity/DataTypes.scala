@@ -40,6 +40,8 @@ case class Brand(@Key("_id") id: UUID = UUID.randomUUID(), name: String = "", ic
 
 case class Hint(@Key("_id") id: UUID = UUID.randomUUID(), userId: UUID, brandId: UUID, ad: UUID, score: Double)
 
+//case class UserBrandInteraction(@Key("_id") id: UUID = UUID.randomUUID(), userId: UUID, )
+
 case class MediaContentDescriptor(name: String, contentType: String, id: String = "")
 
 case class MediaContent(descriptor: MediaContentDescriptor, inputStream: InputStream)
