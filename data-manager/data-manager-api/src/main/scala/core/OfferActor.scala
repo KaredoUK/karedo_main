@@ -5,7 +5,7 @@ import java.util.UUID
 import akka.actor.{Actor, ActorLogging, Props}
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import com.parallelai.wallet.datamanager.data._
-import core.BrandActor.{BrandError, InternalBrandError, InvalidBrandRequest}
+
 import core.OfferActor.{InvalidOfferRequest, InternalOfferError, OfferError}
 import org.joda.time.DateTime
 import parallelai.wallet.entity.{Brand, _}
@@ -31,7 +31,7 @@ object OfferActor {
   case class InvalidOfferRequest(reason: String) extends OfferError
   case class InternalOfferError(reason: Throwable) extends OfferError
 
-  implicit object brandErrorJsonFormat extends RootJsonWriter[OfferError] {
+  implicit object offerErrorJsonFormat extends RootJsonWriter[OfferError] {
     def write(error: OfferError) = error match {
       case InvalidOfferRequest(reason) => JsObject(
         "type" -> JsString("OfferInvalidRequest"),

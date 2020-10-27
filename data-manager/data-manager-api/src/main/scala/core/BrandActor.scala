@@ -6,7 +6,8 @@ import java.util.UUID
 import akka.actor.{Actor, ActorLogging, Props}
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import com.parallelai.wallet.datamanager.data._
-import core.BrandActor.{BrandError, InternalBrandError, InvalidBrandRequest}
+import objAPI._
+
 import org.joda.time.DateTime
 import parallelai.wallet.entity.{Brand, _}
 import parallelai.wallet.persistence.{HintDAO, MediaDAO, BrandDAO}
@@ -24,34 +25,8 @@ object BrandActor {
 
   def props(brandDAO: BrandDAO, hintDAO: HintDAO)(implicit bindingModule: BindingModule): Props =
     Props(classOf[BrandActor], brandDAO, hintDAO, bindingModule)
-
-
-  sealed trait BrandError
-
-  case class InvalidBrandRequest(reason: String) extends BrandError
-
-  case class InternalBrandError(reason: Throwable) extends BrandError
-
-  implicit object brandErrorJsonFormat extends RootJsonWriter[BrandError] {
-    def write(error: BrandError) = error match {
-      case InvalidBrandRequest(reason) => JsObject(
-        "type" -> JsString("BrandInvalidRequest"),
-        "data" -> JsObject {
-          "reason" -> JsString(reason)
-        }
-      )
-      case InternalBrandError(reason) => JsObject(
-        "type" -> JsString("InternalBrandError"),
-        "data" -> JsObject {
-          "reason" -> JsString(reason.getMessage)
-        }
-      )
-    }
-
-
   }
 
-}
 
 class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
                 (implicit val bindingModule: BindingModule) extends Actor with ActorLogging with Injectable {
@@ -69,6 +44,22 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
 
   }
 
+  def createBrand(request: BrandData): Future[ResponseWithFailure[APIError, BrandResponse]] = successful {
+
+    validateBrand(request) match {
+      case None =>
+        log.info("Creating new brand for request {}", request)
+        val newbrand = Brand(name = request.name, iconId = request.iconId, ads = List[AdvertisementDetail]())
+        val uuid = brandDAO.insertNew(newbrand).get
+        val response = BrandResponse(uuid)
+        SuccessResponse(response)
+
+      case Some(error) =>
+        log.info("Validation failed " + error)
+        FailureResponse(InvalidRequest(error))
+    }
+  }
+
   def returnSuggestedAds(request: RequestSuggestedAdForUsersAndBrand): List[SuggestedAdForUsersAndBrand] = {
 
     hintDAO.suggestedNAdsForUserAndBrandLimited(request.userId, request.brandId, request.max)
@@ -81,7 +72,7 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
 
   }
 
-  def listBrandAdverts(adverts: ListBrandsAdverts): Future[ResponseWithFailure[BrandError, List[AdvertDetailResponse]]] =
+  def listBrandAdverts(adverts: ListBrandsAdverts): Future[ResponseWithFailure[APIError, List[AdvertDetailResponse]]] =
     successful {
       SuccessResponse(
         brandDAO.listAds(adverts.brandId).map {
@@ -90,13 +81,13 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
     }
 
 
-  def deleteAdv(request: DeleteAdvRequest): Future[ResponseWithFailure[BrandError, String]] = successful {
+  def deleteAdv(request: DeleteAdvRequest): Future[ResponseWithFailure[APIError, String]] = successful {
     brandDAO.delAd(request.advId)
 
     SuccessResponse("OK")
   }
 
-  def addAdvert(request: AddAdvertCommand): Future[ResponseWithFailure[BrandError, AdvertDetailResponse]] = successful {
+  def addAdvert(request: AddAdvertCommand): Future[ResponseWithFailure[APIError, AdvertDetailResponse]] = successful {
 
     val detail: AdvertisementDetail = AdvertisementDetail(text = request.text, imageIds = request.imageIds map { _.imageId }, value = request.value)
     //log.info(s"XXX using detail uuid: ${detail.id}")
@@ -105,21 +96,7 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
   }
 
 
-  def createBrand(request: BrandData): Future[ResponseWithFailure[BrandError, BrandResponse]] = successful {
 
-    validateBrand(request) match {
-      case None =>
-        log.info("Creating new brand for request {}", request)
-        val newbrand = Brand(name = request.name, iconId = request.iconId, ads = List[AdvertisementDetail]())
-        val uuid = brandDAO.insertNew(newbrand).get
-        val response = BrandResponse(uuid)
-        SuccessResponse(response)
-
-      case Some(error) =>
-        log.info("Validation failed " + error)
-        FailureResponse(InvalidBrandRequest(error))
-    }
-  }
 
   def listBrands: List[BrandRecord] = {
 
@@ -130,7 +107,7 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
   }
 
 
-  def getBrand(request: BrandIDRequest): Future[ResponseWithFailure[BrandError, BrandRecord]] = successful {
+  def getBrand(request: BrandIDRequest): Future[ResponseWithFailure[APIError, BrandRecord]] = successful {
     brandDAO.getById(request.brandId) match {
       case Some(b) => {
         log.info(s"getting brand ${b.id}")
@@ -138,12 +115,12 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
       }
       case None => {
         log.info(s" cannot get brand ${request.brandId}")
-        FailureResponse(InvalidBrandRequest("Invalid id"))
+        FailureResponse(InvalidRequest("Invalid id"))
       }
     }
   }
 
-  def deleteBrand(request: DeleteBrandRequest): Future[ResponseWithFailure[BrandError, String]] = successful {
+  def deleteBrand(request: DeleteBrandRequest): Future[ResponseWithFailure[APIError, String]] = successful {
     brandDAO.getById(request.brandId) match {
       case Some(b) => {
         log.info(s"deleting brand ${request.brandId}")
@@ -152,7 +129,7 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
       }
       case None => {
         log.info(s"cannot delete brand ${request.brandId}")
-        FailureResponse(InvalidBrandRequest("Invalid id"))
+        FailureResponse(InvalidRequest("Invalid brand id"))
       }
     }
   }
@@ -163,15 +140,15 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
     case _ => None
   }
 
-  def replyToSender[T <: Any](response: Future[ResponseWithFailure[BrandError, T]]): Unit = {
+  def replyToSender[T <: Any](response: Future[ResponseWithFailure[APIError, T]]): Unit = {
     val replyTo = sender
 
     response recover {
       case t =>
         log.warning("Internal error: {}", t)
-        FailureResponse(InternalBrandError(t))
+        FailureResponse(InternalError(t))
     } foreach {
-      responseContent: ResponseWithFailure[BrandError, T] =>
+      responseContent: ResponseWithFailure[APIError, T] =>
         replyTo ! responseContent
     }
   }

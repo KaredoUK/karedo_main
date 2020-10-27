@@ -1,6 +1,7 @@
 package api
 
-import core.BrandActor.{InternalBrandError, InvalidBrandRequest, BrandError}
+
+import core.objAPI.{InvalidRequest, APIError, InternalError}
 import core.EditAccountActor._
 import core.MediaContentActor.{InvalidContentId, MediaHandlingError}
 import core.OfferActor.{InternalOfferError, InvalidOfferRequest, OfferError}
@@ -19,11 +20,11 @@ trait ApiErrorsJsonProtocol extends DefaultJsonFormats {
     }
   }
 
-  implicit object brandErrorSelector extends ErrorSelector[BrandError] {
-    def apply(error: BrandError): StatusCode = error match {
-      case InvalidBrandRequest(reason) =>
+  implicit object errorSelector extends ErrorSelector[APIError] {
+    def apply(error: APIError): StatusCode = error match {
+      case InvalidRequest(reason) =>
         BadRequest
-      case InternalBrandError(_) =>
+      case InternalError(_) =>
         InternalServerError
     }
   }

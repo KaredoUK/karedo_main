@@ -6,7 +6,7 @@ import akka.actor.ActorRef
 import akka.event.slf4j.Logger
 import akka.util.Timeout
 import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
-import com.parallelai.wallet.datamanager.data.{InteractionType, InteractionResponse}
+import com.parallelai.wallet.datamanager.data.{UserBrandInteraction, InteractionResponse}
 import core.OtherActor._
 import core.ResponseWithFailure
 import shapeless.HNil
@@ -29,26 +29,7 @@ class MockService(otherActor: ActorRef)(implicit executionContext: ExecutionCont
 
   implicit val timeout = Timeout(20.seconds)
 
-  val route55: Route =
 
-  // PARALLELAI-55API: User Brand Interaction
-  // "user/"+userId+"/interaction/brand/"+brandId, { "interactionType":  "BUY"}
-    path("user" / JavaUUID / "interaction" / "brand" / JavaUUID)
-    { (user, brand) => {
-      /*get {
-        complete {
-          """{"a":"5"}"""
-        }
-      }
-    } ~ */
-      post {
-        handleWith( (s:String) =>
-
-          s"{${q}userId${q}: ${q}$user${q},${q}userTotalPoints${q}:${q}500${q}}")
-        }
-      }
-
-    }
   val route56: Route =
     // PARALLELAI-56API: User Ads Interaction")
     // r = post("user/"+userId+"/interaction/advert/"+advertId)
@@ -211,7 +192,7 @@ class MockService(otherActor: ActorRef)(implicit executionContext: ExecutionCont
     }
 
 
-  val route=route55 ~ route56 ~ /* 57 */ route59 ~ route61 ~
+  val route= route56 ~ /* 57 */ route59 ~ route61 ~
     route63 ~ route71 ~ route79 ~ route80 ~ route81 ~ route82 ~ route92
 
 }

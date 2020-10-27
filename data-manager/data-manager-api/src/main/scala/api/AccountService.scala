@@ -2,7 +2,7 @@ package api
 
 import com.mongodb.casbah.Imports._
 import com.parallelai.wallet.datamanager.data._
-import core.BrandActor.{InternalBrandError, InvalidBrandRequest, BrandError}
+
 import core.EditAccountActor.EditAccountError
 import spray.httpx.marshalling.{CollectingMarshallingContext, Marshaller}
 import spray.json.RootJsonFormat

@@ -67,7 +67,7 @@ case class BrandIDRequest(brandId: UUID) extends ApiDataRequest
 case class DeleteBrandRequest(brandId: UUID) extends ApiDataRequest
 
 // BRAND ADS
-// This is heare just to please the UI devs who are aving problem to parse a list of Strings
+// This is here just to please the UI devs who are having problem to parse a list of Strings
 case class ImageId(imageId: String)
 
 case class AddAdvertCommand(brandId: UUID, text: String, imageIds: List[ImageId], value: Int) extends ApiDataRequest
@@ -93,5 +93,5 @@ case class OfferResponse(offerId: UUID)
 case class StatusResponse(status: String) extends ApiDataResponse
 
 // Other types
-case class InteractionType(interactionType: String) extends ApiDataRequest
-case class InteractionResponse(userId: UUID, userTotalPoints: Int)
+case class UserBrandInteraction(userId:UUID, brandId: UUID, intType: String) extends ApiDataRequest
+case class InteractionResponse(userId: UUID, userTotalPoints: Int) extends ApiDataResponse
