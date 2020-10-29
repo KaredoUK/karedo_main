@@ -4,6 +4,7 @@ import java.util.UUID
 import org.joda.time.DateTime
 import parallelai.wallet.entity._
 import com.novus.salat.annotations._
+import parallelai.wallet.persistence.Interaction
 
 object MongoBrandAds {
   def fromAd(ad: AdvertisementDetail) =
@@ -27,7 +28,8 @@ case class MongoBrand
   @Key("_id") id: UUID,
   name: String,
   iconId: String,
-  ads: List[MongoBrandAd]
+  ads: List[MongoBrandAd],
+  interactions: List[Interaction]
   )
 {
 

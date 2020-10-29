@@ -2,6 +2,7 @@ package parallelai.wallet.persistence.mongodb
 
 import org.specs2.mutable.Specification
 import com.github.athieriot.{CleanAfterExample, EmbedConnection}
+import org.specs2.specification.BeforeExample
 import org.specs2.time.NoTimeConversions
 import com.escalatesoft.subcut.inject.NewBindingModule._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -9,20 +10,16 @@ import com.escalatesoft.subcut.inject.NewBindingModule._
 import parallelai.wallet.entity.{ClientApplication, UserAccount}
 import java.util.UUID
 
-class ClientApplicationMongoDAOSpec extends Specification with EmbedConnection with CleanAfterExample with NoTimeConversions with MongoTestUtils {
+class ClientApplicationMongoDAOSpec
+  extends Specification
+  with TestWithLocalMongoDb
+  with BeforeExample
+{
+  def before = clearAll()
+
   sequential
 
   "ClientApplicationMongoDAO" should {
-
-    implicit val bindingModule = newBindingModuleWithConfig(
-      Map(
-        "mongo.server.host" -> "localhost",
-        "mongo.server.port" -> s"$embedConnectionPort",
-        "mongo.db.name" -> "test",
-        "mongo.db.user" -> "",
-        "mongo.db.pwd" -> ""
-      )
-    )
 
     val accountDAO = new UserAccountMongoDAO
     val clientAppDAO = new ClientApplicationMongoDAO

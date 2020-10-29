@@ -3,7 +3,7 @@ package core
 import java.net.URI
 
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
-import core.BrandActor.InternalBrandError
+//import core.BrandActor.InternalBrandError
 import core.MessengerActor.SendMessage
 import core.common.RequestValidationChaining
 import parallelai.wallet.persistence.{ClientApplicationDAO, UserAccountDAO}

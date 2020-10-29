@@ -2,74 +2,106 @@ package parallelai.wallet.persistence.mongodb
 
 import java.util.UUID
 
-import com.github.athieriot.{CleanAfterExample, EmbedConnection}
+
 import com.mongodb.casbah.commons.MongoDBObject
 import com.mongodb.casbah.commons.ValidBSONType.DBObject
-import org.specs2.mutable.Specification
+import org.specs2.mutable.{Before, Specification}
 import org.specs2.time.NoTimeConversions
 import parallelai.wallet.entity.{AdvertisementDetail, Brand}
 import com.escalatesoft.subcut.inject.NewBindingModule
 import NewBindingModule._
+import parallelai.wallet.persistence.{InteractionType, Interaction}
 
-/**
- * Created by pakkio on 29/09/2014.
- */
-class MongoBrandDAOSpec extends Specification with EmbedConnection with CleanAfterExample with NoTimeConversions with MongoTestUtils  {
+
+class MongoBrandDAOSpec
+  extends Specification
+  with TestWithLocalMongoDb
+  with Before
+{
+  def before = clearAll()
 
   sequential
 
   "BrandMongoDAO" should {
-
-    implicit val bindingModule = newBindingModuleWithConfig(
-      Map(
-        "mongo.server.host" -> "localhost",
-        "mongo.server.port" -> s"$embedConnectionPort",
-        "mongo.db.name" -> "test",
-        "mongo.db.user" -> "",
-        "mongo.db.pwd" -> ""
-      )
-    )
-
-    val brandDAO = new BrandMongoDAO
-
-    lazy val mybrand = Brand(name = "brand X", iconId= "iconId", ads=List[AdvertisementDetail]() )
-
     "create and retrieve a brand with a generated id " in {
-
-      val id = brandDAO.insertNew(mybrand).get
-
+      val n1=newbrand
+      val id = brandDAO.insertNew(n1).get
       val findAfterInsert = brandDAO.getById(id).get
 
-      findAfterInsert shouldEqual mybrand
+      brandDAO.delete(id)
+      findAfterInsert shouldEqual n1
     }
 
     "can delete one instance" in {
-
-      val id = brandDAO.insertNew(mybrand).get
-
+      val id = brandDAO.insertNew(newbrand).get
       brandDAO.delete(id)
-
       val findAfterDelete = brandDAO.getById(id)
-
       findAfterDelete should be(None)
-
     }
 
     "can delete all instances" in {
-      val id = brandDAO.insertNew(mybrand).get
-
+      val id = brandDAO.insertNew(newbrand).get
       val list=brandDAO.list
-
       list should have size 1
 
       list.map( brand => brandDAO.delete(id))
-
       val list2=brandDAO.list
-
       list2 should have size 0
-
     }
 
   }
+  "BrandInteractionsMongoDAO" should {
+    "add an interaction" in {
+      val id = brandDAO.insertNew(newbrand).get
+      val user = UUID.randomUUID()
+      val interaction = Interaction(userId = user, kind = InteractionType.Click, note = "Annotations")
+      brandInteractionsDAO.insertNew(id, interaction)
+      interaction shouldNotEqual(None)
 
+    }
+    "get it back" in {
+
+      val id = brandDAO.insertNew(newbrand).get
+      val user = UUID.randomUUID()
+      val interaction = Interaction(userId = user, kind = InteractionType.Click, note = "Annotations")
+      brandInteractionsDAO.insertNew(id, interaction)
+      val readback=brandInteractionsDAO.getById(interaction.id).get
+      readback shouldEqual(interaction)
+    }
+    "get list of interactions" in {
+      val id = brandDAO.insertNew(newbrand).get
+      val user = UUID.randomUUID()
+      val interaction = Interaction(userId = user, kind = InteractionType.Click, note = "Annotations")
+      brandInteractionsDAO.insertNew(id, interaction)
+
+      val interaction2 = Interaction(userId = user, kind = InteractionType.Like, note = "likes")
+      brandInteractionsDAO.insertNew(id, interaction2)
+
+      val list=brandInteractionsDAO.getInteractions(id)
+      list should have size(2)
+
+    }
+    "delete interaction" in {
+      val id = brandDAO.insertNew(newbrand).get
+      val user = UUID.randomUUID()
+      val interaction = Interaction(userId = user, kind = InteractionType.Click, note = "Annotations")
+      brandInteractionsDAO.insertNew(id, interaction)
+      val list=brandInteractionsDAO.getInteractions(id)
+      list should have size(1)
+
+      brandInteractionsDAO.delete(interaction.id)
+      val list1=brandInteractionsDAO.getInteractions(id)
+      list1 should have size(0)
+
+
+    }
+  }
+
+  private def addInteraction: Interaction = {
+    val id = brandDAO.insertNew(newbrand).get
+    val user = UUID.randomUUID()
+    val interaction = Interaction(userId = user, kind = InteractionType.Click, note = "Annotations")
+    brandInteractionsDAO.insertNew(id, interaction)
+    interaction
+  }
 }

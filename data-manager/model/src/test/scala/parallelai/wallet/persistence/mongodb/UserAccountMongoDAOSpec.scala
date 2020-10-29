@@ -1,10 +1,11 @@
 package parallelai.wallet.persistence.mongodb
 
-import org.specs2.mutable.{After, Specification}
+import org.specs2.mutable.{Before, BeforeAfter, After, Specification}
 import com.github.athieriot.{CleanAfterExample, EmbedConnection}
 import com.escalatesoft.subcut.inject.NewBindingModule
 import NewBindingModule._
 import com.escalatesoft.subcut.inject.config.PropertiesConfigMapSource
+import org.specs2.specification.BeforeExample
 import parallelai.wallet.entity.{ClientApplication, UserPersonalInfo, UserAccount}
 import java.util.UUID
 import scala.concurrent.{Future, Await}
@@ -13,38 +14,27 @@ import org.specs2.time.NoTimeConversions
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class UserAccountMongoDAOSpec extends Specification with EmbedConnection with CleanAfterExample with NoTimeConversions with MongoTestUtils {
-
+class UserAccountMongoDAOSpec
+  extends Specification
+  with TestWithLocalMongoDb
+  with BeforeExample
+{
   sequential
+
+  def before = clearAll()
 
   "UserAccountMongoDAO" should {
 
-    implicit val bindingModule = newBindingModuleWithConfig(
-      Map(
-        "mongo.server.host" -> "localhost",
-        "mongo.server.port" -> s"$embedConnectionPort",
-        "mongo.db.name" -> "test",
-        "mongo.db.user" -> "",
-        "mongo.db.pwd" -> ""
-      )
-    )
-
-    val accountDAO = new UserAccountMongoDAO
-
-    val userAccount = UserAccount(UUID.randomUUID(), Some("12345678"), Some("user@email.com"))
-    val clientApplication = ClientApplication(UUID.randomUUID(), userAccount.id, "ACT_CODE")
-    val activeAccount = UserAccount(UUID.randomUUID(), Some("87654321"), Some("other.user@email.com"), active = true)
-    val activeClientApplication = ClientApplication(UUID.randomUUID(), activeAccount.id, "ACT_CODE_1", active = true)
-
-    "Save and retreive a user account" in {
+    "Save and retrieve a user account" in {
       accountDAO.insertNew(userAccount, clientApplication)
-      val findAfterInsert =accountDAO.getById(userAccount.id)
+      val findAfterInsert = accountDAO.getById(userAccount.id)
 
       findAfterInsert shouldEqual Some(userAccount)
     }
 
 
     "Find account by application ID" in {
+
       accountDAO.insertNew(userAccount, clientApplication)
       val findAfterInsert =accountDAO.getByApplicationId(clientApplication.id)
 
@@ -52,6 +42,7 @@ class UserAccountMongoDAOSpec extends Specification with EmbedConnection with Cl
     }
 
     "Don't find anything with wrong ID" in {
+      clearAll()
       accountDAO.insertNew(userAccount, clientApplication)
 
       accountDAO.getById(UUID.randomUUID()) shouldEqual None
