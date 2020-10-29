@@ -103,11 +103,11 @@ class RegistrationActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cl
     case request: AddApplicationToKnownUserRequest => replyToSender {
       registerApplication(request)
     }
-    case validation: RegistrationValidation => replyToSender {
-      validateUser(validation)
-    }
     case addApplication: AddApplicationRequest => replyToSender {
       addApplicationToUser(addApplication)
+    }
+    case validation: RegistrationValidation => replyToSender {
+      validateUser(validation)
     }
   }
 

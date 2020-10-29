@@ -53,6 +53,7 @@ class AccountServiceSpec extends ApiHttpClientSpec with RestApiSpecMatchers {
       val userAccount = UserAccount(UUID.randomUUID(), Some(msisdn), Some("email"))
 
       mockedClientApplicationDAO.getById(any[UUID]) returns None
+      mockedUserAccountDAO.getById(any[UUID]) returns Some(userAccount)
       mockedUserAccountDAO.findByAnyOf(any[Option[UUID]], any[Option[String]], any[Option[String]]) returns Some(userAccount)
 
       val applicationId = UUID.randomUUID()
