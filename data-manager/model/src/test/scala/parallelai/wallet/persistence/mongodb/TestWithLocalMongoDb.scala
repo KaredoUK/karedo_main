@@ -17,7 +17,7 @@ trait TestWithLocalMongoDb extends MongoTestUtils with NoTimeConversions {
   implicit val bindingModule = newBindingModuleWithConfig  (
     Map(
       "mongo.server.host" -> "localhost",
-      "mongo.server.port" -> "27017",
+      "mongo.server.port" -> "12345",
       "mongo.db.name" -> "test",
       "mongo.db.user" -> "",
       "mongo.db.pwd" -> ""

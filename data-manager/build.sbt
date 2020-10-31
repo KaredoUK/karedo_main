@@ -20,3 +20,12 @@ lazy val api = (project.in(file("./data-manager-api"))).dependsOn(data,model,com
 lazy val root = project.in( file(".") )
   .aggregate(data, api, model)
 
+
+testOptions in Test += Tests.Setup( () => Embedder.startMongo)
+
+testOptions in Test += Tests.Cleanup( () => println("After Tests"))
+
+TaskKey[Unit]("start-mongo") := Embedder.startMongo
+
+TaskKey[Unit]("stop-mongo") := Embedder.stopMongo
+

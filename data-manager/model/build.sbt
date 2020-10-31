@@ -26,3 +26,8 @@ scalacOptions ++= Seq(
   "-target:jvm-1.7",
   "-encoding", "UTF-8"
 )
+
+testOptions in Test += Tests.Setup( () => Embedder.startMongo)
+
+testOptions in Test += Tests.Cleanup( () => println("After Tests"))
+
