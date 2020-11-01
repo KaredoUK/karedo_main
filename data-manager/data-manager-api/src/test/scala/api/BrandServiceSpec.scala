@@ -47,7 +47,7 @@ class BrandServiceSpec
       there was one(mockedBrandDAO).insertNew(argThat(m))
     }
 
-    "PARALLELAI 95 API: Get a single brand" in new WithMockedPersistenceRestService {
+    "PARALLELAI-95: Get a single brand" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[BrandData]
 
       val brand = new Brand(UUID.randomUUID(), "brandName", "iconID", List.empty)
@@ -60,7 +60,7 @@ class BrandServiceSpec
       response shouldEqual BrandData(brand.name, brand.iconId)
     }
 
-    "PARALLELAI-68API: Deactivate Brand" in new WithMockedPersistenceRestService {
+    "PARALLELAI-68: Deactivate Brand" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[String]
 
       val brand = new Brand(UUID.randomUUID(), "brandName", "iconID", List.empty)
@@ -73,7 +73,7 @@ class BrandServiceSpec
       there was one(mockedBrandDAO).delete(brand.id)
     }
 
-    "PARALLELAI-65API: Create Ad" in new WithMockedPersistenceRestService {
+    "PARALLELAI-65: Create Ad" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[AdvertDetailResponse]
 
       val brand = new Brand(UUID.randomUUID(), "brandName", "iconID", List.empty)
@@ -102,7 +102,7 @@ class BrandServiceSpec
       )
 
     }
-    "PARALLELAI-59API: Get Next N Ads For User For Brand" in new WithMockedPersistenceRestService {
+    /*"PARALLELAI-59: Get Next N Ads For User For Brand" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[List[SuggestedAdForUsersAndBrand]]
 
       val brand = new Brand(UUID.randomUUID(), "brandName", "iconID", List.empty)
@@ -149,7 +149,7 @@ class BrandServiceSpec
 
 
     }
-
+*/
 
   }
 }
