@@ -17,36 +17,44 @@ import org.specs2.mutable.SpecificationLike
 import org.mockito.Matchers.{eq => argEq}
 
 
-class AccountServiceSpec extends ApiHttpClientSpec with RestApiSpecMatchers {
+class AccountServiceSpec
+  extends ApiHttpClientSpec // Mocked instance
+  with RestApiSpecMatchers  // specialized Matchers
+{
   import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
   import parallelai.wallet.util.SprayJsonSupport._
 
   override def responseTimeout = 30.seconds
 
   "Account Service API" should {
-    "Register a new user using MSISDN inserting a new account with validation code in the DB" in new WithMockedPersistenceRestService {
-      val pipeline = sendReceive ~> unmarshal[RegistrationResponse]
+    "PARALLELAI-77: Register a new user using MSISDN inserting a new account with validation code in the DB" in
+      new WithMockedPersistenceRestService
+      {
+        val pipeline = sendReceive ~> unmarshal[RegistrationResponse]
 
-      mockedClientApplicationDAO.getById(any[UUID]) returns None
-      mockedUserAccountDAO.findByAnyOf(any[Option[UUID]], any[Option[String]], any[Option[String]]) returns None
+        mockedClientApplicationDAO.getById(any[UUID]) returns None
+        mockedUserAccountDAO.findByAnyOf(any[Option[UUID]], any[Option[String]], any[Option[String]]) returns None
 
-      val applicationId = UUID.randomUUID()
-      val msisdn = "00123123123"
-      val registrationResponse = wait {
-        pipeline {
-          Post(s"$serviceUrl/account", RegistrationRequest(applicationId, Some(msisdn), None))
+        val applicationId = UUID.randomUUID()
+        val msisdn = "00123123123"
+        val registrationResponse = wait {
+          pipeline {
+            Post(s"$serviceUrl/account", RegistrationRequest(applicationId, Some(msisdn), None))
+          }
         }
-      }
 
-      registrationResponse shouldEqual RegistrationResponse(applicationId, "msisdn", msisdn)
+        registrationResponse shouldEqual RegistrationResponse(applicationId, "msisdn", msisdn)
 
-      there was one(mockedUserAccountDAO).insertNew(
-        userAccount = argThat( haveMsisdn(msisdn) ),
-        firstApplication = argThat( beInactive and haveActivationCode and beAnAppWithId(applicationId) )
-      )
+        there was one(mockedUserAccountDAO).insertNew(
+          userAccount = argThat( haveMsisdn(msisdn) ),
+          firstApplication = argThat(
+            beInactive and
+              haveActivationCode and
+              beAnAppWithId(applicationId) )
+        )
     }
 
-    "Add an application to an existing account" in new WithMockedPersistenceRestService {
+    "PARALLELAI-101: Add an application to an existing account" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[AddApplicationResponse]
 
       val msisdn = "00123123123"
@@ -54,7 +62,9 @@ class AccountServiceSpec extends ApiHttpClientSpec with RestApiSpecMatchers {
 
       mockedClientApplicationDAO.getById(any[UUID]) returns None
       mockedUserAccountDAO.getById(any[UUID]) returns Some(userAccount)
-      mockedUserAccountDAO.findByAnyOf(any[Option[UUID]], any[Option[String]], any[Option[String]]) returns Some(userAccount)
+      mockedUserAccountDAO.findByAnyOf(
+        any[Option[UUID]], any[Option[String]], any[Option[String]]
+      ) returns Some(userAccount)
 
       val applicationId = UUID.randomUUID()
 
@@ -70,7 +80,7 @@ class AccountServiceSpec extends ApiHttpClientSpec with RestApiSpecMatchers {
       there was one(mockedClientApplicationDAO).insertNew(ClientApplication(applicationId, userAccount.id, anyString))
     }
 
-    "Refuse registration with no MSISDN or email" in new WithMockedPersistenceRestService {
+    "PARALLELAI-77b: Refuse registration with no MSISDN or email" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive
       val registrationResponse = wait {
        pipeline {
@@ -81,7 +91,7 @@ class AccountServiceSpec extends ApiHttpClientSpec with RestApiSpecMatchers {
       registrationResponse should haveStatusCode(BadRequest)
     }
 
-    "Activate user if activationCode is correct" in new WithMockedPersistenceRestService {
+    "PARALLELAI-53: Activate user if activationCode is correct" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[RegistrationValidationResponse]
 
       val user = UserAccount(UUID.randomUUID(), Some("123123"), None)
@@ -102,7 +112,7 @@ class AccountServiceSpec extends ApiHttpClientSpec with RestApiSpecMatchers {
       there was one(mockedUserAccountDAO).setActive( argEq(user.id) )
     }
 
-    "Refuse wrong activationCode" in new WithMockedPersistenceRestService {
+    "PARALLELAI-53b: Refuse wrong activationCode" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive
 
       val user = UserAccount(UUID.randomUUID(), Some("123123"), None)
@@ -122,4 +132,5 @@ class AccountServiceSpec extends ApiHttpClientSpec with RestApiSpecMatchers {
       there was no(mockedUserAccountDAO).setActive( any[UUID] )
     }
   }
+
 }

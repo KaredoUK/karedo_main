@@ -1,8 +1,9 @@
 package api
 
 import com.parallelai.wallet.datamanager.data._
+import org.specs2.matcher.Matcher
 import org.specs2.mutable.Specification
-import parallelai.wallet.entity.{Hint, SuggestedAdForUsersAndBrandModel, Brand, AdvertisementDetail}
+import parallelai.wallet.entity._
 import spray.client.pipelining._
 import util.{ RestApiSpecMatchers, ApiHttpClientSpec }
 import java.util.UUID
@@ -14,24 +15,36 @@ import java.util.Date
 import org.joda.time.DateTime
 
 @RunWith(classOf[JUnitRunner])
-class BrandServiceSpec extends ApiHttpClientSpec with RestApiSpecMatchers {
+class BrandServiceSpec
+  extends ApiHttpClientSpec
+  with RestApiSpecMatchers
+{
   import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
   import parallelai.wallet.util.SprayJsonSupport._
 
   override def responseTimeout = 30.seconds
 
   "Brand Service" should {
-    "PARALLELAI-67API: Create Brand" in new WithMockedPersistenceRestService {
+    "PARALLELAI-67: Create Brand" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[BrandResponse]
 
       val newBrandUUID = UUID.randomUUID()
       mockedBrandDAO.insertNew(any[Brand]) returns Some(newBrandUUID)
+      val data: BrandData = BrandData("brand X", "iconID")
 
       val response = wait(pipeline {
-        Post(s"$serviceUrl/brand", BrandData("brand X", "iconID"))
+        Post(s"$serviceUrl/brand", data)
       })
 
       response shouldEqual BrandResponse(newBrandUUID)
+
+      def m: Matcher[Brand] =
+        ({b: Brand =>
+          b.name == data.name && b.iconId == data.iconId
+        },
+          s"Brand should have been inserted with values")
+
+      there was one(mockedBrandDAO).insertNew(argThat(m))
     }
 
     "PARALLELAI 95 API: Get a single brand" in new WithMockedPersistenceRestService {

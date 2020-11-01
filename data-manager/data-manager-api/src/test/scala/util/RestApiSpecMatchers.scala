@@ -11,12 +11,23 @@ import spray.http.{HttpResponse, StatusCode}
 trait RestApiSpecMatchers {
   self : SpecificationLike =>
 
-  val beInactive: Matcher[ClientApplication] = ({ app: ClientApplication => ! app.active },  "App should be inactive" )
-  val haveActivationCode: Matcher[ClientApplication] = ({ app: ClientApplication => StringUtils.isNotEmpty(app.activationCode) },  "App should have a validation code" )
+  val beInactive: Matcher[ClientApplication] =
+    ({ app: ClientApplication => ! app.active },
+      "App should be inactive" )
+
+  val haveActivationCode: Matcher[ClientApplication] =
+    ({ app: ClientApplication => StringUtils.isNotEmpty(app.activationCode) },
+      "App should have a validation code" )
+
   def beAnAppWithId(applicationId: UUID): Matcher[ClientApplication] =
-    ({ app: ClientApplication => app.id == applicationId },  s"App should have a applicationId == $applicationId" )
+    ({ app: ClientApplication => app.id == applicationId },
+      s"App should have an applicationId == $applicationId" )
 
-  def haveMsisdn(msisdn: String): Matcher[UserAccount] = ({user: UserAccount => user.msisdn == Some(msisdn) }, s"User msisdn should be Some($msisdn)")
+  def haveMsisdn(msisdn: String): Matcher[UserAccount] =
+    ({user: UserAccount => user.msisdn == Some(msisdn) },
+      s"User msisdn should be Some($msisdn)")
 
-  def haveStatusCode(statusCode: StatusCode): Matcher[HttpResponse] = ({response: HttpResponse => response.status == statusCode }, s"HttpResponse should have status code $statusCode")
+  def haveStatusCode(statusCode: StatusCode): Matcher[HttpResponse] =
+    ({response: HttpResponse => response.status == statusCode },
+      s"HttpResponse should have status code $statusCode")
 }
