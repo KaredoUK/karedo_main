@@ -49,6 +49,8 @@ object RegistrationActor {
 
   case object InvalidValidationCode extends RegistrationError
 
+  case class InvalidValidationRequest(reason: String) extends RegistrationError
+
   case class InternalRegistrationError(throwable: Throwable) extends RegistrationError
 
   implicit object registrationErrorJsonFormat extends RootJsonWriter[RegistrationError] {
@@ -57,7 +59,7 @@ object RegistrationActor {
       case UserAlreadyRegistered => JsString("UserAlreadyRegistered")
       case InvalidValidationCode => JsString("InvalidValidationCode")
       case InvalidRegistrationRequest(reason) => JsObject(
-        "type" -> JsString("InvalidRequest"),
+        "type" -> JsString("InvalidRegistrationRequest"),
         "data" -> JsObject {
           "reason" -> JsString(reason)
         }
@@ -68,6 +70,12 @@ object RegistrationActor {
           "errorClass" -> JsString(throwable.getClass.getName),
           "errorMessage" -> JsString(throwable.getMessage)
         )
+      )
+      case InvalidValidationRequest(reason) => JsObject(
+        "type" -> JsString("InvalidValidationRequest"),
+        "data" -> JsObject {
+          "reason" -> JsString(reason)
+        }
       )
     }
 
@@ -176,51 +184,64 @@ class RegistrationActor(
 
   def registerApplication(registrationRequest: AddApplicationToKnownUserRequest): ResponseWithFailure[RegistrationError, RegistrationResponse] =
     withValidations(registrationRequest)(applicationNotRegistered) { request =>
-      wrapLog("registerApplication",request) {
-        userAccountDAO.getById(request.accountId) match {
-          case None => FailureResponse(InvalidRegistrationRequest(s"User with ID ${registrationRequest.accountId} doesn't exist"))
 
-          case Some(userAccount) =>
-            val activationCode = newActivationCode
+      userAccountDAO.getById(request.accountId) match {
+        case None => FailureResponse(InvalidRegistrationRequest(s"User with ID ${registrationRequest.accountId} doesn't exist"))
 
-            clientApplicationDAO.insertNew(ClientApplication(registrationRequest.applicationId, registrationRequest.accountId, activationCode))
+        case Some(userAccount) =>
+          val activationCode = newActivationCode
 
-            activateApplication(
-              registrationRequest.applicationId,
-              userAccount.id,
-              UserContacts(userAccount.email, userAccount.msisdn),
-              activationCode
-            )
-        }
+          clientApplicationDAO.insertNew(ClientApplication(registrationRequest.applicationId, registrationRequest.accountId, activationCode))
+
+          activateApplication(
+            registrationRequest.applicationId,
+            userAccount.id,
+            UserContacts(userAccount.email, userAccount.msisdn),
+            activationCode
+          )
       }
     }
 
   def validateUser(validation: RegistrationValidation): ResponseWithFailure[RegistrationError, RegistrationValidationResponse] = {
+    val clientAppOption = clientApplicationDAO.getById(validation.applicationId)
 
-    wrapLog("validateUser",validation) {
-      val clientAppOption = clientApplicationDAO.getById(validation.applicationId)
+    clientAppOption match {
+      case None => FailureResponse(InvalidRegistrationRequest(s"Unable to find client application with ID '${validation.applicationId}'"))
 
-      clientAppOption match {
-        case None => FailureResponse(InvalidRegistrationRequest(s"Unable to find client application with ID '${validation.applicationId}'"))
+      case Some(clientApplication) =>
+        // I don't care if the user validates twice. I just check the validation code
+        if (clientApplication.activationCode == validation.validationCode) {
+          val userOpt = userAccountDAO.getByApplicationId(validation.applicationId)
 
-        case Some(clientApplication) =>
-          // I don't care if the user validates twice. I just check the validation code
-          if (clientApplication.activationCode == validation.validationCode) {
-            val userOpt = userAccountDAO.getByApplicationId(validation.applicationId)
-
-            userOpt map { user =>
+          userOpt map { user =>
+            def saveValidationInfo = {
               clientApplicationDAO.update(clientApplication copy (active = true))
               userAccountDAO.setActive(user.id)
 
               SuccessResponse(RegistrationValidationResponse(validation.applicationId, user.id))
-            } getOrElse {
-              FailureResponse(InternalRegistrationError(new IllegalStateException(s"Unable to find user for valid application ID '${validation.applicationId}'")))
             }
-          } else {
-            FailureResponse(InvalidValidationCode)
+
+            (user.password, validation.password) match {
+              case (Some(_), None) =>
+                log.debug("Successfully validating user with an already set password")
+                saveValidationInfo
+              case (Some(_), Some(_)) =>
+                log.warning("Successfully validating user with an already set password, a pwd has been provided by client. IGNORING IT")
+                saveValidationInfo
+              case (None, Some(password)) =>
+                userAccountDAO.setPassword(user.id, password)
+                saveValidationInfo
+              case (None, None) =>
+                FailureResponse(InvalidValidationRequest("Missing password for a new user validation"))
+            }
+          } getOrElse {
+            FailureResponse(InternalRegistrationError(new IllegalStateException(s"Unable to find user for valid application ID '${validation.applicationId}'")))
           }
-      }
+        } else {
+          FailureResponse(InvalidValidationCode)
+        }
     }
+
   }
 
   private def activateApplication(applicationId: ApplicationID,

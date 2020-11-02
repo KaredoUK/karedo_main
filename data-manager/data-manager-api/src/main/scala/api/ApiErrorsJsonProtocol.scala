@@ -16,6 +16,7 @@ trait ApiErrorsJsonProtocol extends DefaultJsonFormats {
       case ApplicationAlreadyRegistered => BadRequest
       case UserAlreadyRegistered => BadRequest
       case InvalidValidationCode => Unauthorized
+      case InvalidValidationRequest(_) => BadRequest
       case InternalRegistrationError(_) => InternalServerError
     }
   }
