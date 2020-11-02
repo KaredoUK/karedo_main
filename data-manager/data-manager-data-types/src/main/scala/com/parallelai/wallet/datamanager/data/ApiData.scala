@@ -27,6 +27,12 @@ trait WithUserContacts {
 case class RegistrationRequest(applicationId: ApplicationID, msisdn: Option[String], email: Option[String])
   extends WithUserContacts with ApiDataRequest
 
+case class APILoginRequest(password: String)
+  extends ApiDataRequest
+
+case class APISessionResponse(sessionId: String)
+  extends ApiDataResponse
+
 case class AddApplicationRequest(applicationId: ApplicationID, msisdn: Option[String], email: Option[String])
   extends WithUserContacts with ApiDataRequest
 
@@ -52,6 +58,7 @@ case class UserProfile(info: UserInfo, settings: UserSettings, totalPoints: Long
 
 case class UserPoints(userId: UserID, totalPoints: Long)
 
+case class LoginRequest(accountId: UserID, applicationId: UUID, password: String)
 
 case class UserContacts(email: Option[String], msisdn: Option[String]) extends WithUserContacts
 

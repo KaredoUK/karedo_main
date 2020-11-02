@@ -1,6 +1,6 @@
 from common import *
 import unittest, json
-
+import re
 #
 # This is testing many things in the
 # "User Profile" section contained in
@@ -125,6 +125,18 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(r.status_code, 200)
         found=ua.find_one({ "email" : "pakkio@gmail.com" })
         self.assertEqual(found,None)
+
+
+    def test102_login(self):
+        global userId, applicationId
+        title("PARALLELAI-102: login")
+        r=post("account/"+userId+"/application/"+applicationId+"/login",{ "password" : "fakepwd"})
+        self.assertEqual(r.status_code, 200)
+        js=json.loads(r.text)
+
+        compiled=re.compile("[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}")
+        self.assertTrue(compiled.match(js["sessionId"]),"not a valid UUID")
+
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestAccount)

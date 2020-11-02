@@ -82,11 +82,18 @@ object RegistrationActor {
 }
 
 /**
- * Registers the users. Replies with
+ * Registers the users.
  */
-class RegistrationActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: ClientApplicationDAO,
-                        messengerActor: ActorRef)(implicit val bindingModule: BindingModule)
-  extends Actor with ActorLogging with Injectable with RequestValidationChaining {
+class RegistrationActor(
+      userAccountDAO: UserAccountDAO,
+      clientApplicationDAO: ClientApplicationDAO,
+      messengerActor: ActorRef)
+      (implicit val bindingModule: BindingModule)
+  extends Actor
+  with ActorLogging
+  with Injectable
+  with RequestValidationChaining
+{
 
   import RegistrationActor._
 
@@ -109,102 +116,132 @@ class RegistrationActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cl
     case validation: RegistrationValidation => replyToSender {
       validateUser(validation)
     }
+    case loginRequest: LoginRequest => replyToSender {
+      loginUser(loginRequest)
+    }
+  }
+
+  def wrapLog[S,T](method:String,input:S)(block : => T):T =
+  {
+    log.info(s">>> {$method} Input {$input}")
+    val ret=block
+
+    log.info(s"<<< {$method} Returning {$ret}")
+    ret
+  }
+
+  def loginUser(loginRequest: LoginRequest): ResponseWithFailure[RegistrationError,APISessionResponse] =
+  {
+    wrapLog("loginUser",loginRequest){
+      val sessionid=UUID.randomUUID().toString
+      SuccessResponse(APISessionResponse(sessionid))
+    }
+
   }
 
   def registerUser(registrationRequest: RegistrationRequest): ResponseWithFailure[RegistrationError, RegistrationResponse] =
     withValidations(registrationRequest)(validUserIdentification, applicationNotRegistered, noActiveAccountForMsisdnOrEmail) { request =>
 
-      log.debug("Creating new account for request {}", request)
-      val account = UserAccount(id = UUID.randomUUID(), email = request.email, msisdn = request.msisdn)
+      wrapLog("registerUser",request) {
+        val account = UserAccount(id = UUID.randomUUID(), email = request.email, msisdn = request.msisdn)
 
-      val activationCode = newActivationCode
+        val activationCode = newActivationCode
 
-      val firstApplication = ClientApplication(request.applicationId, account.id, activationCode)
+        val firstApplication = ClientApplication(request.applicationId, account.id, activationCode)
 
-      userAccountDAO.insertNew(account, firstApplication)
+        userAccountDAO.insertNew(account, firstApplication)
 
-      activateApplication(request.applicationId, account.id, request, activationCode)
+        activateApplication(request.applicationId, account.id, request, activationCode)
+      }
     }
 
   def addApplicationToUser(addApplicationRequest: AddApplicationRequest): ResponseWithFailure[RegistrationError, AddApplicationResponse] =
     withValidations(addApplicationRequest)(validUserIdentification, applicationNotRegistered) { request =>
-      log.debug("Adding new application to user for request {}", request)
+      wrapLog("addApplicationToUser",request) {
 
-      userAccountDAO.findByAnyOf(None, request.msisdn, request.email) match {
-        case None =>
-          log.debug("Cannot find any user with specified params {}", request)
-          FailureResponse(InvalidRegistrationRequest("Unable to find user with specified identification"))
+        userAccountDAO.findByAnyOf(None, request.msisdn, request.email) match {
+          case None =>
+            log.debug("Cannot find any user with specified params {}", request)
+            FailureResponse(InvalidRegistrationRequest("Unable to find user with specified identification"))
 
-        case Some(userAccount) =>
-          log.debug("Adding new application {} to account {}", request.applicationId, userAccount.id)
-          val registrationResponse = registerApplication(AddApplicationToKnownUserRequest(request.applicationId, userAccount.id))
+          case Some(userAccount) =>
+            log.debug("Adding new application {} to account {}", request.applicationId, userAccount.id)
+            val registrationResponse = registerApplication(AddApplicationToKnownUserRequest(request.applicationId, userAccount.id))
 
-          registrationResponse map { resp => AddApplicationResponse(resp.applicationId, resp.channel, resp.address)  }
+            registrationResponse map { resp => AddApplicationResponse(resp.applicationId, resp.channel, resp.address)}
+        }
       }
   }
 
 
   def registerApplication(registrationRequest: AddApplicationToKnownUserRequest): ResponseWithFailure[RegistrationError, RegistrationResponse] =
     withValidations(registrationRequest)(applicationNotRegistered) { request =>
+      wrapLog("registerApplication",request) {
+        userAccountDAO.getById(request.accountId) match {
+          case None => FailureResponse(InvalidRegistrationRequest(s"User with ID ${registrationRequest.accountId} doesn't exist"))
 
-      userAccountDAO.getById(request.accountId) match {
-        case None => FailureResponse(InvalidRegistrationRequest(s"User with ID ${registrationRequest.accountId} doesn't exist"))
+          case Some(userAccount) =>
+            val activationCode = newActivationCode
 
-        case Some(userAccount) =>
-          val activationCode = newActivationCode
+            clientApplicationDAO.insertNew(ClientApplication(registrationRequest.applicationId, registrationRequest.accountId, activationCode))
 
-          clientApplicationDAO.insertNew(ClientApplication(registrationRequest.applicationId, registrationRequest.accountId, activationCode))
-
-          activateApplication(
-            registrationRequest.applicationId,
-            userAccount.id,
-            UserContacts(userAccount.email, userAccount.msisdn),
-            activationCode
-          )
+            activateApplication(
+              registrationRequest.applicationId,
+              userAccount.id,
+              UserContacts(userAccount.email, userAccount.msisdn),
+              activationCode
+            )
+        }
       }
     }
 
   def validateUser(validation: RegistrationValidation): ResponseWithFailure[RegistrationError, RegistrationValidationResponse] = {
-    val clientAppOption = clientApplicationDAO.getById(validation.applicationId)
 
-    clientAppOption match {
-      case None => FailureResponse(InvalidRegistrationRequest(s"Unable to find client application with ID '${validation.applicationId}'"))
+    wrapLog("validateUser",validation) {
+      val clientAppOption = clientApplicationDAO.getById(validation.applicationId)
 
-      case Some(clientApplication) =>
-        // I don't care if the user validates twice. I just check the validation code
-        if (clientApplication.activationCode == validation.validationCode) {
-          val userOpt = userAccountDAO.getByApplicationId(validation.applicationId)
+      clientAppOption match {
+        case None => FailureResponse(InvalidRegistrationRequest(s"Unable to find client application with ID '${validation.applicationId}'"))
 
-          userOpt map { user =>
-            clientApplicationDAO.update(clientApplication copy (active = true))
-            userAccountDAO.setActive(user.id)
+        case Some(clientApplication) =>
+          // I don't care if the user validates twice. I just check the validation code
+          if (clientApplication.activationCode == validation.validationCode) {
+            val userOpt = userAccountDAO.getByApplicationId(validation.applicationId)
 
-            SuccessResponse(RegistrationValidationResponse(validation.applicationId, user.id))
-          } getOrElse {
-            FailureResponse(InternalRegistrationError(new IllegalStateException(s"Unable to find user for valid application ID '${validation.applicationId}'")))
+            userOpt map { user =>
+              clientApplicationDAO.update(clientApplication copy (active = true))
+              userAccountDAO.setActive(user.id)
+
+              SuccessResponse(RegistrationValidationResponse(validation.applicationId, user.id))
+            } getOrElse {
+              FailureResponse(InternalRegistrationError(new IllegalStateException(s"Unable to find user for valid application ID '${validation.applicationId}'")))
+            }
+          } else {
+            FailureResponse(InvalidValidationCode)
           }
-        } else {
-          FailureResponse(InvalidValidationCode)
-        }
+      }
     }
-
   }
 
-  private def activateApplication(applicationId: ApplicationID, accountId: UserID, userContacts: WithUserContacts, validationCode: String): ResponseWithFailure[RegistrationError, RegistrationResponse] = {
-    log.info("activateApplication: Validation code for registration request of application {} is '{}'", applicationId, validationCode)
+  private def activateApplication(applicationId: ApplicationID,
+                                  accountId: UserID,
+                                  userContacts: WithUserContacts,
+                                  validationCode: String): ResponseWithFailure[RegistrationError, RegistrationResponse] =
+  {
+    wrapLog("activateApplication",(applicationId, validationCode)) {
 
-    val activationMessage = s"Welcome to Karedo, your activation code is $validationCode. " +
-      s"Please click on $uiServerAddress/confirmActivation?applicationId=$applicationId&activationCode=$validationCode"
+      val activationMessage = s"Welcome to Karedo, your activation code is $validationCode. " +
+        s"Please click on $uiServerAddress/confirmActivation?applicationId=$applicationId&activationCode=$validationCode"
 
-    if (userContacts.msisdn.isDefined) {
-      messengerActor ! SendMessage(URI.create(s"sms:${userContacts.msisdn.get}"), activationMessage)
-      SuccessResponse(RegistrationResponse(applicationId, "msisdn", userContacts.msisdn.get))
+      if (userContacts.msisdn.isDefined) {
+        messengerActor ! SendMessage(URI.create(s"sms:${userContacts.msisdn.get}"), activationMessage)
+        SuccessResponse(RegistrationResponse(applicationId, "msisdn", userContacts.msisdn.get))
+      }
+      else {
+        messengerActor ! SendMessage(URI.create(s"mailto:${userContacts.email.get}"), activationMessage, "Welcome to Karedo")
+        SuccessResponse(RegistrationResponse(applicationId, "email", userContacts.email.get))
+      }
     }
-    else {
-      messengerActor ! SendMessage(URI.create(s"mailto:${userContacts.email.get}"), activationMessage, "Welcome to Karedo")
-      SuccessResponse(RegistrationResponse(applicationId, "email", userContacts.email.get))
-    }
-
   }
 
   def replyToSender[T <: Any](response: => ResponseWithFailure[RegistrationError, T]): Unit = {
