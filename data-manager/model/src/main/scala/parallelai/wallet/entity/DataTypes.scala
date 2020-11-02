@@ -25,7 +25,8 @@ case class UserAccount(id: UUID, msisdn: Option[String], email: Option[String],
                        settings: AccountSettings = defaultAccountSettings,
                        active: Boolean = false,
                        totalPoints: Long = 0,
-                       subscribedBrands: List[UUID] = List())
+                       subscribedBrands: List[UUID] = List(),
+                       password: Option[String] = None)
 
 case class UserAds(userId: UUID, readAds: Set[UUID])
 

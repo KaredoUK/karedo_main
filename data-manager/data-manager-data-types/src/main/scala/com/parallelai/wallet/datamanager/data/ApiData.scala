@@ -30,7 +30,7 @@ case class RegistrationRequest(applicationId: ApplicationID, msisdn: Option[Stri
 case class AddApplicationRequest(applicationId: ApplicationID, msisdn: Option[String], email: Option[String])
   extends WithUserContacts with ApiDataRequest
 
-case class RegistrationValidation(applicationId: ApplicationID, validationCode: String)
+case class RegistrationValidation(applicationId: ApplicationID, validationCode: String, password: Option[String] = None)
   extends ApiDataRequest
 
 case class RegistrationResponse(applicationId: ApplicationID, channel: String, address: String)

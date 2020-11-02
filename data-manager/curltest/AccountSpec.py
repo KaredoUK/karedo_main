@@ -30,7 +30,7 @@ class TestAccount(unittest.TestCase):
         activationCode = doc["applications"][0]["activationCode"]
 
         title("PARALLELAI-53API: Validate/Activate Account Application")
-        r = post("account/application/validation", {"applicationId": applicationId, "validationCode": activationCode})
+        r = post("account/application/validation", {"applicationId": applicationId, "validationCode": activationCode, "password": "newPass"})
 
         self.assertEqual(r.status_code, 200)
 

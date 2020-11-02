@@ -26,10 +26,9 @@ class AccountServiceSpec
 
   override def responseTimeout = 30.seconds
 
-  "Account Service API" should {
-    "PARALLELAI-77: Register a new user using MSISDN inserting a new account with validation code in the DB" in
-      new WithMockedPersistenceRestService
-      {
+  "PARALLELAI-77:Account Service API" should {
+    " Register a new user using MSISDN inserting a new account with validation code in the DB" in
+      new WithMockedPersistenceRestService {
         val pipeline = sendReceive ~> unmarshal[RegistrationResponse]
 
         mockedClientApplicationDAO.getById(any[UUID]) returns None
@@ -46,15 +45,28 @@ class AccountServiceSpec
         registrationResponse shouldEqual RegistrationResponse(applicationId, "msisdn", msisdn)
 
         there was one(mockedUserAccountDAO).insertNew(
-          userAccount = argThat( haveMsisdn(msisdn) ),
+          userAccount = argThat(haveMsisdn(msisdn)),
           firstApplication = argThat(
             beInactive and
               haveActivationCode and
-              beAnAppWithId(applicationId) )
+              beAnAppWithId(applicationId))
         )
-    }
+      }
 
-    "PARALLELAI-101: Add an application to an existing account" in new WithMockedPersistenceRestService {
+    "Refuse registration with no MSISDN or email" in new WithMockedPersistenceRestService {
+      val pipeline = sendReceive
+      val registrationResponse = wait {
+        pipeline {
+          Post(s"$serviceUrl/account", RegistrationRequest(UUID.randomUUID(), None, None))
+        }
+      }
+
+      registrationResponse should haveStatusCode(BadRequest)
+    }
+  }
+
+  "PARALLELAI-101: Account Service API" should {
+    "Add an application to an existing account" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[AddApplicationResponse]
 
       val msisdn = "00123123123"
@@ -76,22 +88,13 @@ class AccountServiceSpec
 
       registrationResponse shouldEqual AddApplicationResponse(applicationId, "msisdn", msisdn)
 
-      there was no(mockedUserAccountDAO).insertNew( any[UserAccount], any[ClientApplication] )
+      there was no(mockedUserAccountDAO).insertNew(any[UserAccount], any[ClientApplication])
       there was one(mockedClientApplicationDAO).insertNew(ClientApplication(applicationId, userAccount.id, anyString))
     }
+  }
 
-    "PARALLELAI-77b: Refuse registration with no MSISDN or email" in new WithMockedPersistenceRestService {
-      val pipeline = sendReceive
-      val registrationResponse = wait {
-       pipeline {
-          Post(s"$serviceUrl/account", RegistrationRequest(UUID.randomUUID(), None, None))
-        }
-      }
-
-      registrationResponse should haveStatusCode(BadRequest)
-    }
-
-    "PARALLELAI-53: Activate user if activationCode is correct" in new WithMockedPersistenceRestService {
+  "PARALLELAI-53: Account Service API" should {
+    "Activate user if activationCode is correct" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[RegistrationValidationResponse]
 
       val user = UserAccount(UUID.randomUUID(), Some("123123"), None)
@@ -103,7 +106,7 @@ class AccountServiceSpec
 
       val validationResponse = wait {
         pipeline {
-          Post(s"$serviceUrl/account/application/validation", RegistrationValidation(clientApplication.id, "activationCode"))
+          Post(s"$serviceUrl/account/application/validation", RegistrationValidation(clientApplication.id, "activationCode", Some("pwd")))
         }
       }
 
@@ -112,7 +115,7 @@ class AccountServiceSpec
       there was one(mockedUserAccountDAO).setActive( argEq(user.id) )
     }
 
-    "PARALLELAI-53b: Refuse wrong activationCode" in new WithMockedPersistenceRestService {
+    "Refuse wrong activationCode" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive
 
       val user = UserAccount(UUID.randomUUID(), Some("123123"), None)
@@ -123,7 +126,7 @@ class AccountServiceSpec
 
       val validationResponse = wait {
         pipeline {
-          Post(s"$serviceUrl/account/application/validation", RegistrationValidation(clientApplication.id, "wrongActivationCode"))
+          Post(s"$serviceUrl/account/application/validation", RegistrationValidation(clientApplication.id, "wrongActivationCode", Some("pwd")))
         }
       }
 
@@ -131,6 +134,63 @@ class AccountServiceSpec
 
       there was no(mockedUserAccountDAO).setActive( any[UUID] )
     }
+
+    "Save password for a newly activated user " in new WithMockedPersistenceRestService {
+      val pipeline = sendReceive ~> unmarshal[RegistrationValidationResponse]
+
+      val user = UserAccount(id = UUID.randomUUID(), msisdn = Some("123123"), email = None, password = None)
+      val clientApplication = ClientApplication(UUID.randomUUID, user.id, "activationCode")
+
+
+      mockedClientApplicationDAO.getById(any[UUID]) returns Some(clientApplication)
+      mockedUserAccountDAO.getByApplicationId(any[UUID], any[Boolean]) returns Some(user)
+
+      val validationResponse = wait {
+        pipeline {
+          Post(s"$serviceUrl/account/application/validation", RegistrationValidation(clientApplication.id, "activationCode", Some("pwd")))
+        }
+      }
+
+      there was one(mockedUserAccountDAO).setPassword( argEq(user.id), argEq("pwd") )
+    }
+
+    "Ignore password for a user with an already set one" in new WithMockedPersistenceRestService {
+      val pipeline = sendReceive ~> unmarshal[RegistrationValidationResponse]
+
+      val user = UserAccount(id = UUID.randomUUID(), msisdn = Some("123123"), email = None, password = Some("pwd"))
+      val clientApplication = ClientApplication(UUID.randomUUID, user.id, "activationCode")
+
+
+      mockedClientApplicationDAO.getById(any[UUID]) returns Some(clientApplication)
+      mockedUserAccountDAO.getByApplicationId(any[UUID], any[Boolean]) returns Some(user)
+
+      val validationResponse = wait {
+        pipeline {
+          Post(s"$serviceUrl/account/application/validation", RegistrationValidation(clientApplication.id, "activationCode", Some("pwd")))
+        }
+      }
+
+      there was no(mockedUserAccountDAO).setPassword( argEq(user.id), anyString )
+    }
+
+    "Fail if no password is supplied for a newly activated user " in new WithMockedPersistenceRestService {
+      val pipeline = sendReceive
+
+      val user = UserAccount(id = UUID.randomUUID(), msisdn = Some("123123"), email = None, password = None)
+      val clientApplication = ClientApplication(UUID.randomUUID, user.id, "activationCode")
+
+      mockedClientApplicationDAO.getById(any[UUID]) returns Some(clientApplication)
+      mockedUserAccountDAO.getByApplicationId(any[UUID], any[Boolean]) returns Some(user)
+
+      val validationResponse = wait {
+        pipeline {
+          Post(s"$serviceUrl/account/application/validation", RegistrationValidation(clientApplication.id, "activationCode", None))
+        }
+      }
+
+      validationResponse.status shouldEqual StatusCodes.BadRequest
+    }
+
   }
 
 }
