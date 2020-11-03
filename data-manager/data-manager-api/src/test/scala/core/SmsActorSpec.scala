@@ -24,10 +24,14 @@ import util._
 import scala.concurrent.duration._
 import scala.util.Random
 
-class SmsActorSpec extends TestKit(ActorSystem()) with SpecificationLike with Core
-  with ImplicitSender with ThrownExpectations with NoTimeConversions {
-
-
+class SmsActorSpec
+  extends TestKit(ActorSystem())
+  with SpecificationLike
+  with Core
+  with ImplicitSender
+  with ThrownExpectations
+  with NoTimeConversions
+{
 
   trait WithWireMockServer extends After {
     lazy val mockServiceListeningPort = 30000 + Random.nextInt(3000)
@@ -36,6 +40,7 @@ class SmsActorSpec extends TestKit(ActorSystem()) with SpecificationLike with Co
         Map(
           "notification.sms.auth.user" -> "user",
           "notification.sms.auth.pwd" -> "pwd",
+          "notification.sms.auth.accesskey" -> "dummy",
           "notification.sms.server.endpoint" -> s"http://localhost:$mockServiceListeningPort/smsEndpoint",
           "notification.sms.sender" -> "sender"
         )
@@ -62,16 +67,17 @@ class SmsActorSpec extends TestKit(ActorSystem()) with SpecificationLike with Co
   "SMS actor should" >> {
 
     "Request SMS delivery to textmarketer.co.uk" in new WithWireMockServer {
-      givenThat {
-        get(urlMatching("/smsEndpoint.*")) willReturn (aResponse withStatus (SC_OK))
-      }
+      stubFor(post(urlMatching("/smsEndpoint.*")) willReturn (aResponse withStatus (SC_OK)))
+     /* givenThat {
+        post(urlMatching("/smsEndpoint.*")) willReturn (aResponse withStatus (SC_OK))
+      }*/
 
       smsActor ! SendSMS("4412345", "message")
 
 
       withinTimeout(1.minutes) {
 
-        val loggedRequests = findAll(getRequestedFor(urlMatching("/smsEndpoint.*")))
+        val loggedRequests = findAll(postRequestedFor(urlMatching("/smsEndpoint.*")))
 
         loggedRequests should haveSize(1)
 

@@ -135,22 +135,7 @@ class AccountServiceSpec
       there was no(mockedUserAccountDAO).setActive( any[UUID] )
     }
 
-    "PARALLELAI-102: login" in new WithMockedPersistenceRestService {
 
-      val pipeline = sendReceive ~> unmarshal[APISessionResponse]
-
-      val user = UserAccount(UUID.randomUUID(), Some("123123"), None)
-      val clientApplication = ClientApplication(UUID.randomUUID, user.id, "activationCode")
-
-
-      val loginResponse = wait {
-        pipeline {
-          Post(s"$serviceUrl/account/${user.id}/application/${clientApplication.id}/login", APILoginRequest(password="password"))
-        }
-      }
-      UUID.fromString(loginResponse.sessionId).toString shouldEqual loginResponse.sessionId
-
-    }
 
     "Save password for a newly activated user " in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[RegistrationValidationResponse]
@@ -207,6 +192,22 @@ class AccountServiceSpec
 
       validationResponse.status shouldEqual StatusCodes.BadRequest
     }
+
+  }
+  "PARALLELAI-102: login" in new WithMockedPersistenceRestService {
+
+    val pipeline = sendReceive ~> unmarshal[APISessionResponse]
+
+    val user = UserAccount(UUID.randomUUID(), Some("123123"), None)
+    val clientApplication = ClientApplication(UUID.randomUUID, user.id, "activationCode")
+
+
+    val loginResponse = wait {
+      pipeline {
+        Post(s"$serviceUrl/account/${user.id}/application/${clientApplication.id}/login", APILoginRequest(password="password"))
+      }
+    }
+    UUID.fromString(loginResponse.sessionId).toString shouldEqual loginResponse.sessionId
 
   }
 
