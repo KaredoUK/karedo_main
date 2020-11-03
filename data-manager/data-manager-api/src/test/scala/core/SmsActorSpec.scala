@@ -24,6 +24,8 @@ import util._
 import scala.concurrent.duration._
 import scala.util.Random
 
+
+
 class SmsActorSpec
   extends TestKit(ActorSystem())
   with SpecificationLike
@@ -49,16 +51,13 @@ class SmsActorSpec
 
     var smsActor = system.actorOf(SMSActor.props)
 
-    var wireMockServer : WireMockServer = null
-    wireMockServer = new WireMockServer(wireMockConfig().port(mockServiceListeningPort));
+    val wireMockServer = new WireMockServer(wireMockConfig().port(mockServiceListeningPort));
     wireMockServer.start();
 
     WireMock.configureFor("localhost", mockServiceListeningPort);
 
 
-    def after =
-      if(wireMockServer != null)
-        wireMockServer.stop()
+    def after = wireMockServer.stop()
   }
 
 
@@ -68,28 +67,25 @@ class SmsActorSpec
 
     "Request SMS delivery to textmarketer.co.uk" in new WithWireMockServer {
       stubFor(post(urlMatching("/smsEndpoint.*")) willReturn (aResponse withStatus (SC_OK)))
-     /* givenThat {
-        post(urlMatching("/smsEndpoint.*")) willReturn (aResponse withStatus (SC_OK))
-      }*/
 
       smsActor ! SendSMS("4412345", "message")
 
 
       withinTimeout(1.minutes) {
 
-        val loggedRequests = findAll(postRequestedFor(urlMatching("/smsEndpoint.*")))
+        val loggedRequests = findAll(postRequestedFor(urlMatching("/.*")))
 
         loggedRequests should haveSize(1)
 
-        val parameters = extractQueryParams(loggedRequests.head.getUrl)
+        val expected = """{
+  "recipients": "4412345",
+  "originator": "sender",
+  "body": "message"
+}"""
+        loggedRequests.head.getBodyAsString shouldEqual (expected)
 
-        parameters shouldEqual Map(
-          "username" -> "user",
-          "password" -> "pwd",
-          "orig" -> "sender",
-          "message" -> "message",
-          "to" -> "4412345"
-        )
+
+
       }
     }
   }

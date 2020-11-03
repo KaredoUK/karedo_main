@@ -29,3 +29,4 @@ TaskKey[Unit]("start-mongo") := Embedder.startMongo
 
 TaskKey[Unit]("stop-mongo") := Embedder.stopMongo
 
+libraryDependencies += "net.databinder.dispatch" %% "dispatch-core" % "0.11.2"
