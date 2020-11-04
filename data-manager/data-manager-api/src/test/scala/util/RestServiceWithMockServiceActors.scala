@@ -19,7 +19,12 @@ class RestServiceWithMockServiceActors(
   override val other: ActorRef,
   override val media: ActorRef,
   override val registration: ActorRef
-) extends Injectable with BootedCore with ServiceActors with MessageActors with Api with Web {
+) extends Injectable
+  with BootedCore
+  with ServiceActors
+  with MessageActors
+  with Api with Web
+{
   // Define The Configuration for the tests
   implicit def configProvider = AppConfigPropertySource(
     ConfigFactory.parseString(
