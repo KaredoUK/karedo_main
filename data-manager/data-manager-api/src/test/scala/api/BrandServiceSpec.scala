@@ -17,7 +17,7 @@ import org.joda.time.DateTime
 @RunWith(classOf[JUnitRunner])
 class BrandServiceSpec
   extends ApiHttpClientSpec
-  with RestApiSpecMatchers
+  //with RestApiSpecMatchers only matchers used by account defined so not needed here
 {
   import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
   import parallelai.wallet.util.SprayJsonSupport._

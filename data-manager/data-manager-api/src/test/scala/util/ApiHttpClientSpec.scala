@@ -15,7 +15,11 @@ import scala.util.Random
 import org.specs2.mutable.Specification
 
 
-trait ApiHttpClientSpec extends Specification with NoTimeConversions with Mockito {
+trait ApiHttpClientSpec
+  extends Specification
+  with NoTimeConversions
+  with Mockito
+{
   def responseTimeout = 5.seconds
 
   sequential

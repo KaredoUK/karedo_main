@@ -14,6 +14,7 @@ import scala.util.Random
 
 // Using this trait you just need to define the DAO as mocked and start your rest server
 class RestServiceWithMockPersistence(
+
   val servicePort: Int,
   override val brandDAO: BrandDAO,
   override val hintDAO: HintDAO,
@@ -21,7 +22,16 @@ class RestServiceWithMockPersistence(
   override val userAccountDAO: UserAccountDAO,
   override val mediaDAO: MediaDAO,
   override val offerDAO: OfferDAO,
-  override val messenger: ActorRef) extends Injectable with BootedCore with Persistence with MessageActors with BaseCoreActors with Api with Web {
+  override val messenger: ActorRef)
+
+  extends Injectable
+  with BootedCore
+  with Persistence
+  with MessageActors
+  with BaseCoreActors
+  with Api
+  with Web
+{
 
   // Define The Configuration for the tests
   implicit def configProvider = AppConfigPropertySource(
