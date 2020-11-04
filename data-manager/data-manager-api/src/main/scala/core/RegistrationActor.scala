@@ -229,6 +229,7 @@ class RegistrationActor(
                 log.warning("Successfully validating user with an already set password, a pwd has been provided by client. IGNORING IT")
                 saveValidationInfo
               case (None, Some(password)) =>
+                log.debug("Validation of use with no password, setting password in DB")
                 userAccountDAO.setPassword(user.id, password)
                 saveValidationInfo
               case (None, None) =>

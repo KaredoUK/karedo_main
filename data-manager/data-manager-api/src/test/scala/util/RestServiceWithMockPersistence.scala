@@ -21,6 +21,7 @@ class RestServiceWithMockPersistence(
   override val userAccountDAO: UserAccountDAO,
   override val mediaDAO: MediaDAO,
   override val offerDAO: OfferDAO,
+  override val userSessionDAO: UserSessionDAO,
   override val messenger: ActorRef) extends Injectable with BootedCore with Persistence with MessageActors with BaseCoreActors with Api with Web {
 
   // Define The Configuration for the tests

@@ -4,6 +4,7 @@ package parallelai.wallet.persistence.mongodb
 import java.util.UUID
 
 import com.escalatesoft.subcut.inject.NewBindingModule._
+import com.escalatesoft.subcut.inject.config.PropertiesConfigPropertySource
 import org.specs2.time.NoTimeConversions
 import parallelai.wallet.entity.{ClientApplication, UserAccount, AdvertisementDetail, Brand}
 import parallelai.wallet.persistence.BrandInteractionsDAO
@@ -14,7 +15,7 @@ import scala.collection.immutable.Map
  */
 trait TestWithLocalMongoDb extends MongoTestUtils with NoTimeConversions {
 
-  implicit val bindingModule = newBindingModuleWithConfig  (
+  lazy val defaultBindingConfig =
     Map(
       "mongo.server.host" -> "localhost",
       "mongo.server.port" -> "12345",
@@ -22,6 +23,10 @@ trait TestWithLocalMongoDb extends MongoTestUtils with NoTimeConversions {
       "mongo.db.user" -> "",
       "mongo.db.pwd" -> ""
     )
+
+
+  implicit val bindingModule = newBindingModuleWithConfig  (
+    PropertiesConfigPropertySource(defaultBindingConfig)
   )
 
 

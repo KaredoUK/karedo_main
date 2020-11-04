@@ -1,8 +1,10 @@
 import java.io.IOException
-import java.net.ServerSocket
+import java.net.{Socket, ServerSocket}
 
 import sbt._
 import Keys._
+
+import scala.util.Try
 
 object Embedder {
 
@@ -26,14 +28,20 @@ object Embedder {
 
 
   def startMongo : Unit = {
-    var s:ServerSocket=null
-    try {
-      s=new ServerSocket(embedConnectionPort)
-    } catch { case ioe: IOException => Unit }
-    if(s==null){
+
+    println( "\tChecking if it is necessary to start mongo\n\n" )
+
+    // See comment to post http://stackoverflow.com/questions/434718/sockets-discover-port-availability-using-java
+    // ...It appears that as of Java 7, David Santamaria's answer doesn't work reliably any more.
+    // It looks like you can still reliably use a Socket to test the connection, however.
+    val socketToMongoServerTry = Try {
+      new Socket("localhost", embedConnectionPort)
+    }
+
+    if(socketToMongoServerTry.isSuccess){
       println(s"NOT Starting server: Somebody already listening to port $embedConnectionPort")
     } else {
-      s.close()
+      socketToMongoServerTry.map { _.close() }
 
       println("Starting server as requested")
       mongodExecutable.start

@@ -32,8 +32,7 @@ import scala.concurrent.Future._
 class BrandMongoDAO (implicit val bindingModule: BindingModule)
   extends BrandDAO with MongoConnection with Injectable   {
 
-
-
+  //This should be removed and using the MongoAppSupport features
   RegisterJodaTimeConversionHelpers()
   val dao = new SalatDAO[Brand, UUID](collection = db("Brand")) {}
 

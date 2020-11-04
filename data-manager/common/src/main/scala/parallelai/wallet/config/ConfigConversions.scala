@@ -9,8 +9,14 @@ object ConfigConversions {
     if(prop.value == "infinite") {
       Duration.Inf
     } else {
-      val amount: Long = prop.value.toLong
-      val timeQualifier: String = prop.name.split('.').last
+      val (amount: Long, timeQualifier: String) =
+        if(prop.value.contains('.')) {
+          val tokens = prop.value.split('.')
+          require(tokens.length == 2, s"Invalid format for property ${prop.name}: ${prop.value}, expected amount.timeQualifier")
+          (tokens(0).toLong, tokens(1))
+        } else {
+          (prop.value.toLong, "millis")
+        }
 
       timeQualifier match {
         case "seconds" | "secs" | "second" | "sec" => amount.seconds

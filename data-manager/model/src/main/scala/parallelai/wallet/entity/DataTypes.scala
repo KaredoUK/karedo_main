@@ -48,3 +48,5 @@ case class MediaContentDescriptor(name: String, contentType: String, id: String 
 case class MediaContent(descriptor: MediaContentDescriptor, inputStream: InputStream)
 
 case class SuggestedAdForUsersAndBrandModel(id: UUID, name: String, iconId: String)
+
+case class UserSession(sessionId: UUID, userId: UUID, applicationId: UUID)
