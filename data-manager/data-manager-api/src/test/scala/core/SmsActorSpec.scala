@@ -65,15 +65,16 @@ class SmsActorSpec
 
   "SMS actor should" >> {
 
-    "Request SMS delivery to textmarketer.co.uk" in new WithWireMockServer {
-      stubFor(post(urlMatching("/smsEndpoint.*")) willReturn (aResponse withStatus (SC_OK)))
+    "Request SMS delivery as post to endpoint for service https://rest.messagebird.com/messages " in new WithWireMockServer {
+      val endPoint="/smsEndpoint.*"
+      stubFor(post(urlMatching(endPoint)) willReturn (aResponse withStatus (SC_OK)))
 
       smsActor ! SendSMS("4412345", "message")
 
 
       withinTimeout(1.minutes) {
 
-        val loggedRequests = findAll(postRequestedFor(urlMatching("/.*")))
+        val loggedRequests = findAll(postRequestedFor(urlMatching(endPoint)))
 
         loggedRequests should haveSize(1)
 
