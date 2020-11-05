@@ -7,31 +7,37 @@ import java.util.UUID
 import akka.actor.{ActorRef}
 import akka.event.slf4j.Logger
 import akka.util.Timeout
+import api.security.{AuthorizationSupport, AuthenticationSupport}
 import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
 import com.parallelai.wallet.datamanager.data.{BrandData, BrandResponse, ListBrandsAdverts, _}
 
 import core.EditAccountActor.{ListBrandsRequest, EditAccountError, AddBrand}
 import core.{SuccessResponse, ResponseWithFailure}
 import core.objAPI._
-import parallelai.wallet.entity.{AdvertisementDetail, SuggestedAdForUsersAndBrandModel}
-
+import parallelai.wallet.entity.{UserAuthContext, AdvertisementDetail, SuggestedAdForUsersAndBrandModel}
+import parallelai.wallet.persistence.UserAuthDAO
+import spray.http.HttpHeader
+import spray.http.HttpHeaders.RawHeader
+import spray.routing.AuthenticationFailedRejection.{CredentialsRejected, CredentialsMissing}
+import scala.concurrent._
 
 
 import spray.routing._
+import spray.routing.directives.{SecurityDirectives, AuthMagnet}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{Future, ExecutionContext}
 
 
 object BrandService {
   val logger = Logger("BrandService")
 }
 
-class BrandService(brandActor: ActorRef, editAccountActor: ActorRef)
-                  (implicit executionContext: ExecutionContext)
+class BrandService(brandActor: ActorRef, editAccountActor: ActorRef, val authDAO: UserAuthDAO)
   extends Directives
   with DefaultJsonFormats
-  with ApiErrorsJsonProtocol  {
-
+  with ApiErrorsJsonProtocol
+  with AuthenticationSupport
+  with AuthorizationSupport {
 
   import akka.pattern.ask
 
@@ -39,26 +45,27 @@ class BrandService(brandActor: ActorRef, editAccountActor: ActorRef)
 
   implicit val timeout = Timeout(20.seconds)
 
-  val route55: Route =
+  val route = userBrandInteraction ~ createOrList ~ getOrDelete ~
+    addOrRetrieveAdvert ~ deleteAdvert ~ /* routesuggestedBrands ~ */ suggesteddBrandsDummy
 
   // PARALLELAI-55API: User Brand Interaction
   // "user/"+userId+"/interaction/brand/"+brandId, { "interactionType":  "BUY"}
+  val userBrandInteraction: Route =
     path("user" / JavaUUID / "interaction" / "brand" / JavaUUID) {
-      (user, brand) => {
-        post {
-          handleWith((intType: String) =>
+      (user, brand) =>
+        userAuthorizedFor(canAccessUser(user)) { userAuthContext =>
+          post {
+            handleWith((intType: String) =>
 
-            (brandActor ? UserBrandInteraction(user, brand, intType)).mapTo[ResponseWithFailure[APIError, InteractionResponse]]
-          // s"{${q}userId${q}: ${q}$user${q},${q}userTotalPoints${q}:${q}500${q}}")
-          )
+              (brandActor ? UserBrandInteraction(user, brand, intType)).mapTo[ResponseWithFailure[APIError, InteractionResponse]]
+              // s"{${q}userId${q}: ${q}$user${q},${q}userTotalPoints${q}:${q}500${q}}")
+            )
+          }
         }
-      }
-
-
-    }
+  }
 
   // dealing with /brand to create inquiry a brand
-  val routebrand_67_95 =
+  val createOrList =
     path("brand") {
 
 
@@ -79,7 +86,7 @@ class BrandService(brandActor: ActorRef, editAccountActor: ActorRef)
 
     }
 
-  val routebrandWithId =
+  val getOrDelete =
 
     path("brand" / JavaUUID) {
 
@@ -99,7 +106,7 @@ class BrandService(brandActor: ActorRef, editAccountActor: ActorRef)
       }
     }
 
-  val routebrandWithIdAdvert =
+  val addOrRetrieveAdvert =
 
     path("brand" / JavaUUID / "advert") {
 
@@ -121,7 +128,7 @@ class BrandService(brandActor: ActorRef, editAccountActor: ActorRef)
       }
     }
 
-  val routebrandWithIdAdvertWithId =
+  val deleteAdvert =
 
     path("brand" / JavaUUID / "advert" / JavaUUID) {
 
@@ -135,7 +142,7 @@ class BrandService(brandActor: ActorRef, editAccountActor: ActorRef)
         }
     }
 
-  val routesuggestedBrands =
+  val suggestedBrands =
     path("account" / JavaUUID / "brand" / JavaUUID / "ads" ) { (accountId: UUID, brandId: UUID) =>
       get {
         parameters('max.as[Int]) { max =>
@@ -150,7 +157,7 @@ class BrandService(brandActor: ActorRef, editAccountActor: ActorRef)
       }
     }
 
-  val routesuggestedBrandsDummy =
+  val suggesteddBrandsDummy =
     path("account" / JavaUUID / "suggestedBrands") { accountId: UserID =>
       post {
         handleWith {
@@ -164,6 +171,5 @@ class BrandService(brandActor: ActorRef, editAccountActor: ActorRef)
       }
     }
 
-  val route = route55 ~ routebrand_67_95 ~ routebrandWithId ~
-    routebrandWithIdAdvert ~ routebrandWithIdAdvertWithId ~ /* routesuggestedBrands ~ */ routesuggestedBrandsDummy
+  
 }

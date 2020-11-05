@@ -50,3 +50,7 @@ case class MediaContent(descriptor: MediaContentDescriptor, inputStream: InputSt
 case class SuggestedAdForUsersAndBrandModel(id: UUID, name: String, iconId: String)
 
 case class UserSession(sessionId: UUID, userId: UUID, applicationId: UUID)
+
+case class UserAuthContext(userId: UUID, activeApps: Seq[UUID]) {
+  def isValidAppForUser(appId: UUID): Boolean = activeApps.contains(appId)
+}
