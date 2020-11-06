@@ -3,11 +3,11 @@ package api.security
 import java.util.UUID._
 
 import api.security.AuthenticationSupport._
+import core.security.UserAuthService
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import org.specs2.specification.Scope
 import parallelai.wallet.entity.UserAuthContext
-import parallelai.wallet.persistence.UserAuthDAO
 import spray.routing.AuthenticationFailedRejection.{CredentialsMissing, CredentialsRejected}
 import spray.routing.{AuthorizationFailedRejection, AuthenticationFailedRejection, Directives, HttpService}
 import spray.testkit.Specs2RouteTest
@@ -20,9 +20,9 @@ class AuthorizationSupportSpec extends Specification with Specs2RouteTest with H
   def actorRefFactory = system
 
   trait WithAuthenticatedRoute extends Scope with Directives with AuthorizationSupport {
-    val mockAuthDAO = mock[UserAuthDAO]
+    val mockAuthService = mock[UserAuthService]
 
-    override def authDAO: UserAuthDAO = mockAuthDAO
+    override def authDAO: UserAuthService = mockAuthService
 
     override def executionContext: ExecutionContext = system.dispatcher
 
@@ -43,7 +43,7 @@ class AuthorizationSupportSpec extends Specification with Specs2RouteTest with H
     "Extract user authentication context" in new WithAuthenticatedRoute {
       val userAuthContext = UserAuthContext(randomUUID(), Seq(randomUUID(), randomUUID()))
       val sessionId = "sessionId"
-      mockAuthDAO.getUserContextForSession(sessionId) returns successful { Some(userAuthContext) }
+      mockAuthService.getUserContextForSession(sessionId) returns successful { Some(userAuthContext) }
 
       Get("/authenticatedRoute") ~> addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> testRoute(isLoggedInUser) ~> check {
         responseAs[String] mustEqual userAuthContext.toString
@@ -64,7 +64,7 @@ class AuthorizationSupportSpec extends Specification with Specs2RouteTest with H
 
     "Refuse request with non matching session id" in new WithAuthenticatedRoute  {
       val sessionId = "sessionId"
-      mockAuthDAO.getUserContextForSession(sessionId) returns successful { None }
+      mockAuthService.getUserContextForSession(sessionId) returns successful { None }
 
       Get("/authenticatedRoute") ~> addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> testRoute(isLoggedInUser) ~> check {
         rejection mustEqual AuthenticationFailedRejection(CredentialsRejected, List(HEADER_SESSION_ID))
@@ -74,7 +74,7 @@ class AuthorizationSupportSpec extends Specification with Specs2RouteTest with H
     "Refuse logged in users not passing validation check" in new WithAuthenticatedRoute  {
       val userAuthContext = UserAuthContext(randomUUID(), Seq(randomUUID(), randomUUID()))
       val sessionId = "sessionId"
-      mockAuthDAO.getUserContextForSession(sessionId) returns successful { Some(userAuthContext) }
+      mockAuthService.getUserContextForSession(sessionId) returns successful { Some(userAuthContext) }
 
       Get("/authenticatedRoute") ~> addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> testRoute(hasActiveAppWithID(randomUUID())) ~> check {
         rejection mustEqual AuthorizationFailedRejection

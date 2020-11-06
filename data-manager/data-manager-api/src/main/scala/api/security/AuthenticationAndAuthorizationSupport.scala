@@ -2,8 +2,8 @@ package api.security
 
 import java.util.UUID
 
+import core.security.UserAuthService
 import parallelai.wallet.entity.UserAuthContext
-import parallelai.wallet.persistence.UserAuthDAO
 import spray.http.HttpHeaders.RawHeader
 import spray.http.{HttpHeader, HttpRequest}
 import spray.routing.AuthenticationFailedRejection.{CredentialsMissing, CredentialsRejected}
@@ -28,13 +28,13 @@ trait AuthenticationSupport {
   
   import AuthenticationSupport._
 
-  protected def authDAO: UserAuthDAO
+  protected def authDAO: UserAuthService
   protected def executionContext: ExecutionContext
 
   implicit private val _execCtx = executionContext
 
   import spray.routing.authentication._
-  def userAuthContextFromSessionId(authDAO: UserAuthDAO)(requestCtx: RequestContext): Future[Authentication[UserAuthContext]] = {
+  def userAuthContextFromSessionId(authDAO: UserAuthService)(requestCtx: RequestContext): Future[Authentication[UserAuthContext]] = {
     val sessionIdOp = extractSessionIDHeader(requestCtx.request)
 
     sessionIdOp map { sessionId =>

@@ -33,10 +33,17 @@ class MongoUserSessionDAO (implicit val bindingModule: BindingModule) extends Us
     dao.collection.ensureIndex(MongoDBObject( "expiry" -> 1, "expireAfterSeconds" -> 0))
   }
 
-  override def validateSession(userSession: UserSession): Boolean = {
-    dao.findOneById(userSession.sessionId) map {
+  override def getSession(sessionId: UUID): Option[UserSession] = {
+    dao.findOneById(sessionId) map {
       mongoSession =>
-        mongoSessionAsUserSession(mongoSession) == userSession
+        mongoSessionAsUserSession(mongoSession)
+    }
+  }
+
+  override def validateSession(userSession: UserSession): Boolean = {
+    getSession(userSession.sessionId) map {
+      mongoSession =>
+        mongoSession == userSession
     } getOrElse false
   }
 

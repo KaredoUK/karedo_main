@@ -12,10 +12,10 @@ import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
 import com.parallelai.wallet.datamanager.data.{BrandData, BrandResponse, ListBrandsAdverts, _}
 
 import core.EditAccountActor.{ListBrandsRequest, EditAccountError, AddBrand}
+import core.security.UserAuthService
 import core.{SuccessResponse, ResponseWithFailure}
 import core.objAPI._
 import parallelai.wallet.entity.{AdvertisementDetail, SuggestedAdForUsersAndBrandModel}
-import parallelai.wallet.persistence.UserAuthDAO
 
 
 import spray.routing._

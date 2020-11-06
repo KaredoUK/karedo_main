@@ -3,10 +3,10 @@ package api.security
 import java.util.UUID
 import java.util.UUID._
 
+import core.security.UserAuthService
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import parallelai.wallet.entity.UserAuthContext
-import parallelai.wallet.persistence.UserAuthDAO
 import spray.http.StatusCodes
 import spray.http.StatusCodes._
 import spray.routing.AuthenticationFailedRejection.{CredentialsRejected, CredentialsMissing}
@@ -19,13 +19,14 @@ import AuthenticationSupport._
 import org.specs2.specification.Scope
 
 
+
 class AuthenticationSupportSpec extends Specification with Specs2RouteTest with HttpService with Mockito {
   def actorRefFactory = system
 
   trait WithAuthenticatedRoute extends Scope with Directives with AuthenticationSupport {
-    val mockAuthDAO = mock[UserAuthDAO]
+    val mockAuthService = mock[UserAuthService]
 
-    override def authDAO: UserAuthDAO = mockAuthDAO
+    override def authDAO: UserAuthService = mockAuthService
 
     override def executionContext: ExecutionContext = system.dispatcher
 
@@ -46,7 +47,7 @@ class AuthenticationSupportSpec extends Specification with Specs2RouteTest with 
     "Extract user authentication context" in new WithAuthenticatedRoute {
       val userAuthContext = UserAuthContext(randomUUID(), Seq(randomUUID(), randomUUID()))
       val sessionId = "sessionId"
-      mockAuthDAO.getUserContextForSession(sessionId) returns successful { Some(userAuthContext) }
+      mockAuthService.getUserContextForSession(sessionId) returns successful { Some(userAuthContext) }
 
       Get("/authenticatedRoute") ~> addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> testRoute ~> check {
         responseAs[String] mustEqual userAuthContext.toString
@@ -67,7 +68,7 @@ class AuthenticationSupportSpec extends Specification with Specs2RouteTest with 
 
     "Refuse request with non matching session id" in new WithAuthenticatedRoute  {
       val sessionId = "sessionId"
-      mockAuthDAO.getUserContextForSession(sessionId) returns successful { None }
+      mockAuthService.getUserContextForSession(sessionId) returns successful { None }
 
       Get("/authenticatedRoute") ~> addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> testRoute ~> check {
         rejection mustEqual AuthenticationFailedRejection(CredentialsRejected, List(HEADER_SESSION_ID))
@@ -76,7 +77,7 @@ class AuthenticationSupportSpec extends Specification with Specs2RouteTest with 
 
     "Fail with internal error when having problems retrieving sessions" in new WithAuthenticatedRoute  {
       val sessionId = "sessionId"
-      mockAuthDAO.getUserContextForSession(sessionId) returns failed { new Exception("Internal error") }
+      mockAuthService.getUserContextForSession(sessionId) returns failed { new Exception("Internal error") }
 
       Get("/authenticatedRoute") ~> addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> testRoute ~> check {
         response.status mustEqual InternalServerError

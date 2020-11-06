@@ -1,0 +1,26 @@
+package core.security
+
+import java.util.UUID
+
+import parallelai.wallet.entity.UserAuthContext
+import parallelai.wallet.persistence.{ClientApplicationDAO, UserAccountDAO, UserSessionDAO}
+
+import scala.concurrent.Future
+
+import scala.concurrent.ExecutionContext.Implicits.global
+
+trait UserAuthService {
+  def getUserContextForSession(sessionId: String): Future[Option[UserAuthContext]]
+}
+
+class UserAuthServiceImpl(sessionDAO: UserSessionDAO, clientApplicationDAO: ClientApplicationDAO) extends UserAuthService {
+  override def getUserContextForSession(sessionId: String): Future[Option[UserAuthContext]] = Future {
+    val sessionUUID = UUID.fromString(sessionId)
+
+    sessionDAO.getSession(sessionUUID) map { session =>
+      val userActiveApps = clientApplicationDAO.findByUserId(session.userId) filter { _.active }
+
+      UserAuthContext(session.userId, userActiveApps map { _.id })
+    }
+  }
+}
