@@ -11,6 +11,7 @@ import spray.routing._
 import spray.routing.directives.BasicDirectives._
 import spray.routing.directives.{AuthMagnet, SecurityDirectives}
 
+import scala.concurrent.Future._
 import scala.concurrent.{ExecutionContext, Future}
 
 object AuthenticationSupport {
@@ -27,23 +28,27 @@ trait AuthenticationSupport {
   
   import AuthenticationSupport._
 
-  def authDAO: UserAuthDAO
-  def executionContext: ExecutionContext
+  protected def authDAO: UserAuthDAO
+  protected def executionContext: ExecutionContext
 
   implicit private val _execCtx = executionContext
 
   import spray.routing.authentication._
-  def userAuthContextFromSessionId(authDAO: UserAuthDAO)(requestCtx: RequestContext): Future[Authentication[UserAuthContext]] = Future {
+  def userAuthContextFromSessionId(authDAO: UserAuthDAO)(requestCtx: RequestContext): Future[Authentication[UserAuthContext]] = {
     val sessionIdOp = extractSessionIDHeader(requestCtx.request)
 
     sessionIdOp map { sessionId =>
-      authDAO.getUserContextForSession(sessionId) map {
-        Right(_)
-      } getOrElse {
-        Left( AuthenticationFailedRejection( CredentialsRejected, List(HEADER_SESSION_ID) ) )
+      authDAO.getUserContextForSession(sessionId) map { userContextForSessionOp =>
+        userContextForSessionOp map {
+          Right(_)
+        } getOrElse {
+          Left(AuthenticationFailedRejection(CredentialsRejected, List(HEADER_SESSION_ID)))
+        }
       }
     } getOrElse {
-      Left( AuthenticationFailedRejection(CredentialsMissing, List(HEADER_SESSION_ID)) )
+      successful{
+        Left( AuthenticationFailedRejection(CredentialsMissing, List(HEADER_SESSION_ID)) )
+      }
     }
   }
 

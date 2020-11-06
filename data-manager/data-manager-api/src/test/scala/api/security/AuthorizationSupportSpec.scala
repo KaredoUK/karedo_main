@@ -13,6 +13,7 @@ import spray.routing.{AuthorizationFailedRejection, AuthenticationFailedRejectio
 import spray.testkit.Specs2RouteTest
 
 import scala.concurrent.ExecutionContext
+import scala.concurrent.Future._
 
 
 class AuthorizationSupportSpec extends Specification with Specs2RouteTest with HttpService with Mockito {
@@ -42,7 +43,7 @@ class AuthorizationSupportSpec extends Specification with Specs2RouteTest with H
     "Extract user authentication context" in new WithAuthenticatedRoute {
       val userAuthContext = UserAuthContext(randomUUID(), Seq(randomUUID(), randomUUID()))
       val sessionId = "sessionId"
-      mockAuthDAO.getUserContextForSession(sessionId) returns(Some(userAuthContext))
+      mockAuthDAO.getUserContextForSession(sessionId) returns successful { Some(userAuthContext) }
 
       Get("/authenticatedRoute") ~> addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> testRoute(isLoggedInUser) ~> check {
         responseAs[String] mustEqual userAuthContext.toString
@@ -63,7 +64,7 @@ class AuthorizationSupportSpec extends Specification with Specs2RouteTest with H
 
     "Refuse request with non matching session id" in new WithAuthenticatedRoute  {
       val sessionId = "sessionId"
-      mockAuthDAO.getUserContextForSession(sessionId) returns(None)
+      mockAuthDAO.getUserContextForSession(sessionId) returns successful { None }
 
       Get("/authenticatedRoute") ~> addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> testRoute(isLoggedInUser) ~> check {
         rejection mustEqual AuthenticationFailedRejection(CredentialsRejected, List(HEADER_SESSION_ID))
@@ -73,7 +74,7 @@ class AuthorizationSupportSpec extends Specification with Specs2RouteTest with H
     "Refuse logged in users not passing validation check" in new WithAuthenticatedRoute  {
       val userAuthContext = UserAuthContext(randomUUID(), Seq(randomUUID(), randomUUID()))
       val sessionId = "sessionId"
-      mockAuthDAO.getUserContextForSession(sessionId) returns(Some(userAuthContext))
+      mockAuthDAO.getUserContextForSession(sessionId) returns successful { Some(userAuthContext) }
 
       Get("/authenticatedRoute") ~> addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> testRoute(hasActiveAppWithID(randomUUID())) ~> check {
         rejection mustEqual AuthorizationFailedRejection

@@ -13,7 +13,8 @@ import spray.routing.AuthenticationFailedRejection.{CredentialsRejected, Credent
 import spray.testkit.Specs2RouteTest
 import spray.routing.{AuthenticationFailedRejection, Directives, HttpService}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.Future._
+import scala.concurrent.{Future, ExecutionContext}
 import AuthenticationSupport._
 import org.specs2.specification.Scope
 
@@ -45,7 +46,7 @@ class AuthenticationSupportSpec extends Specification with Specs2RouteTest with 
     "Extract user authentication context" in new WithAuthenticatedRoute {
       val userAuthContext = UserAuthContext(randomUUID(), Seq(randomUUID(), randomUUID()))
       val sessionId = "sessionId"
-      mockAuthDAO.getUserContextForSession(sessionId) returns(Some(userAuthContext))
+      mockAuthDAO.getUserContextForSession(sessionId) returns successful { Some(userAuthContext) }
 
       Get("/authenticatedRoute") ~> addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> testRoute ~> check {
         responseAs[String] mustEqual userAuthContext.toString
@@ -66,10 +67,19 @@ class AuthenticationSupportSpec extends Specification with Specs2RouteTest with 
 
     "Refuse request with non matching session id" in new WithAuthenticatedRoute  {
       val sessionId = "sessionId"
-      mockAuthDAO.getUserContextForSession(sessionId) returns(None)
+      mockAuthDAO.getUserContextForSession(sessionId) returns successful { None }
 
       Get("/authenticatedRoute") ~> addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> testRoute ~> check {
         rejection mustEqual AuthenticationFailedRejection(CredentialsRejected, List(HEADER_SESSION_ID))
+      }
+    }
+
+    "Fail with internal error when having problems retrieving sessions" in new WithAuthenticatedRoute  {
+      val sessionId = "sessionId"
+      mockAuthDAO.getUserContextForSession(sessionId) returns failed { new Exception("Internal error") }
+
+      Get("/authenticatedRoute") ~> addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> testRoute ~> check {
+        response.status mustEqual InternalServerError
       }
     }
   }
