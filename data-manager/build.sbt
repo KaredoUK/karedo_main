@@ -1,4 +1,5 @@
 import org.slf4j.LoggerFactory
+import pakkio.JenkinsJUnitXmlTestsListener
 import sbt._
 import Keys._
 import sbtassembly.Plugin._
@@ -26,7 +27,8 @@ testOptions in Test += Tests.Setup( () => Embedder.startMongo)
 
 testOptions in Test += Tests.Cleanup( () => println("After Tests"))
 
-//testListeners <<= target.map(t => Seq(new eu.henkelmann.sbt.JUnitXmlTestsListener(t.getAbsolutePath,LoggerFactory.getLogger("junitlogger"))))
+testListeners <<= target.map(t => Seq(new JenkinsJUnitXmlTestsListener(t.getAbsolutePath)))
+
 
 TaskKey[Unit]("start-mongo") := Embedder.startMongo
 
