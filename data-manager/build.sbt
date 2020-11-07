@@ -26,7 +26,7 @@ testOptions in Test += Tests.Setup( () => Embedder.startMongo)
 
 testOptions in Test += Tests.Cleanup( () => println("After Tests"))
 
-testListeners <<= target.map(t => Seq(new eu.henkelmann.sbt.JUnitXmlTestsListener(t.getAbsolutePath,LoggerFactory.getLogger("junitlogger"))))
+//testListeners <<= target.map(t => Seq(new eu.henkelmann.sbt.JUnitXmlTestsListener(t.getAbsolutePath,LoggerFactory.getLogger("junitlogger"))))
 
 TaskKey[Unit]("start-mongo") := Embedder.startMongo
 
