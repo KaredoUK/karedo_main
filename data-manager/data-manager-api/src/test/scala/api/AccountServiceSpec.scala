@@ -135,8 +135,6 @@ class AccountServiceSpec
       there was no(mockedUserAccountDAO).setActive( any[UUID] )
     }
 
-
-
     "Save password for a newly activated user " in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[RegistrationValidationResponse]
 
@@ -194,77 +192,25 @@ class AccountServiceSpec
     }
 
   }
-  "PARALLELAI-102: login" in new WithMockedPersistenceRestService {
 
-    val pipeline = sendReceive ~> unmarshal[APISessionResponse]
+  "PARALLELAI-102: login" should {
+    "Accept user with correct password and active application returning new sessionId" in new WithMockedPersistenceRestService {
+      val pipeline = sendReceive ~> unmarshal[APISessionResponse]
 
-    val user = UserAccount(UUID.randomUUID(), Some("123123"), None)
-    val clientApplication = ClientApplication(UUID.randomUUID, user.id, "activationCode")
+//      val user = UserAccount(UUID.randomUUID(), Some("123123"), None)
+//      val clientApplication = ClientApplication(UUID.randomUUID, user.id, "activationCode")
+//
+//
+//      val loginResponse = wait {
+//        pipeline {
+//          Post(s"$serviceUrl/account/${user.id}/application/${clientApplication.id}/login", APILoginRequest(password = "password"))
+//        }
+//      }
+//      UUID.fromString(loginResponse.sessionId).toString shouldEqual loginResponse.sessionId
 
 
-    val loginResponse = wait {
-      pipeline {
-        Post(s"$serviceUrl/account/${user.id}/application/${clientApplication.id}/login", APILoginRequest(password="password"))
-      }
+      todo
     }
-    UUID.fromString(loginResponse.sessionId).toString shouldEqual loginResponse.sessionId
-
-    "Save password for a newly activated user " in new WithMockedPersistenceRestService {
-      val pipeline = sendReceive ~> unmarshal[RegistrationValidationResponse]
-
-      val user = UserAccount(id = UUID.randomUUID(), msisdn = Some("123123"), email = None, password = None)
-      val clientApplication = ClientApplication(UUID.randomUUID, user.id, "activationCode")
-
-
-      mockedClientApplicationDAO.getById(any[UUID]) returns Some(clientApplication)
-      mockedUserAccountDAO.getByApplicationId(any[UUID], any[Boolean]) returns Some(user)
-
-      val validationResponse = wait {
-        pipeline {
-          Post(s"$serviceUrl/account/application/validation", RegistrationValidation(clientApplication.id, "activationCode", Some("pwd")))
-        }
-      }
-
-      there was one(mockedUserAccountDAO).setPassword( argEq(user.id), argEq("pwd") )
-    }
-
-    "Ignore password for a user with an already set one" in new WithMockedPersistenceRestService {
-      val pipeline = sendReceive ~> unmarshal[RegistrationValidationResponse]
-
-      val user = UserAccount(id = UUID.randomUUID(), msisdn = Some("123123"), email = None, password = Some("pwd"))
-      val clientApplication = ClientApplication(UUID.randomUUID, user.id, "activationCode")
-
-
-      mockedClientApplicationDAO.getById(any[UUID]) returns Some(clientApplication)
-      mockedUserAccountDAO.getByApplicationId(any[UUID], any[Boolean]) returns Some(user)
-
-      val validationResponse = wait {
-        pipeline {
-          Post(s"$serviceUrl/account/application/validation", RegistrationValidation(clientApplication.id, "activationCode", Some("pwd")))
-        }
-      }
-
-      there was no(mockedUserAccountDAO).setPassword( argEq(user.id), anyString )
-    }
-
-    "Fail if no password is supplied for a newly activated user " in new WithMockedPersistenceRestService {
-      val pipeline = sendReceive
-
-      val user = UserAccount(id = UUID.randomUUID(), msisdn = Some("123123"), email = None, password = None)
-      val clientApplication = ClientApplication(UUID.randomUUID, user.id, "activationCode")
-
-      mockedClientApplicationDAO.getById(any[UUID]) returns Some(clientApplication)
-      mockedUserAccountDAO.getByApplicationId(any[UUID], any[Boolean]) returns Some(user)
-
-      val validationResponse = wait {
-        pipeline {
-          Post(s"$serviceUrl/account/application/validation", RegistrationValidation(clientApplication.id, "activationCode", None))
-        }
-      }
-
-      validationResponse.status shouldEqual StatusCodes.BadRequest
-    }
-
   }
 
 

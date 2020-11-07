@@ -26,13 +26,11 @@ class AuthenticationSupportSpec extends Specification with Specs2RouteTest with 
   trait WithAuthenticatedRoute extends Scope with Directives with AuthenticationSupport {
     val mockAuthService = mock[UserAuthService]
 
-    override def authDAO: UserAuthService = mockAuthService
-
-    override def executionContext: ExecutionContext = system.dispatcher
+    override def userAuthService: UserAuthService = mockAuthService
 
     val testRoute =
       path("authenticatedRoute") {
-        authenticateWithKaredoSession { userAuthContext =>
+        authenticateWithKaredoSession(system.dispatcher) { userAuthContext: UserAuthContext =>
           get {
             complete {
               userAuthContext.toString

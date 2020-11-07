@@ -1,9 +1,11 @@
 package api
 
+import api.security.AuthorizationSupport
 import com.mongodb.casbah.Imports._
 import com.parallelai.wallet.datamanager.data._
 
 import core.EditAccountActor.EditAccountError
+import core.security.UserAuthService
 import spray.httpx.marshalling.{CollectingMarshallingContext, Marshaller}
 import spray.json.RootJsonFormat
 import spray.routing.Directives
@@ -24,11 +26,13 @@ import java.util.UUID
 
 
 class AccountService(registrationActor: ActorRef,
-                     editAccountActor: ActorRef)
+                     editAccountActor: ActorRef,
+                     override protected val userAuthService: UserAuthService)
                     (implicit executionContext: ExecutionContext)
   extends Directives
   with DefaultJsonFormats
   with ApiErrorsJsonProtocol
+  with AuthorizationSupport
 {
 
   import akka.pattern.ask
@@ -82,31 +86,32 @@ class AccountService(registrationActor: ActorRef,
 
 
   lazy val edit =
-
-    path(JavaUUID) { accountId: UserID =>
-      rejectEmptyResponse {
-        // PARALLELAI-51 get user profile
-        get {
-          complete {
-            (editAccountActor ? GetAccount(accountId)).mapTo[ResponseWithFailure[EditAccountError, Option[UserProfile]]]
-          }
+      path(JavaUUID) { accountId: UserID =>
+        userAuthorizedFor( canAccessUser(accountId) )(executionContext) { userAuthContext =>
+          rejectEmptyResponse {
+            // PARALLELAI-51 get user profile
+            get {
+              complete {
+                (editAccountActor ? GetAccount(accountId)).mapTo[ResponseWithFailure[EditAccountError, Option[UserProfile]]]
+              }
+            }
+          } ~
+            // PARALLELAI-50 update userprofile
+            put {
+              handleWith {
+                userProfile: UserProfile =>
+                  editAccountActor ! UpdateAccount(userProfile)
+                  ""
+              }
+            } ~
+            // PARALLELAI-52 delete userprofile
+            delete {
+              complete {
+                (editAccountActor ? DeleteAccount(accountId)).mapTo[ResponseWithFailure[EditAccountError, String]]
+              }
+            }
         }
-      } ~
-        // PARALLELAI-50 update userprofile
-        put {
-          handleWith {
-            userProfile: UserProfile =>
-              editAccountActor ! UpdateAccount(userProfile)
-              ""
-          }
-        } ~
-        // PARALLELAI-52 delete userprofile
-        delete {
-          complete {
-            (editAccountActor ? DeleteAccount(accountId)).mapTo[ResponseWithFailure[EditAccountError, String]]
-          }
-        }
-    }
+      }
 
   lazy val validateApp =
     path( "application" / "validation") {
@@ -122,11 +127,13 @@ class AccountService(registrationActor: ActorRef,
 
   lazy val getPoints =
     path( JavaUUID / "points") { accountId: UserID =>
-      rejectEmptyResponse {
-        // PARALLELAI-54API: Get User Points
-        get {
-          complete {
-            (editAccountActor ? GetAccountPoints(accountId)).mapTo[ResponseWithFailure[RegistrationError,Option[UserPoints]]]
+      userAuthorizedFor( canAccessUser(accountId) )(executionContext) { userAuthContext =>
+        rejectEmptyResponse {
+          // PARALLELAI-54API: Get User Points
+          get {
+            complete {
+              (editAccountActor ? GetAccountPoints(accountId)).mapTo[ResponseWithFailure[RegistrationError, Option[UserPoints]]]
+            }
           }
         }
       }
@@ -152,7 +159,7 @@ class AccountService(registrationActor: ActorRef,
 
   // PARALLELAI-101: Add Application to Existing User
   lazy val addApplication =
-  path( "application" ) {
+    path( "application" ) {
       post {
         handleWith {
           addApplicationToUserRequest: AddApplicationRequest =>
@@ -163,18 +170,17 @@ class AccountService(registrationActor: ActorRef,
 
 
   lazy val login =
-  // PARALLELAI-102 API: User Login
-  // POST /account/$UserID/application/$ApplicationId/login {
-  path (JavaUUID / "application" / JavaUUID / "login"){
-    (accountId: UserID, applicationId: ApplicationID) =>
-    post {
-      handleWith {
-        loginRequest: APILoginRequest =>
+    // PARALLELAI-102 API: User Login
+    // POST /account/$UserID/application/$ApplicationId/login {
+    path (JavaUUID / "application" / JavaUUID / "login"){
+      (accountId: UserID, applicationId: ApplicationID) =>
+      post {
+        handleWith {
+          loginRequest: APILoginRequest =>
 
-        (registrationActor ? LoginRequest(accountId, applicationId, loginRequest.password)).mapTo[ResponseWithFailure[RegistrationError, APISessionResponse]]
+          (registrationActor ? LoginRequest(accountId, applicationId, loginRequest.password)).mapTo[ResponseWithFailure[RegistrationError, APISessionResponse]]
+        }
       }
     }
-  }
-
 
 }

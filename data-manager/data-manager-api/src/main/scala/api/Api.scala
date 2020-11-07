@@ -17,7 +17,7 @@ trait Api extends RouteConcatenation {
   private implicit val _ = system.dispatcher
 
   val routes =
-    new AccountService(registration, editAccount).route ~
+    new AccountService(registration, editAccount, userAuthentication).route ~
     new BrandService(brand, editAccount).route ~
     new MediaService(media).route ~
     new OfferService(offer).route ~

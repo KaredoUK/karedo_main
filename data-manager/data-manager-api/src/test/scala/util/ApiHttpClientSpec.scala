@@ -40,6 +40,7 @@ trait ApiHttpClientSpec
     lazy val mockedOfferDAO = mock[OfferDAO]
     lazy val mockedUserSessionDAO = mock[UserSessionDAO]
     lazy val messagerActor = TestProbe()
+
     val server = new RestServiceWithMockPersistence(
       servicePort, mockedBrandDAO, mockedHintDAO,
       mockedClientApplicationDAO, mockedUserAccountDAO,

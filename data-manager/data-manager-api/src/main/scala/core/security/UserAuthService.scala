@@ -18,9 +18,9 @@ class UserAuthServiceImpl(sessionDAO: UserSessionDAO, clientApplicationDAO: Clie
     val sessionUUID = UUID.fromString(sessionId)
 
     sessionDAO.getSession(sessionUUID) map { session =>
-      val userActiveApps = clientApplicationDAO.findByUserId(session.userId) filter { _.active }
+      val activeAppsIDs = clientApplicationDAO.findByUserId(session.userId) filter { _.active } map { _.id }
 
-      UserAuthContext(session.userId, userActiveApps map { _.id })
+      UserAuthContext(session.userId, activeAppsIDs)
     }
   }
 }

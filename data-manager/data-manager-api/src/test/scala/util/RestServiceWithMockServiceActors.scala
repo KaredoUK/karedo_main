@@ -5,6 +5,7 @@ import api.Api
 import com.escalatesoft.subcut.inject.NewBindingModule._
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import com.typesafe.config.ConfigFactory
+import core.security.UserAuthService
 import core.{MessageActors, BootedCore, ServiceActors}
 import parallelai.wallet.config.AppConfigPropertySource
 import web.Web
@@ -18,7 +19,8 @@ class RestServiceWithMockServiceActors(
   override val offer: ActorRef,
   override val other: ActorRef,
   override val media: ActorRef,
-  override val registration: ActorRef
+  override val registration: ActorRef,
+  override val userAuthentication: UserAuthService
 ) extends Injectable
   with BootedCore
   with ServiceActors

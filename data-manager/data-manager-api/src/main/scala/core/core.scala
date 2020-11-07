@@ -2,10 +2,11 @@ package core
 
 import java.util.UUID
 
-import akka.actor.{ActorRef, ActorDSL, Props, ActorSystem}
+import akka.actor._
 import ActorDSL._
-import akka.routing.{RoundRobinPool, RoundRobinRouter}
+import akka.routing.{RoundRobinGroup, RoundRobinPool, RoundRobinRouter}
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
+import core.security.{UserAuthServiceImpl, UserAuthService}
 import parallelai.wallet.entity.Brand
 import parallelai.wallet.entity.api.offermanager.RetailOffer
 import parallelai.wallet.persistence._
@@ -81,6 +82,7 @@ trait ServiceActors {
   def other: ActorRef
   def media: ActorRef
   def editAccount: ActorRef
+  def userAuthentication: UserAuthService
 }
 
 trait MessageActors {
@@ -117,13 +119,13 @@ trait BaseCoreActors extends ServiceActors with RestMessageActors  {
   val otherActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.other") getOrElse 3
   val registrationActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.registration") getOrElse 3
   val editAccountActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.editAccount") getOrElse 3
+  val userAuthActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.userAuthentication") getOrElse 5
 
-
-  // This should be an actor pool at least if we don't want to use a one actor per request strategy
   override val registration = system.actorOf(
     RegistrationActor.props(userAccountDAO, clientApplicationDAO, messenger)
       .withRouter( RoundRobinPool(nrOfInstances = registrationActorPoolSize) )
   )
+
   override val brand = system.actorOf(
     BrandActor.props(brandDAO, hintDAO)
       .withRouter( RoundRobinPool(nrOfInstances = brandActorPoolSize) )
@@ -133,7 +135,6 @@ trait BaseCoreActors extends ServiceActors with RestMessageActors  {
     MediaContentActor.props(mediaDAO)
       .withRouter( RoundRobinPool(nrOfInstances = mediaActorPoolSize) )
   )
-
 
   override val offer = system.actorOf(
     OfferActor.props(offerDAO)
@@ -149,6 +150,24 @@ trait BaseCoreActors extends ServiceActors with RestMessageActors  {
     EditAccountActor.props(userAccountDAO, clientApplicationDAO, brandDAO)
       .withRouter( RoundRobinPool(nrOfInstances = editAccountActorPoolSize) )
   )
+
+  override val userAuthentication: UserAuthService = createUserAuthenticationPool(userAuthActorPoolSize)
+
+  def createUserAuthenticationPool(poolSize: Int): UserAuthService = {
+    // see http://doc.akka.io/docs/akka/snapshot/scala/typed-actors.html
+
+    val userAuthActors = List.range(0, poolSize).map { idx =>
+      TypedActor(system).typedActorOf(
+        TypedProps(classOf[UserAuthService], new UserAuthServiceImpl(userSessionDAO, clientApplicationDAO)), s"userAuthenticationActor-$idx"
+      )
+    }
+    val userAuthActorsPaths = userAuthActors map { r =>
+      TypedActor(system).getActorRefFor(r).path.toStringWithoutAddress
+    }
+    val userAuthActorsRouter: ActorRef = system.actorOf(RoundRobinGroup(userAuthActorsPaths).props())
+
+    TypedActor(system).typedActorOf(TypedProps[UserAuthService](), actorRef = userAuthActorsRouter)
+  }
 }
 
 trait CoreActors extends BaseCoreActors with RestMessageActors {

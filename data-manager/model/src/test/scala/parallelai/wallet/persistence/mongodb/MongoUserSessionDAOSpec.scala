@@ -56,27 +56,40 @@ class MongoUserSessionDAOSpec
       userSessionDAO.validateSession(session) shouldEqual false
     }
 
-    // TO BE FIXED
-//    "Not validate expired session" in {
-//
-//      implicit val bindingModule =
-//        newBindingModuleWithConfig(
-//          PropertiesConfigPropertySource(
-//            defaultBindingConfig +  ( "user.session.ttl" -> "2.seconds" )
-//          )
-//        )
-//
-//      val quickExpirySessionDAO = new MongoUserSessionDAO()
-//
-//      val userId = randomUUID()
-//      val appId = randomUUID()
-//      val session = quickExpirySessionDAO.createNewSession(userId, appId)
-//
-//      //Expiry is handled by mongo every 60 seconds
-//      Thread.sleep( 60.seconds.toMillis )
-//
-//      userSessionDAO.validateSession(session) shouldEqual false
-//    }
+    "Not validate expired session" in {
+
+      implicit val bindingModule =
+        newBindingModuleWithConfig(
+          PropertiesConfigPropertySource(
+            defaultBindingConfig +  ( "user.session.ttl" -> "2.seconds" )
+          )
+        )
+
+      val quickExpirySessionDAO = new MongoUserSessionDAO()
+
+      val userId = randomUUID()
+      val appId = randomUUID()
+      val session = quickExpirySessionDAO.createNewSession(userId, appId)
+
+      userSessionDAO.validateSession(session) must beFalse.eventually(20, 4.seconds)
+    }
+
+    "Not retrieve expired session" in {
+      implicit val bindingModule =
+        newBindingModuleWithConfig(
+          PropertiesConfigPropertySource(
+            defaultBindingConfig +  ( "user.session.ttl" -> "2.seconds" )
+          )
+        )
+
+      val quickExpirySessionDAO = new MongoUserSessionDAO()
+
+      val userId = randomUUID()
+      val appId = randomUUID()
+      val session = quickExpirySessionDAO.createNewSession(userId, appId)
+
+      userSessionDAO.getSession(session.sessionId) must beNone.eventually(20, 4.seconds)
+    }
 
   }
 }

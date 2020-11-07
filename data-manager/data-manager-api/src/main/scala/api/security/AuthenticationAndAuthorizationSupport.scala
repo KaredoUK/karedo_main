@@ -28,13 +28,10 @@ trait AuthenticationSupport {
   
   import AuthenticationSupport._
 
-  protected def authDAO: UserAuthService
-  protected def executionContext: ExecutionContext
-
-  implicit private val _execCtx = executionContext
+  protected def userAuthService: UserAuthService
 
   import spray.routing.authentication._
-  def userAuthContextFromSessionId(authDAO: UserAuthService)(requestCtx: RequestContext): Future[Authentication[UserAuthContext]] = {
+  def userAuthContextFromSessionId(authDAO: UserAuthService)(implicit executionContext: ExecutionContext): ContextAuthenticator[UserAuthContext] =  (requestCtx: RequestContext) =>  {
     val sessionIdOp = extractSessionIDHeader(requestCtx.request)
 
     sessionIdOp map { sessionId =>
@@ -52,9 +49,9 @@ trait AuthenticationSupport {
     }
   }
 
-  def userContextAuthenticator: ContextAuthenticator[UserAuthContext] = userAuthContextFromSessionId(authDAO)
+  def userContextAuthenticator(implicit executionContext: ExecutionContext): ContextAuthenticator[UserAuthContext] = userAuthContextFromSessionId(userAuthService)
 
-  def authenticateWithKaredoSession: Directive1[UserAuthContext] =
+  def authenticateWithKaredoSession(implicit executionContext: ExecutionContext): Directive1[UserAuthContext] =
     authenticate( AuthMagnet.fromContextAuthenticator(userContextAuthenticator) )
 }
 
@@ -67,7 +64,7 @@ trait AuthorizationSupport extends AuthenticationSupport {
   def canAccessUser(userId: UUID)(userAuthContext: UserAuthContext): Boolean = userAuthContext.userId == userId
   def hasActiveAppWithID(appID: UUID)(userAuthContext: UserAuthContext): Boolean = userAuthContext.activeApps.contains(appID)
   
-  def userAuthorizedFor( check: => KaredoAuthCheck ): Directive1[UserAuthContext] =
+  def userAuthorizedFor( check: => KaredoAuthCheck )(implicit executionContext: ExecutionContext): Directive1[UserAuthContext] =
     authenticateWithKaredoSession.flatMap { userAuthContext: UserAuthContext =>
       authorize( check(userAuthContext) ).hflatMap {
         _ => provide(userAuthContext)

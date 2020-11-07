@@ -34,7 +34,9 @@ class MongoUserSessionDAO (implicit val bindingModule: BindingModule) extends Us
   }
 
   override def getSession(sessionId: UUID): Option[UserSession] = {
-    dao.findOneById(sessionId) map {
+    dao.findOneById(sessionId) filter {
+      _.expiry.isBeforeNow
+    } map {
       mongoSession =>
         mongoSessionAsUserSession(mongoSession)
     }

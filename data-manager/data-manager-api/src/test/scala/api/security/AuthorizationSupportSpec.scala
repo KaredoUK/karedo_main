@@ -22,13 +22,11 @@ class AuthorizationSupportSpec extends Specification with Specs2RouteTest with H
   trait WithAuthenticatedRoute extends Scope with Directives with AuthorizationSupport {
     val mockAuthService = mock[UserAuthService]
 
-    override def authDAO: UserAuthService = mockAuthService
-
-    override def executionContext: ExecutionContext = system.dispatcher
+    override def userAuthService: UserAuthService = mockAuthService
 
     def testRoute(check: KaredoAuthCheck) =
       path("authenticatedRoute") {
-        userAuthorizedFor( check ) { userAuthContext =>
+        userAuthorizedFor( check )(system.dispatcher) { userAuthContext =>
           get {
             complete {
               userAuthContext.toString
@@ -37,7 +35,6 @@ class AuthorizationSupportSpec extends Specification with Specs2RouteTest with H
         }
       }
   }
-
 
   "An AuthorizedRoute" should {
     "Extract user authentication context" in new WithAuthenticatedRoute {

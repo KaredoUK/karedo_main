@@ -138,13 +138,12 @@ class RegistrationActor(
     ret
   }
 
-  def loginUser(loginRequest: LoginRequest): ResponseWithFailure[RegistrationError,APISessionResponse] =
-  {
-    wrapLog("loginUser",loginRequest){
-      val sessionid=UUID.randomUUID().toString
-      SuccessResponse(APISessionResponse(sessionid))
-    }
+  def loginUser(loginRequest: LoginRequest): ResponseWithFailure[RegistrationError,APISessionResponse] = wrapLog("loginUser",loginRequest){
+    val sessionid=UUID.randomUUID().toString
 
+
+
+    SuccessResponse(APISessionResponse(sessionid))
   }
 
   def registerUser(registrationRequest: RegistrationRequest): ResponseWithFailure[RegistrationError, RegistrationResponse] =
@@ -164,8 +163,7 @@ class RegistrationActor(
     }
 
   def addApplicationToUser(addApplicationRequest: AddApplicationRequest): ResponseWithFailure[RegistrationError, AddApplicationResponse] =
-    withValidations(addApplicationRequest)(validUserIdentification, applicationNotRegistered) { request =>
-      wrapLog("addApplicationToUser",request) {
+    withValidations(addApplicationRequest)(validUserIdentification, applicationNotRegistered) { request =>  wrapLog("addApplicationToUser",request) {
 
         userAccountDAO.findByAnyOf(None, request.msisdn, request.email) match {
           case None =>
