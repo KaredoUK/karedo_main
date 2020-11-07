@@ -293,7 +293,7 @@ class AccountServiceSpec
 
         val pipeline = addHeader(AuthenticationSupport.HEADER_NAME_SESSION_ID, sessionId.toString) ~> sendReceive ~> unmarshal[UserProfile]
 
-        val returnedProfile = wait { pipeline { Get(s"/account/${userAccount.id}")  } }
+        val returnedProfile = wait { pipeline { Get(s"$serviceUrl/account/${userAccount.id}")  } }
 
         returnedProfile shouldEqual EditAccountActor.userAccountToUserProfile(userAccount)
       }
