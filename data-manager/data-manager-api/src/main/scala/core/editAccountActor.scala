@@ -72,6 +72,38 @@ object EditAccountActor {
     }
   }
 
+  def userAccountToUserProfile(userAccount: UserAccount): UserProfile =
+    UserProfile(
+      UserInfo(
+        userId = userAccount.id,
+        fullName = userAccount.personalInfo.name,
+        postCode = userAccount.personalInfo.postCode,
+        birthDate = userAccount.personalInfo.birthDate,
+        country = None,
+        email = userAccount.email,
+        msisdn = userAccount.msisdn,
+        gender = userAccount.personalInfo.gender
+      ),
+      UserSettings(
+        userAccount.settings.maxMessagesPerWeek
+      ),
+      totalPoints = userAccount.totalPoints
+    )
+
+  def userProfileToUserAccount(userProfile: UserProfile): UserAccount =
+    UserAccount(
+      userProfile.info.userId,
+      userProfile.info.msisdn,
+      userProfile.info.email,
+      UserPersonalInfo(
+        userProfile.info.fullName,
+        userProfile.info.postCode,
+        userProfile.info.birthDate,
+        userProfile.info.gender
+      ),
+      AccountSettings(userProfile.settings.maxAdsPerWeek),
+      totalPoints = userProfile.totalPoints
+    )
 }
 
 import EditAccountActor._
@@ -190,38 +222,4 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
         SuccessResponse("OK")
       }
     }
-
-
-  def userAccountToUserProfile(userAccount: UserAccount): UserProfile =
-    UserProfile(
-      UserInfo(
-        userId = userAccount.id,
-        fullName = userAccount.personalInfo.name,
-        postCode = userAccount.personalInfo.postCode,
-        birthDate = userAccount.personalInfo.birthDate,
-        country = None,
-        email = userAccount.email,
-        msisdn = userAccount.msisdn,
-        gender = userAccount.personalInfo.gender
-      ),
-      UserSettings(
-        userAccount.settings.maxMessagesPerWeek
-      ),
-      totalPoints = userAccount.totalPoints
-    )
-
-  def userProfileToUserAccount(userProfile: UserProfile): UserAccount =
-    UserAccount(
-      userProfile.info.userId,
-      userProfile.info.msisdn,
-      userProfile.info.email,
-      UserPersonalInfo(
-        userProfile.info.fullName,
-        userProfile.info.postCode,
-        userProfile.info.birthDate,
-        userProfile.info.gender
-      ),
-      AccountSettings(userProfile.settings.maxAdsPerWeek),
-      totalPoints = userProfile.totalPoints
-    )
 }

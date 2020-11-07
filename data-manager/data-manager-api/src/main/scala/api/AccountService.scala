@@ -1,7 +1,6 @@
 package api
 
 import api.security.AuthorizationSupport
-import com.mongodb.casbah.Imports._
 import com.parallelai.wallet.datamanager.data._
 
 import core.EditAccountActor.EditAccountError
@@ -17,8 +16,6 @@ import RegistrationActor._
 import EditAccountActor._
 import spray.http._
 import spray.http.StatusCodes._
-import com.parallelai.wallet.datamanager.data._
-import ApiDataJsonProtocol._
 import RegistrationActor.AddApplicationToKnownUserRequest
 import parallelai.wallet.entity.UserAccount
 import core.EditAccountActor._
@@ -32,6 +29,7 @@ class AccountService(registrationActor: ActorRef,
   extends Directives
   with DefaultJsonFormats
   with ApiErrorsJsonProtocol
+  with ApiDataJsonProtocol
   with AuthorizationSupport
 {
 
@@ -125,11 +123,11 @@ class AccountService(registrationActor: ActorRef,
     }
 
 
+  // PARALLELAI-54API: Get User Points
   lazy val getPoints =
     path( JavaUUID / "points") { accountId: UserID =>
       userAuthorizedFor( canAccessUser(accountId) )(executionContext) { userAuthContext =>
         rejectEmptyResponse {
-          // PARALLELAI-54API: Get User Points
           get {
             complete {
               (editAccountActor ? GetAccountPoints(accountId)).mapTo[ResponseWithFailure[RegistrationError, Option[UserPoints]]]

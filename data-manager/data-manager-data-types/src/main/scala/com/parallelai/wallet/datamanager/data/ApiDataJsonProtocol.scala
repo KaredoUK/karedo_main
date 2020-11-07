@@ -10,7 +10,7 @@ import spray.http.StatusCodes._
 import spray.json._
 import java.util.UUID
 
-object ApiDataJsonProtocol extends DefaultJsonProtocol  {
+trait ApiDataJsonProtocol extends DefaultJsonProtocol  {
 
   implicit object UuidJsonFormat extends RootJsonFormat[UUID] {
     def write(x: UUID) = JsString(x.toString)
@@ -73,3 +73,5 @@ object ApiDataJsonProtocol extends DefaultJsonProtocol  {
   implicit val interactionResponse = jsonFormat2(InteractionResponse)
 
 }
+
+object ApiDataJsonProtocol extends ApiDataJsonProtocol

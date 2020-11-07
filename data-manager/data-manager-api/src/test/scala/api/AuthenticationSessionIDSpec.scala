@@ -11,18 +11,15 @@ import spray.http.{HttpResponse, HttpRequest}
 import util.ApiHttpClientSpec
 
 import scala.concurrent.Future
-
+import parallelai.wallet.util.SprayJsonSupport
 //import util.ApiHttpClientSpec.WithMockedPersistenceRestService
 
 /**
  * Created by user on 12/24/14.
  */
 class AuthenticationSessionIDSpec
-  extends ApiHttpClientSpec
+  extends ApiHttpClientSpec with ApiDataJsonProtocol with SprayJsonSupport
 {
-  import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
-  import parallelai.wallet.util.SprayJsonSupport._
-
 
   "POST /login" should {
     "1) give 400 with invalid json" >> new WithMockedPersistenceRestService {

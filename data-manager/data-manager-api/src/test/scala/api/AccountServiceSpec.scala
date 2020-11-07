@@ -3,7 +3,9 @@ package api
 import java.util.UUID
 import java.util.UUID._
 
+import api.security.AuthenticationSupport
 import com.parallelai.wallet.datamanager.data._
+import core.EditAccountActor
 import org.apache.commons.lang.StringUtils
 import org.specs2.matcher._
 import org.specs2.mutable.Specification
@@ -276,6 +278,49 @@ class AccountServiceSpec
 
       there was no(mockedUserSessionDAO).createNewSession(any[UUID], any[UUID])
     }
+
+    "PARALLELAI-51 get user profile" should {
+      "Retrieve user profile for the calling authenticated user" in new WithMockedPersistenceRestService  {
+
+        val sessionId = randomUUID()
+
+        val userAccount = UserAccount(randomUUID(), Some("Email"), Some("msisdn"))
+
+        // Authentication is fine
+        mockedUserSessionDAO.getSession(sessionId) returns Some(UserSession(sessionId, userAccount.id, randomUUID()))
+
+        mockedUserAccountDAO.getById(userAccount.id) returns Some(userAccount)
+
+        val pipeline = addHeader(AuthenticationSupport.HEADER_NAME_SESSION_ID, sessionId.toString) ~> sendReceive ~> unmarshal[UserProfile]
+
+        val returnedProfile = wait { pipeline { Get(s"/account/${userAccount.id}")  } }
+
+        returnedProfile shouldEqual EditAccountActor.userAccountToUserProfile(userAccount)
+      }
+
+      "Refuse unauthenticated user" in {
+        todo
+      }
+
+      "Refuse calls from a different authenticated user" in {
+        todo
+      }
+    }
+
+    "PARALLELAI-54API: Get User Points" should {
+      "Return user points for the calling authenticated user" in {
+        todo
+      }
+
+      "Refuse unauthenticated user" in {
+        todo
+      }
+
+      "Refuse calls from a different authenticated user" in {
+        todo
+      }
+    }
+
   }
 
 
