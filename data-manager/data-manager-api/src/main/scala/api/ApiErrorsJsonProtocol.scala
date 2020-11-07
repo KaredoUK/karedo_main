@@ -18,6 +18,8 @@ trait ApiErrorsJsonProtocol extends DefaultJsonFormats {
       case InvalidValidationCode => Unauthorized
       case InvalidValidationRequest(_) => BadRequest
       case InternalRegistrationError(_) => InternalServerError
+      case ApplicationNotActivated => Unauthorized
+      case InvalidCredentials => Unauthorized
     }
   }
 

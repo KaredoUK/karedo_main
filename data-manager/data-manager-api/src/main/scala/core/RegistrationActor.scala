@@ -6,7 +6,7 @@ import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
 //import core.BrandActor.InternalBrandError
 import core.MessengerActor.SendMessage
 import core.common.RequestValidationChaining
-import parallelai.wallet.persistence.{ClientApplicationDAO, UserAccountDAO}
+import parallelai.wallet.persistence.{UserSessionDAO, ClientApplicationDAO, UserAccountDAO}
 import akka.actor.{Props, ActorLogging, ActorRef, Actor}
 import com.parallelai.wallet.datamanager.data._
 import scala.concurrent.{ExecutionContext, Future}
@@ -36,8 +36,11 @@ import scala.util.Try
  */
 object RegistrationActor {
 
-  def props(userAccountDAO: UserAccountDAO, clientApplicationDAO: ClientApplicationDAO, messengerActor: ActorRef)(implicit bindingModule: BindingModule): Props =
-    Props(new RegistrationActor(userAccountDAO, clientApplicationDAO, messengerActor))
+  def props(userAccountDAO: UserAccountDAO, clientApplicationDAO: ClientApplicationDAO, userSessionDAO: UserSessionDAO,
+            messengerActor: ActorRef)(implicit bindingModule: BindingModule): Props = {
+
+    Props(new RegistrationActor(userAccountDAO, clientApplicationDAO, userSessionDAO, messengerActor))
+  }
 
   sealed trait RegistrationError
 
@@ -52,6 +55,10 @@ object RegistrationActor {
   case class InvalidValidationRequest(reason: String) extends RegistrationError
 
   case class InternalRegistrationError(throwable: Throwable) extends RegistrationError
+
+  case object InvalidCredentials extends RegistrationError
+
+  case object ApplicationNotActivated extends RegistrationError
 
   implicit object registrationErrorJsonFormat extends RootJsonWriter[RegistrationError] {
     def write(error: RegistrationError) = error match {
@@ -77,6 +84,12 @@ object RegistrationActor {
           "reason" -> JsString(reason)
         }
       )
+      case InvalidCredentials => JsObject(
+        "type" -> JsString("InvalidCredentials")
+      )
+      case ApplicationNotActivated => JsObject(
+        "type" -> JsString("ApplicationNotActivated")
+      )
     }
 
   }
@@ -95,6 +108,7 @@ object RegistrationActor {
 class RegistrationActor(
       userAccountDAO: UserAccountDAO,
       clientApplicationDAO: ClientApplicationDAO,
+      userSessionDAO: UserSessionDAO,
       messengerActor: ActorRef)
       (implicit val bindingModule: BindingModule)
   extends Actor
@@ -138,12 +152,31 @@ class RegistrationActor(
     ret
   }
 
-  def loginUser(loginRequest: LoginRequest): ResponseWithFailure[RegistrationError,APISessionResponse] = wrapLog("loginUser",loginRequest){
-    val sessionid=UUID.randomUUID().toString
+  def loginUser(loginRequest: LoginRequest): ResponseWithFailure[RegistrationError,APISessionResponse] = wrapLog("loginUser",loginRequest) {
 
+    val userAccountWithAppStatusOp = userAccountDAO.getById(loginRequest.accountId) filter { userAccount =>
+      userAccount.password == Some(loginRequest.password)
+    } map { userAccount =>
+      val clientAppStatusOp = clientApplicationDAO.getById(loginRequest.applicationId) filter { _.accountId == userAccount.id } map { _.active }
 
+      (userAccount, clientAppStatusOp)
+    }
 
-    SuccessResponse(APISessionResponse(sessionid))
+    userAccountWithAppStatusOp match {
+      case Some( (account, Some(true)) ) =>
+        val newSession = userSessionDAO.createNewSession(loginRequest.accountId, loginRequest.applicationId)
+        SuccessResponse(APISessionResponse(newSession.sessionId.toString))
+
+      case Some( (account, Some(false)) )  =>
+        FailureResponse(ApplicationNotActivated)
+
+      case Some( (account, None) )  =>
+        FailureResponse(InvalidCredentials)
+
+      case None =>
+        FailureResponse(InvalidCredentials)
+    }
+
   }
 
   def registerUser(registrationRequest: RegistrationRequest): ResponseWithFailure[RegistrationError, RegistrationResponse] =

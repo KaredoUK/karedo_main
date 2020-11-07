@@ -122,7 +122,7 @@ trait BaseCoreActors extends ServiceActors with RestMessageActors  {
   val userAuthActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.userAuthentication") getOrElse 5
 
   override val registration = system.actorOf(
-    RegistrationActor.props(userAccountDAO, clientApplicationDAO, messenger)
+    RegistrationActor.props(userAccountDAO, clientApplicationDAO, userSessionDAO, messenger)
       .withRouter( RoundRobinPool(nrOfInstances = registrationActorPoolSize) )
   )
 
