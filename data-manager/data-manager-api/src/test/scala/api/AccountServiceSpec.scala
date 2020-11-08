@@ -287,7 +287,12 @@ class AccountServiceSpec
         val userAccount = UserAccount(randomUUID(), Some("Email"), Some("msisdn"))
 
         // Authentication is fine
-        mockedUserSessionDAO.getSession(sessionId) returns Some(UserSession(sessionId, userAccount.id, randomUUID()))
+        mockedUserSessionDAO.getSession(sessionId) returns
+          Some(UserSession(sessionId, userAccount.id, randomUUID()))
+
+        // there is a client application for that
+        mockedClientApplicationDAO.findByUserId(userAccount.id) returns
+          Seq(ClientApplication(randomUUID(), userAccount.id, "aaaa", true))
 
         mockedUserAccountDAO.getById(userAccount.id) returns Some(userAccount)
 
