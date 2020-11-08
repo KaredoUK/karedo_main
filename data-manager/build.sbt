@@ -22,13 +22,13 @@ lazy val api = (project.in(file("./data-manager-api"))).dependsOn(data,model,com
 lazy val root = project.in( file(".") )
   .aggregate(data, api, model)
 
-testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "junitxml", "console")
+//testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "junitxml", "console")
 
 testOptions in Test += Tests.Setup( () => Embedder.startMongo)
 
 testOptions in Test += Tests.Cleanup( () => println("After Tests"))
 
-testListeners <<= target.map(t => Seq(new JenkinsJUnitXmlTestsListener(t.getAbsolutePath)))
+//testListeners <<= target.map(t => Seq(new JenkinsJUnitXmlTestsListener(t.getAbsolutePath)))
 
 
 TaskKey[Unit]("start-mongo") := Embedder.startMongo
