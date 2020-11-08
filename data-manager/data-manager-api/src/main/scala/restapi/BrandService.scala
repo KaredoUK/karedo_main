@@ -1,4 +1,4 @@
-package api
+package restapi
 
 
 
@@ -7,7 +7,7 @@ import java.util.UUID
 import akka.actor.{ActorRef}
 import akka.event.slf4j.Logger
 import akka.util.Timeout
-import api.security.AuthorizationSupport
+import restapi.security.AuthorizationSupport
 import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
 import com.parallelai.wallet.datamanager.data.{BrandData, BrandResponse, ListBrandsAdverts, _}
 

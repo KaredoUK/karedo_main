@@ -1,4 +1,4 @@
-package api
+package restapi
 
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
 import com.parallelai.wallet.datamanager.data._

@@ -1,4 +1,4 @@
-package api
+package restapi
 
 import akka.actor.ActorRef
 import akka.event.slf4j.Logger

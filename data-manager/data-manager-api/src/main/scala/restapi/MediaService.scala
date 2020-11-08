@@ -1,4 +1,4 @@
-package api
+package restapi
 
 import java.io.ByteArrayInputStream
 import java.util.UUID
@@ -7,7 +7,7 @@ import akka.actor.ActorRef
 
 import akka.event.slf4j.Logger
 import akka.util.Timeout
-import api.MediaService.logger
+import restapi.MediaService.logger
 import com.parallelai.wallet.datamanager.data._
 
 import core.MediaContentActor._

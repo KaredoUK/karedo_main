@@ -1,4 +1,4 @@
-package api
+package restapi
 
 import java.util.UUID
 
@@ -65,7 +65,7 @@ object AuthorizedFilter {
   def apply(implicit bindingModule: BindingModule) = new AuthorizedFilter
 }
 
-import api.authorization._
+import restapi.authorization._
 
 class AuthorizedFilter(implicit val bindingModule: BindingModule) extends Filter with Injectable with Results {
 

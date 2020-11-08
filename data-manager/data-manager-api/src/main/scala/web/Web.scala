@@ -2,7 +2,7 @@ package web
 
 import com.escalatesoft.subcut.inject.Injectable
 import core.{ServiceActors, CoreActors, Core}
-import api.Api
+import restapi.Api
 import akka.io.IO
 import spray.can.Http
 

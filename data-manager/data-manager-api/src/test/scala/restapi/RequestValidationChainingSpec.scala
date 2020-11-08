@@ -1,4 +1,4 @@
-package api
+package restapi
 
 import core.{FailureResponse, SuccessResponse, ResponseWithFailure}
 import core.common.RequestValidationChaining

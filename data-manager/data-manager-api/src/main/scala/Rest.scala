@@ -1,4 +1,4 @@
-import api.Api
+import restapi.Api
 import core.{MongoPersistence, DependencyInjection, BootedCore, CoreActors}
 import parallelai.wallet.persistence.mongodb.MongoAppSupport
 import web.Web

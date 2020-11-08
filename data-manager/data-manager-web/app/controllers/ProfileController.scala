@@ -2,7 +2,7 @@ package controllers
 
 import java.util.UUID
 
-import api.{DataManagerRestClient, DataManagerApiClient}
+import restapi.{DataManagerRestClient, DataManagerApiClient}
 import com.parallelai.wallet.datamanager.data.{UserSettings, UserInfo, UserProfile, RegistrationRequest}
 import controllers.RegistrationController._
 import org.joda.time.DateTime
@@ -57,7 +57,7 @@ object profileForms {
     UserInfo(UUID.fromString(id), name getOrElse "", email, msisdn, postCode, country, birthDate, gender)
 }
 
-import api.authorization._
+import restapi.authorization._
 import profileForms._
 trait ProfileController extends Controller {
   def dataManagerApiClient : DataManagerApiClient

@@ -14,7 +14,7 @@ import scala.Some
 import com.parallelai.wallet.datamanager.data.UserSettings
 import com.parallelai.wallet.datamanager.data.RegistrationRequest
 import com.parallelai.wallet.datamanager.data.UserInfo
-import api.{authorization, DataManagerRestClient, DataManagerApiClient}
+import restapi.{authorization, DataManagerRestClient, DataManagerApiClient}
 import com.parallelai.wallet.datamanager.data.UserProfile
 import scala.Some
 import com.parallelai.wallet.datamanager.data.UserSettings

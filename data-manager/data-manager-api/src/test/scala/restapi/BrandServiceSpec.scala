@@ -1,4 +1,4 @@
-package api
+package restapi
 
 import com.parallelai.wallet.datamanager.data._
 import org.specs2.matcher.Matcher

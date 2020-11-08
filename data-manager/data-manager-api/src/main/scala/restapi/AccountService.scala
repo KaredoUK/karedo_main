@@ -1,6 +1,6 @@
-package api
+package restapi
 
-import api.security.AuthorizationSupport
+import restapi.security.AuthorizationSupport
 import com.parallelai.wallet.datamanager.data._
 
 import core.EditAccountActor.EditAccountError

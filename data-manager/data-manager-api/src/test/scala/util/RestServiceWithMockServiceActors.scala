@@ -1,7 +1,7 @@
 package util
 
 import akka.actor.ActorRef
-import api.Api
+import restapi.Api
 import com.escalatesoft.subcut.inject.NewBindingModule._
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import com.typesafe.config.ConfigFactory

@@ -1,4 +1,4 @@
-package api
+package restapi
 
 
 import core.objAPI.{InvalidRequest, APIError, InternalError}

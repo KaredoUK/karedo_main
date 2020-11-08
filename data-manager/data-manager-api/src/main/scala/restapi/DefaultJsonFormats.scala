@@ -1,4 +1,4 @@
-package api
+package restapi
 
 import core.{SuccessResponse, FailureResponse, ResponseWithFailure}
 import spray.json._

@@ -1,6 +1,6 @@
 package controllers
 
-import api.{DataManagerRestClient, DataManagerApiClient}
+import restapi.{DataManagerRestClient, DataManagerApiClient}
 import org.joda.time.format.DateTimeFormat
 import parallelai.wallet.config.AppConfigInjection
 import parallelai.wallet.persistence.{ClientApplicationDAO, UserAccountDAO}

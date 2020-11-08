@@ -1,7 +1,7 @@
 package core
 
 import spray.json.{JsString, JsObject, RootJsonWriter}
-import api.ApiErrorsJsonProtocol
+import restapi.ApiErrorsJsonProtocol
 
 /**
  * Created by pakkio on 09/12/2014.

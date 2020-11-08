@@ -1,4 +1,4 @@
-import api.AuthorizedFilter
+import restapi.AuthorizedFilter
 import com.escalatesoft.subcut.inject.NewBindingModule._
 import parallelai.wallet.config.AppConfigPropertySource
 import play.api._

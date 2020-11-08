@@ -1,6 +1,6 @@
 package controllers
 
-import api.{DataManagerRestClient, DataManagerApiClient}
+import restapi.{DataManagerRestClient, DataManagerApiClient}
 import parallelai.wallet.config.AppConfigInjection
 import play.api.Logger
 import play.api.mvc.Action._
@@ -9,7 +9,7 @@ import play.mvc.Controller
 import scala.concurrent.Future._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-import api.authorization._
+import restapi.authorization._
 
 object MainController extends Controller with AppConfigInjection {
   implicit val _ = bindingModule

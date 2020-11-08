@@ -1,9 +1,9 @@
-package api
+package restapi
 
 import java.util.UUID
 import java.util.UUID._
 
-import api.security.AuthenticationSupport
+import restapi.security.AuthenticationSupport
 import com.parallelai.wallet.datamanager.data._
 import core.EditAccountActor
 import org.apache.commons.lang.StringUtils
