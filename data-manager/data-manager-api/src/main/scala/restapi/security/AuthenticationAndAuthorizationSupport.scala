@@ -31,11 +31,11 @@ trait AuthenticationSupport {
   protected def userAuthService: UserAuthService
 
   import spray.routing.authentication._
-  def userAuthContextFromSessionId(authDAO: UserAuthService)(implicit executionContext: ExecutionContext): ContextAuthenticator[UserAuthContext] =  (requestCtx: RequestContext) =>  {
+  def userAuthContextFromSessionId(authService: UserAuthService)(implicit executionContext: ExecutionContext): ContextAuthenticator[UserAuthContext] =  (requestCtx: RequestContext) =>  {
     val sessionIdOp = extractSessionIDHeader(requestCtx.request)
 
     sessionIdOp map { sessionId =>
-      authDAO.getUserContextForSession(sessionId) map { userContextForSessionOp =>
+      authService.getUserContextForSession(sessionId) map { userContextForSessionOp =>
         userContextForSessionOp map {
           Right(_)
         } getOrElse {

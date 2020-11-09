@@ -57,6 +57,7 @@ class AccountService(registrationActor: ActorRef,
     }
 
   // seems orphan no PARALLELAI referring to this (utility function?)
+  // Is used only by our Play front-end but should be removed
   lazy val find =
     pathEnd {
       get {
@@ -139,18 +140,20 @@ class AccountService(registrationActor: ActorRef,
 
   lazy val getBrands =
     path( JavaUUID / "brand") { accountId: UserID =>
-      // PARALLELAI-90API: Add Brand to User
-      post {
-        handleWith {
-          brandIdRequest: BrandIDRequest =>
-            (editAccountActor ? AddBrand(accountId, brandIdRequest.brandId)).mapTo[ResponseWithFailure[EditAccountError, String]]
-        }
-      } ~
-      // PARALLELAI-69API: Show User Brands
-      get {
-        complete {
-          (editAccountActor ? ListBrandsRequest(accountId)).mapTo[ResponseWithFailure[EditAccountError,List[BrandRecord]]]
-        }
+      userAuthorizedFor( canAccessUser(accountId) )(executionContext) { userAuthContext =>
+        // PARALLELAI-90API: Add Brand to User
+        post {
+          handleWith {
+            brandIdRequest: BrandIDRequest =>
+              (editAccountActor ? AddBrand(accountId, brandIdRequest.brandId)).mapTo[ResponseWithFailure[EditAccountError, String]]
+          }
+        } ~
+          // PARALLELAI-69API: Show User Brands
+          get {
+            complete {
+              (editAccountActor ? ListBrandsRequest(accountId)).mapTo[ResponseWithFailure[EditAccountError, List[BrandRecord]]]
+            }
+          }
       }
 
     }

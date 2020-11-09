@@ -280,7 +280,7 @@ class AccountServiceSpec
     }
 
     "PARALLELAI-51 get user profile" should {
-      "Retrieve user profile for the calling authenticated user" in new WithMockedPersistenceRestService  {
+      "Retrieve user profile for the calling authenticated user" in new WithMockedPersistenceRestService {
 
         val sessionId = randomUUID()
 
@@ -292,7 +292,7 @@ class AccountServiceSpec
 
         // there is a client application for that
         mockedClientApplicationDAO.findByUserId(userAccount.id) returns
-          Seq(ClientApplication(randomUUID(), userAccount.id, "aaaa", true))
+          Seq(ClientApplication(randomUUID(), userAccount.id, "activationCode", true))
 
         mockedUserAccountDAO.getById(userAccount.id) returns Some(userAccount)
 
@@ -303,12 +303,40 @@ class AccountServiceSpec
         returnedProfile shouldEqual EditAccountActor.userAccountToUserProfile(userAccount)
       }
 
-      "Refuse unauthenticated user" in {
-        todo
+      "Refuse unauthenticated user" in new WithMockedPersistenceRestService {
+        val userAccount = UserAccount(randomUUID(), Some("Email"), Some("msisdn"))
+
+        mockedUserAccountDAO.getById(userAccount.id) returns Some(userAccount)
+
+        val pipeline = sendReceive
+
+        val returnedProfile = wait { pipeline { Get(s"$serviceUrl/account/${userAccount.id}")  } }
+
+        returnedProfile.status shouldEqual Unauthorized
       }
 
-      "Refuse calls from a different authenticated user" in {
-        todo
+      "Refuse calls from a different authenticated user" in new WithMockedPersistenceRestService {
+        val sessionId = randomUUID()
+
+        val userAccount = UserAccount(randomUUID(), Some("Email"), Some("msisdn"))
+
+        val otherUserId = randomUUID()
+
+        // Authentication is with another user
+        mockedUserSessionDAO.getSession(sessionId) returns
+          Some(UserSession(sessionId, otherUserId, randomUUID()))
+
+        // there is a client application for the other user
+        mockedClientApplicationDAO.findByUserId(otherUserId) returns
+          Seq(ClientApplication(randomUUID(), userAccount.id, "activationCode", true))
+
+        mockedUserAccountDAO.getById(otherUserId) returns Some(userAccount)
+
+        val pipeline = addHeader(AuthenticationSupport.HEADER_NAME_SESSION_ID, sessionId.toString) ~> sendReceive
+
+        val returnedProfile = wait { pipeline { Get(s"$serviceUrl/account/${userAccount.id}")  } }
+
+        returnedProfile.status shouldEqual Forbidden
       }
     }
 

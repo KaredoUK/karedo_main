@@ -123,32 +123,38 @@ trait BaseCoreActors extends ServiceActors with RestMessageActors  {
 
   override val registration = system.actorOf(
     RegistrationActor.props(userAccountDAO, clientApplicationDAO, userSessionDAO, messenger)
-      .withRouter( RoundRobinPool(nrOfInstances = registrationActorPoolSize) )
+      .withRouter( RoundRobinPool(nrOfInstances = registrationActorPoolSize) ),
+    "Registration"
   )
 
   override val brand = system.actorOf(
     BrandActor.props(brandDAO, hintDAO)
-      .withRouter( RoundRobinPool(nrOfInstances = brandActorPoolSize) )
+      .withRouter( RoundRobinPool(nrOfInstances = brandActorPoolSize) ),
+    "Brand"
   )
 
   override val media = system.actorOf(
     MediaContentActor.props(mediaDAO)
-      .withRouter( RoundRobinPool(nrOfInstances = mediaActorPoolSize) )
+      .withRouter( RoundRobinPool(nrOfInstances = mediaActorPoolSize) ),
+    "Media"
   )
 
   override val offer = system.actorOf(
     OfferActor.props(offerDAO)
-      .withRouter( RoundRobinPool(nrOfInstances = offerActorPoolSize) )
+      .withRouter( RoundRobinPool(nrOfInstances = offerActorPoolSize) ),
+    "Offer"
   )
 
   override val other = system.actorOf(
     OtherActor.props()
-      .withRouter( RoundRobinPool(nrOfInstances = otherActorPoolSize) )
+      .withRouter( RoundRobinPool(nrOfInstances = otherActorPoolSize) ),
+    "Other"
   )
 
   override val editAccount = system.actorOf(
     EditAccountActor.props(userAccountDAO, clientApplicationDAO, brandDAO)
-      .withRouter( RoundRobinPool(nrOfInstances = editAccountActorPoolSize) )
+      .withRouter( RoundRobinPool(nrOfInstances = editAccountActorPoolSize) ),
+    "EditAccount"
   )
 
   override val userAuthentication: UserAuthService = createUserAuthenticationPool(userAuthActorPoolSize)
