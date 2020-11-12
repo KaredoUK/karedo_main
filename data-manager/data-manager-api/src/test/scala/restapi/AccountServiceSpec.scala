@@ -287,7 +287,7 @@ class AccountServiceSpec
         val userAccount = UserAccount(randomUUID(), Some("Email"), Some("msisdn"))
 
         // Authentication is fine
-        mockedUserSessionDAO.getSession(sessionId) returns
+        mockedUserSessionDAO.getValidSessionAndRenew(sessionId) returns
           Some(UserSession(sessionId, userAccount.id, randomUUID()))
 
         // there is a client application for that
@@ -323,7 +323,7 @@ class AccountServiceSpec
         val otherUserId = randomUUID()
 
         // Authentication is with another user
-        mockedUserSessionDAO.getSession(sessionId) returns
+        mockedUserSessionDAO.getValidSessionAndRenew(sessionId) returns
           Some(UserSession(sessionId, otherUserId, randomUUID()))
 
         // there is a client application for the other user

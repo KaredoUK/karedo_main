@@ -5,7 +5,8 @@ import parallelai.wallet.entity._
 import com.novus.salat.annotations._
 
 object MongoUserApplicationInfo {
-  def fromClientApplication(clientApp: ClientApplication): MongoUserApplicationInfo = MongoUserApplicationInfo(clientApp.id, clientApp.activationCode, clientApp.active)
+  def fromClientApplication(clientApp: ClientApplication): MongoUserApplicationInfo =
+    MongoUserApplicationInfo(clientApp.id, clientApp.activationCode, clientApp.active)
 }
 
 case class SubscribedBrands(id:UUID)
