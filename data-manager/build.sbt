@@ -1,5 +1,3 @@
-import org.slf4j.LoggerFactory
-import pakkio.JenkinsJUnitXmlTestsListener
 import sbt._
 import Keys._
 import sbtassembly.Plugin._
@@ -22,17 +20,15 @@ lazy val api = (project.in(file("./data-manager-api"))).dependsOn(data,model,com
 lazy val root = project.in( file(".") )
   .aggregate(data, api, model)
 
-//testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "junitxml", "console")
-
+// be sure that Mongo is started on port 12345 before tests
 testOptions in Test += Tests.Setup( () => Embedder.startMongo)
 
-testOptions in Test += Tests.Cleanup( () => println("After Tests"))
-
-//testListeners <<= target.map(t => Seq(new JenkinsJUnitXmlTestsListener(t.getAbsolutePath)))
+//testOptions in Test += Tests.Cleanup( () => println("After Tests"))
 
 
-TaskKey[Unit]("start-mongo") := Embedder.startMongo
+//TaskKey[Unit]("start-mongo") := Embedder.startMongo
 
-TaskKey[Unit]("stop-mongo") := Embedder.stopMongo
+//TaskKey[Unit]("stop-mongo") := Embedder.stopMongo
 
+// http://dispatch.databinder.net/Dispatch.html allows for easier http/rest calls
 libraryDependencies += "net.databinder.dispatch" %% "dispatch-core" % "0.11.2"
