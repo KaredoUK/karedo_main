@@ -47,7 +47,8 @@ trait BootedCore extends Core {
 
 trait DependencyInjection extends Injectable {
   implicit val configProvider = {
-    println(s"Loading config from ${System.getProperty("config.resource")}")
+    println(s"\n**** config.resource: ${System.getProperty("config.resource")}")
+    println(  s"**** config.file: ${System.getProperty("config.file")}\n")
     AppConfigPropertySource( ConfigFactory.load().withFallback(ConfigFactory.parseResources("application.default.conf")) )
   }
   override implicit val bindingModule : BindingModule = newBindingModuleWithConfig

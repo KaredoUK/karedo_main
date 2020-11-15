@@ -10,7 +10,7 @@ from bson.objectid import ObjectId
 # to enable extra printing from the tests
 DEBUG=False
 
-client = MongoClient()
+client = MongoClient("localhost",12345)
 db = client.wallet_data
 JAVA=5 # uuid_type to properly understand UUIDS from DB
 
@@ -54,7 +54,7 @@ def info(x):
     if(DEBUG):print("         " + x)
 
 def httproute(x):
-    r=("http://localhost:8080/"+x)
+    r=("http://localhost:8090/"+x)
     info("routing to:"+r)
     return r
 

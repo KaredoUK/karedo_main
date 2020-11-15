@@ -1,7 +1,12 @@
 import sbt._
-import Keys._
+
 import sbtassembly.Plugin._
 import AssemblyKeys._
+
+import io.scalac.sbt.processrunner.{ProcessRunnerPlugin, ProcessInfo}
+import ProcessRunnerPlugin.ProcessRunner
+import ProcessRunnerPlugin.Keys.processInfoList
+
 
 name := """data-manager-api"""
 
@@ -44,6 +49,34 @@ scalacOptions ++= Seq(
   "-encoding", "UTF-8"
 )
 
-// test
+// assembly will produce Karedo.jar
+// this can be launched using java -Dconfig.resource=dummy.deployment.conf -jar data-manager-api\target\scala-2.11\Karedo.jar
+// or you can use -Dconfig.file=your configuration file
+mainClass in assembly := Some("Rest")
+
+jarName in assembly := "Karedo.jar"
+
+lazy val python = taskKey[Int]("Launches python tests")
+
+
+python := {
+  println("Testing python pwd: "+System.getProperty("user.dir"))
+  val ret:Int=Process("python3 curltest/Specs.py") !;
+  println("Exit code is "+ret)
+  ret
+}
+
+
 
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
+
+ProcessRunnerPlugin.processRunnerSettings ++ Seq(
+  scalaVersion := "2.11.4",
+  scalacOptions := Seq("-deprecation", "-feature", "-encoding", "utf8", "-language:postfixOps"),
+  organization := "io.scalac",
+  // Register ProcessInfo objects
+  processInfoList in ProcessRunner := Seq(Build.restapi)
+)
+
+
+

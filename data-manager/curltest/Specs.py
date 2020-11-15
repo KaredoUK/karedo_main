@@ -3,6 +3,7 @@ import unittest
 import AccountSpec
 import BrandSpec
 import MediaSpec
+import sys
 
 
 if __name__ == '__main__':
@@ -11,4 +12,5 @@ if __name__ == '__main__':
 
     alltests = unittest.TestSuite([AccountSpec.suite,BrandSpec.suite,MediaSpec.suite])
 
-    runner.run(alltests)
+    ret = not runner.run(alltests).wasSuccessful()
+    sys.exit(ret)

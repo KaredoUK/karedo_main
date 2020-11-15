@@ -8,11 +8,15 @@ object AppConfigPropertySource {
   val CLASSPATH_PATH_PREFIX = "classpath:"
 
   def loadAppConfig(configPath : String ) : Config = {
-    if(configPath.startsWith(CLASSPATH_PATH_PREFIX)) {
+    val ret=if(configPath.startsWith(CLASSPATH_PATH_PREFIX)) {
+      println("classpath "+configPath)
       ConfigFactory.parseReader( new InputStreamReader(getClass.getClassLoader.getResourceAsStream(configPath.drop(CLASSPATH_PATH_PREFIX.length))))
     } else {
+      println("file "+configPath)
       ConfigFactory.parseFile(new java.io.File(configPath))
     }
+    println("Config: \n"+ret.root().render())
+    ret
   }
 
   def apply(configPath: String) :  AppConfigPropertySource = apply(loadAppConfig(configPath))
