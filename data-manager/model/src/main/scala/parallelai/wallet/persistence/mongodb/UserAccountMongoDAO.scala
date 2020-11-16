@@ -146,6 +146,15 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule)
         )
       )
 
+  override def checkPassword(userId: UUID, password: String): Boolean =
+  {
+    val element = dao.findOne($and(byId(userId),MongoDBObject("password"->password)))
+    element match {
+      case Some(_) => true
+      case _ => false
+    }
+  }
+
   override def getByEmail(email: String, mustBeActive: Boolean ) : Option[UserAccount] = {
       val query = if (mustBeActive) {
         $and(MongoDBObject("email" -> Some(email)), MongoDBObject("active" -> true))

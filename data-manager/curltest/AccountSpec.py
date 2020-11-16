@@ -30,13 +30,25 @@ class TestAccount(unittest.TestCase):
         activationCode = doc["applications"][0]["activationCode"]
 
         title("PARALLELAI-53API: Validate/Activate Account Application")
-        r = post("account/application/validation", {"applicationId": applicationId, "validationCode": activationCode, "password": "newPass"})
+        r = post("account/application/validation",
+                 {"applicationId": applicationId, "validationCode": activationCode, "password": "newPass"})
 
         self.assertEqual(r.status_code, 200)
 
         js = json.loads(r.text)
         userId = js["userID"]
         info("UserId returned: " + js["userID"])
+
+
+    def test01a_Login(self):
+        title("PARALLELAI-102API: Login")
+        #  POST (JavaUUID / "application" / JavaUUID / "login"){
+        r = post("account/"+userId+"/application/"+applicationId+"/login",
+            {"password" : "newPass"})
+        self.assertEqual(r.status_code, 200)
+
+
+
 
     def test02_ResetApplication(self):
         global userId, applicationId

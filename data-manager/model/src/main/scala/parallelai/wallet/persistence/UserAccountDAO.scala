@@ -30,6 +30,8 @@ trait UserAccountDAO {
 
   def setPassword(userId: UUID, password: String) : Unit
 
+  def checkPassword(userId: UUID, password: String): Boolean
+
   def findByAnyOf(applicationId: Option[UUID], msisdn: Option[String], email: Option[String]) : Option[UserAccount]
 
   def delete(userId: UUID) : Unit

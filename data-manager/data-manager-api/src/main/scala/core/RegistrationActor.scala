@@ -143,6 +143,17 @@ class RegistrationActor(
     }
   }
 
+  /**
+   * wrapLog("name",input) <block>
+   *
+   * To be used for automagically display traces of calls
+   * @param method Name to be printed in trace
+   * @param input  input to the block to be traced
+   * @param block to be executed which is producing a resulting value to be traced
+   * @tparam S Type or input
+   * @tparam T Type produced by block
+   * @return will return exactly the same as block
+   */
   def wrapLog[S,T](method:String,input:S)(block : => T):T =
   {
     log.info(s">>> {$method} Input {$input}")
@@ -152,69 +163,103 @@ class RegistrationActor(
     ret
   }
 
-  def loginUser(loginRequest: LoginRequest): ResponseWithFailure[RegistrationError,APISessionResponse] = wrapLog("loginUser",loginRequest) {
+  def loginUser(loginRequest: LoginRequest): ResponseWithFailure[RegistrationError, APISessionResponse] = {
 
-    val userAccountWithAppStatusOp = userAccountDAO.getById(loginRequest.accountId) filter { userAccount =>
-      userAccount.password == Some(loginRequest.password)
-    } map { userAccount =>
-      val clientAppStatusOp = clientApplicationDAO.getById(loginRequest.applicationId) filter { _.accountId == userAccount.id } map { _.active }
 
-      (userAccount, clientAppStatusOp)
+    def getUserAccountWithAppStatus:
+    Option[(UserAccount, Option[Boolean])] =
+
+      wrapLog("getUserAccountWithAppStatus",loginRequest.applicationId) {
+        // gets information of current accountId and status active false/true
+        // very strange we don't have password field as return so I needed to craft a special method
+        val userAccountWithAppStatusOp = userAccountDAO.getById(loginRequest.accountId) filter { userAccount =>
+          userAccountDAO.checkPassword(loginRequest.accountId,loginRequest.password)
+          // userAccount.password == Some(loginRequest.password)
+        } map { userAccount =>
+          val clientAppStatusOp = clientApplicationDAO.getById(loginRequest.applicationId) filter {
+            _.accountId == userAccount.id
+          } map {
+            _.active
+          }
+
+          (userAccount, clientAppStatusOp)
+        }
+        userAccountWithAppStatusOp
+      }
+
+    def matchStatus(status: Option[(UserAccount, Option[Boolean])]) =
+    wrapLog("matchStatus",status) {
+      status match {
+        case Some((account, Some(true))) =>
+          log.info("found active account")
+          val newSession = userSessionDAO.createNewSession(loginRequest.accountId, loginRequest.applicationId)
+          SuccessResponse(APISessionResponse(newSession.sessionId.toString))
+
+        case Some((account, Some(false))) =>
+          log.info("found inactive account")
+          FailureResponse(ApplicationNotActivated)
+
+        case Some((account, None)) =>
+          log.info("found account without status")
+          FailureResponse(InvalidCredentials)
+
+        case None =>
+          log.info("nothing found")
+          FailureResponse(InvalidCredentials)
+      }
     }
-
-    userAccountWithAppStatusOp match {
-      case Some( (account, Some(true)) ) =>
-        val newSession = userSessionDAO.createNewSession(loginRequest.accountId, loginRequest.applicationId)
-        SuccessResponse(APISessionResponse(newSession.sessionId.toString))
-
-      case Some( (account, Some(false)) )  =>
-        FailureResponse(ApplicationNotActivated)
-
-      case Some( (account, None) )  =>
-        FailureResponse(InvalidCredentials)
-
-      case None =>
-        FailureResponse(InvalidCredentials)
+    // use composition to have short "main"
+    wrapLog("loginUser", loginRequest) {
+      matchStatus(
+        getUserAccountWithAppStatus
+      )
     }
 
   }
 
   def registerUser(registrationRequest: RegistrationRequest): ResponseWithFailure[RegistrationError, RegistrationResponse] =
+
+  wrapLog("registerUser",registrationRequest) {
     withValidations(registrationRequest)(validUserIdentification, applicationNotRegistered, noActiveAccountForMsisdnOrEmail) { request =>
 
-      wrapLog("registerUser",request) {
+      wrapLog("registerUser", request) {
         val account = UserAccount(id = UUID.randomUUID(), email = request.email, msisdn = request.msisdn)
-
         val activationCode = newActivationCode
-
         val firstApplication = ClientApplication(request.applicationId, account.id, activationCode)
-
         userAccountDAO.insertNew(account, firstApplication)
-
         activateApplication(request.applicationId, account.id, request, activationCode)
       }
     }
+  }
 
-  def addApplicationToUser(addApplicationRequest: AddApplicationRequest): ResponseWithFailure[RegistrationError, AddApplicationResponse] =
-    withValidations(addApplicationRequest)(validUserIdentification, applicationNotRegistered) { request =>  wrapLog("addApplicationToUser",request) {
+  def addApplicationToUser(addApplicationRequest: AddApplicationRequest):ResponseWithFailure[RegistrationError, AddApplicationResponse] =
 
-        userAccountDAO.findByAnyOf(None, request.msisdn, request.email) match {
-          case None =>
-            log.debug("Cannot find any user with specified params {}", request)
-            FailureResponse(InvalidRegistrationRequest("Unable to find user with specified identification"))
+    wrapLog("addApplicationToUser", addApplicationRequest) {
+      withValidations(addApplicationRequest)(validUserIdentification, applicationNotRegistered) {
+        request => {
 
-          case Some(userAccount) =>
-            log.debug("Adding new application {} to account {}", request.applicationId, userAccount.id)
-            val registrationResponse = registerApplication(AddApplicationToKnownUserRequest(request.applicationId, userAccount.id))
+          userAccountDAO.findByAnyOf(None, request.msisdn, request.email) match {
+            case None =>
+              log.debug("Cannot find any user with specified params {}", request)
+              FailureResponse(InvalidRegistrationRequest("Unable to find user with specified identification"))
 
-            registrationResponse map { resp => AddApplicationResponse(resp.applicationId, resp.channel, resp.address)}
+            case Some(userAccount) =>
+              log.debug("Adding new application {} to account {}", request.applicationId, userAccount.id)
+              val registrationResponse = registerApplication(AddApplicationToKnownUserRequest(request.applicationId, userAccount.id))
+
+              registrationResponse map { resp => AddApplicationResponse(resp.applicationId, resp.channel, resp.address)}
+          }
+
         }
       }
-  }
+    }
 
 
   def registerApplication(registrationRequest: AddApplicationToKnownUserRequest): ResponseWithFailure[RegistrationError, RegistrationResponse] =
-    withValidations(registrationRequest)(applicationNotRegistered) { request =>
+
+  wrapLog("registerApplication",registrationRequest) {
+    withValidations(registrationRequest)(applicationNotRegistered) {
+      request =>
 
       userAccountDAO.getById(request.accountId) match {
         case None => FailureResponse(InvalidRegistrationRequest(s"User with ID ${registrationRequest.accountId} doesn't exist"))
@@ -232,55 +277,60 @@ class RegistrationActor(
           )
       }
     }
+  }
 
-  def validateUser(validation: RegistrationValidation): ResponseWithFailure[RegistrationError, RegistrationValidationResponse] = {
-    val clientAppOption = clientApplicationDAO.getById(validation.applicationId)
+  def validateUser(validation: RegistrationValidation):
+  ResponseWithFailure[RegistrationError, RegistrationValidationResponse] =
+    wrapLog("ValidateUser", validation) {
+      val clientAppOption = clientApplicationDAO.getById(validation.applicationId)
 
-    clientAppOption match {
-      case None => FailureResponse(InvalidRegistrationRequest(s"Unable to find client application with ID '${validation.applicationId}'"))
+      clientAppOption match {
+        case None => FailureResponse(InvalidRegistrationRequest(s"Unable to find client application with ID '${validation.applicationId}'"))
 
-      case Some(clientApplication) =>
-        // I don't care if the user validates twice. I just check the validation code
-        if (clientApplication.activationCode == validation.validationCode) {
-          val userOpt = userAccountDAO.getByApplicationId(validation.applicationId)
+        case Some(clientApplication) =>
+          // I don't care if the user validates twice. I just check the validation code
+          if (clientApplication.activationCode == validation.validationCode) {
+            val userOpt = userAccountDAO.getByApplicationId(validation.applicationId)
 
-          userOpt map { user =>
-            def saveValidationInfo = {
-              clientApplicationDAO.update(clientApplication copy (active = true))
-              userAccountDAO.setActive(user.id)
+            userOpt map { user =>
+              def saveValidationInfo = {
+                clientApplicationDAO.update(clientApplication copy (active = true))
+                userAccountDAO.setActive(user.id)
 
-              SuccessResponse(RegistrationValidationResponse(validation.applicationId, user.id))
+                SuccessResponse(RegistrationValidationResponse(validation.applicationId, user.id))
+              }
+
+              (user.password, validation.password) match {
+                case (Some(_), None) =>
+                  log.debug("Successfully validating user with an already set password")
+                  saveValidationInfo
+                case (Some(_), Some(_)) =>
+                  log.warning("Successfully validating user with an already set password, a pwd has been provided by client. IGNORING IT")
+                  saveValidationInfo
+                case (None, Some(password)) =>
+                  log.debug("Validation of use with no password, setting password in DB")
+                  userAccountDAO.setPassword(user.id, password)
+                  saveValidationInfo
+                case (None, None) =>
+                  FailureResponse(InvalidValidationRequest("Missing password for a new user validation"))
+              }
+            } getOrElse {
+              FailureResponse(InternalRegistrationError(new IllegalStateException(s"Unable to find user for valid application ID '${validation.applicationId}'")))
             }
-
-            (user.password, validation.password) match {
-              case (Some(_), None) =>
-                log.debug("Successfully validating user with an already set password")
-                saveValidationInfo
-              case (Some(_), Some(_)) =>
-                log.warning("Successfully validating user with an already set password, a pwd has been provided by client. IGNORING IT")
-                saveValidationInfo
-              case (None, Some(password)) =>
-                log.debug("Validation of use with no password, setting password in DB")
-                userAccountDAO.setPassword(user.id, password)
-                saveValidationInfo
-              case (None, None) =>
-                FailureResponse(InvalidValidationRequest("Missing password for a new user validation"))
-            }
-          } getOrElse {
-            FailureResponse(InternalRegistrationError(new IllegalStateException(s"Unable to find user for valid application ID '${validation.applicationId}'")))
+          } else {
+            FailureResponse(InvalidValidationCode)
           }
-        } else {
-          FailureResponse(InvalidValidationCode)
-        }
+      }
     }
 
-  }
+
 
   private def activateApplication(applicationId: ApplicationID,
                                   accountId: UserID,
                                   userContacts: WithUserContacts,
-                                  validationCode: String): ResponseWithFailure[RegistrationError, RegistrationResponse] =
-  {
+                                  validationCode: String):
+  ResponseWithFailure[RegistrationError, RegistrationResponse] =
+
     wrapLog("activateApplication",(applicationId, validationCode)) {
 
       val activationMessage = s"Welcome to Karedo, your activation code is $validationCode. " +
@@ -295,7 +345,7 @@ class RegistrationActor(
         SuccessResponse(RegistrationResponse(applicationId, "email", userContacts.email.get))
       }
     }
-  }
+
 
   def replyToSender[T <: Any](response: => ResponseWithFailure[RegistrationError, T]): Unit = {
     Try {
