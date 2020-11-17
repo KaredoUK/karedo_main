@@ -69,26 +69,31 @@ class UserAccountMongoDAOSpec
       val inactive = accountDAO.getByEmail(userAccount.email.get, true)
       val active = accountDAO.getByEmail(activeAccount.email.get, true)
 
+
       inactive shouldEqual None
       active shouldEqual Some(activeAccount)
     }
 
     "Find by application_id filtering with active status" in {
       accountDAO.insertNew(userAccount, clientApplication)
-      accountDAO.setPassword(userAccount.id,"pass")
       accountDAO.insertNew(activeAccount, activeClientApplication)
+      accountDAO.setPassword(activeAccount.id,"pass")
 
       val inactive = accountDAO.getByApplicationId(clientApplication.id, true)
       val active = accountDAO.getByApplicationId(activeClientApplication.id, true)
-      val checkPassword = accountDAO.checkPassword(userAccount.id,"pass")
-      val wrongPassword = accountDAO.checkPassword(userAccount.id,"pass2")
+      val checkPassword = accountDAO.checkPassword(activeAccount.id,"pass")
+      val wrongPassword = accountDAO.checkPassword(activeAccount.id,"pass2")
 
       inactive shouldEqual None
-      active shouldEqual Some(activeAccount)
+      val activeAddingPassword=activeAccount.copy(password=Some("pass"))
+      active shouldEqual Some(activeAddingPassword)
 
       checkPassword should beTrue
 
       wrongPassword should beFalse
+
+      // this previously failed
+      active.get.password should beEqualTo(Some("pass"))
     }
 
     "Find by any of id, email, application id" in {

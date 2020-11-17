@@ -173,8 +173,8 @@ class RegistrationActor(
         // gets information of current accountId and status active false/true
         // very strange we don't have password field as return so I needed to craft a special method
         val userAccountWithAppStatusOp = userAccountDAO.getById(loginRequest.accountId) filter { userAccount =>
-          userAccountDAO.checkPassword(loginRequest.accountId,loginRequest.password)
-          // userAccount.password == Some(loginRequest.password)
+          //userAccountDAO.checkPassword(loginRequest.accountId,loginRequest.password)
+          userAccount.password == Some(loginRequest.password)
         } map { userAccount =>
           val clientAppStatusOp = clientApplicationDAO.getById(loginRequest.applicationId) filter {
             _.accountId == userAccount.id

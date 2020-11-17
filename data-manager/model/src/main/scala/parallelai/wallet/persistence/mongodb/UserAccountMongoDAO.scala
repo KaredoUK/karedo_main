@@ -77,7 +77,7 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule)
   override def insertNew(userAccount: UserAccount, firstApplication: ClientApplication): Unit =
       dao.insert(
         MongoUserAccount(userAccount.id, userAccount.msisdn, userAccount.email,
-          userAccount.personalInfo, userAccount.settings, userAccount.active, userAccount.totalPoints,
+          userAccount.personalInfo, userAccount.settings, userAccount.password, userAccount.active, userAccount.totalPoints,
           List(),
           List(
             MongoUserApplicationInfo(firstApplication.id, firstApplication.activationCode, firstApplication.active)
@@ -88,7 +88,7 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule)
   def insertNew(userAccount: UserAccount, firstApplications: ClientApplication*): Unit =
       dao.insert(
         MongoUserAccount(userAccount.id, userAccount.msisdn, userAccount.email,
-          userAccount.personalInfo, userAccount.settings, userAccount.active, userAccount.totalPoints,
+          userAccount.personalInfo, userAccount.settings, userAccount.password, userAccount.active, userAccount.totalPoints,
           List(),
           firstApplications map { app => MongoUserApplicationInfo(app.id, app.activationCode, app.active)} toList
         )
