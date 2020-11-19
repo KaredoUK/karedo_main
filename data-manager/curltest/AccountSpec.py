@@ -1,6 +1,6 @@
 from common import *
 import unittest, json
-import re
+
 #
 # This is testing many things in the
 # "User Profile" section contained in
@@ -41,17 +41,21 @@ class TestAccount(unittest.TestCase):
 
 
     def test01a_Login(self):
+        global sessionId
         title("PARALLELAI-102API: Login")
         #  POST (JavaUUID / "application" / JavaUUID / "login"){
         r = post("account/"+userId+"/application/"+applicationId+"/login",
-            {"password" : "newPass"})
+                 {"password" : "newPass"})
         self.assertEqual(r.status_code, 200)
+        js = json.loads(r.text)
+        sessionId = js["sessionId"]
 
-
+        self.assertTrue(valid_uuid(sessionId))
+        info("login passed sessionId "+sessionId)
 
 
     def test02_ResetApplication(self):
-        global userId, applicationId
+        global userId, applicationId, sessionId
         applicationId = newUUID()
         title("PARALLELAI-49API: Reset Application for Account")
 
@@ -76,7 +80,7 @@ class TestAccount(unittest.TestCase):
         super(TestAccount, self).assertNotIn(member, container, msg)
 
     def test03_UpdateInfo(self):
-        global userId
+        global userId, sessionId
         title("PARALLELAI-50API: Update Account Settings")
 
         info("Question002: not present in documentation")
@@ -101,53 +105,54 @@ class TestAccount(unittest.TestCase):
                 },
             "totalPoints": 100 # Question004: not present in documentation and NOT actually working
         }
-        r=put("account/"+userId,data)
+        r=put("account/"+userId,data,sessionId)
         self.assertEqual(r.status_code, 200)
+
+        # tryng to do the same without authentication should be blocked
+        r=put("account/"+userId,data,newUUID())
+        self.assertEqual(r.status_code, 401)
 
 
 
     def test04_GetInfo(self):
-        global userId
+        global userId, sessionId
         title("PARALLELAI-51API: Get Account Settings ")
 
-        r=get("account/"+userId)
+        r=get("account/"+userId,sessionId)
         self.assertEqual(r.status_code, 200)
         js = json.loads(r.text)
         self.assertEqual(js["info"]["postCode"],"EC1")
         self.assertEqual(js["info"]["fullName"],"Claudio Pacchiega")
         self.assertEqual(js["settings"]["maxAdsPerWeek"],500)
 
+        # called without authentication should fail
+        r=get("account/"+userId,newUUID())
+        self.assertEqual(r.status_code, 401)
+
         # this is failing (!)
         #self.assertEqual(js["totalPoints"],100) # Question005: cfr question004 how can we change this value from rest APIs?
 
     def test05_getUserPoints(self):
-        global userId
+        global userId,sessionId
         title("PARALLELAI-54API: Get User Points")
 
-        r=get("account/"+userId+"/points")
+        r=get("account/"+userId+"/points",sessionId)
         self.assertEqual(r.status_code, 200)
         js = json.loads(r.text)
         self.assertEqual(js["totalPoints"],0) # Question006: cfr Questions 004 and 005: how can we read something different from 0?
 
+        r=get("account/"+userId+"/points",newUUID())
+        self.assertEqual(r.status_code, 401)
 
     def test06_deleteAccount(self):
-        global userId
+        global userId,sessionId
         title("PARALLELAI-52API: Delete Account")
-        r=delete("account/"+userId)
+        r=delete("account/"+userId,session=sessionId)
         self.assertEqual(r.status_code, 200)
         found=ua.find_one({ "email" : "pakkio@gmail.com" })
         self.assertEqual(found,None)
-
-
-    def test102_login(self):
-        global userId, applicationId
-        title("PARALLELAI-102: login")
-        r=post("account/"+userId+"/application/"+applicationId+"/login",{ "password" : "fakepwd"})
-        self.assertEqual(r.status_code, 200)
-        js=json.loads(r.text)
-
-        compiled=re.compile("[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}")
-        self.assertTrue(compiled.match(js["sessionId"]),"not a valid UUID")
+        r=delete("account/"+userId,session=newUUID())
+        self.assertEqual(r.status_code, 401)
 
 
 

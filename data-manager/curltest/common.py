@@ -3,6 +3,7 @@ import json
 import pymongo
 import uuid
 import unittest
+import re
 
 from pymongo import MongoClient
 from bson.objectid import ObjectId
@@ -41,13 +42,23 @@ fs1.remove
 
 def newUUID(): return str(uuid.uuid1())
 
+def valid_uuid(uuid):
+    regex = re.compile('^[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}\Z', re.I)
+    match = regex.match(uuid)
+    return bool(match)
+
 userId = newUUID()
 applicationId = newUUID()
+
 
 def title(x):
     global a
     if(DEBUG):print("==========================================================================\n=======> " + x + "\n==========================================================================")
 
+def getHeaders(s):
+    global sessionId
+    return {'content-type': 'application/json',
+            'X-SESSION-ID':s}
 
 def info(x):
     global a
@@ -69,10 +80,10 @@ def printr(r):
     info(" ")
     return r
 
-def post(route, data={}):
+def post(route, data={},session=None):
     info("METHOD: POST")
     r=requests.post(httproute(route), data=postdata(data),
-                         headers={'content-type': 'application/json'})
+                         headers=getHeaders(session))
     printr(r)
     return r
 
@@ -84,17 +95,17 @@ def postfile(route, file):
 
 
 
-def put(route, data={}):
+def put(route, data={}, session=None):
     info("METHOD: PUT")
     r=requests.put(httproute(route), data=json.dumps(data),
-                        headers={'content-type': 'application/json'})
+                        headers=getHeaders(session))
     printr(r)
     return r
 
-def get(route):
+def get(route, session=None):
     info("METHOD: GET")
     r=requests.get(httproute(route), #data=json.dumps(data),
-                        headers={'content-type': 'application/json'})
+                        headers=getHeaders(session))
     printr(r)
     return r
 
@@ -104,11 +115,11 @@ def getstream(route):
     printr(r)
     return r
 
-def delete(route, params={}):
+def delete(route, params={}, session=None):
 
     info("METHOD: DELETE")
     r=requests.delete(httproute(route), #data=json.dumps(data),
-                           headers={'content-type': 'application/json'})
+                           headers=getHeaders(session))
     printr(r)
     return r
 

@@ -27,11 +27,14 @@ object BrandService {
   val logger = Logger("BrandService")
 }
 
-class BrandService(brandActor: ActorRef, editAccountActor: ActorRef)
+class BrandService(brandActor: ActorRef, editAccountActor: ActorRef,
+                  override protected val userAuthService: UserAuthService)
                   (implicit protected val executionContext: ExecutionContext)
   extends Directives
   with DefaultJsonFormats
-  with ApiErrorsJsonProtocol {
+  with ApiErrorsJsonProtocol
+  with AuthorizationSupport
+{
 
 
   import akka.pattern.ask
@@ -46,38 +49,39 @@ class BrandService(brandActor: ActorRef, editAccountActor: ActorRef)
   // "user/"+userId+"/interaction/brand/"+brandId, { "interactionType":  "BUY"}
     path("user" / JavaUUID / "interaction" / "brand" / JavaUUID) {
       (user, brand) => {
-        post {
-          handleWith((intType: String) =>
+        userAuthorizedFor( canAccessUser(user) )(executionContext) { userAuthContext =>
+          post {
+            handleWith((intType: String) =>
 
-            (brandActor ? UserBrandInteraction(user, brand, intType)).mapTo[ResponseWithFailure[APIError, InteractionResponse]]
-            // s"{${q}userId${q}: ${q}$user${q},${q}userTotalPoints${q}:${q}500${q}}")
-          )
+              (brandActor ? UserBrandInteraction(user, brand, intType)).mapTo[ResponseWithFailure[APIError, InteractionResponse]]
+              // s"{${q}userId${q}: ${q}$user${q},${q}userTotalPoints${q}:${q}500${q}}")
+            )
+          }
         }
       }
-
 
     }
 
   // dealing with /brand to create inquiry a brand
   val routebrand_67_95 =
     path("brand") {
+      // FIXME: user? userAuthorizedFor( canAccessUser(user) )(executionContext) { userAuthContext =>
 
+        post {
+          handleWith {
+            brandData: BrandData =>
+              (brandActor ? brandData).mapTo[ResponseWithFailure[APIError, BrandResponse]]
+          }
+        } ~
+          get {
+            rejectEmptyResponse {
 
-      post {
-        handleWith {
-          brandData: BrandData =>
-            (brandActor ? brandData).mapTo[ResponseWithFailure[APIError, BrandResponse]]
-        }
-      } ~
-        get {
-          rejectEmptyResponse {
-
-            complete {
-              (brandActor ? ListBrands).mapTo[List[BrandRecord]]
+              complete {
+                (brandActor ? ListBrands).mapTo[List[BrandRecord]]
+              }
             }
           }
-        }
-
+      //}
     }
 
   val routebrandWithId =
@@ -138,13 +142,15 @@ class BrandService(brandActor: ActorRef, editAccountActor: ActorRef)
 
   val routesuggestedBrands =
     path("account" / JavaUUID / "brand" / JavaUUID / "ads" ) { (accountId: UUID, brandId: UUID) =>
-      get {
-        parameters('max.as[Int]) { max =>
-          rejectEmptyResponse {
-            complete {
-              (brandActor ? RequestSuggestedAdForUsersAndBrand(accountId,brandId,max)).
-                mapTo[List[SuggestedAdForUsersAndBrand]]
+      userAuthorizedFor( canAccessUser(accountId) )(executionContext) { userAuthContext =>
+        get {
+          parameters('max.as[Int]) { max =>
+            rejectEmptyResponse {
+              complete {
+                (brandActor ? RequestSuggestedAdForUsersAndBrand(accountId, brandId, max)).
+                  mapTo[List[SuggestedAdForUsersAndBrand]]
 
+              }
             }
           }
         }
@@ -153,14 +159,16 @@ class BrandService(brandActor: ActorRef, editAccountActor: ActorRef)
 
   val routesuggestedBrandsDummy =
     path("account" / JavaUUID / "suggestedBrands") { accountId: UserID =>
-      post {
-        handleWith {
-          brandIdRequest: BrandIDRequest =>
-            (editAccountActor ? AddBrand(accountId, brandIdRequest.brandId)).mapTo[ResponseWithFailure[EditAccountError, String]]
-        }
-      } ~ get {
-        complete {
-          (editAccountActor ? ListBrandsRequest(accountId)).mapTo[ResponseWithFailure[EditAccountError, List[BrandRecord]]]
+      userAuthorizedFor( canAccessUser(accountId) )(executionContext) { userAuthContext =>
+        post {
+          handleWith {
+            brandIdRequest: BrandIDRequest =>
+              (editAccountActor ? AddBrand(accountId, brandIdRequest.brandId)).mapTo[ResponseWithFailure[EditAccountError, String]]
+          }
+        } ~ get {
+          complete {
+            (editAccountActor ? ListBrandsRequest(accountId)).mapTo[ResponseWithFailure[EditAccountError, List[BrandRecord]]]
+          }
         }
       }
     }

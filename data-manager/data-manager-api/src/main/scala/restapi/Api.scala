@@ -18,7 +18,7 @@ trait Api extends RouteConcatenation {
 
   val routes =
     new AccountService(registration, editAccount, userAuthentication).route ~
-    new BrandService(brand, editAccount).route ~
+    new BrandService(brand, editAccount, userAuthentication).route ~
     new MediaService(media).route ~
     new OfferService(offer).route ~
     new MockService(other).route
