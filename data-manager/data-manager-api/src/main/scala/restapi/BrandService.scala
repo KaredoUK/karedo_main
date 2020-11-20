@@ -15,7 +15,7 @@ import core.EditAccountActor.{ListBrandsRequest, EditAccountError, AddBrand}
 import core.security.UserAuthService
 import core.{SuccessResponse, ResponseWithFailure}
 import core.objAPI._
-import parallelai.wallet.entity.{AdvertisementDetail, SuggestedAdForUsersAndBrandModel}
+import parallelai.wallet.entity.{UserAuthContext, AdvertisementDetail, SuggestedAdForUsersAndBrandModel}
 
 
 import spray.routing._
@@ -65,9 +65,9 @@ class BrandService(brandActor: ActorRef, editAccountActor: ActorRef,
   // dealing with /brand to create inquiry a brand
   val routebrand_67_95 =
     path("brand") {
-      // FIXME: user? userAuthorizedFor( canAccessUser(user) )(executionContext) { userAuthContext =>
+      userAuthorizedFor( isLoggedInUser )(executionContext) { userAuthContext =>
 
-        post {
+      post {
           handleWith {
             brandData: BrandData =>
               (brandActor ? brandData).mapTo[ResponseWithFailure[APIError, BrandResponse]]
@@ -81,14 +81,13 @@ class BrandService(brandActor: ActorRef, editAccountActor: ActorRef,
               }
             }
           }
-      //}
+      }
     }
 
   val routebrandWithId =
 
-    path("brand" / JavaUUID) {
-
-      brandId: UUID =>
+    path("brand" / JavaUUID) { brandId: UUID =>
+      userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
         rejectEmptyResponse {
           get {
             complete {
@@ -102,6 +101,7 @@ class BrandService(brandActor: ActorRef, editAccountActor: ActorRef,
             (brandActor ? DeleteBrandRequest(brandId)).mapTo[ResponseWithFailure[APIError, String]]
           }
         }
+      }
     }
 
   val routebrandWithIdAdvert =
@@ -109,18 +109,21 @@ class BrandService(brandActor: ActorRef, editAccountActor: ActorRef,
     path("brand" / JavaUUID / "advert") {
 
       brandId: UUID =>
-        rejectEmptyResponse {
-          get {
-            complete {
+        userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
 
-              (brandActor ? ListBrandsAdverts(brandId)).mapTo[ResponseWithFailure[APIError, List[AdvertDetailResponse]]]
+          rejectEmptyResponse {
+            get {
+              complete {
 
+                (brandActor ? ListBrandsAdverts(brandId)).mapTo[ResponseWithFailure[APIError, List[AdvertDetailResponse]]]
+
+              }
             }
-          }
-        } ~ post {
-          handleWith {
-            request: AdvertDetail => {
-              (brandActor ? AddAdvertCommand(brandId, request.text, request.imageIds, request.value)).mapTo[ResponseWithFailure[APIError, AdvertDetailResponse]]
+          } ~ post {
+            handleWith {
+              request: AdvertDetail => {
+                (brandActor ? AddAdvertCommand(brandId, request.text, request.imageIds, request.value)).mapTo[ResponseWithFailure[APIError, AdvertDetailResponse]]
+              }
             }
           }
         }
@@ -129,13 +132,15 @@ class BrandService(brandActor: ActorRef, editAccountActor: ActorRef,
   val routebrandWithIdAdvertWithId =
 
     path("brand" / JavaUUID / "advert" / JavaUUID) {
-
       (brandId: UUID, advId: UUID) =>
-        delete {
-          complete {
-            (brandActor ? DeleteAdvRequest (brandId, advId) ).mapTo[ResponseWithFailure[APIError, String]]
+        userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
+
+          delete {
+            complete {
+              (brandActor ? DeleteAdvRequest(brandId, advId)).mapTo[ResponseWithFailure[APIError, String]]
 
 
+            }
           }
         }
     }

@@ -61,7 +61,7 @@ class TestBrand(unittest.TestCase):
         js = json.loads(r.text)
         brandId2=js["id"]
 
-        r=get("brand")
+        r=get("brand", sessionId)
 
         self.assertEqual(r.status_code, 200)
 
@@ -76,12 +76,11 @@ class TestBrand(unittest.TestCase):
         js = json.loads(r.text)
         self.assertEqual(js["name"],"brandX")
 
-        # FIXME how to check for authorization?
-        #r = post("brand", {"name": "brandY", "iconId": "iconId"}, newUUID())
-        #self.assertEqual(r.status_code, 401)
+        r = post("brand", {"name": "brandY", "iconId": "iconId"}, newUUID())
+        self.assertEqual(r.status_code, 401)
 
-        #r=get("brand/"+brandId, newUUID())
-        #self.assertEqual(r.status_code, 401)
+        r=get("brand/"+brandId, newUUID())
+        self.assertEqual(r.status_code, 401)
 
     def test03_DeactivateBrand(self):
         global brandId2, sessionId
