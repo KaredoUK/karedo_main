@@ -10,6 +10,9 @@ import core.ResponseWithFailure
 import spray.routing.{Route, Directives}
 import akka.pattern.ask
 
+import restapi.security.AuthorizationSupport
+import core.security.UserAuthService
+
 import scala.concurrent.ExecutionContext
 
 
@@ -17,8 +20,13 @@ object OfferService {
   val logger = Logger("OfferService")
 }
 
-class OfferService(offerActor: ActorRef)(implicit executionContext: ExecutionContext)
-  extends Directives with DefaultJsonFormats with ApiErrorsJsonProtocol {
+class OfferService(offerActor: ActorRef,
+     override protected val userAuthService: UserAuthService)
+    (implicit executionContext: ExecutionContext)
+  extends Directives 
+  with DefaultJsonFormats 
+  with ApiErrorsJsonProtocol 
+  with AuthorizationSupport {
 
   import scala.concurrent.duration._
 
@@ -26,10 +34,12 @@ class OfferService(offerActor: ActorRef)(implicit executionContext: ExecutionCon
 
   val route: Route =
     path("offer") {
-      post {
-        handleWith {
-          offerData: OfferData =>
-            (offerActor ? offerData).mapTo[ResponseWithFailure[OfferError, OfferResponse]]
+      userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
+        post {
+          handleWith {
+            offerData: OfferData =>
+              (offerActor ? offerData).mapTo[ResponseWithFailure[OfferError, OfferResponse]]
+          }
         }
       }
     }

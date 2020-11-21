@@ -1,7 +1,6 @@
 package restapi.security
 
 import java.util.UUID
-
 import core.security.UserAuthService
 import parallelai.wallet.entity.UserAuthContext
 import spray.http.HttpHeaders.RawHeader
@@ -10,9 +9,10 @@ import spray.routing.AuthenticationFailedRejection.{CredentialsMissing, Credenti
 import spray.routing._
 import spray.routing.directives.BasicDirectives._
 import spray.routing.directives.{AuthMagnet, SecurityDirectives}
-
 import scala.concurrent.Future._
 import scala.concurrent.{ExecutionContext, Future}
+import core.WrapLog
+import spray.util.SprayActorLogging
 
 object AuthenticationSupport {
   val HEADER_NAME_SESSION_ID = "X-SESSION-ID"
@@ -23,7 +23,7 @@ object AuthenticationSupport {
   
 }
 
-trait AuthenticationSupport {
+trait AuthenticationSupport  {
   self: SecurityDirectives =>
   
   import AuthenticationSupport._

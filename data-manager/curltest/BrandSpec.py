@@ -29,6 +29,7 @@ class TestBrand(unittest.TestCase):
         self.assertEqual(r.status_code, 200)
         js = json.loads(r.text)
         sessionId = js["sessionId"]
+        self.assertTrue(valid_uuid(sessionId))
 
 
 
@@ -48,9 +49,8 @@ class TestBrand(unittest.TestCase):
         doc = br.find_one({"_id": uuid.UUID(brandId)})
         self.assertNotEqual(doc,None)
 
-        # FIXME how to check for authorization?
-        # r = post("brand", {"name": "brandX", "iconId": iconId}, newUUID())
-        #self.assertEqual(r.status_code, 401)
+        r = post("brand", {"name": "brandX", "iconId": iconId}, newUUID())
+        self.assertEqual(r.status_code, 401)
 
     def test02_FindBrands(self):
         global brandId,brandId2, sessionId
@@ -86,14 +86,14 @@ class TestBrand(unittest.TestCase):
         global brandId2, sessionId
         title("PARALLELAI-68API: Deactivate Brand")
 
-        r=delete("brand/"+brandId2, sessionId)
+        r=delete("brand/"+brandId2, session=sessionId)
         self.assertEqual(r.status_code, 200)
 
         r=get("brand/"+brandId2, sessionId)
         self.assertEqual(r.status_code, 400)
 
-        r=delete("brand/"+brandId2, sessionId)
-        self.assertEqual(r.status_code, 200)
+        r=delete("brand/"+brandId2, session=newUUID())
+        self.assertEqual(r.status_code, 401)
 
     def test04_CreateAdvert(self):
         global brandId,advId, sessionId
@@ -106,9 +106,8 @@ class TestBrand(unittest.TestCase):
         js = json.loads(r.text)
         advId=js["id"]
 
-        # FIXME how to check for authorization?
-        #r=post("brand/"+brandId+"/advert",data, newUUID())
-        #self.assertEqual(r.status_code, 401)
+        r=post("brand/"+brandId+"/advert",data, newUUID())
+        self.assertEqual(r.status_code, 401)
 
     def test05_DisableAdvert(self):
         global brandId, sessionId
@@ -121,12 +120,11 @@ class TestBrand(unittest.TestCase):
         js = json.loads(r.text)
         advId2=js["id"]
 
-        r=delete("brand/"+brandId+"/advert/"+advId2, sessionId)
+        r=delete("brand/"+brandId+"/advert/"+advId2, session=sessionId)
         self.assertEqual(r.status_code, 200)
 
-        # FIXME how to check for authorization?
-        # r=delete("brand/"+brandId+"/advert/"+advId2, newUUID())
-        # self.assertEqual(r.status_code, 401)
+        r=delete("brand/"+brandId+"/advert/"+advId2, session=newUUID())
+        self.assertEqual(r.status_code, 401)
 
     def test051_ListAdsByBrand(self):
         global brandId, sessionId

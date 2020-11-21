@@ -39,7 +39,10 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule)
   val dao = new SalatDAO[MongoUserAccount, UUID](collection = db("UserAccount")) {}
   //val brandDao = new SalatDAO[Brand, UUID](collection = db("Brand")) {}
 
-  override def getById(userId: UUID): Option[UserAccount] = dao.findOneById(userId)
+  override def getById(userId: UUID): Option[UserAccount] = {
+    val dbuser=dao.findOneById(userId)
+    dbuser
+  }
 
   override def update(userAccount: UserAccount): Unit =
       dao.update(

@@ -13,7 +13,8 @@ trait UserAuthService {
   def getUserContextForSession(sessionId: String): Future[Option[UserAuthContext]]
 }
 
-class UserAuthServiceImpl(sessionDAO: UserSessionDAO, clientApplicationDAO: ClientApplicationDAO) extends UserAuthService {
+class UserAuthServiceImpl(sessionDAO: UserSessionDAO, clientApplicationDAO: ClientApplicationDAO) 
+  extends UserAuthService {
   override def getUserContextForSession(sessionId: String): Future[Option[UserAuthContext]] = Future {
     val sessionUUID = UUID.fromString(sessionId)
 

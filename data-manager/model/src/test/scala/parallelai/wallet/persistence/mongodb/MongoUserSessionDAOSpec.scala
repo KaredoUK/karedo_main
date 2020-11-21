@@ -2,12 +2,14 @@ package parallelai.wallet.persistence.mongodb
 
 import java.util.UUID._
 import com.escalatesoft.subcut.inject.config.PropertiesConfigPropertySource
-
 import scala.concurrent.duration._
 import org.specs2.mutable.{Before, Specification}
 import com.escalatesoft.subcut.inject.NewBindingModule._
 import parallelai.wallet.entity.UserSession
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class MongoUserSessionDAOSpec
   extends Specification
   with TestWithLocalMongoDb

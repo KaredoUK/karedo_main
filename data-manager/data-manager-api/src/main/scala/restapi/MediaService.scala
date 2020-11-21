@@ -12,6 +12,10 @@ import com.parallelai.wallet.datamanager.data._
 
 import core.MediaContentActor._
 import core.{FailureResponse, SuccessResponse, ResponseWithFailure}
+
+import restapi.security.AuthorizationSupport
+import core.security.UserAuthService
+
 import spray.http._
 import spray.routing.Directives
 
@@ -29,54 +33,61 @@ object MediaService {
   val logger = Logger("MediaService")
 }
 
-class MediaService(mediaActor: ActorRef)(implicit executionContext: ExecutionContext)
-  extends Directives with DefaultJsonFormats with ApiErrorsJsonProtocol  {
+class MediaService (mediaActor: ActorRef, 
+    override protected val userAuthService: UserAuthService)
+    (implicit executionContext: ExecutionContext)
+  extends Directives 
+  with DefaultJsonFormats 
+  with ApiErrorsJsonProtocol
+  with AuthorizationSupport {
 
   import akka.pattern.ask
 
-import scala.concurrent.duration._
+  import scala.concurrent.duration._
 
   implicit val timeout = Timeout(20.seconds)
 
   val routeput =
     path("media") {
-      post {
-        headerValueByName(HttpHeaders.`Content-Type`.name) { contentType =>
-          entity(as[MultipartFormData]) { formData: MultipartFormData =>
-              complete {
+      userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
+        {
+          post {
+            headerValueByName(HttpHeaders.`Content-Type`.name) { contentType =>
+              entity(as[MultipartFormData]) { formData: MultipartFormData =>
+                complete {
 
+                  formData.fields.head match {
+                    case (BodyPart(entity, headers)) =>
+                      val file_bin = entity.data.toByteArray
 
-               formData.fields.head match {
-                  case (BodyPart(entity, headers)) =>
-                    val file_bin = entity.data.toByteArray
+                      val contentType = headers.find(h => h.is("content-type")).get.value
+                      val fileName = headers.find(h => h.is("content-disposition")).get.value.split("filename=").last
 
-                    val contentType = headers.find(h => h.is("content-type")).get.value
-                    val fileName = headers.find(h => h.is("content-disposition")).get.value.split("filename=").last
+                      logger.info(s"Found a media of type '${contentType}' named '${fileName}' with '${file_bin.length}' bytes")
 
+                      (mediaActor ? AddMediaRequest(fileName, contentType, file_bin))
+                        .mapTo[ResponseWithFailure[MediaHandlingError, AddMediaResponse]]
 
-                    logger.info(s"Found a media of type '${contentType}' named '${fileName}' with '${file_bin.length}' bytes")
+                    case _ => Future.successful[MediaHandlingError](InvalidContentId(new Exception("Missing bodypart")))
+                  }
 
-                    (mediaActor ? AddMediaRequest(fileName, contentType, file_bin))
-                      .mapTo[ResponseWithFailure[MediaHandlingError, AddMediaResponse]]
-
-                  case _ => Future.successful[MediaHandlingError](InvalidContentId(new Exception("Missing bodypart")))
                 }
-
               }
             }
           }
         }
       }
+    }
 
-
-    val routeget = path("media" / Segment) { mediaId: String =>
+  val routeget = path("media" / Segment) { mediaId: String =>
+    userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
       get {
         detach() {
           val mediaResponseFuture = (mediaActor ? GetMediaRequest(mediaId)).mapTo[ResponseWithFailure[MediaHandlingError, Option[GetMediaResponse]]]
 
           val mediaResponse = Await.result(mediaResponseFuture, timeout.duration)
 
-          mediaResponse  match {
+          mediaResponse match {
             case FailureResponse(mediaHandlingError) => respondWithStatus(mediaHandlingError) { complete { "" } } // Taking advandate of the ErrorSelector implicit converter
 
             case SuccessResponse(Some(GetMediaResponse(contentType, content))) =>
@@ -91,11 +102,12 @@ import scala.concurrent.duration._
                 }
               }
 
-            case SuccessResponse(None) => respondWithStatus(StatusCodes.NotFound) { complete { "" }}
+            case SuccessResponse(None) => respondWithStatus(StatusCodes.NotFound) { complete { "" } }
           }
         }
       }
     }
+  }
 
   val route = routeget ~ routeput
 }
