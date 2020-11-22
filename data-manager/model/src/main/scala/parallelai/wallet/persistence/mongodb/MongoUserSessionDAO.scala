@@ -42,11 +42,12 @@ class MongoUserSessionDAO (implicit val bindingModule: BindingModule)
     DateTime.now().plusMillis(sessionTTL.toMillis.toInt)
   }
   
-  // be sure we have session expiry correctly set
-  setSessionExpiryIndex
-
+  
 
   val dao = new SalatDAO[MongoSession, UUID](collection = db("UserSession")) {}
+
+  // be sure we have session expiry correctly set
+  setSessionExpiryIndex
 
 
   def setSessionExpiryIndex(): Unit = {

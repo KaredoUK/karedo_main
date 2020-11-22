@@ -14,7 +14,7 @@ client = MongoClient("localhost",12345)
 
 
 # to enable extra printing from the tests
-DEBUG=True
+DEBUG=False
 
 HTTP_OK=200
 HTTP_AUTH_ERR=401
