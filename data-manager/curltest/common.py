@@ -8,10 +8,18 @@ import re
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 
-# to enable extra printing from the tests
-DEBUG=False
-
+Root = "http://localhost:8090/"
 client = MongoClient("localhost",12345)
+
+
+
+# to enable extra printing from the tests
+DEBUG=True
+
+HTTP_OK=200
+HTTP_AUTH_ERR=401
+HTTP_BAD_REQUEST=400
+
 db = client.wallet_data
 JAVA=5 # uuid_type to properly understand UUIDS from DB
 
@@ -51,23 +59,28 @@ userId = newUUID()
 applicationId = newUUID()
 
 
+from requests.auth import AuthBase
+
+class KaredoAuth(AuthBase):
+    """Attaches HTTP SessionId Authentication to the given Request object."""
+    def __init__(self, sessionId):
+        # setup any auth-related data here
+        self.sessionId = sessionId
+
+    def __call__(self, r):
+        # modify and return the request
+        r.headers['X-SESSION-ID'] = self.sessionId
+        return r
+
 def title(x):
-    global a
     if(DEBUG):print("==========================================================================\n=======> " + x + "\n==========================================================================")
 
 def getHeaders(s):
-    global sessionId
-    return {'content-type': 'application/json',
-            'X-SESSION-ID':s}
-
+    return {'content-type': 'application/json', 'X-SESSION-ID': s}
+    
+# debug functions
 def info(x):
-    global a
     if(DEBUG):print("         " + x)
-
-def httproute(x):
-    r=("http://localhost:8090/"+x)
-    info("routing to:"+r)
-    return r
 
 def postdata(x):
     r=json.dumps(x)
@@ -80,6 +93,15 @@ def printr(r):
     info(" ")
     return r
 
+
+# helping function to compose final URI
+def httproute(x):
+    r=(Root+x)
+    info("routing to:"+r)
+    return r
+
+
+# POST
 def post(route, data={},session=None):
     info("METHOD: POST")
     r=requests.post(httproute(route), data=postdata(data),
@@ -87,14 +109,15 @@ def post(route, data={},session=None):
     printr(r)
     return r
 
-def postfile(route, file):
+# POST a file
+def postfile(route, file, session=None):
     info("METHOD: POST MULTIPART")
-    r=requests.post(httproute(route), files=file)
+    r=requests.post(httproute(route), files=file, auth=KaredoAuth(session))
     printr(r)
     return r
 
 
-
+# PUT
 def put(route, data={}, session=None):
     info("METHOD: PUT")
     r=requests.put(httproute(route), data=json.dumps(data),
@@ -102,6 +125,7 @@ def put(route, data={}, session=None):
     printr(r)
     return r
 
+# GET
 def get(route, session=None):
     info("METHOD: GET")
     r=requests.get(httproute(route), #data=json.dumps(data),
@@ -109,12 +133,14 @@ def get(route, session=None):
     printr(r)
     return r
 
-def getstream(route):
+# GET a stream
+def getstream(route, session=None):
     info("METHOD: GETSTREAM")
-    r=requests.get(httproute(route), stream=True)
-    printr(r)
+    r=requests.get(httproute(route), auth=KaredoAuth(session), stream=True)
+    #this can produce encoding errors printr(r)
     return r
 
+# DELETE
 def delete(route, params={}, session=None):
 
     info("METHOD: DELETE")
