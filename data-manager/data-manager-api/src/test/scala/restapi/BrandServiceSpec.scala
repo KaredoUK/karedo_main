@@ -1,5 +1,6 @@
 package restapi
 
+
 import com.parallelai.wallet.datamanager.data._
 import org.specs2.matcher.Matcher
 import org.specs2.mutable.Specification
@@ -13,14 +14,20 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import java.util.Date
 import org.joda.time.DateTime
+import spray.http.HttpHeaders.RawHeader
+
+
+
 
 @RunWith(classOf[JUnitRunner])
 class BrandServiceSpec
-  extends ApiHttpClientSpec
-  //with RestApiSpecMatchers only matchers used by account defined so not needed here
-{
+  extends ApiHttpClientSpec {
+  //with RestApiSpecMatchers only matchers used by account defined so not needed here 
+  
   import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
   import parallelai.wallet.util.SprayJsonSupport._
+    
+
 
   override def responseTimeout = 30.seconds
 
@@ -30,10 +37,11 @@ class BrandServiceSpec
 
       val newBrandUUID = UUID.randomUUID()
       mockedBrandDAO.insertNew(any[Brand]) returns Some(newBrandUUID)
+
       val data: BrandData = BrandData("brand X", "iconID")
 
       val response = wait(pipeline {
-        Post(s"$serviceUrl/brand", data)
+        Post(s"$serviceUrl/brand", data).withHeaders(headers)
       })
 
       response shouldEqual BrandResponse(newBrandUUID)
@@ -54,7 +62,7 @@ class BrandServiceSpec
       mockedBrandDAO.getById(any[UUID]) returns Some(brand)
 
       val response = wait(pipeline {
-        Get(s"$serviceUrl/brand/${brand.id}")
+        Get(s"$serviceUrl/brand/${brand.id}").withHeaders(headers)
       })
 
       response shouldEqual BrandData(brand.name, brand.iconId)
@@ -67,7 +75,7 @@ class BrandServiceSpec
       mockedBrandDAO.getById(any[UUID]) returns Some(brand)
 
       val response = wait(pipeline {
-        Delete(s"$serviceUrl/brand/${brand.id}")
+        Delete(s"$serviceUrl/brand/${brand.id}").withHeaders(headers)
       })
 
       there was one(mockedBrandDAO).delete(brand.id)
@@ -83,7 +91,7 @@ class BrandServiceSpec
 
       val response = wait(pipeline {
 
-        Post(s"$serviceUrl/brand/${brand.id}/advert", ad)
+        Post(s"$serviceUrl/brand/${brand.id}/advert", ad).withHeaders(headers)
       })
 
       response should beLike {
@@ -152,4 +160,6 @@ class BrandServiceSpec
 */
 
   }
+
+
 }

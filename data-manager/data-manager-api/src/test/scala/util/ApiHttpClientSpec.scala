@@ -1,12 +1,16 @@
 package util
 
+import java.util.UUID
+
 import akka.actor.ActorSystem
 import akka.testkit.TestProbe
 import org.specs2.mock.Mockito
 import org.specs2.mutable.{After, SpecificationLike}
 import org.specs2.specification.{Step, Fragments}
 import org.specs2.time.NoTimeConversions
+import parallelai.wallet.entity.{ClientApplication, UserSession}
 import parallelai.wallet.persistence._
+import spray.http.HttpHeaders.RawHeader
 import spray.testkit.TestUtils
 import scala.concurrent.Await._
 import scala.concurrent.Future
@@ -22,9 +26,18 @@ trait ApiHttpClientSpec
 {
   def responseTimeout = 5.seconds
 
+  val  sessionId = UUID.randomUUID()
+  val userId=UUID.randomUUID()
+  val applicationId=UUID.randomUUID()
+
+  val  headers = List(RawHeader("X-SESSION-ID",sessionId.toString()))
+
   sequential
 
   trait WithMockedPersistenceRestService extends After {
+
+
+
     val servicePort : Int = Math.abs( Random.nextInt(3000) ) + 10000
     val serviceUrl = s"http://localhost:$servicePort"
 
@@ -40,6 +53,12 @@ trait ApiHttpClientSpec
     lazy val mockedOfferDAO = mock[OfferDAO]
     lazy val mockedUserSessionDAO = mock[UserSessionDAO]
     lazy val messagerActor = TestProbe()
+
+    mockedUserSessionDAO.getValidSessionAndRenew(sessionId) returns
+      Some(UserSession(sessionId, userId, applicationId))
+
+    mockedClientApplicationDAO.findByUserId(userId) returns
+      Seq(ClientApplication(applicationId, userId, "xxxx", active= true))
 
     val server = new RestServiceWithMockPersistence(
       servicePort, mockedBrandDAO, mockedHintDAO,
