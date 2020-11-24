@@ -111,8 +111,8 @@ class RegistrationActor(
       userSessionDAO: UserSessionDAO,
       messengerActor: ActorRef)
       (implicit val bindingModule: BindingModule)
+
   extends Actor
-  with ActorLogging
   with Injectable
   with RequestValidationChaining
   with WrapLog
@@ -121,6 +121,9 @@ class RegistrationActor(
   import RegistrationActor._
 
   import context.dispatcher
+
+  // core.WrapLog trait use this for logging purposes
+  override val log=context.system.log
 
   val uiServerAddress = injectProperty[String]("ui.web.server.address")
 

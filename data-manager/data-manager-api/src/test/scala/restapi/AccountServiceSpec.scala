@@ -29,7 +29,7 @@ class AccountServiceSpec
 
   override def responseTimeout = 30.seconds
 
-  "PARALLELAI-77:Account Service API" should {
+  lazy val exampleP77 = {
     " Register a new user using MSISDN inserting a new account with validation code in the DB" in
       new WithMockedPersistenceRestService {
         val pipeline = sendReceive ~> unmarshal[RegistrationResponse]
@@ -68,7 +68,7 @@ class AccountServiceSpec
     }
   }
 
-  "PARALLELAI-101: Account Service API" should {
+  lazy val exampleP101 = {
     "Add an application to an existing account" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[AddApplicationResponse]
 
@@ -96,7 +96,7 @@ class AccountServiceSpec
     }
   }
 
-  "PARALLELAI-53: Account Service API" should {
+  lazy val exampleP53 =  {
     "Activate user if activationCode is correct" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[RegistrationValidationResponse]
 
@@ -196,7 +196,7 @@ class AccountServiceSpec
 
   }
 
-  "PARALLELAI-102: login" should {
+  lazy val exampleP102 = {
     "Accept user with correct password and active application returning new sessionId" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[APISessionResponse]
 
@@ -278,8 +278,9 @@ class AccountServiceSpec
 
       there was no(mockedUserSessionDAO).createNewSession(any[UUID], any[UUID])
     }
+  }
 
-    "PARALLELAI-51 get user profile" should {
+  lazy val exampleP51 = {
       "Retrieve user profile for the calling authenticated user" in new WithMockedPersistenceRestService {
 
         val sessionId = randomUUID()
@@ -296,7 +297,8 @@ class AccountServiceSpec
 
         mockedUserAccountDAO.getById(userAccount.id) returns Some(userAccount)
 
-        val pipeline = addHeader(AuthenticationSupport.HEADER_NAME_SESSION_ID, sessionId.toString) ~> sendReceive ~> unmarshal[UserProfile]
+        val pipeline = addHeader(AuthenticationSupport.HEADER_NAME_SESSION_ID, sessionId.toString) ~>
+          sendReceive ~> unmarshal[UserProfile]
 
         val returnedProfile = wait { pipeline { Get(s"$serviceUrl/account/${userAccount.id}")  } }
 
@@ -332,7 +334,8 @@ class AccountServiceSpec
 
         mockedUserAccountDAO.getById(otherUserId) returns Some(userAccount)
 
-        val pipeline = addHeader(AuthenticationSupport.HEADER_NAME_SESSION_ID, sessionId.toString) ~> sendReceive
+        val pipeline = addHeader(AuthenticationSupport.HEADER_NAME_SESSION_ID, sessionId.toString) ~>
+          sendReceive
 
         val returnedProfile = wait { pipeline { Get(s"$serviceUrl/account/${userAccount.id}")  } }
 
@@ -340,23 +343,79 @@ class AccountServiceSpec
       }
     }
 
-    "PARALLELAI-54API: Get User Points" should {
-      "Return user points for the calling authenticated user" in {
-        todo
+  lazy val exampleP54 =  {
+
+      "Return user points for the calling authenticated user" in new WithMockedPersistenceRestService {
+        val sessionId = randomUUID()
+
+        val pipeline = addHeader(AuthenticationSupport.HEADER_NAME_SESSION_ID, sessionId.toString) ~>
+          sendReceive ~> unmarshal[UserPoints]
+
+
+
+        val userAccount = UserAccount(randomUUID(), Some("Email"), Some("msisdn"), totalPoints = 5000)
+
+        // Authentication is fine
+        mockedUserSessionDAO.getValidSessionAndRenew(sessionId) returns
+          Some(UserSession(sessionId, userAccount.id, randomUUID()))
+
+        // there is a client application for that
+        mockedClientApplicationDAO.findByUserId(userAccount.id) returns
+          Seq(ClientApplication(randomUUID(), userAccount.id, "activationCode", true))
+
+        mockedUserAccountDAO.getById(userAccount.id) returns Some(userAccount)
+
+        val returnedPoints:UserPoints = wait {
+          pipeline { Get(s"$serviceUrl/account/${userAccount.id}/points")  } }
+
+        returnedPoints.totalPoints shouldEqual(5000)
+
       }
 
-      "Refuse unauthenticated user" in {
-        todo
+      "Refuse unauthenticated user" in new WithMockedPersistenceRestService {
+        val userAccount = UserAccount(randomUUID(), Some("Email"), Some("msisdn"))
+
+        mockedUserAccountDAO.getById(userAccount.id) returns Some(userAccount)
+
+        val pipeline = sendReceive
+
+        val returnedPointsResponse = wait { pipeline { Get(s"$serviceUrl/account/${userAccount.id}/points")  } }
+
+        returnedPointsResponse.status shouldEqual Unauthorized
       }
 
-      "Refuse calls from a different authenticated user" in {
-        todo
+      "Refuse calls from a different authenticated user" in new WithMockedPersistenceRestService {
+        val sessionId = randomUUID()
+
+        val userAccount = UserAccount(randomUUID(), Some("Email"), Some("msisdn"))
+
+        val otherUserId = randomUUID()
+
+        // Authentication is with another user
+        mockedUserSessionDAO.getValidSessionAndRenew(sessionId) returns
+          Some(UserSession(sessionId, otherUserId, randomUUID()))
+
+        // there is a client application for the other user
+        mockedClientApplicationDAO.findByUserId(otherUserId) returns
+          Seq(ClientApplication(randomUUID(), userAccount.id, "activationCode", true))
+
+        mockedUserAccountDAO.getById(otherUserId) returns Some(userAccount)
+
+        val pipeline = addHeader(AuthenticationSupport.HEADER_NAME_SESSION_ID, sessionId.toString) ~>
+          sendReceive
+
+        val returnedPointsResponse = wait { pipeline { Get(s"$serviceUrl/account/${userAccount.id}/points")  } }
+
+        returnedPointsResponse.status shouldEqual Forbidden
       }
     }
 
-  }
-
-
+  "PARALLELAI-77:Account Service API" should  exampleP77
+  "PARALLELAI-101: Account Service API" should exampleP101
+  "PARALLELAI-53: Account Service API" should exampleP53
+  "PARALLELAI-102: login" should exampleP102
+  "PARALLELAI-51 get user profile" should exampleP51
+  "PARALLELAI-54API: Get User Points" should exampleP54
 
 
 }

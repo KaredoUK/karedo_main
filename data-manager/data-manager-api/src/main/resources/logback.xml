@@ -4,7 +4,7 @@
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <target>System.out</target>
         <encoder>
-            <pattern>%-5level[%thread] %logger{0} - %msg%n</pattern>
+            <pattern>%-5level[%thread] %X{akkaSource} %logger{0} - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -12,7 +12,7 @@
         <file>log/akka1.log</file>
         <append>false</append>
         <encoder>
-            <pattern>%d %-5level [%thread] %logger{1} - %msg%n</pattern>
+            <pattern>%d %-5level [%thread] %X{akkaSource} %logger{1} - %msg%n</pattern>
         </encoder>
     </appender>
 

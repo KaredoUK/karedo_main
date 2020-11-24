@@ -39,7 +39,7 @@ lazy val root = project.in( file(".") )
 testOptions in Test += Tests.Setup( () => Embedder.startMongo)
 
 //testOptions in Test += Tests.Cleanup( () => println("After Tests"))
-
+testOptions in Test += Tests.Argument("junitxml", "console")
 
 // http://dispatch.databinder.net/Dispatch.html allows for easier http/rest calls
 libraryDependencies += "net.databinder.dispatch" %% "dispatch-core" % "0.11.2"
