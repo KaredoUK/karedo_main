@@ -3,6 +3,8 @@ package restapi
 import java.util.UUID
 import java.util.UUID._
 
+
+
 import restapi.security.AuthenticationSupport
 import com.parallelai.wallet.datamanager.data._
 import core.EditAccountActor
@@ -20,9 +22,11 @@ import org.specs2.mutable.SpecificationLike
 import org.mockito.Matchers.{eq => argEq}
 
 
+
 class AccountServiceSpec
   extends ApiHttpClientSpec // Mocked instance
   with RestApiSpecMatchers  // specialized Matchers
+  with RetryExamples // allows repetition of tests if they are temporarily failing
 {
   import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
   import parallelai.wallet.util.SprayJsonSupport._

@@ -2,6 +2,7 @@ package restapi.security
 
 import java.util.UUID._
 
+import restapi.RetryExamples
 import restapi.security.AuthenticationSupport._
 import core.security.UserAuthService
 import org.specs2.mock.Mockito
@@ -16,7 +17,12 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.Future._
 
 
-class AuthorizationSupportSpec extends Specification with Specs2RouteTest with HttpService with Mockito {
+class AuthorizationSupportSpec
+  extends Specification
+  with Specs2RouteTest
+  with HttpService
+  with RetryExamples
+  with Mockito {
   def actorRefFactory = system
 
   trait WithAuthenticatedRoute extends Scope with Directives with AuthorizationSupport {

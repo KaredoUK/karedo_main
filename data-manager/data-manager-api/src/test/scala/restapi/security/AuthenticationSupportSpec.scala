@@ -7,6 +7,7 @@ import core.security.UserAuthService
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import parallelai.wallet.entity.UserAuthContext
+import restapi.RetryExamples
 import spray.http.StatusCodes
 import spray.http.StatusCodes._
 import spray.routing.AuthenticationFailedRejection.{CredentialsRejected, CredentialsMissing}
@@ -20,7 +21,12 @@ import org.specs2.specification.Scope
 
 
 
-class AuthenticationSupportSpec extends Specification with Specs2RouteTest with HttpService with Mockito {
+class AuthenticationSupportSpec
+  extends Specification
+  with Specs2RouteTest
+  with HttpService
+  with RetryExamples
+  with Mockito {
   def actorRefFactory = system
 
   trait WithAuthenticatedRoute extends Scope with Directives with AuthenticationSupport {

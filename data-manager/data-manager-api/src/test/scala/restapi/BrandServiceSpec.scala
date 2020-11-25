@@ -21,7 +21,8 @@ import spray.http.HttpHeaders.RawHeader
 
 @RunWith(classOf[JUnitRunner])
 class BrandServiceSpec
-  extends ApiHttpClientSpec {
+  extends ApiHttpClientSpec
+  with RetryExamples {
   //with RestApiSpecMatchers only matchers used by account defined so not needed here 
   
   import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
