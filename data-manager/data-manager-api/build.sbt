@@ -61,7 +61,7 @@ lazy val python = taskKey[Int]("Launches python tests")
 
 python := {
   println("Testing python pwd: "+System.getProperty("user.dir"))
-  val ret:Int=Process("python3 curltest/Specs.py") !;
+  val ret:Int=Process("python3 -m py.test curltest/*.py --junitxml=Specs.xml") !;
   println("Exit code is "+ret)
   ret
 }
