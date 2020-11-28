@@ -1,5 +1,5 @@
 from common import *
-import unittest, json
+import pytest, json
 
 #
 # This is testing many things in the
@@ -15,185 +15,184 @@ applicationId=newUUID()
 sessionId=newUUID()
 advId=newUUID()
 
-class TestBrand(unittest.TestCase):
-    def test00_CreateAndValidateUser(self):
-        global applicationId,userId,sessionId
-        title("Setting up an initial user...")
-        
-        r = post("account", {"applicationId": applicationId, "msisdn": "0044712345678", "email": "pakkio@gmail.com"})
-        self.assertEqual(r.status_code, HTTP_OK)
-        doc = ua.find_one({"email": "pakkio@gmail.com"})
-        activationCode = doc["applications"][0]["activationCode"]
-        r = post("account/application/validation", {"applicationId": applicationId, "validationCode": activationCode, "password":"PASS"})
-        self.assertEqual(r.status_code, HTTP_OK)
-        js = json.loads(r.text)
-        userId = js["userID"]
+@pytest.mark.run(order=0)
+def test00_CreateAndValidateUser():
+    global applicationId,userId,sessionId
+    title("Setting up an initial user...")
 
-        r = post("account/"+userId+"/application/"+applicationId+"/login",
-                 {"password" : "PASS"})
-        self.assertEqual(r.status_code, HTTP_OK)
-        js = json.loads(r.text)
-        sessionId = js["sessionId"]
-        self.assertTrue(valid_uuid(sessionId))
+    r = post("account", {"applicationId": applicationId, "msisdn": "0044712345678", "email": "pakkio@gmail.com"})
+    assert r.status_code == HTTP_OK
+    doc = ua.find_one({"email": "pakkio@gmail.com"})
+    activationCode = doc["applications"][0]["activationCode"]
+    r = post("account/application/validation", {"applicationId": applicationId, "validationCode": activationCode, "password":"PASS"})
+    assert r.status_code == HTTP_OK
+    js = json.loads(r.text)
+    userId = js["userID"]
 
+    r = post("account/"+userId+"/application/"+applicationId+"/login",
+             {"password" : "PASS"})
+    assert r.status_code == HTTP_OK
+    js = json.loads(r.text)
+    sessionId = js["sessionId"]
 
-    def test01_CreateBrand(self):
-        global sessionId, brandId
-        title("PARALLELAI-67API: Create Brand")
+    assert valid_uuid(sessionId)
 
-        iconId="iconId"
-        r = post("brand", {"name": "brandX", "iconId": iconId}, sessionId)
-        self.assertEqual(r.status_code, HTTP_OK)
+@pytest.mark.run(order=1)
+def test01_CreateBrand():
+    global sessionId, brandId
+    title("PARALLELAI-67API: Create Brand")
 
-        js = json.loads(r.text)
-        brandId=js["id"]
+    iconId="iconId"
+    r = post("brand", {"name": "brandX", "iconId": iconId}, sessionId)
+    assert r.status_code == HTTP_OK
+    js = json.loads(r.text)
+    brandId=js["id"]
 
-        #doc = br.find_one({"name": "brandX"})
-        doc = br.find_one({"_id": uuid.UUID(brandId)})
-        self.assertNotEqual(doc,None)
+    #doc = br.find_one({"name": "brandX"})
+    doc = br.find_one({"_id": uuid.UUID(brandId)})
+    assert doc !=None
 
-        r = post("brand", {"name": "brandX", "iconId": iconId}, newUUID())
-        self.assertEqual(r.status_code, HTTP_AUTH_ERR)
+    r = post("brand", {"name": "brandX", "iconId": iconId}, newUUID())
+    assert r.status_code == HTTP_AUTH_ERR
 
-    def test02_FindBrands(self):
-        global sessionId, brandId, brandId2
-        title("PARALLELAI 95 API: Get Brands")
+@pytest.mark.run(order=2)
+def test02_FindBrands():
+    global sessionId, brandId, brandId2
+    title("PARALLELAI 95 API: Get Brands")
 
-        r = post("brand", {"name": "brandY", "iconId": "iconId"}, sessionId)
-        self.assertEqual(r.status_code, HTTP_OK)
-        js = json.loads(r.text)
-        brandId2=js["id"]
+    r = post("brand", {"name": "brandY", "iconId": "iconId"}, sessionId)
+    assert r.status_code == HTTP_OK
+    js = json.loads(r.text)
+    brandId2=js["id"]
 
-        r=get("brand", sessionId)
+    r=get("brand", sessionId)
 
-        self.assertEqual(r.status_code, HTTP_OK)
+    assert r.status_code == HTTP_OK
 
-        js = json.loads(r.text)
-        self.assertEqual(len(js),2)
+    js = json.loads(r.text)
+    assert len(js) == 2
 
-        title("PARALLELAI 95 API: Get a single brand") # not present in doc but tested by SG
-        r=get("brand/"+brandId, sessionId)
+    title("PARALLELAI 95 API: Get a single brand") # not present in doc but tested by SG
+    r=get("brand/"+brandId, sessionId)
 
-        self.assertEqual(r.status_code, HTTP_OK)
+    assert r.status_code == HTTP_OK
 
-        js = json.loads(r.text)
-        self.assertEqual(js["name"],"brandX")
+    js = json.loads(r.text)
+    assert js["name"] == "brandX"
 
-        r = post("brand", {"name": "brandY", "iconId": "iconId"}, newUUID())
-        self.assertEqual(r.status_code, HTTP_AUTH_ERR)
+    r = post("brand", {"name": "brandY", "iconId": "iconId"}, newUUID())
+    assert r.status_code == HTTP_AUTH_ERR
 
-        r=get("brand/"+brandId, newUUID())
-        self.assertEqual(r.status_code, HTTP_AUTH_ERR)
+    r=get("brand/"+brandId, newUUID())
+    assert r.status_code == HTTP_AUTH_ERR
 
-    def test03_DeactivateBrand(self):
-        global sessionId, brandId, brandId2
-        title("PARALLELAI-68API: Deactivate Brand")
+@pytest.mark.run(order=3)
+def test03_DeactivateBrand():
+    global sessionId, brandId, brandId2
+    title("PARALLELAI-68API: Deactivate Brand")
 
-        r=delete("brand/"+brandId2, session=sessionId)
-        self.assertEqual(r.status_code, HTTP_OK)
+    r=delete("brand/"+brandId2, session=sessionId)
+    assert r.status_code == HTTP_OK
 
-        r=get("brand/"+brandId2, sessionId)
-        self.assertEqual(r.status_code, HTTP_BAD_REQUEST)
+    r=get("brand/"+brandId2, sessionId)
+    assert r.status_code == HTTP_BAD_REQUEST
 
-        r=delete("brand/"+brandId2, session=newUUID())
-        self.assertEqual(r.status_code, HTTP_AUTH_ERR)
+    r=delete("brand/"+brandId2, session=newUUID())
+    assert r.status_code == HTTP_AUTH_ERR
 
-    def test04_CreateAdvert(self):
-        global sessionId, brandId, advId
-        title("PARALLELAI-65API: Create Ad")
+@pytest.mark.run(order=4)
+def test04_CreateAdvert():
+    global sessionId, brandId, advId
+    title("PARALLELAI-65API: Create Ad")
 
-        data={ "text":"adtext", "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" } ], "value":5}
-        r=post("brand/"+brandId+"/advert",data, sessionId)
-        self.assertEqual(r.status_code, HTTP_OK)
+    data={ "text":"adtext", "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" } ], "value":5}
+    r=post("brand/"+brandId+"/advert",data, sessionId)
+    assert r.status_code == HTTP_OK
 
-        js = json.loads(r.text)
-        advId=js["id"]
+    js = json.loads(r.text)
+    advId=js["id"]
 
-        r=post("brand/"+brandId+"/advert",data, newUUID())
-        self.assertEqual(r.status_code, HTTP_AUTH_ERR)
+    r=post("brand/"+brandId+"/advert",data, newUUID())
+    assert r.status_code == HTTP_AUTH_ERR
 
-    def test05_DisableAdvert(self):
-        global sessionId, brandId, advId, advId2
+@pytest.mark.run(order=5)
+def test05_DisableAdvert():
+    global sessionId, brandId, advId, advId2
 
-        title("PARALLELAI-66API: Disable Ad")
-        data={ "text":"adtext1", "imageIds": [ { "imageId" : "iconId" }, { "imageId" : "iconId" } ], "value":5}
-        r=post("brand/"+brandId+"/advert",data, sessionId)
+    title("PARALLELAI-66API: Disable Ad")
+    data={ "text":"adtext1", "imageIds": [ { "imageId" : "iconId" }, { "imageId" : "iconId" } ], "value":5}
+    r=post("brand/"+brandId+"/advert",data, sessionId)
 
-        self.assertEqual(r.status_code, HTTP_OK)
-        js = json.loads(r.text)
-        advId2=js["id"]
+    assert r.status_code == HTTP_OK
+    js = json.loads(r.text)
+    advId2=js["id"]
 
-        r=delete("brand/"+brandId+"/advert/"+advId2, session=sessionId)
-        self.assertEqual(r.status_code, HTTP_OK)
+    r=delete("brand/"+brandId+"/advert/"+advId2, session=sessionId)
+    assert r.status_code == HTTP_OK
 
-        r=delete("brand/"+brandId+"/advert/"+advId2, session=newUUID())
-        self.assertEqual(r.status_code, HTTP_AUTH_ERR)
+    r=delete("brand/"+brandId+"/advert/"+advId2, session=newUUID())
+    assert r.status_code == HTTP_AUTH_ERR
 
-    def test051_ListAdsByBrand(self):
-        global sessionId, brandId
+@pytest.mark.run(order=6)
+def test051_ListAdsByBrand():
+    global sessionId, brandId
 
-        title("PARALLELAI-64API: List Ads per Brand")
+    title("PARALLELAI-64API: List Ads per Brand")
 
-        data={ "text":"A", "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" }], "value":6}
-        r=post("brand/"+brandId+"/advert",data, sessionId)
-        self.assertEqual(r.status_code, HTTP_OK)
+    data={ "text":"A", "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" }], "value":6}
+    r=post("brand/"+brandId+"/advert",data, sessionId)
+    assert r.status_code == HTTP_OK
 
-        data={ "text":"B", "imageIds": [ { "imageId" : "iconIdB" }, { "imageId" : "iconIdB" }], "value":7}
-        r=post("brand/"+brandId+"/advert",data, sessionId)
-        self.assertEqual(r.status_code, HTTP_OK)
-
-
-        r=get("brand/"+brandId+"/advert", sessionId)
-        self.assertEqual(r.status_code, HTTP_OK)
-
-        js=json.loads(r.text)
-        self.assertEqual(len(js),3)
-
-        self.assertEqual(js[2]['text'],'B')
-        self.assertEqual(js[2]['value'],7)
-
-        r=get("brand/"+brandId+"/advert", newUUID())
-        self.assertEqual(r.status_code, HTTP_AUTH_ERR)
+    data={ "text":"B", "imageIds": [ { "imageId" : "iconIdB" }, { "imageId" : "iconIdB" }], "value":7}
+    r=post("brand/"+brandId+"/advert",data, sessionId)
+    assert r.status_code == HTTP_OK
 
 
+    r=get("brand/"+brandId+"/advert", sessionId)
+    assert r.status_code == HTTP_OK
 
+    js=json.loads(r.text)
+    assert len(js) == 3
 
-    def test06_AddBrandtouser(self):
-        global sessionId, brandId, brandId2
-        title("PARALLELAI-90API: Add Brand to User")
+    assert js[2]['text'] == 'B'
+    assert js[2]['value'] == 7
 
-        r = post("brand", {"name": "brandY", "iconId": "iconId"}, sessionId)
-        self.assertEqual(r.status_code, HTTP_OK)
-        js = json.loads(r.text)
-        brandId2=js["id"]
+    r=get("brand/"+brandId+"/advert", newUUID())
+    assert r.status_code == HTTP_AUTH_ERR
 
-        r=post("account/"+userId+"/brand",{ "brandId": brandId }, sessionId)
-        self.assertEqual(r.status_code, HTTP_OK)
+@pytest.mark.run(order=7)
+def test06_AddBrandtouser():
+    global sessionId, brandId, brandId2
+    title("PARALLELAI-90API: Add Brand to User")
 
-        r=post("account/"+userId+"/brand",{ "brandId": brandId2 }, sessionId)
-        self.assertEqual(r.status_code, HTTP_OK)
+    r = post("brand", {"name": "brandY", "iconId": "iconId"}, sessionId)
+    assert r.status_code == HTTP_OK
+    js = json.loads(r.text)
+    brandId2=js["id"]
 
-        r=post("account/"+userId+"/brand",{ "brandId": brandId2 }, newUUID())
-        self.assertEqual(r.status_code, HTTP_AUTH_ERR)
+    r=post("account/"+userId+"/brand",{ "brandId": brandId }, sessionId)
+    assert r.status_code == HTTP_OK
 
-    def test07_Showuserbrands(self):
-        global sessionId, userId
-        title("PARALLELAI-69API: Show User Brands")
+    r=post("account/"+userId+"/brand",{ "brandId": brandId2 }, sessionId)
+    assert r.status_code == HTTP_OK
 
-        r=get("account/"+userId+"/brand", sessionId)
-        self.assertEqual(r.status_code, HTTP_OK)
+    r=post("account/"+userId+"/brand",{ "brandId": brandId2 }, newUUID())
+    assert r.status_code == HTTP_AUTH_ERR
 
-        js=json.loads(r.text)
-        self.assertEqual(len(js),2)
+@pytest.mark.run(order=8)
+def test07_Showuserbrands():
+    global sessionId, userId
+    title("PARALLELAI-69API: Show User Brands")
 
-        self.assertEqual(js[0]["name"],"brandX")
-        self.assertEqual(js[1]["name"],"brandY")
+    r=get("account/"+userId+"/brand", sessionId)
+    assert r.status_code == HTTP_OK
 
-        r=get("account/"+userId+"/brand", newUUID())
-        self.assertEqual(r.status_code, HTTP_AUTH_ERR)
+    js=json.loads(r.text)
+    assert len(js) == 2
 
-suite = unittest.TestLoader().loadTestsFromTestCase(TestBrand)
+    assert js[0]["name"] == "brandX"
+    assert js[1]["name"] == "brandY"
 
-if __name__ == '__main__':
-    unittest.main()
+    r=get("account/"+userId+"/brand", newUUID())
+    assert r.status_code == HTTP_AUTH_ERR
 

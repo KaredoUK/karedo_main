@@ -9,6 +9,7 @@ userId=newUUID()
 applicationId=newUUID()
 sessionId=newUUID()
 
+@pytest.mark.run(order=1)
 def test00_CreateAndValidateUser():
     global applicationId,userId,sessionId
     title("Setting up an initial user...")
@@ -30,7 +31,7 @@ def test00_CreateAndValidateUser():
 
     assert valid_uuid(sessionId) == True
 
-
+@pytest.mark.run(order=2)
 def test01_CreateOffer():
     global brandId
 
