@@ -1,30 +1,53 @@
 from common import *
-import unittest
+import pytest
 import json
 import uuid
 
-class TestBrand(unittest.TestCase):
+brandId=newUUID()
+brandId2=newUUID()
+userId=newUUID()
+applicationId=newUUID()
+sessionId=newUUID()
 
-    def test01_CreateOffer(self):
-        global brandId
+def test00_CreateAndValidateUser():
+    global applicationId,userId,sessionId
+    title("Setting up an initial user...")
 
-        title("PARALLELAI-91API: Create Offer")
+    r = post("account", {"applicationId": applicationId, "msisdn": "0044712345678", "email": "pakkio@gmail.com"})
+    assert r.status_code == HTTP_OK
+    doc = ua.find_one({"email": "pakkio@gmail.com"})
+    activationCode = doc["applications"][0]["activationCode"]
+    r = post("account/application/validation", {"applicationId": applicationId, "validationCode": activationCode, "password":"PASS"})
+    assert r.status_code == HTTP_OK
+    js = json.loads(r.text)
+    userId = js["userID"]
 
-        offer = {"name": "offerTest7", "brandId": str(uuid.uuid4())}
+    r = post("account/"+userId+"/application/"+applicationId+"/login",
+             {"password" : "PASS"})
+    assert r.status_code == HTTP_OK
+    js = json.loads(r.text)
+    sessionId = js["sessionId"]
 
-        r = post("offer", offer)
+    assert valid_uuid(sessionId) == True
 
-        self.assertEqual(r.status_code, 200)
 
-        js = json.loads(r.text)
+def test01_CreateOffer():
+    global brandId
 
-        doc = of.find_one({"_id": uuid.UUID(js["offerId"])})
+    title("PARALLELAI-91API: Create Offer")
 
-        self.assertNotEqual(doc, None)
+    offer = {"name": "offerTest7", "brandId": str(uuid.uuid4())}
 
-        self.assertEqual(str(doc["_id"]), js['offerId'])
+    r = post("offer", offer, session=sessionId)
 
-suite = unittest.TestLoader().loadTestsFromTestCase(TestBrand)
+    assert r.status_code == HTTP_OK
 
-if __name__ == '__main__':
-    unittest.main()
+
+
+    js = json.loads(r.text)
+
+    doc = of.find_one({"_id": uuid.UUID(js["offerId"])})
+
+    assert doc != None
+
+    assert str(doc["_id"]) == js['offerId']
