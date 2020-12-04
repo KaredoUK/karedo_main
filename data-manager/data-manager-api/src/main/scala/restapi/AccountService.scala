@@ -1,5 +1,7 @@
 package restapi
 
+//import _root_.api.DefaultJsonFormats
+import com.wordnik.swagger.annotations.{Api => ApiDoc, _}
 import restapi.security.AuthorizationSupport
 import com.parallelai.wallet.datamanager.data._
 
@@ -10,178 +12,269 @@ import spray.json.RootJsonFormat
 import spray.routing.Directives
 import scala.concurrent.ExecutionContext
 import akka.actor.ActorRef
+import akka.pattern.ask
 import core.{EditAccountActor, ResponseWithFailure, User, RegistrationActor}
 import akka.util.Timeout
-import RegistrationActor._
+import core.RegistrationActor._
 import EditAccountActor._
 import spray.http._
 import spray.http.StatusCodes._
-import RegistrationActor.AddApplicationToKnownUserRequest
 import parallelai.wallet.entity.UserAccount
 import core.EditAccountActor._
 import java.util.UUID
 
-
-class AccountService(registrationActor: ActorRef,
-                     editAccountActor: ActorRef,
-                     override protected val userAuthService: UserAuthService)
-                    (implicit executionContext: ExecutionContext)
+trait RegistrationServiceActorComponent
   extends Directives
   with DefaultJsonFormats
   with ApiErrorsJsonProtocol
   with ApiDataJsonProtocol
-  with AuthorizationSupport
-{
+  with AuthorizationSupport {
+  protected def registrationActor: ActorRef
+  protected def editAccountActor: ActorRef
+  protected implicit val executionContext: ExecutionContext
 
-  import akka.pattern.ask
   import scala.concurrent.duration._
+  implicit val timeout = Timeout(2.seconds)
+}
 
-  implicit val timeout = Timeout(20.seconds)
+// PARALLELAI-77API: Create Account
+@ApiDoc(value = "/account", description = "User Registration Operations")
+trait Create extends RegistrationServiceActorComponent {
 
-  val route =
-    pathPrefix("account") {
-      create ~ find ~ reset ~ edit ~
-        validateApp ~ getPoints ~ getBrands ~
-        addApplication ~ login
-    }
-
-  // PARALLELAI-77API: Create Account
-  lazy val create =
-    pathEnd {
-      post {
-        handleWith {
-          registrationRequest: RegistrationRequest =>
-            (registrationActor ? registrationRequest).mapTo[ResponseWithFailure[RegistrationError, RegistrationResponse]]
-        }
+  @ApiOperation(
+    httpMethod = "POST",
+    response = classOf[RegistrationResponse],
+    value = "Returns a pet based on ID")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(
+      name = "request",
+      required = true,
+      dataType = "com.parallelai.wallet.datamanager.data.RegistrationResponse",
+      paramType = "body",
+      value = "Details of the request")
+  ))
+  @ApiResponses(Array(
+    new ApiResponse(code = 400, message = "Invalid Parameters")
+  ))
+  def create = pathEnd {
+    post {
+      handleWith {
+        registrationRequest: RegistrationRequest =>
+          (registrationActor ? registrationRequest).
+            mapTo[ResponseWithFailure[RegistrationError, RegistrationResponse]]
       }
     }
+  }
+}
 
-  // seems orphan no PARALLELAI referring to this (utility function?)
-  // Is used only by our Play front-end but should be removed
-  lazy val find =
-    pathEnd {
-      get {
-        parameters('email.?, 'msisdn.?, 'applicationId.?) { (email, msisdn, applicationId) =>
-          rejectEmptyResponse {
-            complete {
-              (editAccountActor ? FindAccount(applicationId map {
-                UUID.fromString(_)
-              }, msisdn, email)).mapTo[ResponseWithFailure[RegistrationError, Option[UserProfile]]]
-            }
-          }
-        }
+// PARALLELAI-53API: Validate/Activate Account Application
+@ApiDoc(value = "/account/application/validation", description = "User Validation")
+trait Validate extends RegistrationServiceActorComponent {
+
+  @ApiOperation(
+    httpMethod = "POST",
+    response = classOf[RegistrationResponse],
+    value = "Returns a pet based on ID")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(
+      name = "request",
+      required = true,
+      dataType = "com.parallelai.wallet.datamanager.data.RegistrationValidationResponse",
+      paramType = "path",
+      value = "Details of the request")
+  ))
+  @ApiResponses(Array(
+    new ApiResponse(code = 400, message = "Invalid Parameters"),
+    new ApiResponse(code = 401, message = "Wrong validation code")
+  ))
+  def validate = path("application" / "validation") {
+    post {
+      handleWith {
+        registrationValidation: RegistrationValidation =>
+          (registrationActor ? registrationValidation).
+            mapTo[ResponseWithFailure[RegistrationError, RegistrationValidationResponse]]
       }
     }
+  }
 
-  // PARALLELAI-49
-  lazy val reset =
-    path( JavaUUID / "application" / JavaUUID / "reset") { (accountId: UserID, applicationId: ApplicationID) =>
+}
+// PARALLELAI-49
+trait Reset extends RegistrationServiceActorComponent {
+  def reset =
+    path( JavaUUID / "application" / JavaUUID / "reset") {
+      (accountId: UserID, applicationId: ApplicationID) =>
       put {
         complete {
-          (registrationActor ? AddApplicationToKnownUserRequest(applicationId, accountId)).mapTo[ResponseWithFailure[RegistrationError, RegistrationResponse]]
+          (registrationActor ? AddApplicationToKnownUserRequest(applicationId, accountId)).
+            mapTo[ResponseWithFailure[RegistrationError, RegistrationResponse]]
         }
       }
     }
-
-
-  lazy val edit =
-      path(JavaUUID) { accountId: UserID =>
-        userAuthorizedFor( canAccessUser(accountId) )(executionContext) { userAuthContext =>
-          rejectEmptyResponse {
-            // PARALLELAI-51 get user profile
-            get {
-              complete {
-                (editAccountActor ? GetAccount(accountId)).mapTo[ResponseWithFailure[EditAccountError, Option[UserProfile]]]
-              }
-            }
-          } ~
-            // PARALLELAI-50 update userprofile
-            put {
-              handleWith {
-                userProfile: UserProfile =>
-                  editAccountActor ! UpdateAccount(userProfile)
-                  ""
-              }
-            } ~
-            // PARALLELAI-52 delete userprofile
-            delete {
-              complete {
-                (editAccountActor ? DeleteAccount(accountId)).mapTo[ResponseWithFailure[EditAccountError, String]]
-              }
-            }
-        }
-      }
-
-  lazy val validateApp =
-    path( "application" / "validation") {
-      // review this because of new modifications
-      // PARALLELAI-53API: Validate/Activate Account Application
-      post {
-        handleWith {
-          registrationValidation: RegistrationValidation => (registrationActor ? registrationValidation).mapTo[ResponseWithFailure[RegistrationError, RegistrationValidationResponse]]
-        }
-      }
-    }
-
-
-  // PARALLELAI-54API: Get User Points
-  lazy val getPoints =
-    path( JavaUUID / "points") { accountId: UserID =>
-      userAuthorizedFor( canAccessUser(accountId) )(executionContext) { userAuthContext =>
+}
+// PARALLELAI-51 get user profile
+trait GetUserProfile extends RegistrationServiceActorComponent {
+  def getUserProfile =
+    path(JavaUUID) { accountId: UserID =>
+      userAuthorizedFor(canAccessUser(accountId))(executionContext) {
+        userAuthContext =>
         rejectEmptyResponse {
           get {
             complete {
-              (editAccountActor ? GetAccountPoints(accountId)).mapTo[ResponseWithFailure[RegistrationError, Option[UserPoints]]]
+              (editAccountActor ? GetAccount(accountId)).
+                mapTo[ResponseWithFailure[EditAccountError, Option[UserProfile]]]
             }
           }
         }
       }
     }
+}
+// PARALLELAI-50 update userprofile
+trait EditUserProfile extends RegistrationServiceActorComponent {
+  def editUserProfile =
+    path(JavaUUID) { accountId: UserID =>
+      userAuthorizedFor(canAccessUser(accountId))(executionContext) {
+        userAuthContext =>
 
-  lazy val getBrands =
-    path( JavaUUID / "brand") { accountId: UserID =>
-      userAuthorizedFor( canAccessUser(accountId) )(executionContext) { userAuthContext =>
-        // PARALLELAI-90API: Add Brand to User
+        put {
+          handleWith {
+            userProfile: UserProfile =>
+              editAccountActor ! UpdateAccount(userProfile)
+              ""
+          }
+        }
+      }
+    }
+}
+// PARALLELAI-52 delete userprofile
+trait DeleteUserProfile extends RegistrationServiceActorComponent{
+  def deleteUserProfile =
+    path(JavaUUID) { accountId: UserID =>
+    userAuthorizedFor( canAccessUser(accountId) )(executionContext) {
+      userAuthContext =>
+        delete {
+          complete {
+            (editAccountActor ? DeleteAccount(accountId)).
+              mapTo[ResponseWithFailure[EditAccountError, String]]
+          }
+        }
+      }
+    }
+}
+
+// PARALLELAI-54API: Get User Points
+trait GetPoints extends RegistrationServiceActorComponent {
+  def getPoints =
+    path( JavaUUID / "points") { accountId: UserID =>
+      userAuthorizedFor( canAccessUser(accountId) )(executionContext) {
+        userAuthContext =>
+        rejectEmptyResponse {
+          get {
+            complete {
+              (editAccountActor ? GetAccountPoints(accountId)).
+                mapTo[ResponseWithFailure[RegistrationError, Option[UserPoints]]]
+            }
+          }
+        }
+      }
+    }
+}
+// PARALLELAI-90API: Add Brand to User
+trait AddBrandToUser extends RegistrationServiceActorComponent {
+  def addBrandToUser =
+    path(JavaUUID / "brand") { accountId: UserID =>
+      userAuthorizedFor(canAccessUser(accountId))(executionContext) {
+        userAuthContext =>
         post {
           handleWith {
             brandIdRequest: BrandIDRequest =>
-              (editAccountActor ? AddBrand(accountId, brandIdRequest.brandId)).mapTo[ResponseWithFailure[EditAccountError, String]]
+              (editAccountActor ? AddBrand(accountId, brandIdRequest.brandId)).
+                mapTo[ResponseWithFailure[EditAccountError, String]]
           }
-        } ~
-          // PARALLELAI-69API: Show User Brands
-          get {
-            complete {
-              (editAccountActor ? ListBrandsRequest(accountId)).mapTo[ResponseWithFailure[EditAccountError, List[BrandRecord]]]
-            }
+        }
+      }
+    }
+}
+
+// PARALLELAI-69API: Show User Brands
+trait ShowUserBrands extends  RegistrationServiceActorComponent {
+  def showUserBrands =
+    path( JavaUUID / "brand") { accountId: UserID =>
+    userAuthorizedFor( canAccessUser(accountId) )(executionContext) {
+      userAuthContext =>
+        get {
+          complete {
+            (editAccountActor ? ListBrandsRequest(accountId)).
+              mapTo[ResponseWithFailure[EditAccountError, List[BrandRecord]]]
           }
+        }
       }
 
     }
 
-  // PARALLELAI-101: Add Application to Existing User
-  lazy val addApplication =
+}
+// PARALLELAI-101: Add Application to Existing User
+trait AddApplication extends RegistrationServiceActorComponent {
+  def addApplication =
     path( "application" ) {
       post {
         handleWith {
           addApplicationToUserRequest: AddApplicationRequest =>
-            (registrationActor ? addApplicationToUserRequest).mapTo[ResponseWithFailure[RegistrationError, AddApplicationResponse]]
+            (registrationActor ? addApplicationToUserRequest).
+              mapTo[ResponseWithFailure[RegistrationError, AddApplicationResponse]]
         }
       }
     }
 
-
-  lazy val login =
-    // PARALLELAI-102 API: User Login
-    // POST /account/$UserID/application/$ApplicationId/login {
+}
+// PARALLELAI-102 API: User Login
+trait Login extends RegistrationServiceActorComponent {
+  def login =
+  // POST /account/$UserID/application/$ApplicationId/login {
     path (JavaUUID / "application" / JavaUUID / "login"){
       (accountId: UserID, applicationId: ApplicationID) =>
-      post {
-        handleWith {
-          loginRequest: APILoginRequest =>
+        post {
+          handleWith {
+            loginRequest: APILoginRequest =>
 
-          (registrationActor ? LoginRequest(accountId, applicationId, loginRequest.password)).mapTo[ResponseWithFailure[RegistrationError, APISessionResponse]]
+              (registrationActor ? LoginRequest(accountId, applicationId, loginRequest.password)).
+                mapTo[ResponseWithFailure[RegistrationError, APISessionResponse]]
+          }
         }
-      }
     }
+}
 
+class AccountService(protected val registrationActor: ActorRef,
+                     protected val editAccountActor: ActorRef,
+                     override protected val userAuthService: UserAuthService)
+                    (protected implicit val executionContext: ExecutionContext)
+  extends Directives
+
+  with Create
+  with Validate
+  with Reset
+  with AddApplication
+  with Login
+
+  with GetUserProfile
+  with EditUserProfile
+  with DeleteUserProfile
+  with GetPoints
+
+  with AddBrandToUser
+  with ShowUserBrands
+{
+  val route =
+    pathPrefix("account") {
+      create ~
+      validate ~
+      reset ~
+      addApplication ~
+      login ~
+      getUserProfile ~
+      editUserProfile ~
+      deleteUserProfile ~
+      getPoints ~
+      addBrandToUser ~
+      showUserBrands
+    }
 }

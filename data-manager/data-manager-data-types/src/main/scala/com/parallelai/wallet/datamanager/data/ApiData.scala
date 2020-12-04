@@ -7,6 +7,9 @@ package com.parallelai.wallet.datamanager.data
  */
 import java.util.UUID
 import org.joda.time.DateTime
+import com.wordnik.swagger.annotations._
+import scala.annotation.meta.field
+
 
 // if a type acts either as a request and response can extends both
 
@@ -23,8 +26,15 @@ trait WithUserContacts {
   def isValid : Boolean = msisdn.isDefined || email.isDefined
 }
 
+@ApiModel(description = "The registration request. To be valid at least one of the MSISDN or the Email needs to be provided")
+case class RegistrationRequest(
+                                @(ApiModelProperty@field)(value = "unique identifier for the application")
+                                applicationId: UUID,
+                                @(ApiModelProperty@field)(value = "User msisdn (optional)")
+                                msisdn: Option[String],
+                                @(ApiModelProperty@field)(value = "User email (optional)")
+                                email: Option[String])
 
-case class RegistrationRequest(applicationId: ApplicationID, msisdn: Option[String], email: Option[String])
   extends WithUserContacts with ApiDataRequest
 
 case class APILoginRequest(password: String)

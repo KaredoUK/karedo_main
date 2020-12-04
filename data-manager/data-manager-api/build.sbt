@@ -37,7 +37,7 @@ libraryDependencies ++= Seq(
 //  "parallelai.wallet" %% "model" % "1.0" changing(),
   "com.github.tomakehurst" % "wiremock" % "1.38" % "test",
   "net.databinder.dispatch" %% "dispatch-core" % "0.11.2",
-  "com.gettyimages" %% "spray-swagger" % "0.5.0"
+  Common.spraySwagger
 )
 
 scalacOptions ++= Seq(
