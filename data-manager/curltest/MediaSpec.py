@@ -40,8 +40,8 @@ def test01_CreateMedia():
     global sessionId, mediaId
     title("PARALLELAI-94: Create Media")
 
-    r = postfile('media',
-                 file={'file': ('media', open('image.png','rb'), 'image/png' )},
+    r = postfile('media', headers={'X-Content-Type': 'image/png'},
+                 file={'file': ('media', open('image.png','rb'))},
                  session=sessionId)
 
     assert r.status_code ==  HTTP_OK
@@ -56,7 +56,7 @@ def test01_CreateMedia():
     assert inserted["filename"] == "media"
 
     r = postfile('media',
-                 file={'file': ('media', open('image.png','rb'), 'image/png' )},
+                 file={'file': ('media', open('image.png','rb'))},
                  session=newUUID())
 
     assert r.status_code == HTTP_AUTH_ERR
@@ -69,7 +69,8 @@ def test02_GetMedia():
 
     title("PARALLELAI-97: API: Retrieve Media File")
 
-    files = { 'file': ('media', open('image.png','rb'), 'image/png') }
+
+    files = { 'file': ('media', open('image.png','rb')) }
     r = postfile('media', file=files, session=sessionId)
     assert r.status_code == HTTP_OK
 

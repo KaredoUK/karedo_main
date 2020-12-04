@@ -52,7 +52,7 @@ class MediaService (mediaActor: ActorRef,
       userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
         {
           post {
-            headerValueByName(HttpHeaders.`Content-Type`.name) { contentType =>
+            headerValueByName("X-Content-Type") { contentType =>
               entity(as[MultipartFormData]) { formData: MultipartFormData =>
                 complete {
 
@@ -60,8 +60,12 @@ class MediaService (mediaActor: ActorRef,
                     case (BodyPart(entity, headers)) =>
                       val file_bin = entity.data.toByteArray
 
-                      val contentType = headers.find(h => h.is("content-type")).get.value
-                      val fileName = headers.find(h => h.is("content-disposition")).get.value.split("filename=").last
+                      val fileName = headers.find(h => h.is("content-disposition")) match {
+                        case Some(header) =>
+                          header.value.split("filename=").last
+                        case None => "unknown"
+                      }
+
 
                       logger.info(s"Found a media of type '${contentType}' named '${fileName}' with '${file_bin.length}' bytes")
 

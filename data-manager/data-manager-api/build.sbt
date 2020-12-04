@@ -36,7 +36,8 @@ libraryDependencies ++= Seq(
   "com.novocode"        % "junit-interface"  % "0.7"                  % "test->default",
 //  "parallelai.wallet" %% "model" % "1.0" changing(),
   "com.github.tomakehurst" % "wiremock" % "1.38" % "test",
-  "net.databinder.dispatch" %% "dispatch-core" % "0.11.2"
+  "net.databinder.dispatch" %% "dispatch-core" % "0.11.2",
+  "com.gettyimages" %% "spray-swagger" % "0.5.0"
 )
 
 scalacOptions ++= Seq(
@@ -59,12 +60,17 @@ jarName in assembly := "Karedo.jar"
 lazy val python = taskKey[Int]("Launches python tests")
 
 
-python := {
-  println("Testing python pwd: "+System.getProperty("user.dir"))
-  val ret:Int=Process("python3 -m py.test curltest --junitxml=Specs.xml") !;
-  println("Exit code is "+ret)
-  ret
-}
+//python := {
+//  println("Testing python pwd: "+System.getProperty("user.dir"))
+//  val ret:Int=Process("python3 -m py.test curltest --junitxml=Specs.xml") !;
+//  println("Exit code is "+ret)
+//  ret
+//}
+// important to use ~= so that any other initializations aren't dropped
+// the _ discards the meaningless () value previously assigned to 'initialize'
+fork := true
+
+javaOptions := Seq("-Dconfig.resource=dummy.deployment.conf")
 
 
 

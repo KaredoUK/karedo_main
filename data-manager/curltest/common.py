@@ -4,6 +4,12 @@ import pymongo
 import uuid
 import unittest
 import re
+import logging
+import httplib
+
+httplib.HTTPConnection.debuglevel = 1
+
+logging.basicConfig(filename='python.log', level=logging.DEBUG)
 
 from pymongo import MongoClient
 from bson.objectid import ObjectId
@@ -110,9 +116,14 @@ def post(route, data={},session=None):
     return r
 
 # POST a file
-def postfile(route, file, session=None):
+def postfile(route, file, headers= {'X-Content-Type': 'image/png'}, session=None):
     info("METHOD: POST MULTIPART")
-    r=requests.post(httproute(route), files=file, auth=KaredoAuth(session))
+
+    r=requests.request("POST",
+                       httproute(route),
+                       headers = headers,
+                       files=file,
+                       auth=KaredoAuth(session))
     printr(r)
     return r
 

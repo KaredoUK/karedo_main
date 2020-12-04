@@ -9,11 +9,11 @@ object Common {
     organization := "parallelai.wallet"
   )
 
-  val akkaVersion = "2.3.2"
+  val akkaVersion = "2.3.6"
 
   val sl4jVersion = "1.7.5"
 
-  val sprayVersion = "1.3.1"
+  val sprayVersion = "1.3.2"
   val sprayJsonVersion = "1.3.0" 
 
   val sprayResolvers = Seq (
