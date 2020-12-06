@@ -1,27 +1,85 @@
 package restapi
 
-//import _root_.api.DefaultJsonFormats
 import com.wordnik.swagger.annotations.{Api => ApiDoc, _}
+import core.objAPI.APIError
 import restapi.security.AuthorizationSupport
 import com.parallelai.wallet.datamanager.data._
 
 import core.EditAccountActor.EditAccountError
 import core.security.UserAuthService
-import spray.httpx.marshalling.{CollectingMarshallingContext, Marshaller}
-import spray.json.RootJsonFormat
-import spray.routing.Directives
+import spray.routing._
 import scala.concurrent.ExecutionContext
 import akka.actor.ActorRef
 import akka.pattern.ask
-import core.{EditAccountActor, ResponseWithFailure, User, RegistrationActor}
+import core.{ResponseWithFailure}
 import akka.util.Timeout
 import core.RegistrationActor._
-import EditAccountActor._
-import spray.http._
-import spray.http.StatusCodes._
-import parallelai.wallet.entity.UserAccount
 import core.EditAccountActor._
 import java.util.UUID
+
+// All APIs starting with /account go here
+@ApiDoc(value = "/account", description = "Operations on the account.", position = 0)
+abstract class AccountHttpService(
+                                 protected val registrationActor: ActorRef,
+                                 protected val editAccountActor: ActorRef,
+                                 protected val brandActor: ActorRef,
+                                 override protected val userAuthService: UserAuthService)
+  (protected implicit val executionContext: ExecutionContext)
+
+  extends HttpService
+
+  with Create
+  with Validate
+  with Reset
+  with AddApplication
+  with Login
+
+  with GetUserProfile
+  with EditUserProfile
+  with DeleteUserProfile
+  with GetPoints
+
+  with AddBrandToUser
+  with ShowUserBrands
+
+  with SuggestedAdsForBrand
+  with SuggestedBrands {
+
+  def route =
+    pathPrefix("account") {
+        create ~
+        validate ~
+        reset ~
+        addApplication ~
+        login ~
+        getUserProfile ~
+        editUserProfile ~
+        deleteUserProfile ~
+        getPoints ~
+        addBrandToUser ~
+        showUserBrands ~
+        suggestedAdsForBrand ~
+        suggestedBrands
+    }
+
+
+}
+
+// All APIs starting with /user go here
+@ApiDoc(value = "/user", description = "Operations on the user.", position = 1)
+abstract class UserHttpService(
+                                   protected val registrationActor: ActorRef,
+                                   protected val editAccountActor: ActorRef,
+                                   protected val brandActor: ActorRef,
+                                   override protected val userAuthService: UserAuthService)
+                                 (protected implicit val executionContext: ExecutionContext)
+
+  extends HttpService
+
+  with UserBrandInteraction {
+
+  def route = userBrandInteraction
+}
 
 trait RegistrationServiceActorComponent
   extends Directives
@@ -31,6 +89,7 @@ trait RegistrationServiceActorComponent
   with AuthorizationSupport {
   protected def registrationActor: ActorRef
   protected def editAccountActor: ActorRef
+  protected def brandActor: ActorRef
   protected implicit val executionContext: ExecutionContext
 
   import scala.concurrent.duration._
@@ -38,7 +97,6 @@ trait RegistrationServiceActorComponent
 }
 
 // PARALLELAI-77API: Create Account
-@ApiDoc(value = "/account", description = "User Registration Operations")
 trait Create extends RegistrationServiceActorComponent {
 
   @ApiOperation(
@@ -243,38 +301,60 @@ trait Login extends RegistrationServiceActorComponent {
     }
 }
 
-class AccountService(protected val registrationActor: ActorRef,
-                     protected val editAccountActor: ActorRef,
-                     override protected val userAuthService: UserAuthService)
-                    (protected implicit val executionContext: ExecutionContext)
-  extends Directives
+trait SuggestedAdsForBrand extends RegistrationServiceActorComponent {
+  def suggestedAdsForBrand =
+    path(JavaUUID / "brand" / JavaUUID / "ads" ) { (accountId: UUID, brandId: UUID) =>
+      userAuthorizedFor( canAccessUser(accountId) )(executionContext) { userAuthContext =>
+        get {
+          parameters('max.as[Int]) { max =>
+            rejectEmptyResponse {
+              complete {
+                (brandActor ? RequestSuggestedAdForUsersAndBrand(accountId, brandId, max)).
+                  mapTo[List[SuggestedAdForUsersAndBrand]]
 
-  with Create
-  with Validate
-  with Reset
-  with AddApplication
-  with Login
+              }
+            }
+          }
+        }
+      }
+    }
+}
 
-  with GetUserProfile
-  with EditUserProfile
-  with DeleteUserProfile
-  with GetPoints
+trait SuggestedBrands extends RegistrationServiceActorComponent {
+  def suggestedBrands =
+    path(JavaUUID / "suggestedBrands") { accountId: UserID =>
+      userAuthorizedFor( canAccessUser(accountId) )(executionContext) { userAuthContext =>
+        post {
+          handleWith {
+            brandIdRequest: BrandIDRequest =>
+              (editAccountActor ? AddBrand(accountId, brandIdRequest.brandId)).mapTo[ResponseWithFailure[EditAccountError, String]]
+          }
+        } ~ get {
+          complete {
+            (editAccountActor ? ListBrandsRequest(accountId)).mapTo[ResponseWithFailure[EditAccountError, List[BrandRecord]]]
+          }
+        }
+      }
+    }
+}
 
-  with AddBrandToUser
-  with ShowUserBrands
-{
-  val route =
-    pathPrefix("account") {
-      create ~
-      validate ~
-      reset ~
-      addApplication ~
-      login ~
-      getUserProfile ~
-      editUserProfile ~
-      deleteUserProfile ~
-      getPoints ~
-      addBrandToUser ~
-      showUserBrands
+trait UserBrandInteraction extends RegistrationServiceActorComponent {
+  def userBrandInteraction: Route =
+
+  // PARALLELAI-55API: User Brand Interaction
+  // "user/"+userId+"/interaction/brand/"+brandId, { "interactionType":  "BUY"}
+    path(JavaUUID / "interaction" / "brand" / JavaUUID) {
+      (user, brand) => {
+        userAuthorizedFor( canAccessUser(user) )(executionContext) { userAuthContext =>
+          post {
+            handleWith((intType: String) =>
+
+              (brandActor ? UserBrandInteraction(user, brand, intType)).mapTo[ResponseWithFailure[APIError, InteractionResponse]]
+              // s"{${q}userId${q}: ${q}$user${q},${q}userTotalPoints${q}:${q}500${q}}")
+            )
+          }
+        }
+      }
+
     }
 }
