@@ -1,5 +1,7 @@
 package restapi
 
+import javax.ws.rs.Path
+
 import com.wordnik.swagger.annotations.{Api => ApiDoc, _}
 import core.objAPI.APIError
 import restapi.security.AuthorizationSupport
@@ -20,34 +22,26 @@ import java.util.UUID
 // All APIs starting with /account go here
 @ApiDoc(value = "/account", description = "Operations on the account.", position = 0)
 abstract class AccountHttpService(
-                                 protected val registrationActor: ActorRef,
-                                 protected val editAccountActor: ActorRef,
-                                 protected val brandActor: ActorRef,
-                                 override protected val userAuthService: UserAuthService)
-  (protected implicit val executionContext: ExecutionContext)
+                                   protected val registrationActor: ActorRef,
+                                   protected val editAccountActor: ActorRef,
+                                   protected val brandActor: ActorRef,
+                                   override protected val userAuthService: UserAuthService)
+                                 (protected implicit val executionContext: ExecutionContext)
 
   extends HttpService
+  with Directives
+  with DefaultJsonFormats
+  with ApiErrorsJsonProtocol
+  with ApiDataJsonProtocol
+  with AuthorizationSupport {
 
-  with Create
-  with Validate
-  with Reset
-  with AddApplication
-  with Login
 
-  with GetUserProfile
-  with EditUserProfile
-  with DeleteUserProfile
-  with GetPoints
+  import scala.concurrent.duration._
 
-  with AddBrandToUser
-  with ShowUserBrands
-
-  with SuggestedAdsForBrand
-  with SuggestedBrands {
-
+  implicit val timeout = Timeout(2.seconds)
   def route =
     pathPrefix("account") {
-        create ~
+      create ~
         validate ~
         reset ~
         addApplication ~
@@ -60,55 +54,17 @@ abstract class AccountHttpService(
         showUserBrands ~
         suggestedAdsForBrand ~
         suggestedBrands
+    } ~ pathPrefix("user") {
+      userBrandInteraction
+
     }
 
+  // PARALLELAI-77API: Create Account
 
-}
-
-// All APIs starting with /user go here
-@ApiDoc(value = "/user", description = "Operations on the user.", position = 1)
-abstract class UserHttpService(
-                                   protected val registrationActor: ActorRef,
-                                   protected val editAccountActor: ActorRef,
-                                   protected val brandActor: ActorRef,
-                                   override protected val userAuthService: UserAuthService)
-                                 (protected implicit val executionContext: ExecutionContext)
-
-  extends HttpService
-
-  with UserBrandInteraction {
-
-  def route = userBrandInteraction
-}
-
-trait RegistrationServiceActorComponent
-  extends Directives
-  with DefaultJsonFormats
-  with ApiErrorsJsonProtocol
-  with ApiDataJsonProtocol
-  with AuthorizationSupport {
-  protected def registrationActor: ActorRef
-  protected def editAccountActor: ActorRef
-  protected def brandActor: ActorRef
-  protected implicit val executionContext: ExecutionContext
-
-  import scala.concurrent.duration._
-  implicit val timeout = Timeout(2.seconds)
-}
-
-// PARALLELAI-77API: Create Account
-trait Create extends RegistrationServiceActorComponent {
-
-  @ApiOperation(
-    httpMethod = "POST",
-    response = classOf[RegistrationResponse],
-    value = "Returns a pet based on ID")
+  @ApiOperation(httpMethod = "POST", response = classOf[RegistrationRequest], value = "Create a new Account")
   @ApiImplicitParams(Array(
-    new ApiImplicitParam(
-      name = "request",
-      required = true,
-      dataType = "com.parallelai.wallet.datamanager.data.RegistrationResponse",
-      paramType = "body",
+    new ApiImplicitParam(name = "request",required = true,
+      dataType = "com.parallelai.wallet.datamanager.data.RegistrationRequest",paramType = "body",
       value = "Details of the request")
   ))
   @ApiResponses(Array(
@@ -123,23 +79,18 @@ trait Create extends RegistrationServiceActorComponent {
       }
     }
   }
-}
 
-// PARALLELAI-53API: Validate/Activate Account Application
-@ApiDoc(value = "/account/application/validation", description = "User Validation")
-trait Validate extends RegistrationServiceActorComponent {
-
-  @ApiOperation(
-    httpMethod = "POST",
-    response = classOf[RegistrationResponse],
-    value = "Returns a pet based on ID")
+  // PARALLELAI-53API: Validate/Activate Account Application
+  @Path("/application/validation")
+  @ApiOperation(httpMethod = "POST", response = classOf[RegistrationValidationResponse],
+    value = "Validates Registration")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(
       name = "request",
       required = true,
-      dataType = "com.parallelai.wallet.datamanager.data.RegistrationValidationResponse",
-      paramType = "path",
-      value = "Details of the request")
+      dataType = "com.parallelai.wallet.datamanager.data.RegistrationValidation",
+      paramType = "body",
+      value = "Details to be validated")
   ))
   @ApiResponses(Array(
     new ApiResponse(code = 400, message = "Invalid Parameters"),
@@ -155,125 +106,127 @@ trait Validate extends RegistrationServiceActorComponent {
     }
   }
 
-}
-// PARALLELAI-49
-trait Reset extends RegistrationServiceActorComponent {
+  // PARALLELAI-49
+  @Path("/{account}/application/{application}/reset")
+  @ApiOperation(httpMethod = "PUT", response = classOf[RegistrationResponse],
+    value = "Reset an application for a user, allowing them to register again")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "account",required = true,dataType = "String",paramType = "path",
+      value = "UUID of user account to be reset"),
+    new ApiImplicitParam (name = "application", required = true , dataType="String", paramType="path",
+      value = "UUID of the application to be reset")
+  ))
+  @ApiResponses(Array(
+    new ApiResponse(code = 400, message = "Invalid Parameters"),
+    new ApiResponse(code = 401, message = "Wrong validation code")
+  ))
   def reset =
-    path( JavaUUID / "application" / JavaUUID / "reset") {
+    path(JavaUUID / "application" / JavaUUID / "reset") {
       (accountId: UserID, applicationId: ApplicationID) =>
-      put {
-        complete {
-          (registrationActor ? AddApplicationToKnownUserRequest(applicationId, accountId)).
-            mapTo[ResponseWithFailure[RegistrationError, RegistrationResponse]]
+        put {
+          complete {
+            (registrationActor ? AddApplicationToKnownUserRequest(applicationId, accountId)).
+              mapTo[ResponseWithFailure[RegistrationError, RegistrationResponse]]
+          }
         }
-      }
     }
-}
-// PARALLELAI-51 get user profile
-trait GetUserProfile extends RegistrationServiceActorComponent {
+
+  // PARALLELAI-51 get user profile
   def getUserProfile =
     path(JavaUUID) { accountId: UserID =>
       userAuthorizedFor(canAccessUser(accountId))(executionContext) {
         userAuthContext =>
-        rejectEmptyResponse {
-          get {
-            complete {
-              (editAccountActor ? GetAccount(accountId)).
-                mapTo[ResponseWithFailure[EditAccountError, Option[UserProfile]]]
+          rejectEmptyResponse {
+            get {
+              complete {
+                (editAccountActor ? GetAccount(accountId)).
+                  mapTo[ResponseWithFailure[EditAccountError, Option[UserProfile]]]
+              }
             }
           }
-        }
       }
     }
-}
-// PARALLELAI-50 update userprofile
-trait EditUserProfile extends RegistrationServiceActorComponent {
+
+
+  // PARALLELAI-50 update userprofile
   def editUserProfile =
     path(JavaUUID) { accountId: UserID =>
       userAuthorizedFor(canAccessUser(accountId))(executionContext) {
         userAuthContext =>
 
-        put {
-          handleWith {
-            userProfile: UserProfile =>
-              editAccountActor ! UpdateAccount(userProfile)
-              ""
-          }
-        }
-      }
-    }
-}
-// PARALLELAI-52 delete userprofile
-trait DeleteUserProfile extends RegistrationServiceActorComponent{
-  def deleteUserProfile =
-    path(JavaUUID) { accountId: UserID =>
-    userAuthorizedFor( canAccessUser(accountId) )(executionContext) {
-      userAuthContext =>
-        delete {
-          complete {
-            (editAccountActor ? DeleteAccount(accountId)).
-              mapTo[ResponseWithFailure[EditAccountError, String]]
-          }
-        }
-      }
-    }
-}
-
-// PARALLELAI-54API: Get User Points
-trait GetPoints extends RegistrationServiceActorComponent {
-  def getPoints =
-    path( JavaUUID / "points") { accountId: UserID =>
-      userAuthorizedFor( canAccessUser(accountId) )(executionContext) {
-        userAuthContext =>
-        rejectEmptyResponse {
-          get {
-            complete {
-              (editAccountActor ? GetAccountPoints(accountId)).
-                mapTo[ResponseWithFailure[RegistrationError, Option[UserPoints]]]
+          put {
+            handleWith {
+              userProfile: UserProfile =>
+                editAccountActor ! UpdateAccount(userProfile)
+                ""
             }
           }
-        }
       }
     }
-}
-// PARALLELAI-90API: Add Brand to User
-trait AddBrandToUser extends RegistrationServiceActorComponent {
+
+  // PARALLELAI-52 delete userprofile
+  def deleteUserProfile =
+    path(JavaUUID) { accountId: UserID =>
+      userAuthorizedFor(canAccessUser(accountId))(executionContext) {
+        userAuthContext =>
+          delete {
+            complete {
+              (editAccountActor ? DeleteAccount(accountId)).
+                mapTo[ResponseWithFailure[EditAccountError, String]]
+            }
+          }
+      }
+    }
+
+  // PARALLELAI-54API: Get User Points
+  def getPoints =
+    path(JavaUUID / "points") { accountId: UserID =>
+      userAuthorizedFor(canAccessUser(accountId))(executionContext) {
+        userAuthContext =>
+          rejectEmptyResponse {
+            get {
+              complete {
+                (editAccountActor ? GetAccountPoints(accountId)).
+                  mapTo[ResponseWithFailure[RegistrationError, Option[UserPoints]]]
+              }
+            }
+          }
+      }
+    }
+
+  // PARALLELAI-90API: Add Brand to User
   def addBrandToUser =
     path(JavaUUID / "brand") { accountId: UserID =>
       userAuthorizedFor(canAccessUser(accountId))(executionContext) {
         userAuthContext =>
-        post {
-          handleWith {
-            brandIdRequest: BrandIDRequest =>
-              (editAccountActor ? AddBrand(accountId, brandIdRequest.brandId)).
-                mapTo[ResponseWithFailure[EditAccountError, String]]
+          post {
+            handleWith {
+              brandIdRequest: BrandIDRequest =>
+                (editAccountActor ? AddBrand(accountId, brandIdRequest.brandId)).
+                  mapTo[ResponseWithFailure[EditAccountError, String]]
+            }
           }
-        }
       }
     }
-}
 
-// PARALLELAI-69API: Show User Brands
-trait ShowUserBrands extends  RegistrationServiceActorComponent {
+  // PARALLELAI-69API: Show User Brands
   def showUserBrands =
-    path( JavaUUID / "brand") { accountId: UserID =>
-    userAuthorizedFor( canAccessUser(accountId) )(executionContext) {
-      userAuthContext =>
-        get {
-          complete {
-            (editAccountActor ? ListBrandsRequest(accountId)).
-              mapTo[ResponseWithFailure[EditAccountError, List[BrandRecord]]]
+    path(JavaUUID / "brand") { accountId: UserID =>
+      userAuthorizedFor(canAccessUser(accountId))(executionContext) {
+        userAuthContext =>
+          get {
+            complete {
+              (editAccountActor ? ListBrandsRequest(accountId)).
+                mapTo[ResponseWithFailure[EditAccountError, List[BrandRecord]]]
+            }
           }
-        }
       }
 
     }
 
-}
-// PARALLELAI-101: Add Application to Existing User
-trait AddApplication extends RegistrationServiceActorComponent {
+  // PARALLELAI-101: Add Application to Existing User
   def addApplication =
-    path( "application" ) {
+    path("application") {
       post {
         handleWith {
           addApplicationToUserRequest: AddApplicationRequest =>
@@ -283,12 +236,10 @@ trait AddApplication extends RegistrationServiceActorComponent {
       }
     }
 
-}
-// PARALLELAI-102 API: User Login
-trait Login extends RegistrationServiceActorComponent {
+  // PARALLELAI-102 API: User Login
   def login =
   // POST /account/$UserID/application/$ApplicationId/login {
-    path (JavaUUID / "application" / JavaUUID / "login"){
+    path(JavaUUID / "application" / JavaUUID / "login") {
       (accountId: UserID, applicationId: ApplicationID) =>
         post {
           handleWith {
@@ -299,12 +250,10 @@ trait Login extends RegistrationServiceActorComponent {
           }
         }
     }
-}
 
-trait SuggestedAdsForBrand extends RegistrationServiceActorComponent {
   def suggestedAdsForBrand =
-    path(JavaUUID / "brand" / JavaUUID / "ads" ) { (accountId: UUID, brandId: UUID) =>
-      userAuthorizedFor( canAccessUser(accountId) )(executionContext) { userAuthContext =>
+    path(JavaUUID / "brand" / JavaUUID / "ads") { (accountId: UUID, brandId: UUID) =>
+      userAuthorizedFor(canAccessUser(accountId))(executionContext) { userAuthContext =>
         get {
           parameters('max.as[Int]) { max =>
             rejectEmptyResponse {
@@ -318,12 +267,10 @@ trait SuggestedAdsForBrand extends RegistrationServiceActorComponent {
         }
       }
     }
-}
 
-trait SuggestedBrands extends RegistrationServiceActorComponent {
   def suggestedBrands =
     path(JavaUUID / "suggestedBrands") { accountId: UserID =>
-      userAuthorizedFor( canAccessUser(accountId) )(executionContext) { userAuthContext =>
+      userAuthorizedFor(canAccessUser(accountId))(executionContext) { userAuthContext =>
         post {
           handleWith {
             brandIdRequest: BrandIDRequest =>
@@ -336,16 +283,14 @@ trait SuggestedBrands extends RegistrationServiceActorComponent {
         }
       }
     }
-}
 
-trait UserBrandInteraction extends RegistrationServiceActorComponent {
   def userBrandInteraction: Route =
 
   // PARALLELAI-55API: User Brand Interaction
   // "user/"+userId+"/interaction/brand/"+brandId, { "interactionType":  "BUY"}
     path(JavaUUID / "interaction" / "brand" / JavaUUID) {
       (user, brand) => {
-        userAuthorizedFor( canAccessUser(user) )(executionContext) { userAuthContext =>
+        userAuthorizedFor(canAccessUser(user))(executionContext) { userAuthContext =>
           post {
             handleWith((intType: String) =>
 
@@ -357,4 +302,13 @@ trait UserBrandInteraction extends RegistrationServiceActorComponent {
       }
 
     }
+
 }
+
+
+
+
+
+
+
+

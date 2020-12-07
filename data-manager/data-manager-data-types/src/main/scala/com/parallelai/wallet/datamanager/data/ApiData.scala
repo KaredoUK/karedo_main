@@ -46,17 +46,35 @@ case class APISessionResponse(sessionId: String)
 case class AddApplicationRequest(applicationId: ApplicationID, msisdn: Option[String], email: Option[String])
   extends WithUserContacts with ApiDataRequest
 
-case class RegistrationValidation(applicationId: ApplicationID, validationCode: String, password: Option[String] = None)
+@ApiModel(description = "Data to be validated from previous application")
+case class RegistrationValidation(
+                                   @(ApiModelProperty@field)(value = "unique identifier for the application")
+                                   applicationId: ApplicationID,
+                                   @(ApiModelProperty@field)(value = "validation code sent by email/sms")
+                                   validationCode: String,
+                                   @(ApiModelProperty@field)(value = "user password to be set")
+                                   password: Option[String] = None)
   extends ApiDataRequest
 
-case class RegistrationResponse(applicationId: ApplicationID, channel: String, address: String)
+@ApiModel(description = "Data returned on first application (or reset of application)")
+case class RegistrationResponse(
+                                 @(ApiModelProperty@field)(value = "unique identifier for the application")
+                                 applicationId: ApplicationID,
+                                 @(ApiModelProperty@field)(value = "which channel used for sending activation code (sms/email)")
+                                 channel: String,
+                                 @(ApiModelProperty@field)(value = "address")
+                                 address: String)
   extends ApiDataResponse
 
 case class AddApplicationResponse(applicationId: ApplicationID, channel: String, address: String)
   extends ApiDataResponse
 
-
-case class RegistrationValidationResponse(applicationId: ApplicationID, userID: UUID)
+@ApiModel(description = "Returns user data for successful validation")
+case class RegistrationValidationResponse(
+                                           @(ApiModelProperty@field)(value = "unique identifier for the application")
+                                           applicationId: ApplicationID,
+                                           @(ApiModelProperty@field)(value = "userId")
+                                           userID: UUID)
   extends ApiDataResponse
 
 case class UserSettings(maxAdsPerWeek: Int)

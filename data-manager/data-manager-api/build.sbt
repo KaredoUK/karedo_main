@@ -57,7 +57,7 @@ mainClass in assembly := Some("Rest")
 
 jarName in assembly := "Karedo.jar"
 
-lazy val python = taskKey[Int]("Launches python tests")
+//lazy val python = taskKey[Int]("Launches python tests")
 
 
 //python := {
@@ -68,9 +68,9 @@ lazy val python = taskKey[Int]("Launches python tests")
 //}
 // important to use ~= so that any other initializations aren't dropped
 // the _ discards the meaningless () value previously assigned to 'initialize'
-fork := true
+//fork := true
+//javaOptions := Seq("-Dconfig.resource=dummy.deployment.conf")
 
-javaOptions := Seq("-Dconfig.resource=dummy.deployment.conf")
 
 
 
