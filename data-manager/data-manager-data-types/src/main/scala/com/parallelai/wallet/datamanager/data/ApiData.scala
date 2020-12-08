@@ -37,10 +37,16 @@ case class RegistrationRequest(
 
   extends WithUserContacts with ApiDataRequest
 
-case class APILoginRequest(password: String)
+@ApiModel(description = "Credentials when trying to login")
+case class APILoginRequest(
+                            @(ApiModelProperty@field)(value = "password")
+                            password: String)
   extends ApiDataRequest
 
-case class APISessionResponse(sessionId: String)
+@ApiModel(description = "Returned SessionId to be used as Header for subsequent accesses")
+case class APISessionResponse(
+                               @(ApiModelProperty@field)(value = "returned sessionId")
+                               sessionId: String)
   extends ApiDataResponse
 
 case class AddApplicationRequest(applicationId: ApplicationID, msisdn: Option[String], email: Option[String])
@@ -77,28 +83,71 @@ case class RegistrationValidationResponse(
                                            userID: UUID)
   extends ApiDataResponse
 
-case class UserSettings(maxAdsPerWeek: Int)
-case class UserInfo(userId: UserID, fullName: String, email: Option[String], msisdn: Option[String],
-                    postCode: Option[String], country: Option[String],
-                    birthDate: Option[DateTime], gender: Option[String]) extends WithUserContacts
+@ApiModel(description = "General User Info")
+case class UserSettings(
+                         @(ApiModelProperty@field)(value = "Max ads allowable for each week")
+                         maxAdsPerWeek: Int)
 
-case class UserProfile(info: UserInfo, settings: UserSettings, totalPoints: Long)
+@ApiModel(description = "General User Info")
+case class UserInfo(
+                     @(ApiModelProperty@field)(value = "userId")
+                     userId: UserID,
+                     @(ApiModelProperty@field)(value = "full name")
+                     fullName: String,
+                     @(ApiModelProperty@field)(value = "email")
+                     email: Option[String],
+                     @(ApiModelProperty@field)(value = "phone number")
+                     msisdn: Option[String],
+                     @(ApiModelProperty@field)(value = "postal code")
+                    postCode: Option[String],
+                     @(ApiModelProperty@field)(value = "country")
+                     country: Option[String],
+                     @(ApiModelProperty@field)(value = "birth date")
+                    birthDate: Option[DateTime],
+                     @(ApiModelProperty@field)(value = "gender")
+                     gender: Option[String]) extends WithUserContacts
 
-case class UserPoints(userId: UserID, totalPoints: Long)
+@ApiModel(description = "Returned Information about the user")
+case class UserProfile(
+                        @(ApiModelProperty@field)(value = "user info")
+                        info: UserInfo,
+                        @(ApiModelProperty@field)(value = "user settings")
+                        settings: UserSettings,
+                        @(ApiModelProperty@field)(value = "total points")
+                        totalPoints: Long)
+
+@ApiModel(description = "Points gained by the user")
+case class UserPoints(
+                       @(ApiModelProperty@field)(value = "userId")
+                       userId: UserID,
+                       @(ApiModelProperty@field)(value = "total points gained")
+                       totalPoints: Long)
 
 case class LoginRequest(accountId: UserID, applicationId: UUID, password: String)
 
 case class UserContacts(email: Option[String], msisdn: Option[String]) extends WithUserContacts
 
+@ApiModel(description = "Status of the response, usually OK")
+case class RestResponse(status:String)
 //
 // BRAND section
 //
 case object ListBrands extends ApiDataResponse
 
-case class BrandRecord(id: UUID, name: String, iconId: String) extends ApiDataResponse
+@ApiModel(description = "Brand Data")
+case class BrandRecord(
+                        @(ApiModelProperty@field)(value = "BrandId")
+                        id: UUID,
+                        @(ApiModelProperty@field)(value = "Brand Name")
+                        name: String,
+                        @(ApiModelProperty@field)(value = "Brand Icon")
+                        iconId: String) extends ApiDataResponse
 case class BrandData(name: String, iconId: String ) extends ApiDataRequest
 case class BrandResponse(id: UUID) extends ApiDataResponse
-case class BrandIDRequest(brandId: UUID) extends ApiDataRequest
+@ApiModel(description = "Brand to add")
+case class BrandIDRequest(
+                           @(ApiModelProperty@field)(value = "brandId")
+                           brandId: UUID) extends ApiDataRequest
 case class DeleteBrandRequest(brandId: UUID) extends ApiDataRequest
 
 // BRAND ADS

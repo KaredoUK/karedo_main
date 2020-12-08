@@ -15,7 +15,7 @@ import core.WrapLog
 import spray.util.SprayActorLogging
 
 object AuthenticationSupport {
-  val HEADER_NAME_SESSION_ID = "X-SESSION-ID"
+  val HEADER_NAME_SESSION_ID = "X-Session-Id"
   val HEADER_SESSION_ID: HttpHeader = RawHeader(HEADER_NAME_SESSION_ID, "")
 
   def extractSessionIDHeader(request: HttpRequest): Option[String] =

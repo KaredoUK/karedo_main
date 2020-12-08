@@ -163,6 +163,7 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
     case UpdateAccount(userProfile) =>
       log.info("Trying to update account with id {}", userProfile.info.userId)
       userAccountDAO.update(userProfileToUserAccount(userProfile))
+      replyToSender{ SuccessResponse("OK") }
 
     case DeleteAccount(accountId) =>
       log.info("Trying to delete account for userId {} sender is {}", accountId, sender)
