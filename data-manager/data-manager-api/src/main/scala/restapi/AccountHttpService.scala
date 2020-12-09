@@ -54,7 +54,8 @@ abstract class AccountHttpService(
         addBrandToUser ~
         showUserBrands ~
         suggestedAdsForBrand ~
-        suggestedBrands
+        suggestedBrandsPost ~
+        suggestedBrandsGet
     } ~ pathPrefix("user") {
       userBrandInteraction
 
@@ -320,7 +321,7 @@ abstract class AccountHttpService(
 
   @Path("/{account}/brand")
   @ApiOperation(httpMethod = "GET", response = classOf[List[BrandRecord]],
-    value = "Parallelai-69: Add Brand to User")
+    value = "Parallelai-69: Get Brands for User")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
       value = "UUID of user to query"),
@@ -346,6 +347,20 @@ abstract class AccountHttpService(
 
     }
 
+  @Path("/application")
+  @ApiOperation(httpMethod = "POST", response = classOf[AddApplicationResponse],
+    value = "Parallelai-101: Add Application to existing user")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(
+      name = "application apply",
+      required = true,
+      dataType = "com.parallelai.wallet.datamanager.data.AddApplicationRequest",
+      paramType = "body",
+      value = "application request")
+  ))
+  @ApiResponses(Array(
+    new ApiResponse(code = 400, message = "Invalid Parameters")
+  ))
   // PARALLELAI-101: Add Application to Existing User
   def addApplication =
     path("application") {
@@ -358,7 +373,23 @@ abstract class AccountHttpService(
       }
     }
 
-
+  @Path("/{account}/brand/{brand}/ads")
+  @ApiOperation(httpMethod = "GET", response = classOf[List[SuggestedAdForUsersAndBrand]],
+    value = "Parallelai-XXX: Suggested ads for User/Brand")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
+      value = "UUID of user to query"),
+    new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
+      value = "UUID of brand to query ads for"),
+    new ApiImplicitParam(name = "max", required = true, dataType = "String", paramType = "query",
+      value = "max number of suggested ads"),
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+      value = "SessionId for authentication/authorization")
+  ))
+  @ApiResponses(Array(
+    new ApiResponse(code = 400, message = "Invalid Parameters"),
+    new ApiResponse(code = 401, message = "Authentication Error")
+  ))
   def suggestedAdsForBrand =
     path(JavaUUID / "brand" / JavaUUID / "ads") { (accountId: UUID, brandId: UUID) =>
       userAuthorizedFor(canAccessUser(accountId))(executionContext) { userAuthContext =>
@@ -376,7 +407,26 @@ abstract class AccountHttpService(
       }
     }
 
-  def suggestedBrands =
+  @Path("/{account}/suggestedBrands")
+  @ApiOperation(httpMethod = "POST", response = classOf[String],
+    value = "Parallelai-XXX: Add Suggested Brand to user")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
+      value = "UUID of user to query"),
+    new ApiImplicitParam(
+      name = "application apply",
+      required = true,
+      dataType = "com.parallelai.wallet.datamanager.data.BrandIDRequest",
+      paramType = "body",
+      value = "brand to add"),
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+      value = "SessionId for authentication/authorization")
+  ))
+  @ApiResponses(Array(
+    new ApiResponse(code = 400, message = "Invalid Parameters"),
+    new ApiResponse(code = 401, message = "Authentication Error")
+  ))
+  def suggestedBrandsPost =
     path(JavaUUID / "suggestedBrands") { accountId: UserID =>
       userAuthorizedFor(canAccessUser(accountId))(executionContext) { userAuthContext =>
         post {
@@ -384,14 +434,41 @@ abstract class AccountHttpService(
             brandIdRequest: BrandIDRequest =>
               (editAccountActor ? AddBrand(accountId, brandIdRequest.brandId)).mapTo[ResponseWithFailure[EditAccountError, String]]
           }
-        } ~ get {
+        }
+      }
+    }
+  @Path("/{account}/suggestedBrands")
+  @ApiOperation(httpMethod = "GET", response = classOf[List[BrandRecord]],
+    value = "Parallelai-XXX: Get Suggested Brands for user")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
+      value = "UUID of user to query"),
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+      value = "SessionId for authentication/authorization")
+  ))
+  def suggestedBrandsGet =
+    path(JavaUUID / "suggestedBrands") { accountId: UserID =>
+      userAuthorizedFor(canAccessUser(accountId))(executionContext) { userAuthContext =>
+        get {
           complete {
             (editAccountActor ? ListBrandsRequest(accountId)).mapTo[ResponseWithFailure[EditAccountError, List[BrandRecord]]]
           }
         }
       }
     }
-
+  @Path("/{account}/interaction/brand/{brand}")
+  @ApiOperation(httpMethod = "GET", response = classOf[InteractionResponse],
+    value = "Parallelai-55: User interacting with brand")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
+      value = "UUID of user interacting"),
+    new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
+      value = "UUID of brand"),
+    new ApiImplicitParam(name = "intType", required = true, dataType = "String", paramType = "body",
+      value = "interactionType"),
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+          value = "SessionId for authentication/authorization")
+  ))
   def userBrandInteraction: Route =
 
   // PARALLELAI-55API: User Brand Interaction

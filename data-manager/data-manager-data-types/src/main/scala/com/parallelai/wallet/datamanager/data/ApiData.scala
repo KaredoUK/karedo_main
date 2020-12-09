@@ -49,7 +49,14 @@ case class APISessionResponse(
                                sessionId: String)
   extends ApiDataResponse
 
-case class AddApplicationRequest(applicationId: ApplicationID, msisdn: Option[String], email: Option[String])
+@ApiModel(description = "Application request")
+case class AddApplicationRequest(
+                                  @(ApiModelProperty@field)(value = "unique identifier for the application")
+                                  applicationId: ApplicationID,
+                                  @(ApiModelProperty@field)(value = "User msisdn (optional)")
+                                  msisdn: Option[String],
+                                  @(ApiModelProperty@field)(value = "User email (optional)")
+                                  email: Option[String])
   extends WithUserContacts with ApiDataRequest
 
 @ApiModel(description = "Data to be validated from previous application")
@@ -72,7 +79,14 @@ case class RegistrationResponse(
                                  address: String)
   extends ApiDataResponse
 
-case class AddApplicationResponse(applicationId: ApplicationID, channel: String, address: String)
+@ApiModel(description = "Add application response")
+case class AddApplicationResponse(
+                                   @(ApiModelProperty@field)(value = "unique identifier for the application")
+                                   applicationId: ApplicationID,
+                                   @(ApiModelProperty@field)(value = "which channel used for sending activation code (sms/email)")
+                                   channel: String,
+                                   @(ApiModelProperty@field)(value = "address")
+                                   address: String)
   extends ApiDataResponse
 
 @ApiModel(description = "Returns user data for successful validation")
@@ -157,7 +171,15 @@ case class ImageId(imageId: String)
 case class AddAdvertCommand(brandId: UUID, text: String, imageIds: List[ImageId], value: Int) extends ApiDataRequest
 case class AdvertDetail(text: String, imageIds: List[ImageId], value: Int)
 case class AdvertDetailResponse(id: UUID, text: String, imageIds: List[ImageId], value: Int) extends ApiDataResponse
-case class SuggestedAdForUsersAndBrand(id: UUID, name: String, iconId: String) extends ApiDataResponse
+
+@ApiModel(description = "Brand to add")
+case class SuggestedAdForUsersAndBrand(
+                                        @(ApiModelProperty@field)(value = "adId")
+                                        id: UUID,
+                                        @(ApiModelProperty@field)(value = "adName")
+                                        name: String,
+                                        @(ApiModelProperty@field)(value = "iconimage")
+                                        iconId: String) extends ApiDataResponse
 case class RequestSuggestedAdForUsersAndBrand(userId: UUID, brandId: UUID, max: Int) extends ApiDataRequest
 case class ListBrandsAdverts(brandId: UUID) extends ApiDataRequest
 case class DeleteAdvRequest(brandId: UUID, advId: UUID) extends ApiDataRequest
@@ -178,4 +200,9 @@ case class StatusResponse(status: String) extends ApiDataResponse
 
 // Other types
 case class UserBrandInteraction(userId:UUID, brandId: UUID, intType: String) extends ApiDataRequest
-case class InteractionResponse(userId: UUID, userTotalPoints: Int) extends ApiDataResponse
+@ApiModel(description = "Interaction Response")
+case class InteractionResponse(
+                                @(ApiModelProperty@field)(value = "userId")
+                                userId: UUID,
+                                @(ApiModelProperty@field)(value = "total points so far")
+                                userTotalPoints: Int) extends ApiDataResponse
