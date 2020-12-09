@@ -163,6 +163,7 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
     case UpdateAccount(userProfile) =>
       log.info("Trying to update account with id {}", userProfile.info.userId)
       userAccountDAO.update(userProfileToUserAccount(userProfile))
+      replyToSender{ SuccessResponse("OK") }
 
     case DeleteAccount(accountId) =>
       log.info("Trying to delete account for userId {} sender is {}", accountId, sender)
@@ -202,9 +203,14 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
   }
 
   def listBrands(accountId: UserID): ResponseWithFailure[EditAccountError,List[BrandRecord]] = {
-    val list=userAccountDAO.listUserSubscribedBrands(accountId).map { id =>
-      brandDAO getById(id) map { brand =>  BrandRecord(brand.id, brand.name, brand.iconId) }
-    } filter { _.isDefined } map { _.get }
+    val list=userAccountDAO.listUserSubscribedBrands(accountId).map {
+      id =>
+      brandDAO getById(id) map {
+        brand =>  BrandRecord(brand.id, brand.name, brand.iconId)
+      }
+    } filter {
+      _.isDefined
+    } map { _.get }
 
     SuccessResponse(list)
   }

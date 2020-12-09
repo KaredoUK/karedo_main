@@ -75,14 +75,14 @@ class KaredoAuth(AuthBase):
 
     def __call__(self, r):
         # modify and return the request
-        r.headers['X-SESSION-ID'] = self.sessionId
+        r.headers['X-Session-Id'] = self.sessionId
         return r
 
 def title(x):
     if(DEBUG):print("==========================================================================\n=======> " + x + "\n==========================================================================")
 
 def getHeaders(s):
-    return {'content-type': 'application/json', 'X-SESSION-ID': s}
+    return {'content-type': 'application/json', 'X-Session-Id': s}
     
 # debug functions
 def info(x):

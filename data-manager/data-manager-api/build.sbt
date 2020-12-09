@@ -37,7 +37,7 @@ libraryDependencies ++= Seq(
 //  "parallelai.wallet" %% "model" % "1.0" changing(),
   "com.github.tomakehurst" % "wiremock" % "1.38" % "test",
   "net.databinder.dispatch" %% "dispatch-core" % "0.11.2",
-  "com.gettyimages" %% "spray-swagger" % "0.5.0"
+  Common.spraySwagger
 )
 
 scalacOptions ++= Seq(
@@ -57,7 +57,7 @@ mainClass in assembly := Some("Rest")
 
 jarName in assembly := "Karedo.jar"
 
-lazy val python = taskKey[Int]("Launches python tests")
+//lazy val python = taskKey[Int]("Launches python tests")
 
 
 //python := {
@@ -68,9 +68,9 @@ lazy val python = taskKey[Int]("Launches python tests")
 //}
 // important to use ~= so that any other initializations aren't dropped
 // the _ discards the meaningless () value previously assigned to 'initialize'
-fork := true
+//fork := true
+//javaOptions := Seq("-Dconfig.resource=dummy.deployment.conf")
 
-javaOptions := Seq("-Dconfig.resource=dummy.deployment.conf")
 
 
 

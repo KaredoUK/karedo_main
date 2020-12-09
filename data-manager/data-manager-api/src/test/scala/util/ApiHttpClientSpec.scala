@@ -30,7 +30,7 @@ trait ApiHttpClientSpec
   val userId=UUID.randomUUID()
   val applicationId=UUID.randomUUID()
 
-  val  headers = List(RawHeader("X-SESSION-ID",sessionId.toString()))
+  val  headers = List(RawHeader("X-Session-Id",sessionId.toString()))
 
   sequential
 

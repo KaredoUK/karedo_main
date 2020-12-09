@@ -1,5 +1,9 @@
 package restapi
 
+import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
+import com.gettyimages.spray.swagger.SwaggerHttpService
+import com.parallelai.wallet.datamanager.data.RegistrationRequest
+import core.security.UserAuthService
 import spray.http.StatusCodes._
 import spray.http._
 import spray.routing._
@@ -7,10 +11,12 @@ import spray.routing.directives.RouteDirectives
 
 
 import spray.util.{SprayActorLogging, LoggingContext}
+import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
 import spray.httpx.marshalling.{ToResponseMarshallingContext, Marshaller}
 import spray.http.HttpHeaders.RawHeader
-import akka.actor.{ActorRef, ActorLogging, Actor}
+import akka.actor._
+import scala.reflect.runtime.universe._
 
 /**
  * Holds potential error response with the HTTP status and optional body
@@ -67,11 +73,42 @@ trait FailureHandling {
  * Allows you to construct Spray ``HttpService`` from a concatenation of routes; and wires in the error handler.
  * It also logs all internal server errors using ``SprayActorLogging``.
  *
- * @param route the (concatenated) route
  */
-class RoutedHttpService(route: Route) extends Actor with HttpService with ActorLogging {
+class RoutedHttpService(bindPort: Int, routes: Route)
+  extends Actor
 
-  implicit def actorRefFactory = context
+  with HttpService
+  with ActorLogging {
+
+  override implicit def actorRefFactory = context
+
+
+  //val bindAddress = injectOptionalProperty[String]("service.bindAddress") getOrElse "0.0.0.0"
+
+
+  val swaggerRoutes= new SwaggerHttpService {
+    def actorRefFactory = context
+    def apiTypes = Seq( typeOf[AccountHttpService] )
+    def modelTypes =
+      Seq(
+        typeOf[RegistrationRequest]
+        //,typeOf[RegistrationResponse]
+        //,typeOf[RegistrationValidation]//,
+        //            typeOf[RegistrationValidationResponse]
+      )
+    def apiVersion = "1.0"
+    def baseUrl = s"http://localhost:$bindPort"
+    def specPath = "api"
+    def resourcePath = "api-docs"
+  }.routes ~ get {
+    pathPrefix("") {
+      pathEndOrSingleSlash {
+        getFromResource("swagger/index.html")
+      }
+    } ~
+      getFromResourceDirectory("swagger")
+  }
+
 
   implicit val handler = ExceptionHandler {
     case NonFatal(ErrorResponseException(statusCode, entity)) => ctx =>
@@ -85,7 +122,8 @@ class RoutedHttpService(route: Route) extends Actor with HttpService with ActorL
 
 
   def receive: Receive =
-    runRoute(route)(handler, RejectionHandler.Default, context, RoutingSettings.default, LoggingContext.fromActorRefFactory)
+    runRoute(routes ~ swaggerRoutes)
+      (handler, RejectionHandler.Default, context, RoutingSettings.default, LoggingContext.fromActorRefFactory)
 
 
 }
