@@ -14,7 +14,7 @@ Common.settings
 
 test in assembly := {}
 
-version := "1.0"
+version := "1.1"
 
 resolvers ++= Common.sprayResolvers 
 
@@ -55,7 +55,7 @@ scalacOptions ++= Seq(
 // or you can use -Dconfig.file=your configuration file
 mainClass in assembly := Some("Rest")
 
-jarName in assembly := "Karedo.jar"
+//jarName in assembly := "Karedo.jar"
 
 //lazy val python = taskKey[Int]("Launches python tests")
 
