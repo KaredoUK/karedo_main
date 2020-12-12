@@ -18,3 +18,5 @@ resolvers += Resolver.url(
     Resolver.ivyStylePatterns)
 
 addSbtPlugin("io.scalac" % "sbt-process-runner" % "0.8.1")
+
+addSbtPlugin("io.spray" % "sbt-revolver" % "0.7.2")

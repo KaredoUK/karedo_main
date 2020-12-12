@@ -7,6 +7,8 @@ import io.scalac.sbt.processrunner.{ProcessRunnerPlugin, ProcessInfo}
 import ProcessRunnerPlugin.ProcessRunner
 import ProcessRunnerPlugin.Keys.processInfoList
 
+Revolver.settings
+
 
 name := """data-manager-api"""
 
@@ -68,8 +70,9 @@ mainClass in assembly := Some("Rest")
 //}
 // important to use ~= so that any other initializations aren't dropped
 // the _ discards the meaningless () value previously assigned to 'initialize'
-//fork := true
+fork := true
 //javaOptions := Seq("-Dconfig.resource=dummy.deployment.conf")
+
 
 
 

@@ -47,6 +47,7 @@ trait BootedCore extends Core {
 
 trait DependencyInjection extends Injectable {
   implicit val configProvider = {
+    println(java.lang.management.ManagementFactory.getRuntimeMXBean().getInputArguments)
     println(s"\n**** config.resource: ${System.getProperty("config.resource")}")
     println(  s"**** config.file: ${System.getProperty("config.file")}\n")
     AppConfigPropertySource( ConfigFactory.load().withFallback(ConfigFactory.parseResources("application.default.conf")) )
