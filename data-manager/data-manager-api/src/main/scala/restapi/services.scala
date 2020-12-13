@@ -96,12 +96,12 @@ class RoutedHttpService(bindPort: Int, routes: Route)
         //,typeOf[RegistrationValidation]//,
         //            typeOf[RegistrationValidationResponse]
       )
-    def apiVersion = "1.0"
+    def apiVersion = "1.1"
     def baseUrl = s"http://localhost:$bindPort"
     def specPath = "api"
     def resourcePath = "api-docs"
   }.routes ~ get {
-    pathPrefix("") {
+    pathPrefix("swagger") {
       pathEndOrSingleSlash {
         getFromResource("swagger/index.html")
       }
