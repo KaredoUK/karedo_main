@@ -32,8 +32,6 @@ trait ApiHttpClientSpec
 
   val  headers = List(RawHeader("X-Session-Id",sessionId.toString()))
 
-  sequential
-
   trait WithMockedPersistenceRestService extends After {
 
 
@@ -65,6 +63,9 @@ trait ApiHttpClientSpec
       mockedClientApplicationDAO, mockedUserAccountDAO,
       mockedMediaDAO, mockedOfferDAO, mockedUserSessionDAO,
       messagerActor.ref)
+
+    println("Sleeping 2 seconds to wait for the httpserver to start")
+    Thread.sleep(2000)
 
     def after = stopServer()
 

@@ -28,7 +28,7 @@ class BrandServiceSpec
   import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
   import parallelai.wallet.util.SprayJsonSupport._
     
-
+  sequential
 
   override def responseTimeout = 30.seconds
 
