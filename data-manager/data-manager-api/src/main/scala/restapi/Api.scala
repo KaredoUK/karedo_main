@@ -24,6 +24,9 @@ trait Api extends RouteConcatenation with Injectable {
   val serveAccount = new AccountHttpService(registration, editAccount, brand, userAuthentication) {
     override implicit def actorRefFactory: ActorRefFactory = system
   }
+  val serveMedia = new MediaHttpService(media, userAuthentication) {
+    override implicit def actorRefFactory: ActorRefFactory = system
+  }
 
   val serveBrand = new BrandHttpService(brand, userAuthentication) {
     override implicit def actorRefFactory: ActorRefFactory = system
@@ -33,7 +36,7 @@ trait Api extends RouteConcatenation with Injectable {
   val routes =
     serveAccount.route ~
       serveBrand.route ~
-      new MediaService(media, userAuthentication).route ~
+      serveMedia.route ~
       new OfferService(offer, userAuthentication).route ~
       new MockService(other, userAuthentication).route
 

@@ -7,7 +7,7 @@ import akka.actor.ActorRef
 
 import akka.event.slf4j.Logger
 import akka.util.Timeout
-import restapi.MediaService.logger
+import restapi.MediaHttpService.logger
 import com.parallelai.wallet.datamanager.data._
 
 import core.MediaContentActor._
@@ -17,7 +17,7 @@ import restapi.security.AuthorizationSupport
 import core.security.UserAuthService
 
 import spray.http._
-import spray.routing.Directives
+import spray.routing.{HttpService, Directives}
 
 import scala.Some
 import scala.concurrent.{Await, ExecutionContext}
@@ -29,15 +29,16 @@ import scala.concurrent.Future
 import com.wordnik.swagger.annotations.{Api => ApiDoc, _}
 
 
-object MediaService {
+object MediaHttpService {
   val logger = Logger("MediaService")
 }
 
 @ApiDoc(value = "/media", description = "Media Manager, creates and retrieve media content.", position = 0)
-class MediaService (mediaActor: ActorRef, 
+abstract class MediaHttpService (mediaActor: ActorRef,
     override protected val userAuthService: UserAuthService)
     (implicit executionContext: ExecutionContext)
-  extends Directives 
+  extends HttpService
+  with Directives
   with DefaultJsonFormats 
   with ApiErrorsJsonProtocol
   with AuthorizationSupport {
