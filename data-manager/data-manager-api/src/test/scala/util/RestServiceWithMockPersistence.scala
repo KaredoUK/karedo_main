@@ -62,8 +62,8 @@ class RestServiceWithMockPersistence(
         |
         |akka {
         | log-dead-letters-during-shutdown = off
-        | loglevel = DEBUG
         | loggers = ["akka.event.slf4j.Slf4jLogger"]
+        | loglevel = INFO
         |}
       """.stripMargin
     )

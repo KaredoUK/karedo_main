@@ -28,6 +28,7 @@ class AccountServiceSpec
   with RestApiSpecMatchers  // specialized Matchers
   with RetryExamples // allows repetition of tests if they are temporarily failing
 {
+  sequential
   import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
   import parallelai.wallet.util.SprayJsonSupport._
 
