@@ -88,7 +88,7 @@ class RoutedHttpService(bindPort: Int, routes: Route)
 
   val swaggerRoutes= new SwaggerHttpService {
     def actorRefFactory = context
-    def apiTypes = Seq( typeOf[AccountHttpService], typeOf[MediaHttpService] )
+    def apiTypes = Seq( typeOf[AccountHttpService], typeOf[MediaHttpService], typeOf[BrandHttpService] )
     def modelTypes =
       Seq(
         typeOf[RegistrationRequest]

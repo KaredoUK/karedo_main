@@ -35,29 +35,27 @@ abstract class AccountHttpService(
   with ApiDataJsonProtocol
   with AuthorizationSupport {
 
-
   import scala.concurrent.duration._
-
   implicit val timeout = Timeout(2.seconds)
 
   def route =
     pathPrefix("account") {
-      create ~
-        validate ~
-        reset ~
-        addApplication ~
-        login ~
-        getUserProfile ~
-        editUserProfile ~
-        deleteUserProfile ~
-        getPoints ~
-        addBrandToUser ~
-        showUserBrands ~
-        suggestedAdsForBrand ~
-        suggestedBrandsPost ~
-        suggestedBrandsGet
+      create ~               // P77 POST /account
+        validate ~           // P53 POST /account/validation/validate
+        reset ~              // P49 PUT  /account/xxx/application/xxx/reset
+        addApplication ~     // P101 POST /account/application
+        login ~              // P102 POST /account/xxx/application/xxx/login
+        getUserProfile ~     // P51 GET AUTH /account/xxx
+        editUserProfile ~    // P50 PUT AUTH /account/xxx
+        deleteUserProfile ~  // P52 DELETE AUTH /account/xxx
+        getPoints ~          // P54 GET AUTH /account/xxx/points
+        addBrandToUser ~     // P90 POST AUTH /account/xxx/brand
+        showUserBrands ~     // P69 GET AUTH /account/xxx/brand
+        suggestedAdsForBrand ~ // P59 GET AUTH /account/xxx/brand/xxx
+        suggestedBrandsPost ~ // P70 ???
+        suggestedBrandsGet   // P70 GET AUTH /account/xxx/suggestedbrands
     } ~ pathPrefix("user") {
-      userBrandInteraction
+      userBrandInteraction // P55 POST AUTH /account/interaction/brand/xxx
 
     }
 
@@ -179,7 +177,7 @@ abstract class AccountHttpService(
     new ApiResponse(code = 400, message = "Invalid Parameters"),
     new ApiResponse(code = 401, message = "Authentication Error")
   ))
-  // PARALLELAI-51 get user profile
+  // PARALLELAI-51 get user profile / account settings
   def getUserProfile =
     path(JavaUUID) { accountId: UserID =>
       userAuthorizedFor(canAccessUser(accountId))(executionContext) {
@@ -375,7 +373,7 @@ abstract class AccountHttpService(
 
   @Path("/{account}/brand/{brand}/ads")
   @ApiOperation(httpMethod = "GET", response = classOf[List[SuggestedAdForUsersAndBrand]],
-    value = "Parallelai-XXX: Suggested ads for User/Brand")
+    value = "Parallelai-59: Suggested ads for User/Brand")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
       value = "UUID of user to query"),
@@ -409,7 +407,7 @@ abstract class AccountHttpService(
 
   @Path("/{account}/suggestedBrands")
   @ApiOperation(httpMethod = "POST", response = classOf[String],
-    value = "Parallelai-XXX: Add Suggested Brand to user")
+    value = "Parallelai-70: Add Suggested Brand to user")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
       value = "UUID of user to query"),
@@ -439,7 +437,7 @@ abstract class AccountHttpService(
     }
   @Path("/{account}/suggestedBrands")
   @ApiOperation(httpMethod = "GET", response = classOf[List[BrandRecord]],
-    value = "Parallelai-XXX: Get Suggested Brands for user")
+    value = "Parallelai-70: Get Suggested Brands for user")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
       value = "UUID of user to query"),

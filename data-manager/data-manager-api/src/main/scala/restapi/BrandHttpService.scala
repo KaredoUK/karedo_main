@@ -1,6 +1,7 @@
 package restapi
 
 import java.util.UUID
+import javax.ws.rs.Path
 
 import akka.actor.{ActorRef}
 import akka.util.Timeout
@@ -18,46 +19,43 @@ import scala.concurrent.ExecutionContext
 // All APIs starting with /brand go here
 @ApiDoc(value = "/brand", description = "Operations on the brand.", position = 1)
 abstract class BrandHttpService(protected val brandActor: ActorRef,
-                    override protected val userAuthService: UserAuthService)
-                  (implicit protected val executionContext: ExecutionContext)
+                                override protected val userAuthService: UserAuthService)
+                               (implicit protected val executionContext: ExecutionContext)
   extends HttpService
-  with CreateBrand
-  with ListBrands
-  with GetBrand
-  with DeleteBrand
-  with ListBrandsAdverts
-  with AddAdvert
-  with DeleteAdvert
-{
-
-  val route =
-    pathPrefix("brand") {
-      createBrand ~
-      listBrands ~
-      getBrand ~
-      deleteBrand ~
-      listBrandsAdverts ~
-      addAdvert ~
-      deleteAdvert
-
-    }
-}
-trait BrandServiceActorComponent
-  extends Directives
+  with Directives
   with DefaultJsonFormats
   with ApiErrorsJsonProtocol
   with ApiDataJsonProtocol
   with AuthorizationSupport {
 
-  protected def brandActor: ActorRef
-  protected implicit val executionContext: ExecutionContext
-
   import scala.concurrent.duration._
-  implicit val timeout = Timeout(2.seconds)
-}
 
-trait CreateBrand extends BrandServiceActorComponent {
-  // dealing with /brand to create inquiry a brand
+  implicit val timeout = Timeout(2.seconds)
+
+  val route =
+    pathPrefix("brand") {
+      createBrand ~         // P67 POST AUTH /brand
+        listBrands ~        // P95 GET AUTH /brand
+        getBrand ~          // ????? missing? GET AUTH /brand/xxx
+        deleteBrand ~       // P68 DELETE AUTH /brand/xxx
+        listBrandsAdverts ~ // P64 GET AUTH /brand/xxx/advert
+        addAdvert ~         // P65 POST AUTH /brand/xxx
+        deleteAdvert        // P66 DELETE AUTH /brand/xxx/advert/xxx
+
+    }
+
+  // P67 CREATE BRAND
+  @ApiOperation(httpMethod = "POST", response = classOf[BrandResponse], value = "Parallelai-67: Create a new Brand")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "request", required = true,
+      dataType = "com.parallelai.wallet.datamanager.data.BrandData", paramType = "body",
+      value = "Details of the request"),
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+      value = "SessionId for authentication/authorization")
+  ))
+  @ApiResponses(Array(
+    new ApiResponse(code = 400, message = "Invalid Parameters")
+  ))
   def createBrand =
     pathEnd {
       userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
@@ -69,8 +67,19 @@ trait CreateBrand extends BrandServiceActorComponent {
         }
       }
     }
-}
-trait ListBrands extends BrandServiceActorComponent {
+
+  // P95 LIST BRANDS
+
+  @ApiOperation(httpMethod = "GET", response = classOf[List[BrandRecord]],
+    value = "Parallelai-95: List Brands")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+      value = "SessionId for authentication/authorization")
+  ))
+  @ApiResponses(Array(
+    new ApiResponse(code = 400, message = "Invalid Parameters"),
+    new ApiResponse(code = 401, message = "Authentication Error")
+  ))
   def listBrands =
     pathEnd {
       userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
@@ -84,10 +93,20 @@ trait ListBrands extends BrandServiceActorComponent {
         }
       }
     }
-}
 
-trait GetBrand extends BrandServiceActorComponent {
-
+  // ?????
+  @ApiOperation(httpMethod = "GET", response = classOf[BrandRecord],
+    value = "Parallelai-XXX: Fetch a single Brand")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
+      value = "UUID of brand to query"),
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+      value = "SessionId for authentication/authorization")
+  ))
+  @ApiResponses(Array(
+    new ApiResponse(code = 400, message = "Invalid Parameters"),
+    new ApiResponse(code = 401, message = "Authentication Error")
+  ))
   def getBrand = path(JavaUUID) { brandId: UUID =>
     userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
       rejectEmptyResponse {
@@ -101,9 +120,20 @@ trait GetBrand extends BrandServiceActorComponent {
       }
     }
   }
-}
 
-trait DeleteBrand extends BrandServiceActorComponent {
+  // P68 DEACTIVATE BRAND
+  @ApiOperation(httpMethod = "DELETE", response = classOf[String],
+    value = "Parallelai-68: Deactivate Brand")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
+      value = "UUID of brand to deactivate"),
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+      value = "SessionId for authentication/authorization")
+  ))
+  @ApiResponses(Array(
+    new ApiResponse(code = 400, message = "Invalid Parameters"),
+    new ApiResponse(code = 401, message = "Authentication Error")
+  ))
   def deleteBrand = path(JavaUUID) { brandId: UUID =>
     userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
       delete {
@@ -113,8 +143,20 @@ trait DeleteBrand extends BrandServiceActorComponent {
       }
     }
   }
-}
-trait ListBrandsAdverts extends BrandServiceActorComponent {
+
+  // P64 LIST ADS PER BRAND
+  @ApiOperation(httpMethod = "GET", response = classOf[List[BrandRecord]],
+    value = "Parallelai-64: List Ads per Brand")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
+      value = "UUID of brand to search for ads"),
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+      value = "SessionId for authentication/authorization")
+  ))
+  @ApiResponses(Array(
+    new ApiResponse(code = 400, message = "Invalid Parameters"),
+    new ApiResponse(code = 401, message = "Authentication Error")
+  ))
   def listBrandsAdverts =
     path(JavaUUID / "advert") {
       brandId: UUID =>
@@ -128,8 +170,26 @@ trait ListBrandsAdverts extends BrandServiceActorComponent {
           }
         }
     }
-}
-trait AddAdvert extends BrandServiceActorComponent {
+
+  // PARALLELAI-65 CREATE AD
+  @ApiOperation(httpMethod = "POST", response = classOf[AdvertDetailResponse],
+    value = "Parallelai-65: Create Ad")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(
+      name = "Advert data",
+      required = true,
+      dataType = "com.parallelai.wallet.datamanager.data.AdvertDetail",
+      paramType = "body",
+      value = "Advert to add"),
+    new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
+      value = "UUID of brand to owning this new ad"),
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+      value = "SessionId for authentication/authorization")
+  ))
+  @ApiResponses(Array(
+    new ApiResponse(code = 400, message = "Invalid Parameters"),
+    new ApiResponse(code = 401, message = "Authentication Error")
+  ))
   def addAdvert =
     path(JavaUUID / "advert") {
       brandId: UUID =>
@@ -144,8 +204,22 @@ trait AddAdvert extends BrandServiceActorComponent {
           }
         }
     }
-}
-trait DeleteAdvert extends BrandServiceActorComponent {
+
+  // PARALLELAI-66 DISABLE AD
+  @ApiOperation(httpMethod = "DELETE", response = classOf[String],
+    value = "Parallelai-66: Disable ad")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
+      value = "UUID of brand to deactivate"),
+    new ApiImplicitParam(name = "ad id", required = true, dataType = "String", paramType = "path",
+      value = "UUID of ad to deactivate"),
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+      value = "SessionId for authentication/authorization")
+  ))
+  @ApiResponses(Array(
+    new ApiResponse(code = 400, message = "Invalid Parameters"),
+    new ApiResponse(code = 401, message = "Authentication Error")
+  ))
   def deleteAdvert =
     path(JavaUUID / "advert" / JavaUUID) {
       (brandId: UUID, advId: UUID) =>

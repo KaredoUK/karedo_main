@@ -148,7 +148,7 @@ case class RestResponse(status:String)
 //
 case object ListBrands extends ApiDataResponse
 
-@ApiModel(description = "Brand Data")
+@ApiModel(description = "Brand Data Info")
 case class BrandRecord(
                         @(ApiModelProperty@field)(value = "BrandId")
                         id: UUID,
@@ -156,8 +156,17 @@ case class BrandRecord(
                         name: String,
                         @(ApiModelProperty@field)(value = "Brand Icon")
                         iconId: String) extends ApiDataResponse
-case class BrandData(name: String, iconId: String ) extends ApiDataRequest
-case class BrandResponse(id: UUID) extends ApiDataResponse
+@ApiModel(description = "Brand Data to create")
+case class BrandData(
+                      @(ApiModelProperty@field)(value = "Brand Name")
+                      name: String,
+                      @(ApiModelProperty@field)(value = "Icon Image reference")
+                      iconId: String ) extends ApiDataRequest
+
+@ApiModel(description = "Created Brand")
+case class BrandResponse(
+                          @(ApiModelProperty@field)(value = "UUID of the newly brand created")
+                          id: UUID) extends ApiDataResponse
 @ApiModel(description = "Brand to add")
 case class BrandIDRequest(
                            @(ApiModelProperty@field)(value = "brandId")
@@ -169,8 +178,26 @@ case class DeleteBrandRequest(brandId: UUID) extends ApiDataRequest
 case class ImageId(imageId: String)
 
 case class AddAdvertCommand(brandId: UUID, text: String, imageIds: List[ImageId], value: Int) extends ApiDataRequest
-case class AdvertDetail(text: String, imageIds: List[ImageId], value: Int)
-case class AdvertDetailResponse(id: UUID, text: String, imageIds: List[ImageId], value: Int) extends ApiDataResponse
+
+@ApiModel(description = "Detail of returned Ad")
+case class AdvertDetail(
+                         @(ApiModelProperty@field)(value = "ad text")
+                         text: String,
+                         @(ApiModelProperty@field)(value = "list of images")
+                         imageIds: List[ImageId],
+                         @(ApiModelProperty@field)(value = "points weight of this ad")
+                         value: Int)
+
+@ApiModel(description = "Detail of returned Ad")
+case class AdvertDetailResponse(
+                                 @(ApiModelProperty@field)(value = "detail UUID")
+                                 id: UUID,
+                                 @(ApiModelProperty@field)(value = "text of the ad")
+                                 text: String,
+                                 @(ApiModelProperty@field)(value = "listing of images")
+                                 imageIds: List[ImageId],
+                                 @(ApiModelProperty@field)(value = "points weight of this ad")
+                                 value: Int) extends ApiDataResponse
 
 @ApiModel(description = "Brand to add")
 case class SuggestedAdForUsersAndBrand(
