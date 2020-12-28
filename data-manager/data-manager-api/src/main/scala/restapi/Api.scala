@@ -41,7 +41,7 @@ trait Api extends RouteConcatenation with Injectable {
       new OfferService(offer, userAuthentication).route ~
       new MockService(other, userAuthentication).route
 
-
+  println("%%%%%%%%%%%%%%serviceURL: $serviceURL");
   val rootService = system.actorOf(Props(new RoutedHttpService(serviceURL, bindPort, routes)))
 
 }
