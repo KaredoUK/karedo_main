@@ -74,7 +74,7 @@ trait FailureHandling {
  * It also logs all internal server errors using ``SprayActorLogging``.
  *
  */
-class RoutedHttpService(bindPort: Int, routes: Route)
+class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route)
   extends Actor
 
   with HttpService
@@ -97,7 +97,7 @@ class RoutedHttpService(bindPort: Int, routes: Route)
         //            typeOf[RegistrationValidationResponse]
       )
     def apiVersion = "1.1"
-    def baseUrl = s"http://localhost:$bindPort"
+    def baseUrl = s"http://$serviceURL:$bindPort"
     def specPath = "api"
     def resourcePath = "api-docs"
   }.routes ~ get {

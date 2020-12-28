@@ -19,6 +19,7 @@ trait Api extends RouteConcatenation with Injectable {
   private implicit val _ = system.dispatcher
 
   private val bindPort = injectOptionalProperty[Int]("service.port") getOrElse 8080
+  private val serviceURL = injectOptionalProperty[String]("service.url") getOrElse "localhost"
 
 
   val serveAccount = new AccountHttpService(registration, editAccount, brand, userAuthentication) {
@@ -41,6 +42,6 @@ trait Api extends RouteConcatenation with Injectable {
       new MockService(other, userAuthentication).route
 
 
-  val rootService = system.actorOf(Props(new RoutedHttpService(bindPort, routes)))
+  val rootService = system.actorOf(Props(new RoutedHttpService(serviceURL, bindPort, routes)))
 
 }
