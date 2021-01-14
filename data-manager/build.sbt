@@ -15,20 +15,24 @@ javacOptions in ThisBuild ++= Seq("-source", "1.6")
 
 exportJars := true
 
-lazy val common = (project.in(file("./common" ))).
+lazy val common = (project.in(file("common" ))).
   settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
-lazy val data = (project.in(file("./data-manager-data-types" ))).
+lazy val data = (project.in(file("data-manager-data-types" ))).
   dependsOn(common).
   settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
-lazy val model = (project.in(file("./model")).
+lazy val model = (project.in(file("model")).
   dependsOn(common)).dependsOn(common).
   settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
-lazy val api = (project.in(file("./data-manager-api"))).
+lazy val api = (project.in(file("data-manager-api"))).
   dependsOn(data,model,common).
   settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*).
   settings(assemblySettings: _*) /*.
   settings(mainClass in assembly := Some("Rest")).
   settings(jarName in assembly := "Karedo.jar")*/
+lazy val it = (project.in(file("it"))).
+  dependsOn(data,model,common,api).
+  configs( IntegrationTest ).
+  settings( Defaults.itSettings : _*)
 
 //lazy val web = (project.in(file("./data-manager-web"))).enablePlugins(PlayScala).dependsOn(data,model,common).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
