@@ -145,7 +145,8 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
   }
 
   // P64 LIST ADS PER BRAND
-  @ApiOperation(httpMethod = "GET", response = classOf[List[BrandRecord]],
+  @Path("/{brandId}/advert")
+  @ApiOperation(httpMethod = "GET", response = classOf[List[AdvertDetailResponse]],
     value = "Parallelai-64: List Ads per Brand")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
@@ -172,6 +173,7 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
     }
 
   // PARALLELAI-65 CREATE AD
+  @Path("/{brandId}/advert")
   @ApiOperation(httpMethod = "POST", response = classOf[AdvertDetailResponse],
     value = "Parallelai-65: Create Ad")
   @ApiImplicitParams(Array(
