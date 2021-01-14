@@ -19,7 +19,9 @@ object AuthenticationSupport {
   val HEADER_SESSION_ID: HttpHeader = RawHeader(HEADER_NAME_SESSION_ID, "")
 
   def extractSessionIDHeader(request: HttpRequest): Option[String] =
-    request.headers.find { header => header.name == HEADER_NAME_SESSION_ID } map { _.value } filterNot { _.isEmpty }
+    request.headers.find { 
+      header => header.name == HEADER_NAME_SESSION_ID 
+    } map { _.value } filterNot { _.isEmpty }
   
 }
 
