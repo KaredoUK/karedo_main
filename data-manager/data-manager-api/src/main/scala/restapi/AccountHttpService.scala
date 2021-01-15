@@ -372,7 +372,7 @@ abstract class AccountHttpService(
     }
 
   @Path("/{account}/brand/{brand}/ads")
-  @ApiOperation(httpMethod = "GET", response = classOf[List[SuggestedAdForUsersAndBrand]],
+  @ApiOperation(httpMethod = "GET", response = classOf[List[AdvertDetailResponse]],
     value = "Parallelai-59: Suggested ads for User/Brand")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
@@ -395,8 +395,10 @@ abstract class AccountHttpService(
           parameters('max.as[Int]) { max =>
             rejectEmptyResponse {
               complete {
-                (brandActor ? RequestSuggestedAdForUsersAndBrand(accountId, brandId, max)).
-                  mapTo[List[SuggestedAdForUsersAndBrand]]
+               // (brandActor ? RequestSuggestedAdForUsersAndBrand(accountId, brandId, max)).
+               // mapTo[List[SuggestedAdForUsersAndBrand]]
+                (brandActor ? ListBrandsAdverts(brandId,max)).
+                  mapTo[ResponseWithFailure[APIError,List[AdvertDetailResponse]]]
 
               }
             }

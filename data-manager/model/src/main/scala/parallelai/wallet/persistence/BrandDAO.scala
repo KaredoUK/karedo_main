@@ -20,7 +20,7 @@ trait BrandDAO {
 
 
   def addAd(brandId: UUID, ad: AdvertisementDetail): Unit
-  def listAds(brandId:UUID): List[AdvertisementDetail]
+  def listAds(brandId:UUID,max:Int): List[AdvertisementDetail]
   def delAd(uuid: UUID): Unit
   def getAdById(adId: UUID): Option[AdvertisementDetail]
 

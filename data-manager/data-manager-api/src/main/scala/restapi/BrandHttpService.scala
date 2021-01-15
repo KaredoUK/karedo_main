@@ -40,6 +40,7 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
         deleteBrand ~       // P68 DELETE AUTH /brand/xxx
         listBrandsAdverts ~ // P64 GET AUTH /brand/xxx/advert
         addAdvert ~         // P65 POST AUTH /brand/xxx
+        getAdvert ~         // P61 GET AUTH /brand/xxx/advert/xxx
         deleteAdvert        // P66 DELETE AUTH /brand/xxx/advert/xxx
 
     }
@@ -147,7 +148,7 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
   // P64 LIST ADS PER BRAND
   @Path("/{brandId}/advert")
   @ApiOperation(httpMethod = "GET", response = classOf[List[AdvertDetailResponse]],
-    value = "Parallelai-64: List Ads per Brand")
+    value = "Parallelai-64: List Ads per Brand...")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
       value = "UUID of brand to search for ads"),
@@ -170,6 +171,37 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
             }
           }
         }
+    }
+
+
+  // title("PARALLELAI-61API: Get Ad Details")
+  @Path("/{brand}/advert/{adId}")
+  @ApiOperation(httpMethod = "PIPPO", response = classOf[AdvertDetailResponse],
+    value = "Parallelai-61: Get Specific Ad per Brand")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
+      value = "UUID of brand "),
+    new ApiImplicitParam(name = "adId", required = true, dataType = "String", paramType = "path",
+      value = "UUID of ad"),
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+      value = "SessionId for authentication/authorization")
+  ))
+  @ApiResponses(Array(
+    new ApiResponse(code = 400, message = "Invalid Parameters"),
+    new ApiResponse(code = 401, message = "Authentication Error")
+  ))
+  lazy val getAdvert : Route =
+    path(JavaUUID / "advert" / JavaUUID) {
+      (brand, advert) =>
+      {
+        userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
+          get {
+            complete {
+              (brandActor ? GetBrandAdvert(brand,advert)).mapTo[ResponseWithFailure[APIError,AdvertDetailResponse]]
+            }
+          }
+        }
+      }
     }
 
   // PARALLELAI-65 CREATE AD

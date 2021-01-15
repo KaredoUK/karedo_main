@@ -208,7 +208,9 @@ case class SuggestedAdForUsersAndBrand(
                                         @(ApiModelProperty@field)(value = "iconimage")
                                         iconId: String) extends ApiDataResponse
 case class RequestSuggestedAdForUsersAndBrand(userId: UUID, brandId: UUID, max: Int) extends ApiDataRequest
-case class ListBrandsAdverts(brandId: UUID) extends ApiDataRequest
+case class ListBrandsAdverts(brandId: UUID, max:Int=0) extends ApiDataRequest
+case class ListbrandsAdvertsTemp(brandId: UUID)
+case class GetBrandAdvert(brandId:UUID, adId:UUID) extends ApiDataRequest
 case class DeleteAdvRequest(brandId: UUID, advId: UUID) extends ApiDataRequest
 
 

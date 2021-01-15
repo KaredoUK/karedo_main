@@ -4,7 +4,7 @@ import com.parallelai.wallet.datamanager.data._
 import parallelai.wallet.persistence.mongodb.{ClientApplicationMongoDAO, UserAccountMongoDAO}
 import restapi.security.AuthenticationSupport._
 import spray.client.pipelining._
-import spray.http.HttpRequest
+import spray.http._
 
 import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
 import parallelai.wallet.util.SprayJsonSupport._
@@ -12,7 +12,8 @@ import parallelai.wallet.util.SprayJsonSupport._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-case class Registration(application:ApplicationID, pass:String, userId:UUID, sessionId: String)
+case class Registration(application: ApplicationID, pass: String, userId: UUID, sessionId: String)
+
 /**
  * Created by pakkio on 13/02/2015.
  */
@@ -36,18 +37,24 @@ trait RegistrationHelpers {
     Registration(applicationId, pass, userId, sessionId)
   }
 
+  def clearAll() = {
+    ca.dao.collection.getDB.dropDatabase()
+  }
+
   def ResetAccount = {
     val r = RegisterAccount
 
-    val activationCode0=ca.getById(r.application).get.activationCode
+    val activationCode0 = ca.getById(r.application).get.activationCode
 
     val applicationId: ApplicationID = UUID.randomUUID()
 
     try {
       doResetApplication(r.application, r.userId)
       "should fail if called with same applicationId" == ""
-    } catch { case e:Throwable => println("Correctly received exception "+e.getMessage) }
-    doResetApplication(applicationId,r.userId)
+    } catch {
+      case e: Throwable => println("Correctly received exception " + e.getMessage)
+    }
+    doResetApplication(applicationId, r.userId)
 
 
     // get activation code of this one
@@ -104,52 +111,134 @@ trait RegistrationHelpers {
     loginResponse.sessionId
   }
 
-  def doResetApplication(applicationId: ApplicationID, userId:UUID): Unit = {
+  def doResetApplication(applicationId: ApplicationID, userId: UUID): Unit = {
     val reset = sendReceive ~> unmarshal[RegistrationResponse]
 
     val resetResponse = wait {
       reset {
-        Put( s"$serviceUrl/account/${userId}/application/${applicationId}/reset")
+        Put(s"$serviceUrl/account/${userId}/application/${applicationId}/reset")
       }
     }
 
 
   }
 }
+
 trait BrandHelpers {
   this: MyUtility =>
 
-  def addBrand(sessionId:String, name:String): UUID = {
+  def addBrand(sessionId: String, name: String): UUID = {
     val add = addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> sendReceive ~> unmarshal[BrandResponse]
 
     val brandR = wait {
       add {
-        Post( s"$serviceUrl/brand",BrandData(name=name,iconId="11111"))
+        Post(s"$serviceUrl/brand", BrandData(name = name, iconId = "11111"))
       }
     }
     brandR.id
   }
-  def addAd(sessionId:String, brand: UUID, ad:String): UUID = {
+
+  def addAd(sessionId: String, brand: UUID, ad: String): UUID = {
     val add = addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> sendReceive ~> unmarshal[AdvertDetailResponse]
 
     val adR = wait {
       add {
-        Post( s"$serviceUrl/brand/$brand/advert",AdvertDetail(text=ad,imageIds = List(), value=10 ))
+        Post(s"$serviceUrl/brand/$brand/advert", AdvertDetail(text = ad, imageIds = List(), value = 10))
 
       }
     }
     adR.id
   }
 
-  def listAds(sessionId:String, brand: UUID): List[AdvertDetailResponse] = {
-    val add = addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> sendReceive ~> unmarshal[List[AdvertDetailResponse]]
+  def getAd(sessionId: String, brand: UUID, ad: String): AdvertDetailResponse = {
+    val add = addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> sendReceive ~> unmarshal[AdvertDetailResponse]
 
     val adR = wait {
       add {
-        Get( s"$serviceUrl/brand/$brand/advert")
+        Get(s"$serviceUrl/brand/$brand/advert/$ad")
 
       }
     }
     adR
+  }
+
+  def listAds(sessionId: String, brand: UUID): List[AdvertDetailResponse] = {
+    val add = addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> sendReceive ~> unmarshal[List[AdvertDetailResponse]]
+
+    val adR = wait {
+      add {
+        Get(s"$serviceUrl/brand/$brand/advert")
+
+      }
+    }
+    adR
+  }
+
+  def addBrandToUser(sessionId: String, user: UUID, brand: UUID): String = {
+    val add = addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> sendReceive ~> unmarshal[String]
+
+    val result = wait {
+      add {
+        Post(s"$serviceUrl/account/$user/brand", BrandIDRequest(brand))
+      }
+    }
+    result
+  }
+
+  def listBrandsForUser(sessionId: String, user: UUID): List[BrandRecord] = {
+    val list = addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> sendReceive ~> unmarshal[List[BrandRecord]]
+
+    val ret = wait {
+      list {
+        Get(s"$serviceUrl/account/$user/brand")
+      }
+    }
+    ret
+  }
+
+  def getSuggestedAds(sessionId: String, user: UUID, brand: UUID, max: Int): List[AdvertDetailResponse] = {
+    val list = addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> sendReceive ~> unmarshal[List[AdvertDetailResponse]]
+
+    val ret = wait {
+      list {
+        Get(s"$serviceUrl/account/$user/brand/$brand/ads?max=$max")
+      }
+    }
+    ret
+  }
+
+  def addMedia(sessionId: String, name: String, contentType: String, bytes: Array[Byte]): AddMediaResponse = {
+    val add =
+      addHeader("Content-Type", "multipart/form-data") ~>
+        addHeader("X-Content-Type", contentType) ~>
+        addHeader(HEADER_NAME_SESSION_ID, sessionId) ~>
+        sendReceive ~>
+        unmarshal[AddMediaResponse]
+
+    val ret = wait {
+      add {
+        Post(s"$serviceUrl/media",
+          MultipartFormData(Map(
+            "spray-file" -> BodyPart(
+              HttpEntity(MediaTypes.`image/jpeg`, bytes))
+            )
+          ))
+      }
+    }
+    ret
+  }
+
+  def getMedia(sessionId: String, imageId: String): String = {
+    val get =
+      addHeader(HEADER_NAME_SESSION_ID, sessionId) ~>
+        sendReceive ~>
+        unmarshal[String]
+
+    val ret = wait {
+      get {
+        Get(s"$serviceUrl/media/$imageId")
+      }
+    }
+    ret
   }
 }

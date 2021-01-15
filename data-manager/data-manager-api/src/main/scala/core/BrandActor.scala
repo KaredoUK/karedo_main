@@ -32,6 +32,8 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
                 (implicit val bindingModule: BindingModule) extends Actor with ActorLogging with Injectable {
 
 
+
+
   def receive: Receive = {
     case request: BrandData => replyToSender(createBrand(request))
     case request: AddAdvertCommand => replyToSender(addAdvert(request))
@@ -40,6 +42,7 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
     case request: DeleteBrandRequest => replyToSender(deleteBrand(request))
     case request: DeleteAdvRequest => replyToSender(deleteAdv(request))
     case request: ListBrandsAdverts => replyToSender(listBrandAdverts(request))
+    case request: GetBrandAdvert => replyToSender(getBrandAdvert(request))
     case request: RequestSuggestedAdForUsersAndBrand => sender ! returnSuggestedAds(request)
 
   }
@@ -75,11 +78,19 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
   def listBrandAdverts(adverts: ListBrandsAdverts): Future[ResponseWithFailure[APIError, List[AdvertDetailResponse]]] =
     successful {
       SuccessResponse(
-        brandDAO.listAds(adverts.brandId).map {
+        brandDAO.listAds(adverts.brandId,adverts.max).map {
           detail => AdvertDetailResponse(id = detail.id, text = detail.text, imageIds = detail.imageIds map { ImageId } , value = detail.value)
         })
     }
 
+
+  def getBrandAdvert(advert: GetBrandAdvert): Future[ResponseWithFailure[APIError, AdvertDetailResponse]] =
+    successful {
+      brandDAO.getAdById(advert.adId) match {
+        case Some(detail) => SuccessResponse(AdvertDetailResponse(detail.id, detail.text, detail.imageIds.map(ImageId(_)), detail.value))
+        case None => FailureResponse(InvalidRequest("Invalid adId"))
+      }
+    }
 
   def deleteAdv(request: DeleteAdvRequest): Future[ResponseWithFailure[APIError, String]] = successful {
     brandDAO.delAd(request.advId)
