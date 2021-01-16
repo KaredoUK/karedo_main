@@ -215,12 +215,15 @@ trait BrandHelpers {
         sendReceive ~>
         unmarshal[AddMediaResponse]
 
+    val parts = contentType.split("/")
+    val (p1,p2) = (parts(0),parts(1))
+    val mediaType=MediaTypes.getForKey((p1,p2)).get
     val ret = wait {
       add {
         Post(s"$serviceUrl/media",
           MultipartFormData(Map(
-            "spray-file" -> BodyPart(
-              HttpEntity(MediaTypes.`image/jpeg`, bytes))
+            name -> BodyPart(
+              HttpEntity(mediaType, bytes))
             )
           ))
       }
@@ -228,17 +231,16 @@ trait BrandHelpers {
     ret
   }
 
-  def getMedia(sessionId: String, imageId: String): String = {
+  def getMedia(sessionId: String, imageId: String): Array[Byte] = {
     val get =
       addHeader(HEADER_NAME_SESSION_ID, sessionId) ~>
-        sendReceive ~>
-        unmarshal[String]
+        sendReceive
 
     val ret = wait {
       get {
         Get(s"$serviceUrl/media/$imageId")
       }
     }
-    ret
+    ret.entity.data.toByteArray
   }
 }

@@ -2,6 +2,7 @@ package parallelai.wallet.persistence.mongodb
 
 
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
+import com.mongodb.casbah.commons.MongoDBObject
 import com.novus.salat.dao.SalatDAO
 import parallelai.wallet.entity.{Brand, MediaContent, MediaContentDescriptor}
 import parallelai.wallet.persistence.MediaDAO
@@ -14,12 +15,18 @@ class MongoMediaDAO(implicit val bindingModule: BindingModule) extends MediaDAO 
   lazy val gridfs = GridFS(db)
 
   override def createNew(newContent: MediaContent): String = {
-    val newIdOp = gridfs(newContent.inputStream) { writeOp =>
-      writeOp.filename = newContent.descriptor.name
-      writeOp.contentType = newContent.descriptor.contentType
-    }
+    try {
 
-    newIdOp.get.asInstanceOf[ObjectId].toHexString
+      db.getCollection("fs.chunks").createIndex(MongoDBObject("files_id" -> 1, "n"->1),MongoDBObject("unique" ->  1));
+      val newIdOp = gridfs(newContent.inputStream) { writeOp =>
+        writeOp.filename = newContent.descriptor.name
+        writeOp.contentType = newContent.descriptor.contentType
+      }
+
+      newIdOp.get.asInstanceOf[ObjectId].toHexString
+    } catch {
+      case e:Exception => e.getMessage
+    }
   }
 
   override def findById(id: String): Option[MediaContent] =

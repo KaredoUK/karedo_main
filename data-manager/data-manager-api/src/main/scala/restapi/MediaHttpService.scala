@@ -122,9 +122,11 @@ abstract class MediaHttpService (mediaActor: ActorRef,
             case SuccessResponse(Some(GetMediaResponse(contentType, content))) =>
 
               val parts = contentType.split("/")
-              require(parts.length == 2, s"Invalid Content type $contentType for media with ID $mediaId")
+              val (p1,p2)=(parts(0),parts(1))
+              // require(parts.length == 2, s"Invalid Content type $contentType for media with ID $mediaId")
+              val mediaType=MediaTypes.getForKey((p1,p2))
 
-              respondWithMediaType(MediaTypes.getForKey((parts(0), parts(1))).get) {
+              respondWithMediaType(mediaType.get) {
                 complete {
                   logger.info(s"Transmitting content of length ${content.length}")
                   HttpData(content)

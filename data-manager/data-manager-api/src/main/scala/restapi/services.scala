@@ -7,7 +7,7 @@ import core.security.UserAuthService
 import spray.http.StatusCodes._
 import spray.http._
 import spray.routing._
-import spray.routing.directives.RouteDirectives
+import spray.routing.directives.{LogEntry, RouteDirectives}
 
 
 import spray.util.{SprayActorLogging, LoggingContext}
@@ -86,9 +86,11 @@ class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route)
   //val bindAddress = injectOptionalProperty[String]("service.bindAddress") getOrElse "0.0.0.0"
 
 
-  val swaggerRoutes= new SwaggerHttpService {
+  val swaggerRoutes = new SwaggerHttpService {
     def actorRefFactory = context
-    def apiTypes = Seq( typeOf[AccountHttpService], typeOf[MediaHttpService], typeOf[BrandHttpService] )
+
+    def apiTypes = Seq(typeOf[AccountHttpService], typeOf[MediaHttpService], typeOf[BrandHttpService])
+
     def modelTypes =
       Seq(
         typeOf[RegistrationRequest]
@@ -96,9 +98,13 @@ class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route)
         //,typeOf[RegistrationValidation]//,
         //            typeOf[RegistrationValidationResponse]
       )
+
     def apiVersion = "1.1"
+
     def baseUrl = s"http://$serviceURL:$bindPort"
+
     def specPath = "api"
+
     def resourcePath = "api-docs"
   }.routes ~ get {
     pathPrefix("swagger") {
@@ -120,10 +126,19 @@ class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route)
     }
   }
 
+  import akka.event.Logging.InfoLevel
+  // logs just the request method and response status at info level
+  def requestMethodAndResponseStatusAsInfo(req: HttpRequest): Any => Option[LogEntry] = {
+    case res: HttpResponse =>
+      Some(LogEntry(req.method + ":" + req.uri + ":" + res.message.status + " "+res.message, InfoLevel))
+    case _ => None // other kind of responses
+  }
+  def routeWithLogging = logRequestResponse(requestMethodAndResponseStatusAsInfo _)(routes)
+
 
   def receive: Receive =
-    runRoute(routes ~ swaggerRoutes)
-      (handler, RejectionHandler.Default, context, RoutingSettings.default, LoggingContext.fromActorRefFactory)
+    runRoute(routeWithLogging ~ swaggerRoutes)
+    (handler, RejectionHandler.Default, context, RoutingSettings.default, LoggingContext.fromActorRefFactory)
 
 
 }
