@@ -52,10 +52,11 @@ abstract class MediaHttpService (mediaActor: ActorRef,
   @ApiOperation(httpMethod = "POST", response = classOf[AddMediaResponse],
     value = "PARALLELAI-94: API: Upload Media File")
   @ApiImplicitParams(Array(
-    new ApiImplicitParam(name = "content", required = true, dataType = "Array[Byte]",  paramType = "body",
-      value = "Media content"),
+    new ApiImplicitParam(name = "media file to attach", required = true, dataType = "file", paramType = "body"),
     new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
-      value = "SessionId for authentication/authorization")
+      value = "SessionId for authentication/authorization"),
+    new ApiImplicitParam(name = "X-Content-Type", required = true, dataType = "String", paramType = "header",
+      value = "ContentType")
   ))
   @ApiResponses(Array(
     new ApiResponse(code = 400, message = "Invalid Content")
@@ -96,7 +97,7 @@ abstract class MediaHttpService (mediaActor: ActorRef,
       }
     }
 
-  @ApiOperation(httpMethod = "GET", response = classOf[Array[Byte]],
+  @ApiOperation(httpMethod = "GET", response = classOf[String],
     value = "PARALLELAI-97: API: Retrieve Media File")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "mediaId", required = true, dataType = "String", paramType = "path",
@@ -120,16 +121,23 @@ abstract class MediaHttpService (mediaActor: ActorRef,
             case FailureResponse(mediaHandlingError) => respondWithStatus(mediaHandlingError) { complete { "" } } // Taking advandage of the ErrorSelector implicit converter
 
             case SuccessResponse(Some(GetMediaResponse(contentType, content))) =>
-
+              logger.info(s"contentType is $contentType")
               val parts = contentType.split("/")
-              val (p1,p2)=(parts(0),parts(1))
-              // require(parts.length == 2, s"Invalid Content type $contentType for media with ID $mediaId")
-              val mediaType=MediaTypes.getForKey((p1,p2))
+              if(parts.length != 2) {
+                complete(s"Invalid contentType $contentType")
+              } else {
 
-              respondWithMediaType(mediaType.get) {
-                complete {
-                  logger.info(s"Transmitting content of length ${content.length}")
-                  HttpData(content)
+                logger.info("trying to send it")
+                val (p1,p2)=(parts(0),parts(1))
+                val mediaType = MediaTypes.getForKey((p1, p2)).get
+
+                respondWithMediaType(mediaType) {
+                  logger.info("trying to respond with mediatype")
+                  complete {
+
+                    logger.info(s"Transmitting content of length ${content.length}")
+                    HttpData(content)
+                  }
                 }
               }
 
