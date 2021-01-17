@@ -110,7 +110,7 @@ abstract class MediaHttpService (mediaActor: ActorRef,
     new ApiResponse(code = 404, message = "Not found")
   ))
   def routeget = path("media" / Segment) { mediaId: String =>
-    userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
+    //userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
       get {
         detach() {
           val mediaResponseFuture = (mediaActor ? GetMediaRequest(mediaId)).mapTo[ResponseWithFailure[MediaHandlingError, Option[GetMediaResponse]]]
@@ -145,7 +145,7 @@ abstract class MediaHttpService (mediaActor: ActorRef,
           }
         }
       }
-    }
+    //}
   }
 
   val route = routeget ~ routeput
