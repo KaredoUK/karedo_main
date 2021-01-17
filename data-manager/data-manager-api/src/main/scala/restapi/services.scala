@@ -99,7 +99,7 @@ class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route)
         //            typeOf[RegistrationValidationResponse]
       )
 
-    def apiVersion = "1.1"
+    def apiVersion = "1.2"
 
     def baseUrl = s"http://$serviceURL:$bindPort"
 
