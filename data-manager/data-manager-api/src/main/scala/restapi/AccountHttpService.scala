@@ -50,6 +50,7 @@ abstract class AccountHttpService(
         deleteUserProfile ~  // P52 DELETE AUTH /account/xxx
         getPoints ~          // P54 GET AUTH /account/xxx/points
         addBrandToUser ~     // P90 POST AUTH /account/xxx/brand
+        removeUserBrand ~    // P71 DELETE AUTH /account/xxx/brand/xxx
         showUserBrands ~     // P69 GET AUTH /account/xxx/brand
         suggestedAdsForBrand ~ // P59 GET AUTH /account/xxx/brand/xxx
         suggestedBrandsPost ~ // P70 ???
@@ -314,6 +315,38 @@ abstract class AccountHttpService(
                   mapTo[ResponseWithFailure[EditAccountError, String]]
             }
           }
+      }
+    }
+
+  @Path("/{account}/brand/{brandId}")
+  @ApiOperation(httpMethod = "DELETE", response = classOf[String],
+    value = "Parallelai-90: Remove User Brand")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
+      value = "UUID of user"),
+    new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
+      value = "UUID of brand to remove"),
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+      value = "SessionId for authentication/authorization")
+  ))
+  @ApiResponses(Array(
+    new ApiResponse(code = 400, message = "Invalid Parameters"),
+    new ApiResponse(code = 401, message = "Authentication Error")
+  ))
+  // title("PARALLELAI-71API: Remove User Brand")
+  // r = delete("account/"+userId+"/brand/"+brandId)
+  def removeUserBrand : Route =
+    path(JavaUUID / "brand" / JavaUUID) {
+      (user, brand) =>
+      {
+        userAuthorizedFor(canAccessUser(user))(executionContext) { userAuthContext =>
+          delete {
+            complete {
+              (editAccountActor ? RemoveBrand(user, brand)).
+                mapTo[ResponseWithFailure[EditAccountError, String]]
+            }
+          }
+        }
       }
     }
 

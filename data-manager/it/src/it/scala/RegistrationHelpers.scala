@@ -185,6 +185,18 @@ trait BrandHelpers {
     result
   }
 
+  def removeBrandFromUser(sessionId: String, user: UUID, brand: UUID): String = {
+    val add = addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> sendReceive ~> unmarshal[String]
+
+    val result = wait {
+      add {
+        Delete(s"$serviceUrl/account/$user/brand/$brand")
+      }
+    }
+    result
+  }
+
+
   def listBrandsForUser(sessionId: String, user: UUID): List[BrandRecord] = {
     val list = addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> sendReceive ~> unmarshal[List[BrandRecord]]
 

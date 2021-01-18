@@ -69,7 +69,7 @@ class MockService(otherActor: ActorRef,
   implicit val timeout = Timeout(20.seconds)
 
   val route= route56 ~ /* 57 */ route59 ~
-    route63 ~ route71 ~ route79 ~ route80 ~ route81 ~ route82 ~ route92
+    route63 ~ route79 ~ route80 ~ route81 ~ route82 ~ route92
 
   lazy val route56: Route =
     // PARALLELAI-56API: User Ads Interaction")
@@ -130,21 +130,7 @@ class MockService(otherActor: ActorRef,
         }
     }
 
-  // title("PARALLELAI-71API: Remove User Brand")
-  // r = delete("account/"+userId+"/brand/"+brandId)
-  lazy val route71 : Route =
-    path("account" / JavaUUID / "brand" / JavaUUID) {
-      (user, brand) =>
-        {
-          userAuthorizedFor(canAccessUser(user))(executionContext) { userAuthContext =>
-            delete {
-              complete {
-                "{}"
-              }
-            }
-          }
-        }
-    }
+
 
   // title("PARALLELAI-79API: Show Pending Ads Per User Per Brand")
   // r = get("account/"+userId+"/brand/"+brandId+"/pendingAds")

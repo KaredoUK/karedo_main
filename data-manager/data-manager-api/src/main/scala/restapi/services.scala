@@ -127,13 +127,29 @@ class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route)
   }
 
   import akka.event.Logging.InfoLevel
+
+  import spray.http.HttpData
+
   // logs just the request method and response status at info level
-  def requestMethodAndResponseStatusAsInfo(req: HttpRequest): Any => Option[LogEntry] = {
-    case res: HttpResponse =>
-      Some(LogEntry(req.method + ":" + req.uri + ":" + res.message.status + " "+res.message, InfoLevel))
-    case _ => None // other kind of responses
+  def createLogEntry(request: HttpRequest, text: String): Some[LogEntry] = {
+    Some(LogEntry("#### Request " + request + " => " + text, InfoLevel))
   }
-  def routeWithLogging = logRequestResponse(requestMethodAndResponseStatusAsInfo _)(routes)
+
+  def myLog(request: HttpRequest): Any => Option[LogEntry] = {
+    case x: HttpResponse => {
+      createLogEntry(request,x.toString)
+      x.entity match {
+        case e: HttpData => {
+            createLogEntry(request,   x.status + " " + e.asString)
+
+        }
+        case _ => createLogEntry(request,   x.toString())
+      }
+    } // log response
+    case Rejected(rejections) => createLogEntry(request,   " Rejection " + rejections.toString())
+    case x => createLogEntry(request,   x.toString())
+  }
+  def routeWithLogging = logRequestResponse(myLog _)(routes)
 
 
   def receive: Receive =

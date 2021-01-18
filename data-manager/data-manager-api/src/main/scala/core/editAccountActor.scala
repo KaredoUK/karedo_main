@@ -31,6 +31,8 @@ object EditAccountActor {
 
   case class AddBrand(accountId: UserID, brandId: UUID)
 
+  case class RemoveBrand(user: UserID, brand: UUID )
+
   case class ListBrandsRequest(brandId: UUID)
 
   sealed trait EditAccountError
@@ -163,12 +165,14 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
     case UpdateAccount(userProfile) =>
       log.info("Trying to update account with id {}", userProfile.info.userId)
       userAccountDAO.update(userProfileToUserAccount(userProfile))
-      replyToSender{ SuccessResponse("OK") }
+      replyToSender {
+        SuccessResponse("OK")
+      }
 
     case DeleteAccount(accountId) =>
       log.info("Trying to delete account for userId {} sender is {}", accountId, sender)
 
-      replyToSender (
+      replyToSender(
         SuccessResponse {
           userAccountDAO.delete(accountId)
           ""
@@ -177,9 +181,10 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
 
     case request@AddBrand(accountId, brandId) => replyToSender(addBrand(request))
 
+    case request@RemoveBrand(accountId, brandId) => replyToSender(removeBrand(request))
+
     case ListBrandsRequest(accountId) => replyToSender(listBrands(accountId))
   }
-
 
 
   def validAddBrand(addBrand: AddBrand): Option[EditAccountError] = {
@@ -202,15 +207,17 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
     }
   }
 
-  def listBrands(accountId: UserID): ResponseWithFailure[EditAccountError,List[BrandRecord]] = {
-    val list=userAccountDAO.listUserSubscribedBrands(accountId).map {
+  def listBrands(accountId: UserID): ResponseWithFailure[EditAccountError, List[BrandRecord]] = {
+    val list = userAccountDAO.listUserSubscribedBrands(accountId).map {
       id =>
-      brandDAO getById(id) map {
-        brand =>  BrandRecord(brand.id, brand.name, brand.iconId)
-      }
+        brandDAO getById (id) map {
+          brand => BrandRecord(brand.id, brand.name, brand.iconId)
+        }
     } filter {
       _.isDefined
-    } map { _.get }
+    } map {
+      _.get
+    }
 
     SuccessResponse(list)
   }
@@ -228,4 +235,16 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
         SuccessResponse("OK")
       }
     }
+
+  def removeBrand(request: RemoveBrand): ResponseWithFailure[EditAccountError, String] = {
+
+
+    val RemoveBrand(user, brand) = request
+    log.info("Trying to remove brand {}, from user {}, sender is ", brand, user, sender)
+
+    userAccountDAO.deleteBrand(user, brand)
+
+    SuccessResponse("OK")
+
+  }
 }

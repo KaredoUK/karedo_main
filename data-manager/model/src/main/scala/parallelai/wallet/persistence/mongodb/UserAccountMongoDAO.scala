@@ -185,10 +185,15 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule)
     }
 
   override def deleteBrand(userId: UUID, brandId: UUID): Unit =
+    try {
       dao.update(
         byId(userId),
-        $pull("subscribedBrands.0" -> brandId)
+        $pull("subscribedBrands" -> brandId)
       )
+    } catch {
+      case e : Throwable =>
+        e.printStackTrace()
+    }
 
   override def listUserSubscribedBrands(userId: UUID): List[UUID] = {
     val list=getById(userId) match {

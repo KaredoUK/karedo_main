@@ -92,6 +92,16 @@ class Testing
     val suggested2=getSuggestedAds(r2.sessionId,r2.userId,b2,2)
     suggested2.size should_==(0)
 
+    // removeABrand and recheck that only first user has one brand less connected
+    removeBrandFromUser(r.sessionId,r.userId,b)
+
+    val brandsAfter=listBrandsForUser(r.sessionId, r.userId)
+    brandsAfter.size should_==(1)
+    brandsAfter.map(_.id) should contain(b2)
+
+    val brandsUser2After=listBrandsForUser(r2.sessionId,r2.userId)
+    brandsUser2After.size should_==(1)
+
 
   }
   "Media file" in {
