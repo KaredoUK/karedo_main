@@ -27,8 +27,8 @@ trait ApiHttpClientSpec
   def responseTimeout = 5.seconds
 
   val  sessionId = UUID.randomUUID()
-  val userId=UUID.randomUUID()
-  val applicationId=UUID.randomUUID()
+  val userId = UUID.randomUUID()
+  val applicationId = UUID.randomUUID()
 
   val  headers = List(RawHeader("X-Session-Id",sessionId.toString()))
 

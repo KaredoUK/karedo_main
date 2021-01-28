@@ -506,13 +506,14 @@ abstract class AccountHttpService(
 
   // PARALLELAI-55API: User Brand Interaction
   // "user/"+userId+"/interaction/brand/"+brandId, { "interactionType":  "BUY"}
-    path(JavaUUID / "interaction" / "brand" / JavaUUID) {
-      (user, brand) => {
+    path(JavaUUID / "interaction" / "brand") {
+      (user) => {
         userAuthorizedFor(canAccessUser(user))(executionContext) { userAuthContext =>
           post {
-            handleWith((intType: String) =>
+            handleWith((interaction: UserBrandInteraction) =>
 
-              (brandActor ? UserBrandInteraction(user, brand, intType)).mapTo[ResponseWithFailure[APIError, InteractionResponse]]
+              (brandActor ? interaction)
+                .mapTo[ResponseWithFailure[APIError, InteractionResponse]]
               // s"{${q}userId${q}: ${q}$user${q},${q}userTotalPoints${q}:${q}500${q}}")
             )
           }

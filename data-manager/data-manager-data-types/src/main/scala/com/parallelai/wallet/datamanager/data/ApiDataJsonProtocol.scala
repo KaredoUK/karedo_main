@@ -52,6 +52,7 @@ trait ApiDataJsonProtocol extends DefaultJsonProtocol  {
   implicit val userPointsJson = jsonFormat2(UserPoints)
 
   implicit val brandDataJson = jsonFormat2(BrandData)
+  implicit val brandInteractionJson = jsonFormat4(UserBrandInteraction)
   implicit val brandRecordJson = jsonFormat3(BrandRecord)
   implicit val uuidJson = jsonFormat1(BrandResponse)
   implicit val brandIdJson = jsonFormat1(BrandIDRequest)

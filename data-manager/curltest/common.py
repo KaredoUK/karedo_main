@@ -14,7 +14,7 @@ logging.basicConfig(filename='python.log', level=logging.DEBUG)
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 
-Root = "http://localhost:8090/"
+Root = "http://api.karedo.co.uk:8080/"
 client = MongoClient("localhost",12345)
 
 

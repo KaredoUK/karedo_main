@@ -74,7 +74,7 @@ trait FailureHandling {
  * It also logs all internal server errors using ``SprayActorLogging``.
  *
  */
-class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route)
+class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route, doSwagger: Boolean = true)
   extends Actor
 
   with HttpService
@@ -99,7 +99,8 @@ class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route)
         //            typeOf[RegistrationValidationResponse]
       )
 
-    def apiVersion = "1.2"
+
+    def apiVersion = getClass.getPackage.getImplementationVersion
 
     def baseUrl = s"http://$serviceURL:$bindPort"
 
@@ -139,10 +140,10 @@ class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route)
     case x: HttpResponse => {
       createLogEntry(request,x.toString)
       x.entity match {
-        case e: HttpData => {
+        /*case e: HttpData => {
             createLogEntry(request,   x.status + " " + e.asString)
 
-        }
+        }*/
         case _ => createLogEntry(request,   x.toString())
       }
     } // log response
@@ -151,9 +152,10 @@ class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route)
   }
   def routeWithLogging = logRequestResponse(myLog _)(routes)
 
+  def finalRoutes = if(doSwagger) routeWithLogging ~ swaggerRoutes else routeWithLogging
 
   def receive: Receive =
-    runRoute(routeWithLogging ~ swaggerRoutes)
+    runRoute(finalRoutes)
     (handler, RejectionHandler.Default, context, RoutingSettings.default, LoggingContext.fromActorRefFactory)
 
 

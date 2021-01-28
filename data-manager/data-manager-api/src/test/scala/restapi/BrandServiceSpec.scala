@@ -111,6 +111,7 @@ class BrandServiceSpec
       )
 
     }
+
     /*"PARALLELAI-59: Get Next N Ads For User For Brand" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[List[SuggestedAdForUsersAndBrand]]
 
@@ -161,6 +162,7 @@ class BrandServiceSpec
 */
 
   }
+
 
 
 }

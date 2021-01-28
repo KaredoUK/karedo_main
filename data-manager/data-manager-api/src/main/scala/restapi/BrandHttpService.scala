@@ -14,7 +14,7 @@ import core.{SuccessResponse, ResponseWithFailure}
 import core.objAPI._
 import spray.routing._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{Future, ExecutionContext}
 
 // All APIs starting with /brand go here
 @ApiDoc(value = "/brand", description = "Operations on the brand.", position = 1)
@@ -41,9 +41,21 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
         listBrandsAdverts ~ // P64 GET AUTH /brand/xxx/advert
         addAdvert ~         // P65 POST AUTH /brand/xxx
         getAdvert ~         // P61 GET AUTH /brand/xxx/advert/xxx
-        deleteAdvert        // P66 DELETE AUTH /brand/xxx/advert/xxx
-
+        deleteAdvert ~       // P66 DELETE AUTH /brand/xxx/advert/xxx
+        addInteraction       // P108 add Interaction
     }
+
+  def addInteraction =
+      path("brand" / "interaction") {
+        userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
+          post {
+            handleWith {
+              brandData: UserBrandInteraction =>
+                Future[String]("")
+            }
+          }
+        }
+      }
 
   // P67 CREATE BRAND
   @ApiOperation(httpMethod = "POST", response = classOf[BrandResponse], value = "Parallelai-67: Create a new Brand")

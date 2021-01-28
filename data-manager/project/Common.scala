@@ -4,12 +4,12 @@ import Keys._
 object Common {
 
   val settings: Seq[Setting[_]] = Seq (
-    version := "1.0",
-    scalaVersion := "2.11.2",
+    version := "1.2.2",
+    scalaVersion := "2.11.5",
     organization := "parallelai.wallet"
   )
 
-  val akkaVersion = "2.3.2"
+  val akkaVersion = "2.3.9"
 
   val sl4jVersion = "1.7.5"
 

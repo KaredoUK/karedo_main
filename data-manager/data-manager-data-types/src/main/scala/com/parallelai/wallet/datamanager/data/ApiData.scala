@@ -228,7 +228,16 @@ case class OfferResponse(offerId: UUID)
 case class StatusResponse(status: String) extends ApiDataResponse
 
 // Other types
-case class UserBrandInteraction(userId:UUID, brandId: UUID, intType: String) extends ApiDataRequest
+@ApiModel(description = "User Interaction")
+case class UserBrandInteraction(
+                                 @(ApiModelProperty@field)(value="UserAccount id")
+                                 userId:UUID,
+                                 @(ApiModelProperty@field)(value="Brand id")
+                                 brandId: UUID,
+                                 @(ApiModelProperty@field)(value="Interaction (view/detail/like/dislike/share")
+                                 interaction: String,
+                                 @(ApiModelProperty@field)(value="if share, facebook/twitter or other")
+                                 intType: String="") extends ApiDataRequest
 @ApiModel(description = "Interaction Response")
 case class InteractionResponse(
                                 @(ApiModelProperty@field)(value = "userId")

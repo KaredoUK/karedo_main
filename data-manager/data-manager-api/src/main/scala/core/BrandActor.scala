@@ -33,7 +33,6 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
 
 
 
-
   def receive: Receive = {
     case request: BrandData => replyToSender(createBrand(request))
     case request: AddAdvertCommand => replyToSender(addAdvert(request))
@@ -44,7 +43,13 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
     case request: ListBrandsAdverts => replyToSender(listBrandAdverts(request))
     case request: GetBrandAdvert => replyToSender(getBrandAdvert(request))
     case request: RequestSuggestedAdForUsersAndBrand => sender ! returnSuggestedAds(request)
+    case request: UserBrandInteraction => replyToSender(handleBrandInteraction(request))
 
+  }
+  def handleBrandInteraction(interaction: UserBrandInteraction)
+    : Future[ResponseWithFailure[APIError, InteractionResponse]] = successful {
+      val response = InteractionResponse(interaction.userId,0)
+      SuccessResponse(response)
   }
 
   def createBrand(request: BrandData): Future[ResponseWithFailure[APIError, BrandResponse]] = successful {
