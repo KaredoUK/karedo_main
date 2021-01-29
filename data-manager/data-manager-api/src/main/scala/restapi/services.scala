@@ -86,7 +86,7 @@ class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route, doSwag
   //val bindAddress = injectOptionalProperty[String]("service.bindAddress") getOrElse "0.0.0.0"
 
 
-  val swaggerRoutes = new SwaggerHttpService {
+  lazy val swaggerRoutes = new SwaggerHttpService {
     def actorRefFactory = context
 
     def apiTypes = Seq(typeOf[AccountHttpService], typeOf[MediaHttpService], typeOf[BrandHttpService])
@@ -152,7 +152,10 @@ class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route, doSwag
   }
   def routeWithLogging = logRequestResponse(myLog _)(routes)
 
-  def finalRoutes = if(doSwagger) routeWithLogging ~ swaggerRoutes else routeWithLogging
+  def finalRoutes = if(doSwagger)
+    routeWithLogging ~ swaggerRoutes
+  else
+    routeWithLogging
 
   def receive: Receive =
     runRoute(finalRoutes)

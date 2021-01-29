@@ -26,9 +26,6 @@ import com.mongodb.casbah.Imports._
 import scala.concurrent.Future
 import scala.concurrent.Future._
 
-/**
- * Created by pakkio on 29/09/2014.
- */
 class BrandMongoDAO (implicit val bindingModule: BindingModule)
   extends BrandDAO with MongoConnection with Injectable   {
 

@@ -22,8 +22,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
  */
 object OfferActor {
 
-  def props(offerDAO: OfferDAO)(implicit bindingModule: BindingModule): Props =
-    Props(classOf[OfferActor], offerDAO, bindingModule)
+  /*def props(offerDAO: OfferDAO)(implicit bindingModule: BindingModule): Props =
+    Props(classOf[OfferActor], offerDAO, bindingModule)*/
 
 
   sealed trait OfferError
@@ -49,7 +49,7 @@ object OfferActor {
   }
 }
 
-class OfferActor(offerDAO: OfferDAO)(implicit val bindingModule: BindingModule) extends Actor with ActorLogging with Injectable {
+class OfferActor(implicit offerDAO: OfferDAO, implicit val bindingModule: BindingModule) extends Actor with ActorLogging with Injectable {
 
   def receive: Receive = {
     case request: OfferData => replyToSender(createOffer(request))

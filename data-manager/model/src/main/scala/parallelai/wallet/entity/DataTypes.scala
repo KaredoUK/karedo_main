@@ -39,6 +39,8 @@ case class AdvertisementDetail(@Key("_id") id: UUID = UUID.randomUUID(), publish
 
 case class Brand(@Key("_id") id: UUID = UUID.randomUUID(), name: String = "", iconId: String, ads: List[AdvertisementDetail] = List())
 
+case class KaredoLog(@Key("_id") id: UUID = UUID.randomUUID, user: UUID, brand: UUID, offer: UUID, text: String )
+
 case class Hint(@Key("_id") id: UUID = UUID.randomUUID(), userId: UUID, brandId: UUID, ad: UUID, score: Double)
 
 //case class UserBrandInteraction(@Key("_id") id: UUID = UUID.randomUUID(), userId: UUID, )

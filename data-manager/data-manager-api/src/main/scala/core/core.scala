@@ -1,21 +1,14 @@
 package core
 
-import java.util.UUID
-
 import akka.actor._
-import ActorDSL._
-import akka.routing.{RoundRobinGroup, RoundRobinPool, RoundRobinRouter}
-import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
-import core.security.{UserAuthServiceImpl, UserAuthService}
-import parallelai.wallet.entity.Brand
-import parallelai.wallet.entity.api.offermanager.RetailOffer
-import parallelai.wallet.persistence._
-import parallelai.wallet.config.AppConfigPropertySource
-import com.typesafe.config.ConfigFactory
+import akka.routing.{RoundRobinGroup, RoundRobinPool}
 import com.escalatesoft.subcut.inject.NewBindingModule._
+import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
+import com.typesafe.config.ConfigFactory
+import core.security.{UserAuthService, UserAuthServiceImpl}
+import parallelai.wallet.config.AppConfigPropertySource
+import parallelai.wallet.persistence._
 import parallelai.wallet.persistence.mongodb._
-
-import scala.concurrent.Future
 
 /**
  * Core is type containing the ``system: ActorSystem`` member. This enables us to use it in our
@@ -58,6 +51,7 @@ trait DependencyInjection extends Injectable {
 trait Persistence {
   def brandDAO : BrandDAO
   def hintDAO : HintDAO
+  def logDAO : LogDAO
   def offerDAO : OfferDAO
   def mediaDAO : MediaDAO
   def userAccountDAO : UserAccountDAO
@@ -71,6 +65,7 @@ trait MongoPersistence extends Persistence {
   override val userAccountDAO : UserAccountDAO = new UserAccountMongoDAO() 
   override val brandDAO : BrandDAO = new BrandMongoDAO()
   override val hintDAO : HintDAO = new HintMongoDAO()
+  override val logDAO: LogDAO = new LogMongoDAO()
   override val offerDAO : OfferDAO = new OfferMongoDAO()
   override val mediaDAO : MediaDAO = new MongoMediaDAO()
   override val clientApplicationDAO : ClientApplicationDAO = new ClientApplicationMongoDAO()
@@ -123,26 +118,38 @@ trait BaseCoreActors extends ServiceActors with RestMessageActors  {
   val editAccountActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.editAccount") getOrElse 3
   val userAuthActorPoolSize = injectOptionalProperty[Int]("actor.pool.size.userAuthentication") getOrElse 5
 
+  implicit val implicitBrandDAO = brandDAO
+  implicit val implicitHintDAO = hintDAO
+  implicit val implicitLogDAO = logDAO
+  implicit val implicitMediaDAO = mediaDAO
+  implicit val implicitOfferDAO = offerDAO
+  implicit val implicitUserAccountDAO = userAccountDAO
+  implicit val implicitClientApplicationDAO = clientApplicationDAO
+  implicit val implicitUserSessionDAO = userSessionDAO
+
   override val registration = system.actorOf(
-    RegistrationActor.props(userAccountDAO, clientApplicationDAO, userSessionDAO, messenger)
-      .withRouter( RoundRobinPool(nrOfInstances = registrationActorPoolSize) ),
-    "Registration"
+    Props(new RegistrationActor(messenger)) // messenger is "untyped" so it is not clean to implicit it
+    .withRouter( RoundRobinPool(nrOfInstances = registrationActorPoolSize) ),
+  "Registration"
   )
 
+
+
   override val brand = system.actorOf(
-    BrandActor.props(brandDAO, hintDAO)
+
+    Props(new BrandActor)
       .withRouter( RoundRobinPool(nrOfInstances = brandActorPoolSize) ),
     "Brand"
   )
 
   override val media = system.actorOf(
-    MediaContentActor.props(mediaDAO)
+    Props(new MediaContentActor)
       .withRouter( RoundRobinPool(nrOfInstances = mediaActorPoolSize) ),
     "Media"
   )
 
   override val offer = system.actorOf(
-    OfferActor.props(offerDAO)
+    Props(new OfferActor)
       .withRouter( RoundRobinPool(nrOfInstances = offerActorPoolSize) ),
     "Offer"
   )

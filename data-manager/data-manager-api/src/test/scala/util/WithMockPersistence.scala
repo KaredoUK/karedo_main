@@ -1,19 +1,17 @@
 package util
 
 import akka.actor.ActorRef
-import restapi.Api
 import com.escalatesoft.subcut.inject.NewBindingModule._
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import com.typesafe.config.ConfigFactory
 import core._
 import parallelai.wallet.config.AppConfigPropertySource
 import parallelai.wallet.persistence._
+import restapi.Api
 import web.Web
 
-import scala.util.Random
 
-// Using this trait you just need to define the DAO as mocked and start your rest server
-class RestServiceWithMockPersistence(
+class WithMockPersistence(
   val servicePort: Int,
   override val brandDAO: BrandDAO,
   override val hintDAO: HintDAO,
@@ -30,8 +28,7 @@ class RestServiceWithMockPersistence(
   with Persistence
   with MessageActors
   with BaseCoreActors
-  with Api
-  with Web {
+{
 
   // Define The Configuration for the tests
   implicit def configProvider = AppConfigPropertySource(

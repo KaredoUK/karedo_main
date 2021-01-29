@@ -10,49 +10,46 @@ import objAPI._
 
 import org.joda.time.DateTime
 import parallelai.wallet.entity.{Brand, _}
-import parallelai.wallet.persistence.{HintDAO, MediaDAO, BrandDAO}
+import parallelai.wallet.persistence.{LogDAO, HintDAO, MediaDAO, BrandDAO}
+import rules.AddPoints
 import spray.json._
 
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 import scala.concurrent.ExecutionContext.Implicits.global
 
-/**
- * We use the companion object to hold all the messages that the ``BrandActor``
- * receives.
- */
-object BrandActor {
-
-  def props(brandDAO: BrandDAO, hintDAO: HintDAO)(implicit bindingModule: BindingModule): Props =
-    Props(classOf[BrandActor], brandDAO, hintDAO, bindingModule)
-  }
 
 
-class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
-                (implicit val bindingModule: BindingModule) extends Actor with ActorLogging with Injectable {
 
+class BrandActor()
+  (implicit val bindingModule: BindingModule,
+   implicit val brandDAO: BrandDAO,
+   implicit val logDAO: LogDAO,
+   implicit val hintDAO: HintDAO)
 
+  extends Actor with ActorLogging with Injectable {
 
   def receive: Receive = {
-    case request: BrandData => replyToSender(createBrand(request))
-    case request: AddAdvertCommand => replyToSender(addAdvert(request))
-    case ListBrands => sender ! listBrands
-    case request: BrandIDRequest => replyToSender(getBrand(request))
-    case request: DeleteBrandRequest => replyToSender(deleteBrand(request))
-    case request: DeleteAdvRequest => replyToSender(deleteAdv(request))
-    case request: ListBrandsAdverts => replyToSender(listBrandAdverts(request))
-    case request: GetBrandAdvert => replyToSender(getBrandAdvert(request))
-    case request: RequestSuggestedAdForUsersAndBrand => sender ! returnSuggestedAds(request)
+    case request: BrandData => replyToSender(handleCreateBrand(request))
+    case request: AddAdvertCommand => replyToSender(handleAddAdvert(request))
+    case ListBrands => sender ! handleListBrands
+    case request: BrandIDRequest => replyToSender(handleGetBrand(request))
+    case request: DeleteBrandRequest => replyToSender(handleDeleteBrand(request))
+    case request: DeleteAdvRequest => replyToSender(handleDeleteAdv(request))
+    case request: ListBrandsAdverts => replyToSender(handleListBrandAdverts(request))
+    case request: GetBrandAdvert => replyToSender(handleGetBrandAdvert(request))
+    case request: RequestSuggestedAdForUsersAndBrand => sender ! handleReturnSuggestedAds(request)
     case request: UserBrandInteraction => replyToSender(handleBrandInteraction(request))
 
   }
   def handleBrandInteraction(interaction: UserBrandInteraction)
     : Future[ResponseWithFailure[APIError, InteractionResponse]] = successful {
-      val response = InteractionResponse(interaction.userId,0)
+      val points = AddPoints.GetInteractionPoints(interaction)
+      val response = InteractionResponse(interaction.userId,points)
       SuccessResponse(response)
   }
 
-  def createBrand(request: BrandData): Future[ResponseWithFailure[APIError, BrandResponse]] = successful {
+  def handleCreateBrand(request: BrandData): Future[ResponseWithFailure[APIError, BrandResponse]] = successful {
 
     validateBrand(request) match {
       case None =>
@@ -68,7 +65,7 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
     }
   }
 
-  def returnSuggestedAds(request: RequestSuggestedAdForUsersAndBrand): List[SuggestedAdForUsersAndBrand] = {
+  def handleReturnSuggestedAds(request: RequestSuggestedAdForUsersAndBrand): List[SuggestedAdForUsersAndBrand] = {
 
     hintDAO.suggestedNAdsForUserAndBrandLimited(request.userId, request.brandId, request.max)
       .map(x => {
@@ -80,7 +77,7 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
 
   }
 
-  def listBrandAdverts(adverts: ListBrandsAdverts): Future[ResponseWithFailure[APIError, List[AdvertDetailResponse]]] =
+  def handleListBrandAdverts(adverts: ListBrandsAdverts): Future[ResponseWithFailure[APIError, List[AdvertDetailResponse]]] =
     successful {
       SuccessResponse(
         brandDAO.listAds(adverts.brandId,adverts.max).map {
@@ -89,7 +86,7 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
     }
 
 
-  def getBrandAdvert(advert: GetBrandAdvert): Future[ResponseWithFailure[APIError, AdvertDetailResponse]] =
+  def handleGetBrandAdvert(advert: GetBrandAdvert): Future[ResponseWithFailure[APIError, AdvertDetailResponse]] =
     successful {
       brandDAO.getAdById(advert.adId) match {
         case Some(detail) => SuccessResponse(AdvertDetailResponse(detail.id, detail.text, detail.imageIds.map(ImageId(_)), detail.value))
@@ -97,13 +94,13 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
       }
     }
 
-  def deleteAdv(request: DeleteAdvRequest): Future[ResponseWithFailure[APIError, String]] = successful {
+  def handleDeleteAdv(request: DeleteAdvRequest): Future[ResponseWithFailure[APIError, String]] = successful {
     brandDAO.delAd(request.advId)
 
     SuccessResponse("OK")
   }
 
-  def addAdvert(request: AddAdvertCommand): Future[ResponseWithFailure[APIError, AdvertDetailResponse]] = successful {
+  def handleAddAdvert(request: AddAdvertCommand): Future[ResponseWithFailure[APIError, AdvertDetailResponse]] = successful {
 
     val detail: AdvertisementDetail = AdvertisementDetail(text = request.text, imageIds = request.imageIds map { _.imageId }, value = request.value)
     //log.info(s"XXX using detail uuid: ${detail.id}")
@@ -114,7 +111,7 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
 
 
 
-  def listBrands: List[BrandRecord] = {
+  def handleListBrands: List[BrandRecord] = {
 
     val list = brandDAO.list.map(b => BrandRecord(b.id, b.name, b.iconId))
     log.info(s" returning a list of ${list.size} brands")
@@ -123,7 +120,7 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
   }
 
 
-  def getBrand(request: BrandIDRequest): Future[ResponseWithFailure[APIError, BrandRecord]] = successful {
+  def handleGetBrand(request: BrandIDRequest): Future[ResponseWithFailure[APIError, BrandRecord]] = successful {
     brandDAO.getById(request.brandId) match {
       case Some(b) => {
         log.info(s"getting brand ${b.id}")
@@ -136,7 +133,7 @@ class BrandActor(brandDAO: BrandDAO, hintDAO: HintDAO)
     }
   }
 
-  def deleteBrand(request: DeleteBrandRequest): Future[ResponseWithFailure[APIError, String]] = successful {
+  def handleDeleteBrand(request: DeleteBrandRequest): Future[ResponseWithFailure[APIError, String]] = successful {
     brandDAO.getById(request.brandId) match {
       case Some(b) => {
         log.info(s"deleting brand ${request.brandId}")

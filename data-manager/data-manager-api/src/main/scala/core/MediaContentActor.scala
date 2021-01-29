@@ -18,7 +18,7 @@ import scala.concurrent.Future._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object MediaContentActor {
-  def props(mediaDao: MediaDAO) = Props( new MediaContentActor(mediaDao) )
+  //def props(mediaDao: MediaDAO) = Props( new MediaContentActor(mediaDao) )
 
 
 
@@ -51,7 +51,7 @@ object MediaContentActor {
   }
 }
 
-class MediaContentActor(mediaDAO: MediaDAO) extends Actor with ActorLogging with RequestValidationChaining {
+class MediaContentActor(implicit mediaDAO: MediaDAO) extends Actor with ActorLogging with RequestValidationChaining {
 
 
   override def receive: Receive = {

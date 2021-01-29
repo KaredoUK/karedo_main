@@ -6,9 +6,7 @@ import parallelai.wallet.entity.{AdvertisementDetail, Brand, UserAccount, Sugges
 
 import scala.concurrent.Future
 
-/**
- * Created by pakkio on 29/09/2014.
- */
+
 trait BrandDAO {
 
 

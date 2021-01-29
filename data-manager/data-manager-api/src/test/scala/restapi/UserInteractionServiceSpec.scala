@@ -41,8 +41,8 @@ class UserInteractionServiceSpec
         Post(s"$serviceUrl/user/"+userId.toString+"/interaction/brand", data).withHeaders(headers)
       })
 
-      there was one(mockedBrandDAO).delete(brand.id)
-      1===1
+      response.userId must beEqualTo(userId)
+      response.userTotalPoints must beEqualTo(10)
     }
   }
 

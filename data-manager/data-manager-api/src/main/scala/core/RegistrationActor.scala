@@ -36,11 +36,7 @@ import scala.util.Try
  */
 object RegistrationActor {
 
-  def props(userAccountDAO: UserAccountDAO, clientApplicationDAO: ClientApplicationDAO, userSessionDAO: UserSessionDAO,
-            messengerActor: ActorRef)(implicit bindingModule: BindingModule): Props = {
 
-    Props(new RegistrationActor(userAccountDAO, clientApplicationDAO, userSessionDAO, messengerActor))
-  }
 
   sealed trait RegistrationError
 
@@ -105,12 +101,11 @@ object RegistrationActor {
 /**
  * Registers the users.
  */
-class RegistrationActor(
-      userAccountDAO: UserAccountDAO,
-      clientApplicationDAO: ClientApplicationDAO,
-      userSessionDAO: UserSessionDAO,
-      messengerActor: ActorRef)
-      (implicit val bindingModule: BindingModule)
+class RegistrationActor( messengerActor: ActorRef)
+                       (implicit val userAccountDAO: UserAccountDAO,
+      implicit val clientApplicationDAO: ClientApplicationDAO,
+      implicit val userSessionDAO: UserSessionDAO,
+      implicit val bindingModule: BindingModule)
 
   extends Actor
   with Injectable

@@ -6,6 +6,8 @@ import akka.actor.{ActorRefFactory, Props}
 import spray.routing.RouteConcatenation
 import com.mongodb.casbah.commons.conversions.scala._
 
+import scala.util.Try
+
 
 /**
  * The REST API layer. It exposes the REST services, but does not provide any
@@ -20,6 +22,7 @@ trait Api extends RouteConcatenation with Injectable {
 
   private val bindPort = injectOptionalProperty[Int]("service.port") getOrElse 8080
   private val serviceURL = injectOptionalProperty[String]("service.url") getOrElse "localhost"
+  private val doSwagger = injectOptionalProperty[String]("swagger").getOrElse("true").toBoolean
 
 
   val serveAccount = new AccountHttpService(registration, editAccount, brand, userAuthentication) {
@@ -41,6 +44,6 @@ trait Api extends RouteConcatenation with Injectable {
       new OfferService(offer, userAuthentication).route ~
       new MockService(other, userAuthentication).route
 
-  val rootService = system.actorOf(Props(new RoutedHttpService(serviceURL, bindPort, routes)))
+  val rootService = system.actorOf(Props(new RoutedHttpService(serviceURL, bindPort, routes,doSwagger)))
 
 }
