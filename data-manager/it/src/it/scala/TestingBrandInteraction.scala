@@ -2,7 +2,9 @@
 
 import java.util.UUID
 
+import com.parallelai.wallet.datamanager.data.{UserOfferInteraction, UserBrandInteraction}
 import org.specs2.mutable.Specification
+import rules.AddPoints
 import spray.httpx.UnsuccessfulResponseException
 
 
@@ -11,33 +13,76 @@ class TestingBrandInteraction
 
   with ItEnvironment {
 
-  // clearAll()
+  clearAll()
 
   sequential
 
 
-  "Testing interaction brand " should {
-    "add 10 points for sharing" in {
+  "brand interaction " should {
+    "add xxx points for sharing" in {
       val r = RegisterAccount
       val b = addBrand(r.sessionId, "C1")
-      val gainedPoints = addBrandInteraction(r.sessionId, r.userId, b, "share", "facebook")
+      val int1=UserBrandInteraction(userId=r.userId, brandId=b,interaction="share", intType = "facebook")
+      val gainedPoints = addBrandInteraction(r.sessionId, int1)
 
-      gainedPoints === 10
+      gainedPoints === AddPoints.GetInteractionPoints(int1)
     }
-    "add 15 points for sharing and liking" in {
+    "add yyy points for sharing and liking" in {
       val r = RegisterAccount
       val b = addBrand(r.sessionId, "C1")
-      val gainedPoints = addBrandInteraction(r.sessionId, r.userId, b, "share", "facebook")
+      val int1=UserBrandInteraction(userId=r.userId, brandId=b,interaction="share", intType = "facebook")
 
-      val gainedPoints2 = addBrandInteraction(r.sessionId, r.userId, b, "like", "facebook")
+      val gainedPoints = addBrandInteraction(r.sessionId, int1)
 
-      gainedPoints2 === 15
+      val int2=UserBrandInteraction(userId=r.userId, brandId=b,interaction="like", intType = "facebook")
+
+      val totalPoints2 = addBrandInteraction(r.sessionId, int2)
+
+      totalPoints2 === ( AddPoints.GetInteractionPoints(int1) +  AddPoints.GetInteractionPoints(int2))
 
     }
     "giving exception if invalid brand" in {
       val r = RegisterAccount
+      val int1=UserBrandInteraction(userId=r.userId, brandId=UUID.randomUUID(),interaction="share", intType = "facebook")
+      addBrandInteraction(r.sessionId, int1) should
+        throwAn[UnsuccessfulResponseException]
+    }
+  }
+  "Offer interaction " should {
+    "add ppp points for sharing" in {
+      val r = RegisterAccount
+      val b = addBrand(r.sessionId, "C1")
+      val o = addAd(r.sessionId, b,"my ad")
+
+      val int1=UserOfferInteraction(userId=r.userId, offerId=o,interaction="share", intType = "facebook")
+
+      val gainedPoints = addOfferInteraction(r.sessionId, int1)
+
+      gainedPoints === AddPoints.GetInteractionPoints(int1)
+    }
+    "add qqq points for sharing and liking" in {
+      val r = RegisterAccount
+      val b = addBrand(r.sessionId, "C1")
+      val o = addAd(r.sessionId, b,"my ad")
+
+      val int1=UserOfferInteraction(userId=r.userId, offerId=o,interaction="share", intType = "facebook")
+
+      val gainedPoints = addOfferInteraction(r.sessionId, int1)
+
+      val int2=UserOfferInteraction(userId=r.userId, offerId=o,interaction="like", intType = "facebook")
+
+
+      val totalPoints2 = addOfferInteraction(r.sessionId, int2)
+
+      totalPoints2 === ( AddPoints.GetInteractionPoints(int1) +  AddPoints.GetInteractionPoints(int2))
+
+    }
+    "giving exception if invalid offer" in {
+      val r = RegisterAccount
       //val b = addBrand(r.sessionId, "C1")
-      addBrandInteraction(r.sessionId, r.userId, UUID.randomUUID(), "share", "facebook") should
+      val int1=UserOfferInteraction(userId=r.userId, offerId=UUID.randomUUID(),interaction="share", intType = "facebook")
+
+      addOfferInteraction(r.sessionId, int1) should
         throwAn[UnsuccessfulResponseException]
     }
   }

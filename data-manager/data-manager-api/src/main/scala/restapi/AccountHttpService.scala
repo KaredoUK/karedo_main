@@ -56,8 +56,8 @@ abstract class AccountHttpService(
         suggestedBrandsPost ~ // P70 ???
         suggestedBrandsGet   // P70 GET AUTH /account/xxx/suggestedbrands
     } ~ pathPrefix("user") {
-      userBrandInteraction // P108 POST AUTH /account/interaction/brand/xxx
-
+      userBrandInteraction ~ // P108 POST AUTH /user/xxx/interaction/brand
+      userOfferInteraction  // P107 POST AUTH /user/xxx/interaction/offer
     }
 
   // PARALLELAI-77API: Create Account
@@ -505,12 +505,32 @@ abstract class AccountHttpService(
   def userBrandInteraction: Route =
 
   // PARALLELAI-55API: User Brand Interaction
-  // "user/"+userId+"/interaction/brand/"+brandId, { "interactionType":  "BUY"}
+  // PARALLELAI-108API:
+  // "user/"+userId+"/interaction/brand/"
     path(JavaUUID / "interaction" / "brand") {
       (user) => {
         userAuthorizedFor(canAccessUser(user))(executionContext) { userAuthContext =>
           post {
             handleWith((interaction: UserBrandInteraction) =>
+
+              (brandActor ? interaction)
+                .mapTo[ResponseWithFailure[APIError, InteractionResponse]]
+              // s"{${q}userId${q}: ${q}$user${q},${q}userTotalPoints${q}:${q}500${q}}")
+            )
+          }
+        }
+      }
+
+    }
+  def userOfferInteraction: Route =
+
+  // PARALLELAI-107API: User Offer Interaction
+  // "user/"+userId+"/interaction/offer"
+    path(JavaUUID / "interaction" / "offer") {
+      (user) => {
+        userAuthorizedFor(canAccessUser(user))(executionContext) { userAuthContext =>
+          post {
+            handleWith((interaction: UserOfferInteraction) =>
 
               (brandActor ? interaction)
                 .mapTo[ResponseWithFailure[APIError, InteractionResponse]]

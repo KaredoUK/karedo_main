@@ -39,6 +39,7 @@ class BrandActor()
     case request: GetBrandAdvert => replyToSender(handleGetBrandAdvert(request))
     case request: RequestSuggestedAdForUsersAndBrand => sender ! handleReturnSuggestedAds(request)
     case request: UserBrandInteraction => replyToSender(handleBrandInteraction(request))
+    case request: UserOfferInteraction => replyToSender(handleOfferInteraction(request))
 
   }
 
@@ -49,6 +50,40 @@ class BrandActor()
       case Some(brand) => handleValidBrand(interaction)
       case _ => FailureResponse(InvalidRequest("Brand not found"))
     }
+  }
+
+  def handleOfferInteraction(interaction: UserOfferInteraction)
+  : Future[ResponseWithFailure[APIError, InteractionResponse]] = successful {
+    val offer = interaction.offerId
+    brandDAO.getAdById(offer) match {
+      case Some(_) => handleValidOffer(interaction)
+      case _ => FailureResponse(InvalidRequest("Offer not found"))
+    }
+  }
+  def handleValidOffer(interaction: UserOfferInteraction): ResponseWithFailure[APIError, InteractionResponse] = {
+    val points = AddPoints.GetInteractionPoints(interaction)
+    val user = interaction.userId
+    val offer = interaction.offerId
+    val intType = interaction.interaction
+    val intSubType = interaction.intType
+    userAccountDAO.addPoints(user, points) match {
+      case Some(p: UserAccountTotalPoints) => {
+
+        val l: KaredoLog = KaredoLog(
+          user = Some(user),
+          offer = Some(offer),
+          logType = Some(intType + " " + intSubType),
+          text = s"interacted total points: $p")
+
+        logDAO.addLog(l)
+        val response = InteractionResponse(interaction.userId, p.totalPoints.toLong)
+        SuccessResponse(response)
+      }
+      case _ => {
+        FailureResponse(InvalidRequest("User not found"))
+      }
+    }
+
   }
 
   def handleValidBrand(interaction: UserBrandInteraction): ResponseWithFailure[APIError, InteractionResponse] = {

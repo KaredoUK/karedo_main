@@ -140,13 +140,25 @@ trait BrandHelpers {
     brandR.id
   }
 
-  def addBrandInteraction(sessionId: String, user: UUID, brand: UUID, interaction: String, intType: String): KaredoPoints = {
+  def addBrandInteraction(sessionId: String, i:UserBrandInteraction): KaredoPoints = {
     val addInteraction = addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> sendReceive ~> unmarshal[InteractionResponse]
 
     val ir = wait {
       addInteraction {
-        Post(s"$serviceUrl/user/$user/interaction/brand",
-          UserBrandInteraction(userId = user, brandId = brand, interaction = interaction, intType = intType ))
+        Post(s"$serviceUrl/user/${i.userId}/interaction/brand",
+          UserBrandInteraction(userId = i.userId, brandId = i.brandId, interaction = i.interaction, intType = i.intType ))
+      }
+    }
+    ir.userTotalPoints
+  }
+
+  def addOfferInteraction(sessionId: String, i: UserOfferInteraction): KaredoPoints = {
+    val addInteraction = addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> sendReceive ~> unmarshal[InteractionResponse]
+
+    val ir = wait {
+      addInteraction {
+        Post(s"$serviceUrl/user/${i.userId}/interaction/offer",
+          UserOfferInteraction(userId = i.userId, offerId = i.offerId, interaction = i.interaction, intType = i.intType))
       }
     }
     ir.userTotalPoints
