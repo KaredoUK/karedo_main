@@ -1,6 +1,7 @@
 package parallelai.wallet.persistence.mongodb
 
 import java.util.UUID
+import parallelai.wallet.entity.KaredoTypes.KaredoPoints
 import parallelai.wallet.entity._
 import com.novus.salat.annotations._
 
@@ -22,7 +23,7 @@ case class MongoUserAccount(
                              settings: AccountSettings = defaultAccountSettings,
                              password: Option[String] = None,
                              active: Boolean = false,
-                             totalPoints: Long = 0,
+                             totalPoints: KaredoPoints = 0,
                              subscribedBrands: List[UUID] = List[UUID](),
                              applications: List[MongoUserApplicationInfo] = List[MongoUserApplicationInfo]()
                              ) {

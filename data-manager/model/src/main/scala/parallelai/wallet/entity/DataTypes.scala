@@ -10,6 +10,11 @@ import com.novus.salat.annotations.Key
 import org.bson.types.ObjectId
 import org.joda.time.DateTime
 
+object KaredoTypes {
+  type KaredoPoints = Long
+}
+import KaredoTypes._
+
 case class EmailUserLookup(email: String, userId: UUID)
 
 case class MsisdnUserLookup(msisdn: String, userId: UUID)
@@ -24,22 +29,29 @@ case class UserAccount(id: UUID, msisdn: Option[String], email: Option[String],
                        personalInfo: UserPersonalInfo = defaultUserPersonalInfo,
                        settings: AccountSettings = defaultAccountSettings,
                        active: Boolean = false,
-                       totalPoints: Long = 0,
+                       totalPoints: KaredoPoints = 0,
                        subscribedBrands: List[UUID] = List(),
                        password: Option[String] = None)
+case class UserAccountTotalPoints(totalPoints: KaredoPoints)
 
 case class UserAds(userId: UUID, readAds: Set[UUID])
 
 case class UserOffers(userId: UUID, rewards: Set[UUID])
 
 case class Offer(@Key("_id") id: UUID = UUID.randomUUID(), name: String = "", brandId: UUID, description: Option[String],
-                 imagePath: Option[String], qrCodeId: Option[UUID], value: Option[Long])
+                 imagePath: Option[String], qrCodeId: Option[UUID], value: Option[Int])
 
-case class AdvertisementDetail(@Key("_id") id: UUID = UUID.randomUUID(), publishedDate: DateTime = new DateTime(), text: String = "", imageIds: List[String] = List(), value: Int = 0)
+case class AdvertisementDetail(@Key("_id") id: UUID = UUID.randomUUID(), publishedDate: DateTime = new DateTime(), text: String = "", imageIds: List[String] = List(), value: KaredoPoints = 0)
 
 case class Brand(@Key("_id") id: UUID = UUID.randomUUID(), name: String = "", iconId: String, ads: List[AdvertisementDetail] = List())
 
-case class KaredoLog(@Key("_id") id: UUID = UUID.randomUUID, user: UUID, brand: UUID, offer: UUID, text: String )
+case class KaredoLog(@Key("_id") id: UUID = UUID.randomUUID,
+                     ts: DateTime = new DateTime(),
+                     user: Option[UUID]=None,
+                     brand: Option[UUID]=None,
+                     offer: Option[UUID]=None,
+                     logType: Option[String]=None,
+                     text: String )
 
 case class Hint(@Key("_id") id: UUID = UUID.randomUUID(), userId: UUID, brandId: UUID, ad: UUID, score: Double)
 

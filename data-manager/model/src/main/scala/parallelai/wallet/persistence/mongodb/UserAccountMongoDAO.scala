@@ -1,5 +1,6 @@
 package parallelai.wallet.persistence.mongodb
 
+import parallelai.wallet.entity.KaredoTypes.KaredoPoints
 import parallelai.wallet.persistence.{ClientApplicationDAO, UserAccountDAO}
 import scala.concurrent.Future
 import scala.concurrent.Future._
@@ -87,6 +88,34 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule)
           )
         )
       )
+
+
+
+  override def addPoints(userId: UUID, points: KaredoPoints): Option[UserAccountTotalPoints] = {
+    val query: DBObject = byId(userId)
+    val updateQuery: DBObject = MongoDBObject("$inc" -> MongoDBObject("totalPoints" -> points))
+    val fields: DBObject = MongoDBObject("totalPoints" -> "1")
+
+    val ret=dao.collection.findAndModify(
+      query, fields=fields, sort=null, remove=false, updateQuery, returnNew=true, upsert=false) match {
+      case Some(dbo) =>
+        Some(grater[UserAccountTotalPoints].asObject(dbo))
+      case None =>
+        None
+    }
+    ret
+
+  }
+/*
+  @param query query to match
+  * @param fields fields to be returned
+    * @param sort sort to apply before picking first document
+  * @param remove if true, document found will be removed
+  * @param update update to apply
+  * @param returnNew if true, the updated document is returned, otherwise the old document is returned (or it would be lost forever)
+  * @param upsert do upsert*/
+
+
 
   def insertNew(userAccount: UserAccount, firstApplications: ClientApplication*): Unit =
       dao.insert(

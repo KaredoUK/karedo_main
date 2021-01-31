@@ -24,7 +24,7 @@ class ClientApplicationMongoDAOSpec
     val accountDAO = new UserAccountMongoDAO
     val clientAppDAO = new ClientApplicationMongoDAO
 
-    val userAccount = UserAccount(UUID.randomUUID(), Some("12345678"), Some("user@email.com"), totalPoints = 10l)
+    val userAccount = UserAccount(UUID.randomUUID(), Some("12345678"), Some("user@email.com"), totalPoints = 10)
     val clientApplication = ClientApplication(UUID.randomUUID(), userAccount.id, "ACT_CODE")
 
 

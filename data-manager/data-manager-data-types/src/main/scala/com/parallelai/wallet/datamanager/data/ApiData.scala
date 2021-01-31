@@ -10,6 +10,10 @@ import org.joda.time.DateTime
 import com.wordnik.swagger.annotations._
 import scala.annotation.meta.field
 
+object KaredoTypes {
+  type KaredoPoints = Long
+}
+import KaredoTypes._
 
 // if a type acts either as a request and response can extends both
 
@@ -128,14 +132,14 @@ case class UserProfile(
                         @(ApiModelProperty@field)(value = "user settings")
                         settings: UserSettings,
                         @(ApiModelProperty@field)(value = "total points")
-                        totalPoints: Long)
+                        totalPoints: KaredoPoints)
 
 @ApiModel(description = "Points gained by the user")
 case class UserPoints(
                        @(ApiModelProperty@field)(value = "userId")
                        userId: UserID,
                        @(ApiModelProperty@field)(value = "total points gained")
-                       totalPoints: Long)
+                       totalPoints: KaredoPoints)
 
 case class LoginRequest(accountId: UserID, applicationId: UUID, password: String)
 
@@ -177,7 +181,7 @@ case class DeleteBrandRequest(brandId: UUID) extends ApiDataRequest
 // This is here just to please the UI devs who are having problem to parse a list of Strings
 case class ImageId(imageId: String)
 
-case class AddAdvertCommand(brandId: UUID, text: String, imageIds: List[ImageId], value: Int) extends ApiDataRequest
+case class AddAdvertCommand(brandId: UUID, text: String, imageIds: List[ImageId], value: KaredoPoints) extends ApiDataRequest
 
 @ApiModel(description = "Detail of returned Ad")
 case class AdvertDetail(
@@ -186,7 +190,7 @@ case class AdvertDetail(
                          @(ApiModelProperty@field)(value = "list of images")
                          imageIds: List[ImageId],
                          @(ApiModelProperty@field)(value = "points weight of this ad")
-                         value: Int)
+                         value: KaredoPoints)
 
 @ApiModel(description = "Detail of returned Ad")
 case class AdvertDetailResponse(
@@ -197,7 +201,7 @@ case class AdvertDetailResponse(
                                  @(ApiModelProperty@field)(value = "listing of images")
                                  imageIds: List[ImageId],
                                  @(ApiModelProperty@field)(value = "points weight of this ad")
-                                 value: Int) extends ApiDataResponse
+                                 value: KaredoPoints) extends ApiDataResponse
 
 @ApiModel(description = "Brand to add")
 case class SuggestedAdForUsersAndBrand(
@@ -222,7 +226,7 @@ case class GetMediaRequest(mediaId: String) extends ApiDataRequest
 case class GetMediaResponse(contentType: String, content: Array[Byte]) extends ApiDataResponse
 
 // Offer types
-case class OfferData(name: String, brandId: UUID, desc: Option[String], imagePath: Option[String], qrCodeId: Option[UUID], value: Option[Long])
+case class OfferData(name: String, brandId: UUID, desc: Option[String], imagePath: Option[String], qrCodeId: Option[UUID], value: Option[Int])
 case class OfferResponse(offerId: UUID)
 
 case class StatusResponse(status: String) extends ApiDataResponse
@@ -243,4 +247,4 @@ case class InteractionResponse(
                                 @(ApiModelProperty@field)(value = "userId")
                                 userId: UUID,
                                 @(ApiModelProperty@field)(value = "total points so far")
-                                userTotalPoints: Int) extends ApiDataResponse
+                                userTotalPoints: KaredoPoints) extends ApiDataResponse

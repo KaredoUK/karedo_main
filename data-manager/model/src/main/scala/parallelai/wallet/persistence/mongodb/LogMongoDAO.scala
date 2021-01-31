@@ -17,12 +17,12 @@ class LogMongoDAO (implicit val bindingModule: BindingModule)
 
   //This should be removed and using the MongoAppSupport features
   RegisterJodaTimeConversionHelpers()
-  val dao = new SalatDAO[KaredoLog, UUID](collection = db("Log")) {}
+  val dao = new SalatDAO[KaredoLog, UUID](collection = db("KaredoLog")) {}
 
   //def byId(id: UUID) = MongoDBObject("_id" -> id)
 
 
-  //override def getById(id: UUID): Option[KaredoLog] = dao.findOneById(id)
+  override def getById(id: UUID): Option[KaredoLog] = dao.findOneById(id)
 
   override def addLog(log: KaredoLog): Option[UUID] =  {
 

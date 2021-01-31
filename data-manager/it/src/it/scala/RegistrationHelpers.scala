@@ -1,6 +1,7 @@
 import java.util.UUID
 
 import com.parallelai.wallet.datamanager.data._
+import parallelai.wallet.entity.KaredoTypes.KaredoPoints
 import parallelai.wallet.persistence.mongodb.{ClientApplicationMongoDAO, UserAccountMongoDAO}
 import restapi.security.AuthenticationSupport._
 import spray.client.pipelining._
@@ -18,11 +19,12 @@ case class Registration(application: ApplicationID, pass: String, userId: UUID, 
  * Created by pakkio on 13/02/2015.
  */
 trait RegistrationHelpers {
-  this: MyUtility =>
+  this: ItEnvironment =>
 
   def RegisterAccount = {
     val applicationId: ApplicationID = UUID.randomUUID()
     val msisdn = generateMobile
+    val email = generateEmail
 
     doRegister(applicationId, msisdn)
 
@@ -125,7 +127,7 @@ trait RegistrationHelpers {
 }
 
 trait BrandHelpers {
-  this: MyUtility =>
+  this: ItEnvironment =>
 
   def addBrand(sessionId: String, name: String): UUID = {
     val add = addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> sendReceive ~> unmarshal[BrandResponse]
@@ -136,6 +138,18 @@ trait BrandHelpers {
       }
     }
     brandR.id
+  }
+
+  def addBrandInteraction(sessionId: String, user: UUID, brand: UUID, interaction: String, intType: String): KaredoPoints = {
+    val addInteraction = addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> sendReceive ~> unmarshal[InteractionResponse]
+
+    val ir = wait {
+      addInteraction {
+        Post(s"$serviceUrl/user/$user/interaction/brand",
+          UserBrandInteraction(userId = user, brandId = brand, interaction = interaction, intType = intType ))
+      }
+    }
+    ir.userTotalPoints
   }
 
   def addAd(sessionId: String, brand: UUID, ad: String): UUID = {

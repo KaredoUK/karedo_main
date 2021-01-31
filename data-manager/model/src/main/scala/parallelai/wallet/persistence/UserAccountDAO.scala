@@ -1,11 +1,14 @@
 package parallelai.wallet.persistence
 
 import java.util.UUID
-import parallelai.wallet.entity.{AccountSettings, UserPersonalInfo, ClientApplication, UserAccount}
+import parallelai.wallet.entity.KaredoTypes.KaredoPoints
+import parallelai.wallet.entity._
 import parallelai.wallet.persistence.mongodb.SubscribedBrands
 import scala.concurrent.Future
 
 trait UserAccountDAO {
+
+
 
 
   def getById(userId: UUID) : Option[UserAccount]
@@ -17,6 +20,8 @@ trait UserAccountDAO {
   def getByApplicationId(applicationId: UUID, mustBeActive: Boolean = false) : Option[UserAccount]
 
   def insertNew(userAccount: UserAccount, firstApplication: ClientApplication) : Unit
+
+  def addPoints(userId: UUID, points: KaredoPoints): Option[UserAccountTotalPoints]
 
   def update(userAccount: UserAccount): Unit
 

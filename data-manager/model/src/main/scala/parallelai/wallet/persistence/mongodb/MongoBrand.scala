@@ -2,6 +2,7 @@ package parallelai.wallet.persistence.mongodb
 
 import java.util.UUID
 import org.joda.time.DateTime
+import parallelai.wallet.entity.KaredoTypes.KaredoPoints
 import parallelai.wallet.entity._
 import com.novus.salat.annotations._
 import parallelai.wallet.persistence.Interaction
@@ -17,7 +18,7 @@ case class MongoBrandAd
   text: String="",
   publishedDate: DateTime = new DateTime(),
   imageIds: List[String] = List[String](),
-  value: Int=0)
+  value: KaredoPoints=0)
 {
   def toBrandAd(): AdvertisementDetail =
     AdvertisementDetail(id, publishedDate, text, imageIds, value)

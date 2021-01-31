@@ -17,8 +17,8 @@ trait TestWithLocalMongoDb extends MongoTestUtils with NoTimeConversions {
 
   lazy val defaultBindingConfig =
     Map(
-      "mongo.server.host" -> "localhost",
-      "mongo.server.port" -> "12345",
+      "mongo.server.host" -> "127.0.0.1", //192.168.149.138",
+      "mongo.server.port" -> "12345", //27017",
       "mongo.db.name" -> "test",
       "mongo.db.user" -> "",
       "mongo.db.pwd" -> ""
@@ -35,6 +35,7 @@ trait TestWithLocalMongoDb extends MongoTestUtils with NoTimeConversions {
   val brandDAO = new BrandMongoDAO
   val mediaDao = new MongoMediaDAO
   val brandInteractionsDAO = new BrandInteractionsMongoDAO
+  val logDAO = new LogMongoDAO()
 
   // allocate some initial objects to be used in testings
   val userId = UUID.randomUUID()

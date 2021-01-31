@@ -53,7 +53,7 @@ class MongoUserSessionDAO (implicit val bindingModule: BindingModule)
   def setSessionExpiryIndex(): Unit = {
     // corrected the expireAfterSeconds must be done in a 2nd MongoDBObject to be working otherwise it is
     // handled as a columnname
-    dao.collection.ensureIndex(MongoDBObject( "expiry" -> 1 ), MongoDBObject("expireAfterSeconds" -> 0))
+    dao.collection.createIndex(MongoDBObject( "expiry" -> 1 ), MongoDBObject("expireAfterSeconds" -> 0))
   }
 
   def withLog[A,R](title:String,value:A)(body : =>R): R = {

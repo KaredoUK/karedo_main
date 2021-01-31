@@ -10,7 +10,7 @@ import objAPI._
 
 import org.joda.time.DateTime
 import parallelai.wallet.entity.{Brand, _}
-import parallelai.wallet.persistence.{LogDAO, HintDAO, MediaDAO, BrandDAO}
+import parallelai.wallet.persistence._
 import rules.AddPoints
 import spray.json._
 
@@ -19,13 +19,12 @@ import scala.concurrent.Future.successful
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
-
-
 class BrandActor()
-  (implicit val bindingModule: BindingModule,
-   implicit val brandDAO: BrandDAO,
-   implicit val logDAO: LogDAO,
-   implicit val hintDAO: HintDAO)
+                (implicit val bindingModule: BindingModule,
+                 implicit val userAccountDAO: UserAccountDAO,
+                 implicit val brandDAO: BrandDAO,
+                 implicit val logDAO: LogDAO,
+                 implicit val hintDAO: HintDAO)
 
   extends Actor with ActorLogging with Injectable {
 
@@ -42,11 +41,40 @@ class BrandActor()
     case request: UserBrandInteraction => replyToSender(handleBrandInteraction(request))
 
   }
+
   def handleBrandInteraction(interaction: UserBrandInteraction)
-    : Future[ResponseWithFailure[APIError, InteractionResponse]] = successful {
-      val points = AddPoints.GetInteractionPoints(interaction)
-      val response = InteractionResponse(interaction.userId,points)
-      SuccessResponse(response)
+  : Future[ResponseWithFailure[APIError, InteractionResponse]] = successful {
+    val brand = interaction.brandId
+    brandDAO.getById(brand) match {
+      case Some(brand) => handleValidBrand(interaction)
+      case _ => FailureResponse(InvalidRequest("Brand not found"))
+    }
+  }
+
+  def handleValidBrand(interaction: UserBrandInteraction): ResponseWithFailure[APIError, InteractionResponse] = {
+    val points = AddPoints.GetInteractionPoints(interaction)
+    val user = interaction.userId
+    val brand = interaction.brandId
+    val intType = interaction.interaction
+    val intSubType = interaction.intType
+    userAccountDAO.addPoints(user, points) match {
+      case Some(p: UserAccountTotalPoints) => {
+
+        val l: KaredoLog = KaredoLog(
+          user = Some(user),
+          brand = Some(brand),
+          logType = Some(intType + " " + intSubType),
+          text = s"interacted total points: $p")
+
+        logDAO.addLog(l)
+        val response = InteractionResponse(interaction.userId, p.totalPoints.toLong)
+        SuccessResponse(response)
+      }
+      case _ => {
+        FailureResponse(InvalidRequest("User not found"))
+      }
+    }
+
   }
 
   def handleCreateBrand(request: BrandData): Future[ResponseWithFailure[APIError, BrandResponse]] = successful {
@@ -70,9 +98,9 @@ class BrandActor()
     hintDAO.suggestedNAdsForUserAndBrandLimited(request.userId, request.brandId, request.max)
       .map(x => {
 
-      val adDetail = brandDAO.getAdById (x.ad).getOrElse(
-        AdvertisementDetail(id=new UUID(0,0),imageIds = List("empty")))
-      SuggestedAdForUsersAndBrand (x.ad, adDetail.text, adDetail.imageIds.mkString(","))
+      val adDetail = brandDAO.getAdById(x.ad).getOrElse(
+        AdvertisementDetail(id = new UUID(0, 0), imageIds = List("empty")))
+      SuggestedAdForUsersAndBrand(x.ad, adDetail.text, adDetail.imageIds.mkString(","))
     })
 
   }
@@ -80,8 +108,10 @@ class BrandActor()
   def handleListBrandAdverts(adverts: ListBrandsAdverts): Future[ResponseWithFailure[APIError, List[AdvertDetailResponse]]] =
     successful {
       SuccessResponse(
-        brandDAO.listAds(adverts.brandId,adverts.max).map {
-          detail => AdvertDetailResponse(id = detail.id, text = detail.text, imageIds = detail.imageIds map { ImageId } , value = detail.value)
+        brandDAO.listAds(adverts.brandId, adverts.max).map {
+          detail => AdvertDetailResponse(id = detail.id, text = detail.text, imageIds = detail.imageIds map {
+            ImageId
+          }, value = detail.value)
         })
     }
 
@@ -102,13 +132,13 @@ class BrandActor()
 
   def handleAddAdvert(request: AddAdvertCommand): Future[ResponseWithFailure[APIError, AdvertDetailResponse]] = successful {
 
-    val detail: AdvertisementDetail = AdvertisementDetail(text = request.text, imageIds = request.imageIds map { _.imageId }, value = request.value)
+    val detail: AdvertisementDetail = AdvertisementDetail(text = request.text, imageIds = request.imageIds map {
+      _.imageId
+    }, value = request.value)
     //log.info(s"XXX using detail uuid: ${detail.id}")
     brandDAO.addAd(request.brandId, detail)
     SuccessResponse(AdvertDetailResponse(detail.id, request.text, request.imageIds, request.value))
   }
-
-
 
 
   def handleListBrands: List[BrandRecord] = {

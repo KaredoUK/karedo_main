@@ -8,6 +8,7 @@ trait LogDAO {
 
 
   def addLog(l: KaredoLog) : Option[UUID]
+  def getById(id: UUID): Option[KaredoLog]
 
 }
 

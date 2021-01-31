@@ -36,7 +36,7 @@ abstract class AccountHttpService(
   with AuthorizationSupport {
 
   import scala.concurrent.duration._
-  implicit val timeout = Timeout(2.seconds)
+  implicit val timeout = Timeout(20.seconds)
 
   def route =
     pathPrefix("account") {
@@ -56,7 +56,7 @@ abstract class AccountHttpService(
         suggestedBrandsPost ~ // P70 ???
         suggestedBrandsGet   // P70 GET AUTH /account/xxx/suggestedbrands
     } ~ pathPrefix("user") {
-      userBrandInteraction // P55 POST AUTH /account/interaction/brand/xxx
+      userBrandInteraction // P108 POST AUTH /account/interaction/brand/xxx
 
     }
 
@@ -523,11 +523,3 @@ abstract class AccountHttpService(
     }
 
 }
-
-
-
-
-
-
-
-
