@@ -44,6 +44,7 @@ trait ActorsSpec
     lazy val mockedOfferDAO = mock[OfferDAO]
     lazy val mockedUserSessionDAO = mock[UserSessionDAO]
     lazy val messagerActor = TestProbe()
+    lazy val mockedSaleDAO = mock[SaleDAO]
 
 
     mockedUserSessionDAO.getValidSessionAndRenew(sessionId) returns
@@ -55,7 +56,7 @@ trait ActorsSpec
     val server = new WithMockPersistence(
       8080, mockedBrandDAO, mockedHintDAO, mockedLogDAO,
       mockedClientApplicationDAO, mockedUserAccountDAO,
-      mockedMediaDAO, mockedOfferDAO, mockedUserSessionDAO,
+      mockedMediaDAO, mockedOfferDAO, mockedUserSessionDAO, mockedSaleDAO,
       messagerActor.ref)
 
 

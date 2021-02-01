@@ -7,9 +7,10 @@ import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import com.parallelai.wallet.datamanager.data._
 
 import core.OfferActor.{InvalidOfferRequest, InternalOfferError, OfferError}
+import org.apache.commons.lang.RandomStringUtils
 import org.joda.time.DateTime
 import parallelai.wallet.entity.{Brand, _}
-import parallelai.wallet.persistence.{OfferDAO, BrandDAO}
+import parallelai.wallet.persistence.{SaleDAO, OfferDAO, BrandDAO}
 import spray.json._
 
 import scala.concurrent.Future
@@ -49,7 +50,7 @@ object OfferActor {
   }
 }
 
-class OfferActor(implicit offerDAO: OfferDAO, implicit val bindingModule: BindingModule) extends Actor with ActorLogging with Injectable {
+class OfferActor(implicit val saleDAO: SaleDAO, implicit val offerDAO: OfferDAO, implicit val bindingModule: BindingModule) extends Actor with ActorLogging with Injectable {
 
   def receive: Receive = {
     case request: OfferData => replyToSender(createOffer(request))
@@ -73,9 +74,23 @@ class OfferActor(implicit offerDAO: OfferDAO, implicit val bindingModule: Bindin
     }
   }
 
-  def handleGetOfferCode(code: GetOfferCode): Future[ResponseWithFailure[OfferError, GetOfferCodeResponse]] =
+
+  def handleGetOfferCode(request: GetOfferCode): Future[ResponseWithFailure[OfferError, GetOfferCodeResponse]] =
   successful {
-    SuccessResponse(GetOfferCodeResponse(UUID.randomUUID(),"code"))
+    // returns a randomcode only if NOT already used by other offers
+    var code=""
+    do {
+      code = newOfferCode
+
+    } while (saleDAO.getByCode(code)!=None)
+
+    saleDAO.insertNew(Sale(userId = request.userId,adId=request.adId,code=code)) match {
+      case Some(x) => SuccessResponse(GetOfferCodeResponse(x,code))
+      case _ => FailureResponse(InvalidOfferRequest("Can't create code"))
+    }
+  }
+  def newOfferCode: String = {
+    RandomStringUtils.randomAlphanumeric(8).toUpperCase()
   }
 
   def validateOffer(request: OfferData): Option[String] = request match {
