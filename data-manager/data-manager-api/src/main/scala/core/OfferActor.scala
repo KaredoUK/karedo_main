@@ -53,6 +53,7 @@ class OfferActor(implicit offerDAO: OfferDAO, implicit val bindingModule: Bindin
 
   def receive: Receive = {
     case request: OfferData => replyToSender(createOffer(request))
+    case request: GetOfferCode => replyToSender(handleGetOfferCode(request))
   }
 
   def createOffer(request: OfferData): Future[ResponseWithFailure[OfferError, OfferResponse]] = successful {
@@ -70,6 +71,11 @@ class OfferActor(implicit offerDAO: OfferDAO, implicit val bindingModule: Bindin
         log.info("Validation failed "+error)
         FailureResponse(InvalidOfferRequest(error))
     }
+  }
+
+  def handleGetOfferCode(code: GetOfferCode): Future[ResponseWithFailure[OfferError, GetOfferCodeResponse]] =
+  successful {
+    SuccessResponse(GetOfferCodeResponse(UUID.randomUUID(),"code"))
   }
 
   def validateOffer(request: OfferData): Option[String] = request match {
