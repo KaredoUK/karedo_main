@@ -2,6 +2,7 @@ package parallelai.wallet.persistence.mongodb
 
 import java.util.UUID
 
+import com.mongodb.casbah.commons.MongoDBObject
 import org.specs2.mutable.{Before, Specification}
 import parallelai.wallet.entity.KaredoLog
 
@@ -9,11 +10,12 @@ import parallelai.wallet.entity.KaredoLog
 
 class MongoLogDAOSpec
   extends Specification
-  with TestWithLocalMongoDb
-  with Before
+  with MongoTestUtils
+
   with UUIDMatcher
 {
-  def before = clearAll()
+  val logDAO=new LogMongoDAO()
+  logDAO.dao.collection.remove(MongoDBObject())
 
   sequential
 

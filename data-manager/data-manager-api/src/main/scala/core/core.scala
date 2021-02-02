@@ -57,7 +57,7 @@ trait Persistence {
   def userAccountDAO : UserAccountDAO
   def clientApplicationDAO : ClientApplicationDAO
   def userSessionDAO: UserSessionDAO
-  def saleDAO: SaleDAO
+  def saleDAO: KaredoSalesDAO
 }
 
 trait MongoPersistence extends Persistence {
@@ -71,7 +71,7 @@ trait MongoPersistence extends Persistence {
   override val mediaDAO : MediaDAO = new MongoMediaDAO()
   override val clientApplicationDAO : ClientApplicationDAO = new ClientApplicationMongoDAO()
   override val userSessionDAO: UserSessionDAO = new MongoUserSessionDAO()
-  override val saleDAO: SaleDAO = new SaleMongoDAO()
+  override val saleDAO: KaredoSalesDAO = new KaredoSalesMongoDAO()
 }
 
 trait ServiceActors {

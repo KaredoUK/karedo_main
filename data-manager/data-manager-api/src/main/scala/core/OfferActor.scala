@@ -10,7 +10,7 @@ import core.OfferActor.{InvalidOfferRequest, InternalOfferError, OfferError}
 import org.apache.commons.lang.RandomStringUtils
 import org.joda.time.DateTime
 import parallelai.wallet.entity.{Brand, _}
-import parallelai.wallet.persistence.{SaleDAO, OfferDAO, BrandDAO}
+import parallelai.wallet.persistence.{KaredoSalesDAO, OfferDAO, BrandDAO}
 import spray.json._
 
 import scala.concurrent.Future
@@ -50,7 +50,7 @@ object OfferActor {
   }
 }
 
-class OfferActor(implicit val saleDAO: SaleDAO, implicit val offerDAO: OfferDAO, implicit val bindingModule: BindingModule) extends Actor with ActorLogging with Injectable {
+class OfferActor(implicit val saleDAO: KaredoSalesDAO, implicit val offerDAO: OfferDAO, implicit val bindingModule: BindingModule) extends Actor with ActorLogging with Injectable {
 
   def receive: Receive = {
     case request: OfferData => replyToSender(createOffer(request))
@@ -82,9 +82,9 @@ class OfferActor(implicit val saleDAO: SaleDAO, implicit val offerDAO: OfferDAO,
     do {
       code = newOfferCode
 
-    } while (saleDAO.getByCode(code)!=None)
+    } while (saleDAO.findByCode(code)!=None)
 
-    saleDAO.insertNew(Sale(userId = request.userId,adId=request.adId,code=code)) match {
+    saleDAO.insertNew(KaredoSales(userId = request.userId,adId=request.adId,code=code)) match {
       case Some(x) => SuccessResponse(GetOfferCodeResponse(x,code))
       case _ => FailureResponse(InvalidOfferRequest("Can't create code"))
     }

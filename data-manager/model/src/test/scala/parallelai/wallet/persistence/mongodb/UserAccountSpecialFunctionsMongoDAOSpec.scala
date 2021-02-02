@@ -4,15 +4,17 @@ import java.util.UUID
 
 import org.specs2.mutable.Specification
 import org.specs2.specification.BeforeExample
+import parallelai.wallet.entity.{ClientApplication, UserAccount}
 
 class UserAccountSpecialFunctionsMongoDAOSpec
   extends Specification
-  with TestWithLocalMongoDb
-  with BeforeExample
-{
+  with MongoTestUtils {
   sequential
 
-  def before = clearAll()
+  val accountDAO = new UserAccountMongoDAO()
+  val clientApplication = ClientApplication(UUID.randomUUID(), userAccount.id, "ACT_CODE")
+
+  val userAccount = UserAccount(UUID.randomUUID(), Some("12345678"), Some("user@email.com"))
 
   "UserAccountMongoDAO" should {
 

@@ -8,10 +8,13 @@ import parallelai.wallet.entity.{MediaContentDescriptor, MediaContent}
 import scala.util.Random
 
 
-class MongoMediaDAOSpec
+class MongomediaDAOSpec
   extends Specification
-  with TestWithLocalMongoDb
+  with MongoTestUtils
 {
+  val mediaDAO=new MongoMediaDAO()
+  
+  
   sequential
 
   def sampleMediaContent: (MediaContent, Array[Byte]) = {
@@ -21,22 +24,22 @@ class MongoMediaDAOSpec
     (MediaContent( descriptor, inputStream ), fileContent)
   }
 
-  "MongoMediaDAO " should {
+  "MongomediaDAO " should {
 
     "Create a new Media content and allow to retrieve it" in {
       val (mediaContent, _) = sampleMediaContent
 
-      val id = mediaDao.createNew(mediaContent)
+      val id = mediaDAO.createNew(mediaContent)
 
-      mediaDao.findById(id) should not be (None)
+      mediaDAO.findById(id) should not be (None)
     }
 
     "Retrieve the same content of the new created file" in {
       val (mediaContent, fileContent) = sampleMediaContent
 
-      val id = mediaDao.createNew(mediaContent)
+      val id = mediaDAO.createNew(mediaContent)
 
-      val retrieved = mediaDao.findById(id).get
+      val retrieved = mediaDAO.findById(id).get
 
       retrieved.descriptor shouldEqual mediaContent.descriptor.copy(id = id)
 
@@ -51,9 +54,9 @@ class MongoMediaDAOSpec
     "find by name" in {
       val (mediaContent, fileContent) = sampleMediaContent
 
-      val id = mediaDao.createNew(mediaContent)
+      val id = mediaDAO.createNew(mediaContent)
 
-      val retrievedOp = mediaDao.findByName(mediaContent.descriptor.name)
+      val retrievedOp = mediaDAO.findByName(mediaContent.descriptor.name)
 
       retrievedOp should not be (None)
 
@@ -69,11 +72,11 @@ class MongoMediaDAOSpec
     "delete a file" in {
       val (mediaContent, _) = sampleMediaContent
 
-      val id = mediaDao.createNew(mediaContent)
+      val id = mediaDAO.createNew(mediaContent)
 
-      mediaDao.delete(id)
+      mediaDAO.delete(id)
 
-      mediaDao.findById(id) shouldEqual None
+      mediaDAO.findById(id) shouldEqual None
     }
   }
 }

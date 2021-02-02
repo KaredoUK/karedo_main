@@ -15,16 +15,20 @@ import parallelai.wallet.persistence.{InteractionType, Interaction}
 
 class MongoBrandDAOSpec
   extends Specification
-  with TestWithLocalMongoDb
-  with Before
+  with MongoTestUtils
 {
-  def before = clearAll()
+  val brandDAO=new BrandMongoDAO()
+  brandDAO.dao.collection.remove(MongoDBObject())
+  val brandInteractionsDAO=new BrandInteractionsMongoDAO()
+  brandInteractionsDAO.dao.collection.remove(MongoDBObject())
+
+  val newBrand=Brand(name="aBrand")
 
   sequential
 
   "BrandMongoDAO" should {
     "create and retrieve a brand with a generated id " in {
-      val n1=newbrand
+      val n1=newBrand
       val id = brandDAO.insertNew(n1).get
       val findAfterInsert = brandDAO.getById(id).get
 
@@ -33,14 +37,14 @@ class MongoBrandDAOSpec
     }
 
     "can delete one instance" in {
-      val id = brandDAO.insertNew(newbrand).get
+      val id = brandDAO.insertNew(newBrand).get
       brandDAO.delete(id)
       val findAfterDelete = brandDAO.getById(id)
       findAfterDelete should be(None)
     }
 
     "can delete all instances" in {
-      val id = brandDAO.insertNew(newbrand).get
+      val id = brandDAO.insertNew(newBrand).get
       val list=brandDAO.list
       list should have size 1
 
@@ -52,7 +56,7 @@ class MongoBrandDAOSpec
   }
   "BrandInteractionsMongoDAO" should {
     "add an interaction" in {
-      val id = brandDAO.insertNew(newbrand).get
+      val id = brandDAO.insertNew(newBrand).get
       val user = UUID.randomUUID()
       val interaction = Interaction(userId = user, kind = InteractionType.Click, note = "Annotations")
       brandInteractionsDAO.insertNew(id, interaction)
@@ -61,7 +65,7 @@ class MongoBrandDAOSpec
     }
     "get it back" in {
 
-      val id = brandDAO.insertNew(newbrand).get
+      val id = brandDAO.insertNew(newBrand).get
       val user = UUID.randomUUID()
       val interaction = Interaction(userId = user, kind = InteractionType.Click, note = "Annotations")
       brandInteractionsDAO.insertNew(id, interaction)
@@ -69,7 +73,7 @@ class MongoBrandDAOSpec
       readback shouldEqual(interaction)
     }
     "get list of interactions" in {
-      val id = brandDAO.insertNew(newbrand).get
+      val id = brandDAO.insertNew(newBrand).get
       val user = UUID.randomUUID()
       val interaction = Interaction(userId = user, kind = InteractionType.Click, note = "Annotations")
       brandInteractionsDAO.insertNew(id, interaction)
@@ -82,7 +86,7 @@ class MongoBrandDAOSpec
 
     }
     "delete interaction" in {
-      val id = brandDAO.insertNew(newbrand).get
+      val id = brandDAO.insertNew(newBrand).get
       val user = UUID.randomUUID()
       val interaction = Interaction(userId = user, kind = InteractionType.Click, note = "Annotations")
       brandInteractionsDAO.insertNew(id, interaction)
@@ -98,7 +102,7 @@ class MongoBrandDAOSpec
   }
 
   private def addInteraction: Interaction = {
-    val id = brandDAO.insertNew(newbrand).get
+    val id = brandDAO.insertNew(newBrand).get
     val user = UUID.randomUUID()
     val interaction = Interaction(userId = user, kind = InteractionType.Click, note = "Annotations")
     brandInteractionsDAO.insertNew(id, interaction)

@@ -7,7 +7,6 @@ package parallelai.wallet.entity
 import java.io.InputStream
 import java.util.UUID
 import com.novus.salat.annotations.Key
-import org.bson.types.ObjectId
 import org.joda.time.DateTime
 
 object KaredoTypes {
@@ -41,7 +40,7 @@ case class UserOffers(userId: UUID, rewards: Set[UUID])
 case class Offer(@Key("_id") id: UUID = UUID.randomUUID(), name: String = "", brandId: UUID, description: Option[String],
                  imagePath: Option[String], qrCodeId: Option[UUID], value: Option[Int])
 
-case class Sale(@Key("_id") id: UUID = UUID.randomUUID(), userId: UUID, adId: UUID, code: String)
+
 /*
                   codeTs: DateTime=new DateTime,
                   redeemedTs: Option[DateTime]=None, expireTs: DateTime)
@@ -50,7 +49,7 @@ case class Sale(@Key("_id") id: UUID = UUID.randomUUID(), userId: UUID, adId: UU
 
 case class AdvertisementDetail(@Key("_id") id: UUID = UUID.randomUUID(), publishedDate: DateTime = new DateTime(), text: String = "", imageIds: List[String] = List(), value: KaredoPoints = 0)
 
-case class Brand(@Key("_id") id: UUID = UUID.randomUUID(), name: String = "", iconId: String, ads: List[AdvertisementDetail] = List())
+case class Brand(@Key("_id") id: UUID = UUID.randomUUID(), name: String = "", iconId: String = "", ads: List[AdvertisementDetail] = List())
 
 case class KaredoLog(@Key("_id") id: UUID = UUID.randomUUID,
                      ts: DateTime = new DateTime(),

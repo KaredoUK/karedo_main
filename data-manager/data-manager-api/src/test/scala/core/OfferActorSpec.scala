@@ -6,7 +6,7 @@ import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKitBase}
 import com.parallelai.wallet.datamanager.data.{GetOfferCodeResponse, GetOfferCode, InteractionResponse, UserBrandInteraction}
 import org.specs2.matcher.BeMatching
-import parallelai.wallet.entity.Sale
+import parallelai.wallet.entity.KaredoSales
 import util.ActorsSpec
 
 class OfferActorSpec
@@ -22,9 +22,9 @@ class OfferActorSpec
   "Offer Actor" >> {
 
     "should call the actor" in new WithMockedPersistence {
-      mockedSaleDAO.getById(any[UUID]) returns Some(Sale(userId = aUser, adId = aBrand, code=""))
-      mockedSaleDAO.getByCode(any[String]) returns None
-      mockedSaleDAO.insertNew(any[Sale]) returns Some(UUID.randomUUID())
+      mockedSaleDAO.findById(any[UUID]) returns Some(KaredoSales(userId = aUser, adId = aBrand, code=""))
+      mockedSaleDAO.findByCode(any[String]) returns None
+      mockedSaleDAO.insertNew(any[KaredoSales]) returns Some(UUID.randomUUID())
 
       server.offer ! GetOfferCode(aUser, aBrand)
       expectMsgPF() {

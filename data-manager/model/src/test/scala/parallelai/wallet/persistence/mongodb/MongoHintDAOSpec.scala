@@ -8,11 +8,15 @@ import parallelai.wallet.entity.Hint
 
 class MongoHintDAOSpec
   extends Specification
-  with TestWithLocalMongoDb
-  with Before
+  with MongoTestUtils
 {
 
-  def before = clearAll()
+  val hintDAO=new HintMongoDAO()
+  val userId = UUID.randomUUID()
+  val brandId = UUID.randomUUID()
+  val brandId2 = UUID.randomUUID()
+  val adId = UUID.randomUUID()
+
   initialize
 
   sequential

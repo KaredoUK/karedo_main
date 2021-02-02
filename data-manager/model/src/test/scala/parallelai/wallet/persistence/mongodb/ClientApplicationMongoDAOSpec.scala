@@ -1,5 +1,6 @@
 package parallelai.wallet.persistence.mongodb
 
+import com.mongodb.casbah.commons.MongoDBObject
 import org.specs2.mutable.Specification
 import com.github.athieriot.{CleanAfterExample, EmbedConnection}
 import org.specs2.specification.BeforeExample
@@ -12,17 +13,20 @@ import java.util.UUID
 
 class ClientApplicationMongoDAOSpec
   extends Specification
-  with TestWithLocalMongoDb
+  with MongoTestUtils
   with BeforeExample
 {
-  def before = clearAll()
+
+  val accountDAO = new UserAccountMongoDAO
+  val clientAppDAO = new ClientApplicationMongoDAO
+
+  def before = accountDAO.dao.collection.remove(MongoDBObject())
 
   sequential
 
   "ClientApplicationMongoDAO" should {
 
-    val accountDAO = new UserAccountMongoDAO
-    val clientAppDAO = new ClientApplicationMongoDAO
+
 
     val userAccount = UserAccount(UUID.randomUUID(), Some("12345678"), Some("user@email.com"), totalPoints = 10)
     val clientApplication = ClientApplication(UUID.randomUUID(), userAccount.id, "ACT_CODE")

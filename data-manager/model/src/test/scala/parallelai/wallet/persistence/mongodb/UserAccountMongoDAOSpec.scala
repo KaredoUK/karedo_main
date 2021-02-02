@@ -1,5 +1,6 @@
 package parallelai.wallet.persistence.mongodb
 
+import com.mongodb.casbah.commons.MongoDBObject
 import org.specs2.mutable.{Before, BeforeAfter, After, Specification}
 import com.github.athieriot.{CleanAfterExample, EmbedConnection}
 import com.escalatesoft.subcut.inject.NewBindingModule
@@ -16,12 +17,20 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class UserAccountMongoDAOSpec
   extends Specification
-  with TestWithLocalMongoDb
-  with BeforeExample
+  with MongoTestUtils
 {
+  val accountDAO = new UserAccountMongoDAO()
+  accountDAO.dao.collection.remove(MongoDBObject())
+
+  val userAccount = UserAccount(UUID.randomUUID(), Some("12345678"), Some("user@email.com"))
+  val clientApplication = ClientApplication(UUID.randomUUID(), userAccount.id, "ACT_CODE")
+  val activeAccount = UserAccount(UUID.randomUUID(), Some("87654321"), Some("other.user@email.com"), active = true)
+  val activeClientApplication = ClientApplication(UUID.randomUUID(), activeAccount.id, "ACT_CODE_1", active = true)
+
+
   sequential
 
-  def before = clearAll()
+
 
   "UserAccountMongoDAO" should {
 
@@ -42,7 +51,7 @@ class UserAccountMongoDAOSpec
     }
 
     "Don't find anything with wrong ID" in {
-      clearAll()
+      //clearAll()
       accountDAO.insertNew(userAccount, clientApplication)
 
       accountDAO.getById(UUID.randomUUID()) shouldEqual None

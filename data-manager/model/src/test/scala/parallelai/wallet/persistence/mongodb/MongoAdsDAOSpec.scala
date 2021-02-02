@@ -13,13 +13,19 @@ import parallelai.wallet.entity.{AdvertisementDetail, Brand}
 
 class MongoAdsDAOSpec
   extends Specification
-  with TestWithLocalMongoDb {
+  with MongoTestUtils {
+
+  val brandDAO=new BrandMongoDAO()
+
+  brandDAO.dao.collection.remove(MongoDBObject())
+  val aBrand=Brand(name="aBrand")
+
 
   sequential
 
   "Advertising handling" should {
 
-    val brandId = brandDAO.insertNew(newbrand).get
+    val brandId = brandDAO.insertNew(aBrand).get
     val text1 = "adtext"
     val ad1 = AdvertisementDetail(
       text = text1, imageIds = List("image1", "image2"), value = 100)

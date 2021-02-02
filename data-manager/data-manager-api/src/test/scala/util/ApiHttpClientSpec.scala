@@ -51,7 +51,7 @@ trait ApiHttpClientSpec
     lazy val mockedMediaDAO = mock[MediaDAO]
     lazy val mockedOfferDAO = mock[OfferDAO]
     lazy val mockedUserSessionDAO = mock[UserSessionDAO]
-    lazy val mockedSaleDAO = mock[SaleDAO]
+    lazy val mockedSaleDAO = mock[KaredoSalesDAO]
     lazy val messagerActor = TestProbe()
 
     mockedUserSessionDAO.getValidSessionAndRenew(sessionId) returns
