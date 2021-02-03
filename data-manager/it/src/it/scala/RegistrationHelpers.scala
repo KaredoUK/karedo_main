@@ -164,6 +164,18 @@ trait BrandHelpers {
     ir.userTotalPoints
   }
 
+  def getOfferCode(r: Registration, ad: UUID): String ={
+    val getOffer = addHeader(HEADER_NAME_SESSION_ID, r.sessionId) ~> sendReceive ~> unmarshal[GetOfferCodeResponse]
+    case class MyRequest(userId:UUID,adId:UUID)
+    implicit val v=jsonFormat2(MyRequest)
+    val offerR = wait {
+      getOffer {
+        Post(s"$serviceUrl/user/${r.userId}/getcode",MyRequest(r.userId,ad))
+      }
+    }
+    offerR.code
+  }
+
   def addAd(sessionId: String, brand: UUID, ad: String): UUID = {
     val add = addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> sendReceive ~> unmarshal[AdvertDetailResponse]
 

@@ -74,6 +74,9 @@ trait ApiDataJsonProtocol extends DefaultJsonProtocol  {
 
 
   implicit val interactionResponse = jsonFormat2(InteractionResponse)
+  implicit val getOfferCodeRequest = jsonFormat2(GetOfferCodeRequest)
+  implicit val getOfferCodeResponse = jsonFormat2(GetOfferCodeResponse)
+  implicit val getOfferCode = jsonFormat2(Pakkio)
 
 }
 

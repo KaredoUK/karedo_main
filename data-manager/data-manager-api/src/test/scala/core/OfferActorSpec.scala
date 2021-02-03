@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKitBase}
-import com.parallelai.wallet.datamanager.data.{GetOfferCodeResponse, GetOfferCode, InteractionResponse, UserBrandInteraction}
+import com.parallelai.wallet.datamanager.data.{GetOfferCodeResponse, GetOfferCodeRequest, InteractionResponse, UserBrandInteraction}
 import org.specs2.matcher.BeMatching
 import parallelai.wallet.entity.KaredoSales
 import util.ActorsSpec
@@ -26,7 +26,7 @@ class OfferActorSpec
       mockedSaleDAO.findByCode(any[String]) returns None
       mockedSaleDAO.insertNew(any[KaredoSales]) returns Some(UUID.randomUUID())
 
-      server.offer ! GetOfferCode(aUser, aBrand)
+      server.offer ! GetOfferCodeRequest(aUser, aBrand)
       expectMsgPF() {
         case SuccessResponse(obj) =>
         {

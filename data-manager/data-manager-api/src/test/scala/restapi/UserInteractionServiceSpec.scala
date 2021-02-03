@@ -9,16 +9,18 @@ import org.mockito.Matchers.{eq => argEq}
 import org.specs2.matcher.Matcher
 import org.specs2.runner.JUnitRunner
 import parallelai.wallet.entity._
+import restapi.security.AuthenticationSupport._
 import spray.client.pipelining._
 import util.ApiHttpClientSpec
 
+import scala.concurrent.Future._
 import scala.concurrent.duration._
 
 
 @RunWith(classOf[JUnitRunner])
 class UserInteractionServiceSpec
-  extends ApiHttpClientSpec
-  with RetryExamples {
+  extends ApiHttpClientSpec {
+  //with RetryExamples {
   //with RestApiSpecMatchers only matchers used by account defined so not needed here 
   
   import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
@@ -47,6 +49,7 @@ class UserInteractionServiceSpec
       response.userTotalPoints must beEqualTo(10)
     }
   }
+
 
 
 }

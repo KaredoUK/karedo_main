@@ -229,7 +229,7 @@ case class GetMediaResponse(contentType: String, content: Array[Byte]) extends A
 case class OfferData(name: String, brandId: UUID, desc: Option[String], imagePath: Option[String], qrCodeId: Option[UUID], value: Option[Int])
 case class OfferResponse(offerId: UUID)
 
-case class GetOfferCode(userId: UserID, adId: UUID)
+case class GetOfferCodeRequest(userId: UUID, adId: UUID)
 case class GetOfferCodeResponse(saleId: UUID, code: String)
 
 case class StatusResponse(status: String) extends ApiDataResponse
@@ -261,3 +261,5 @@ case class InteractionResponse(
                                 userId: UUID,
                                 @(ApiModelProperty@field)(value = "total points so far")
                                 userTotalPoints: KaredoPoints) extends ApiDataResponse
+
+case class Pakkio(x:Int,s:String)

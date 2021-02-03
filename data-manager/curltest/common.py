@@ -14,13 +14,14 @@ logging.basicConfig(filename='python.log', level=logging.DEBUG)
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 
-Root = "http://api.karedo.co.uk:8080/"
+#Root = "http://api.karedo.co.uk:8080/"
+Root = "http://localhost:8090/"
 client = MongoClient("localhost",12345)
 
 
 
 # to enable extra printing from the tests
-DEBUG=True
+DEBUG=False
 
 HTTP_OK=200
 HTTP_AUTH_ERR=401

@@ -86,5 +86,14 @@ class TestingBrandInteraction
         throwAn[UnsuccessfulResponseException]
     }
   }
+  "Offer sales" should {
+    "Get code" in {
+      val r = RegisterAccount
+      val b = addBrand(r.sessionId, "C1")
+      val offer = addAd(r.sessionId, b, "myad")
+      val code = getOfferCode(r,offer)
+      code.length === 8
+    }
+  }
 
 }

@@ -25,7 +25,7 @@ trait Api extends RouteConcatenation with Injectable {
   private val doSwagger = injectOptionalProperty[String]("swagger").getOrElse("true").toBoolean
 
 
-  val serveAccount = new AccountHttpService(registration, editAccount, brand, userAuthentication) {
+  val serveAccount = new AccountHttpService(registration, editAccount, brand, offer, userAuthentication) {
     override implicit def actorRefFactory: ActorRefFactory = system
   }
   val serveMedia = new MediaHttpService(media, userAuthentication) {

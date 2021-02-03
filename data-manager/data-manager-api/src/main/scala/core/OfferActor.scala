@@ -54,7 +54,7 @@ class OfferActor(implicit val saleDAO: KaredoSalesDAO, implicit val offerDAO: Of
 
   def receive: Receive = {
     case request: OfferData => replyToSender(createOffer(request))
-    case request: GetOfferCode => replyToSender(handleGetOfferCode(request))
+    case request: GetOfferCodeRequest => replyToSender(handleGetOfferCode(request))
   }
 
   def createOffer(request: OfferData): Future[ResponseWithFailure[OfferError, OfferResponse]] = successful {
@@ -75,7 +75,7 @@ class OfferActor(implicit val saleDAO: KaredoSalesDAO, implicit val offerDAO: Of
   }
 
 
-  def handleGetOfferCode(request: GetOfferCode): Future[ResponseWithFailure[OfferError, GetOfferCodeResponse]] =
+  def handleGetOfferCode(request: GetOfferCodeRequest): Future[ResponseWithFailure[OfferError, GetOfferCodeResponse]] =
   successful {
     // returns a randomcode only if NOT already used by other offers
     var code=""

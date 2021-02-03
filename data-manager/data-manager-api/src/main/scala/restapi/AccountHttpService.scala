@@ -3,6 +3,7 @@ package restapi
 import javax.ws.rs.Path
 
 import com.wordnik.swagger.annotations.{Api => ApiDoc, _}
+import core.OfferActor.OfferError
 import core.objAPI.APIError
 import restapi.security.AuthorizationSupport
 import com.parallelai.wallet.datamanager.data._
@@ -21,14 +22,16 @@ import java.util.UUID
 
 // All APIs starting with /account go here
 @ApiDoc(value = "/account", description = "Operations on the account.", position = 0)
-abstract class AccountHttpService(
-                                   protected val registrationActor: ActorRef,
-                                   protected val editAccountActor: ActorRef,
-                                   protected val brandActor: ActorRef,
-                                   override protected val userAuthService: UserAuthService)
-                                 (protected implicit val executionContext: ExecutionContext)
+abstract class AccountHttpService
+(
+  protected val registrationActor: ActorRef,
+  protected val editAccountActor: ActorRef,
+  protected val brandActor: ActorRef,
+  protected val offerActor: ActorRef,
+  override protected val userAuthService: UserAuthService)
+(protected implicit val executionContext: ExecutionContext)
 
-  extends HttpService
+extends HttpService
   with Directives
   with DefaultJsonFormats
   with ApiErrorsJsonProtocol
@@ -57,7 +60,8 @@ abstract class AccountHttpService(
         suggestedBrandsGet   // P70 GET AUTH /account/xxx/suggestedbrands
     } ~ pathPrefix("user") {
       userBrandInteraction ~ // P108 POST AUTH /user/xxx/interaction/brand
-      userOfferInteraction  // P107 POST AUTH /user/xxx/interaction/offer
+      userOfferInteraction ~  // P107 POST AUTH /user/xxx/interaction/offer
+      userOfferCode           // P110 get offer code /user/xxx/getcode
     }
 
   // PARALLELAI-77API: Create Account
@@ -522,6 +526,7 @@ abstract class AccountHttpService(
       }
 
     }
+
   def userOfferInteraction: Route =
 
   // PARALLELAI-107API: User Offer Interaction
@@ -541,5 +546,22 @@ abstract class AccountHttpService(
       }
 
     }
+
+  def userOfferCode: Route =
+  // PARALLELAI-110API: User Offer Code
+  // POST "user/xxx/offer/yyyy/getcode"
+  path(JavaUUID / "getcode"){
+    (userId) => {
+      userAuthorizedFor(canAccessUser(userId))(executionContext){ userAuthContext =>
+        post {
+
+          handleWith { getOfferCode : GetOfferCodeRequest =>
+            (offerActor ? getOfferCode)
+              .mapTo[ResponseWithFailure[OfferError,GetOfferCodeResponse]]
+          }
+        }
+      }
+    }
+  }
 
 }
