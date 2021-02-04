@@ -55,6 +55,14 @@ class OfferActor(implicit val saleDAO: KaredoSalesDAO, implicit val offerDAO: Of
   def receive: Receive = {
     case request: OfferData => replyToSender(createOffer(request))
     case request: GetOfferCodeRequest => replyToSender(handleGetOfferCode(request))
+    case request: OfferCode => replyToSender(handleValidateCode(request))
+  }
+  def handleValidateCode(request: OfferCode):
+            Future[ResponseWithFailure[OfferError,OfferResponse]]= successful {
+    saleDAO.findByCode(request.offerCode) match {
+      case None => FailureResponse(InvalidOfferRequest("Code invalid"))
+      case Some(sale) => SuccessResponse(OfferResponse(sale.id))
+    }
   }
 
   def createOffer(request: OfferData): Future[ResponseWithFailure[OfferError, OfferResponse]] = successful {

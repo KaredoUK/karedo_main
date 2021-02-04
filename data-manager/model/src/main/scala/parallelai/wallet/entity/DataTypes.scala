@@ -24,7 +24,7 @@ case class UserPersonalInfo(name: String, postCode: Option[String] = None, birth
 
 case class AccountSettings(maxMessagesPerWeek: Int)
 
-case class UserAccount(id: UUID, msisdn: Option[String], email: Option[String],
+case class UserAccount(id: UUID, msisdn: Option[String], email: Option[String], userType: String="CUSTOMER",
                        personalInfo: UserPersonalInfo = defaultUserPersonalInfo,
                        settings: AccountSettings = defaultAccountSettings,
                        active: Boolean = false,

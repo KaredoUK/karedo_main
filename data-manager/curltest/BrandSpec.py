@@ -1,44 +1,10 @@
 from common import *
 import unittest, json
-
-#
-# This is testing many things in the
-# "My Stores: brands" section contained in
-# https://java.net/projects/parallelai/pages/RestAPISpecification
-# Look for Question### for doubts
-#
-
-brandId=newUUID()
-brandId2=newUUID()
-userId=newUUID()
-applicationId=newUUID()
-sessionId=newUUID()
-advId=newUUID()
+from fixture import *
 
 class TestBrand(unittest.TestCase):
 
-    def test00_CreateAndValidateUser(self):
-        global applicationId,userId,sessionId
-        title("Setting up an initial user...")
-
-        r = post("account", {"applicationId": applicationId, "msisdn": "0044712345678", "email": "pakkio@gmail.com"})
-        assert r.status_code == HTTP_OK
-        doc = ua.find_one({"email": "pakkio@gmail.com"})
-        activationCode = doc["applications"][0]["activationCode"]
-        r = post("account/application/validation", {"applicationId": applicationId, "validationCode": activationCode, "password":"PASS"})
-        assert r.status_code == HTTP_OK
-        js = json.loads(r.text)
-        userId = js["userID"]
-
-        r = post("account/"+userId+"/application/"+applicationId+"/login",
-                 {"password" : "PASS"})
-        assert r.status_code == HTTP_OK
-        js = json.loads(r.text)
-        sessionId = js["sessionId"]
-
-        assert valid_uuid(sessionId)
-
-    def test01_CreateBrand(self):
+    def test01_P67_CreateBrand(self):
         global sessionId, brandId
         title("PARALLELAI-67API: Create Brand")
 
@@ -55,7 +21,7 @@ class TestBrand(unittest.TestCase):
         r = post("brand", {"name": "brandX", "iconId": iconId}, newUUID())
         assert r.status_code == HTTP_AUTH_ERR
 
-    def test02_FindBrands(self):
+    def test02_P95_FindBrands(self):
         global sessionId, brandId, brandId2
         title("PARALLELAI 95 API: Get Brands")
 
@@ -69,7 +35,7 @@ class TestBrand(unittest.TestCase):
         assert r.status_code == HTTP_OK
 
         js = json.loads(r.text)
-        assert len(js) == 2
+        assert len(js) == 3
 
         title("PARALLELAI 95 API: Get a single brand") # not present in doc but tested by SG
         r=get("brand/"+brandId, sessionId)
@@ -85,7 +51,7 @@ class TestBrand(unittest.TestCase):
         r=get("brand/"+brandId, newUUID())
         assert r.status_code == HTTP_AUTH_ERR
 
-    def test03_DeactivateBrand(self):
+    def test03_P68_DeactivateBrand(self):
         global sessionId, brandId, brandId2
         title("PARALLELAI-68API: Deactivate Brand")
 
@@ -98,7 +64,7 @@ class TestBrand(unittest.TestCase):
         r=delete("brand/"+brandId2, session=newUUID())
         assert r.status_code == HTTP_AUTH_ERR
 
-    def test04_CreateAdvert(self):
+    def test04_P65_CreateAdvert(self):
         global sessionId, brandId, advId
         title("PARALLELAI-65API: Create Ad")
 
@@ -112,7 +78,7 @@ class TestBrand(unittest.TestCase):
         r=post("brand/"+brandId+"/advert",data, newUUID())
         assert r.status_code == HTTP_AUTH_ERR
 
-    def test05_DisableAdvert(self):
+    def test05_P66_DisableAdvert(self):
         global sessionId, brandId, advId, advId2
 
         title("PARALLELAI-66API: Disable Ad")
@@ -129,7 +95,7 @@ class TestBrand(unittest.TestCase):
         r=delete("brand/"+brandId+"/advert/"+advId2, session=newUUID())
         assert r.status_code == HTTP_AUTH_ERR
 
-    def test051_ListAdsByBrand(self):
+    def test051_P64_ListAdsByBrand(self):
         global sessionId, brandId
 
         title("PARALLELAI-64API: List Ads per Brand")
@@ -155,7 +121,7 @@ class TestBrand(unittest.TestCase):
         r=get("brand/"+brandId+"/advert", newUUID())
         assert r.status_code == HTTP_AUTH_ERR
 
-    def test06_AddBrandtouser(self):
+    def test06_P90_AddBrandtouser(self):
         global sessionId, brandId, brandId2
         title("PARALLELAI-90API: Add Brand to User")
 
@@ -173,7 +139,7 @@ class TestBrand(unittest.TestCase):
         r=post("account/"+userId+"/brand",{ "brandId": brandId2 }, newUUID())
         assert r.status_code == HTTP_AUTH_ERR
 
-    def test07_Showuserbrands(self):
+    def test07_P69_Showuserbrands(self):
         global sessionId, userId
         title("PARALLELAI-69API: Show User Brands")
 

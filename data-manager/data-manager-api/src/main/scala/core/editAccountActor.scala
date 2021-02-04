@@ -81,6 +81,7 @@ object EditAccountActor {
         fullName = userAccount.personalInfo.name,
         postCode = userAccount.personalInfo.postCode,
         birthDate = userAccount.personalInfo.birthDate,
+        userType = userAccount.userType,
         country = None,
         email = userAccount.email,
         msisdn = userAccount.msisdn,
@@ -97,6 +98,7 @@ object EditAccountActor {
       userProfile.info.userId,
       userProfile.info.msisdn,
       userProfile.info.email,
+      userProfile.info.userType,
       UserPersonalInfo(
         userProfile.info.fullName,
         userProfile.info.postCode,

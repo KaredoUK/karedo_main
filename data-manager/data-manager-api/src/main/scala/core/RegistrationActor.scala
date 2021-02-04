@@ -204,7 +204,7 @@ class RegistrationActor( messengerActor: ActorRef)
     withValidations(registrationRequest)(validUserIdentification, applicationNotRegistered, noActiveAccountForMsisdnOrEmail) { request =>
 
       wrapLog("registerUser", request) {
-        val account = UserAccount(id = UUID.randomUUID(), email = request.email, msisdn = request.msisdn)
+        val account = UserAccount(id = UUID.randomUUID(), userType=request.userType, email = request.email, msisdn = request.msisdn)
         val activationCode = newActivationCode
         val firstApplication = ClientApplication(request.applicationId, account.id, activationCode)
         userAccountDAO.insertNew(account, firstApplication)

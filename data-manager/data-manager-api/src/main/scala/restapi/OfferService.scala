@@ -4,7 +4,7 @@ import akka.actor.ActorRef
 import akka.event.slf4j.Logger
 import akka.util.Timeout
 import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol._
-import com.parallelai.wallet.datamanager.data.{OfferData, OfferResponse}
+import com.parallelai.wallet.datamanager.data.{OfferCode, OfferData, OfferResponse}
 import core.OfferActor._
 import core.ResponseWithFailure
 import spray.routing.{Route, Directives}
@@ -42,5 +42,18 @@ class OfferService(offerActor: ActorRef,
           }
         }
       }
-    }
+    } ~ P110
+
+  lazy val P110 : Route =
+    path("offer" / "validate") {
+
+        userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
+          post {
+            handleWith {
+              offer: OfferCode => (offerActor ? offer).mapTo[ResponseWithFailure[OfferError,OfferResponse]]
+            }
+          }
+        }
+      }
+
 }

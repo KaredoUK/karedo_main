@@ -6,8 +6,9 @@ import unittest
 import re
 import logging
 import httplib
+import os
 
-httplib.HTTPConnection.debuglevel = 1
+
 
 logging.basicConfig(filename='python.log', level=logging.DEBUG)
 
@@ -15,13 +16,21 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 
 #Root = "http://api.karedo.co.uk:8080/"
-Root = "http://localhost:8090/"
-client = MongoClient("localhost",12345)
+Root = os.getenv("ROOT","http://localhost:8090/")
+MongoHost = os.getenv("MONGO_HOST","localhost")
+MongoPort = os.getenv("MONGO_PORT","12345")
+MongoDb = os.getenv("MONGO_DB","wallet_data")
+client = MongoClient(MongoHost,int(MongoPort))
 
+def clearDB():
+    global client,MongoDb
+    client.drop_database(MongoDb)
 
+clearDB()
 
 # to enable extra printing from the tests
-DEBUG=False
+DEBUG=int(os.getenv("DEBUG","0"))
+if(DEBUG==1): httplib.HTTPConnection.debuglevel = 1
 
 HTTP_OK=200
 HTTP_AUTH_ERR=401
@@ -33,12 +42,10 @@ JAVA=5 # uuid_type to properly understand UUIDS from DB
 # Users collection
 ua = db.UserAccount
 ua.uuid_subtype=JAVA
-ua.remove()
 
 # Brand collection
 br = db.Brand
 br.uuid_subtype=JAVA
-br.remove()
 
 # Offer collection
 of = db.Offer
@@ -47,11 +54,9 @@ of.uuid_subtype=JAVA
 # media
 fs = db["fs.files"]
 #NO fs.uuid_subtype=JAVA
-fs.remove
 
 fs1 = db["fs.chunks"]
 # NO fs1.uuid_subtype=JAVA
-fs1.remove
 
 
 
@@ -80,14 +85,14 @@ class KaredoAuth(AuthBase):
         return r
 
 def title(x):
-    if(DEBUG):print("==========================================================================\n=======> " + x + "\n==========================================================================")
+    if(DEBUG==1):print("==========================================================================\n=======> " + x + "\n==========================================================================")
 
 def getHeaders(s):
     return {'content-type': 'application/json', 'X-Session-Id': s}
     
 # debug functions
 def info(x):
-    if(DEBUG):print("         " + x)
+    if(DEBUG==1):print("         " + x)
 
 def postdata(x):
     r=json.dumps(x)

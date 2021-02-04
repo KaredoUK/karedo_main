@@ -36,6 +36,8 @@ case class RegistrationRequest(
                                 applicationId: UUID,
                                 @(ApiModelProperty@field)(value = "User msisdn (optional)")
                                 msisdn: Option[String],
+                                @(ApiModelProperty@field)(value = "User Type (CUSTOMER/MERCHANT)")
+                                userType: String,
                                 @(ApiModelProperty@field)(value = "User email (optional)")
                                 email: Option[String])
 
@@ -59,6 +61,8 @@ case class AddApplicationRequest(
                                   applicationId: ApplicationID,
                                   @(ApiModelProperty@field)(value = "User msisdn (optional)")
                                   msisdn: Option[String],
+                                  @(ApiModelProperty@field)(value = "User type (CUSTOMER/MERCHANT)")
+                                  userType: String,
                                   @(ApiModelProperty@field)(value = "User email (optional)")
                                   email: Option[String])
   extends WithUserContacts with ApiDataRequest
@@ -110,6 +114,8 @@ case class UserSettings(
 case class UserInfo(
                      @(ApiModelProperty@field)(value = "userId")
                      userId: UserID,
+                     @(ApiModelProperty@field)(value = "userType")
+                     userType: String,
                      @(ApiModelProperty@field)(value = "full name")
                      fullName: String,
                      @(ApiModelProperty@field)(value = "email")
@@ -228,6 +234,7 @@ case class GetMediaResponse(contentType: String, content: Array[Byte]) extends A
 // Offer types
 case class OfferData(name: String, brandId: UUID, desc: Option[String], imagePath: Option[String], qrCodeId: Option[UUID], value: Option[Int])
 case class OfferResponse(offerId: UUID)
+case class OfferCode(offerCode: String)
 
 case class GetOfferCodeRequest(userId: UUID, adId: UUID)
 case class GetOfferCodeResponse(saleId: UUID, code: String)

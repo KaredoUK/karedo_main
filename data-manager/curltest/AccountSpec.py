@@ -10,25 +10,32 @@ import unittest, json
 
 userId=newUUID()
 applicationId=newUUID()
+appid2=newUUID()
 sessionId=newUUID()
 
 
 class TestAccount(unittest.TestCase):
     
 
-    def test01_CreateAccount(self):
+    def test01_P77P53_CreateAccountCustomer(self):
         global userId, applicationId
         title("PARALLELAI-77API: Create Account")
 
-        r = post("account", {"applicationId": applicationId, "msisdn": "00447909738629", "email": "pakkio@gmail.com"})
+        r = post("account", {"applicationId": applicationId,
+                             "msisdn": "00447909738629",
+                             "email": "customer@gmail.com",
+                             "userType": "CUSTOMER"
+                             ""})
 
         self.assertEqual(r.status_code, HTTP_OK)
 
         js = json.loads(r.text)
         self.assertEqual(js["channel"], "msisdn")
 
-        doc = ua.find_one({"email": "pakkio@gmail.com"})
+        doc = ua.find_one({"email": "customer@gmail.com"})
         activationCode = doc["applications"][0]["activationCode"]
+        userType=doc["userType"]
+        self.assertEqual(userType,"CUSTOMER")
 
         title("PARALLELAI-53API: Validate/Activate Account Application")
         r = post("account/application/validation",
@@ -40,8 +47,7 @@ class TestAccount(unittest.TestCase):
         userId = js["userID"]
         info("UserId returned: " + js["userID"])
 
-
-    def test01a_Login(self):
+    def test01c_P102_LoginCustomer(self):
         global userId, applicationId, sessionId
         title("PARALLELAI-102API: Login")
         #  POST (JavaUUID / "application" / JavaUUID / "login"){
@@ -54,7 +60,8 @@ class TestAccount(unittest.TestCase):
         self.assertTrue(valid_uuid(sessionId))
         info("login passed sessionId "+sessionId)
 
-    def test02_ResetApplication(self):
+
+    def test02_P49_ResetApplication(self):
         global userId, applicationId, sessionId
         applicationId = newUUID()
         title("PARALLELAI-49API: Reset Application for Account")
@@ -67,7 +74,7 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(r.status_code, HTTP_OK)
 
 
-        doc = ua.find_one({"email": "pakkio@gmail.com"})
+        doc = ua.find_one({"email": "customer@gmail.com"})
         activationCode = doc["applications"][1]["activationCode"]
 
         info("activationCode: "+activationCode)
@@ -79,20 +86,19 @@ class TestAccount(unittest.TestCase):
     def assertNotIn(self, member, container, msg=None):
         super(TestAccount, self).assertNotIn(member, container, msg)
 
-    def test03_UpdateInfo(self):
+    def test03_P50_UpdateInfo(self):
         global userId, sessionId,applicationId
         title("PARALLELAI-50API: Update Account Settings")
 
         info("Question002: not present in documentation")
         info("Question003: which date format is valid in plain rest?")
-        info("Question004: undocumented way to change totalPoints? or error?")
-
         data={
             "info":
                 {
                     "userId": userId, # Question002: not present in documentation
-                    "fullName": "Claudio Pacchiega",
-                    "email": "claudio.pacchiega@gmail.com",
+                    "userType": "CUSTOMER",
+                    "fullName": "Customer",
+                    "email": "customer@gmail.com",
                     "msisdn": "004476543210",
                     "postCode": "EC1",
                     "country": "UK",
@@ -105,6 +111,8 @@ class TestAccount(unittest.TestCase):
                 },
             "totalPoints": 100 # Question004: not present in documentation and NOT actually working
         }
+        info("Question004: undocumented way to change totalPoints? or error?")
+
         r=put("account/"+userId,data,session=sessionId)
         self.assertEqual(r.status_code, HTTP_OK)
 
@@ -114,7 +122,7 @@ class TestAccount(unittest.TestCase):
 
 
 
-    def test04_GetInfo(self):
+    def test04_P51_GetInfo(self):
         global userId, sessionId
         title("PARALLELAI-51API: Get Account Settings ")
 
@@ -122,7 +130,7 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(r.status_code, HTTP_OK)
         js = json.loads(r.text)
         self.assertEqual(js["info"]["postCode"],"EC1")
-        self.assertEqual(js["info"]["fullName"],"Claudio Pacchiega")
+        self.assertEqual(js["info"]["fullName"],"Customer")
         self.assertEqual(js["settings"]["maxAdsPerWeek"],500)
 
         # called without authentication should fail
@@ -132,7 +140,7 @@ class TestAccount(unittest.TestCase):
         # this is failing (!)
         #self.assertEqual(js["totalPoints"],100) # Question005: cfr question004 how can we change this value from rest APIs?
 
-    def test05_getUserPoints(self):
+    def test05_P54_getUserPoints(self):
         global userId, sessionId
         title("PARALLELAI-54API: Get User Points")
 
@@ -144,12 +152,12 @@ class TestAccount(unittest.TestCase):
         r=get("account/"+userId+"/points",session=newUUID())
         self.assertEqual(r.status_code, HTTP_AUTH_ERR)
 
-    def test06_deleteAccount(self):
+    def test06_P52_deleteAccount(self):
         global userId, sessionId
         title("PARALLELAI-52API: Delete Account")
         r=delete("account/"+userId,session=sessionId)
         self.assertEqual(r.status_code, HTTP_OK)
-        found=ua.find_one({ "email" : "pakkio@gmail.com" })
+        found=ua.find_one({ "email" : "customer@gmail.com" })
         self.assertEqual(found,None)
         r=delete("account/"+userId,session=newUUID())
         self.assertEqual(r.status_code, HTTP_AUTH_ERR)

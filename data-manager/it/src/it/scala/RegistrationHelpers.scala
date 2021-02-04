@@ -80,7 +80,7 @@ trait RegistrationHelpers {
 
     val registrationResponse = wait {
       register {
-        Post(s"$serviceUrl/account", AddApplicationRequest(applicationId, Some(msisdn), None))
+        Post(s"$serviceUrl/account", AddApplicationRequest(applicationId, Some(msisdn), "CUSTOMER", None))
       }
     }
   }

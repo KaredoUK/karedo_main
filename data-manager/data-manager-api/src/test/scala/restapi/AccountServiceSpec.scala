@@ -46,7 +46,7 @@ class AccountServiceSpec
         val msisdn = "00123123123"
         val registrationResponse = wait {
           pipeline {
-            Post(s"$serviceUrl/account", RegistrationRequest(applicationId, Some(msisdn), None))
+            Post(s"$serviceUrl/account", RegistrationRequest(applicationId, Some(msisdn), userType="CUSTOMER",None))
           }
         }
 
@@ -65,7 +65,7 @@ class AccountServiceSpec
       val pipeline = sendReceive
       val registrationResponse = wait {
         pipeline {
-          Post(s"$serviceUrl/account", RegistrationRequest(randomUUID(), None, None))
+          Post(s"$serviceUrl/account", RegistrationRequest(randomUUID(), None, "CUSTOMER", None))
         }
       }
 
@@ -90,7 +90,7 @@ class AccountServiceSpec
 
       val registrationResponse = wait {
         pipeline {
-          Post(s"$serviceUrl/account/application", AddApplicationRequest(applicationId, Some(msisdn), None))
+          Post(s"$serviceUrl/account/application", AddApplicationRequest(applicationId, Some(msisdn), "CUSTOMER", None))
         }
       }
 

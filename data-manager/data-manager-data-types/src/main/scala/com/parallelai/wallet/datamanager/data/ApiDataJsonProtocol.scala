@@ -35,8 +35,8 @@ trait ApiDataJsonProtocol extends DefaultJsonProtocol  {
     }
   }
 
-  implicit val registrationRequestJson = jsonFormat3(RegistrationRequest)
-  implicit val addApplicationRequestJson = jsonFormat3(AddApplicationRequest)
+  implicit val registrationRequestJson = jsonFormat4(RegistrationRequest)
+  implicit val addApplicationRequestJson = jsonFormat4(AddApplicationRequest)
   implicit val registrationValidationJson = jsonFormat3(RegistrationValidation)
   implicit val registrationResponseJson = jsonFormat3(RegistrationResponse)
   implicit val addApplicationResponseJson = jsonFormat3(AddApplicationResponse)
@@ -45,7 +45,7 @@ trait ApiDataJsonProtocol extends DefaultJsonProtocol  {
   implicit val loginRequest = jsonFormat1(APILoginRequest)
 
   implicit val userSettingsJson = jsonFormat1(UserSettings)
-  implicit val userInfoJson = jsonFormat8(UserInfo)
+  implicit val userInfoJson = jsonFormat9(UserInfo)
   implicit val userProfileJson = jsonFormat3(UserProfile)
   implicit val userRestResponse = jsonFormat1(RestResponse)
 
@@ -62,6 +62,7 @@ trait ApiDataJsonProtocol extends DefaultJsonProtocol  {
 
   implicit val offerDataJson = jsonFormat6(OfferData)
   implicit val offerResponseJson = jsonFormat1(OfferResponse)
+  implicit val offerCodeJson = jsonFormat1(OfferCode)
 
   implicit val imageIdJson = jsonFormat1(ImageId)
 
