@@ -87,7 +87,7 @@ class TestOffer(unittest.TestCase):
         userTotalPoints=js["userTotalPoints"]
         assert userTotalPoints == initialPoints + 10
 
-    def test12_P108_InteractionAdAShareOnFacebookMustEarn25Points(self):
+    def test12_P108_InteractionAdAShareOnFacebookMustEarn15Points(self):
         global sessionId, userId, brandId, advId
         title("PARALLELAI-108: Ad Interaction")
         user=ua.find_one({"email": "pakkio@gmail.com"})
