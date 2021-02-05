@@ -4,7 +4,7 @@ import java.util.UUID
 
 import com.parallelai.wallet.datamanager.data.{UserOfferInteraction, UserBrandInteraction}
 import org.specs2.mutable.Specification
-import rules.AddPoints
+import rules.ComputePoints
 import spray.httpx.UnsuccessfulResponseException
 
 
@@ -25,7 +25,7 @@ class TestingBrandInteraction
       val int1=UserBrandInteraction(userId=r.userId, brandId=b,interaction="share", intType = "facebook")
       val gainedPoints = addBrandInteraction(r.sessionId, int1)
 
-      gainedPoints === AddPoints.GetInteractionPoints(int1)
+      gainedPoints === ComputePoints.GetInteractionPoints(int1)
     }
     "add yyy points for sharing and liking" in {
       val r = RegisterAccount
@@ -38,7 +38,7 @@ class TestingBrandInteraction
 
       val totalPoints2 = addBrandInteraction(r.sessionId, int2)
 
-      totalPoints2 === ( AddPoints.GetInteractionPoints(int1) +  AddPoints.GetInteractionPoints(int2))
+      totalPoints2 === ( ComputePoints.GetInteractionPoints(int1) +  ComputePoints.GetInteractionPoints(int2))
 
     }
     "giving exception if invalid brand" in {
@@ -58,7 +58,7 @@ class TestingBrandInteraction
 
       val gainedPoints = addOfferInteraction(r.sessionId, int1)
 
-      gainedPoints === AddPoints.GetInteractionPoints(int1)
+      gainedPoints === ComputePoints.GetInteractionPoints(int1)
     }
     "add qqq points for sharing and liking" in {
       val r = RegisterAccount
@@ -74,7 +74,7 @@ class TestingBrandInteraction
 
       val totalPoints2 = addOfferInteraction(r.sessionId, int2)
 
-      totalPoints2 === ( AddPoints.GetInteractionPoints(int1) +  AddPoints.GetInteractionPoints(int2))
+      totalPoints2 === ( ComputePoints.GetInteractionPoints(int1) +  ComputePoints.GetInteractionPoints(int2))
 
     }
     "giving exception if invalid offer" in {

@@ -7,8 +7,7 @@ import parallelai.wallet.persistence.mongodb.SubscribedBrands
 import scala.concurrent.Future
 
 trait UserAccountDAO {
-
-
+  def consume(userId: UUID, points: KaredoPoints) : Unit
 
 
   def getById(userId: UUID) : Option[UserAccount]

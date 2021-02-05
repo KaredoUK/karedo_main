@@ -21,7 +21,7 @@ object Build extends Build {
     override def processBuilder: ProcessBuilder = {
       println(s"Starting rest on port " + port)
       Thread.sleep(3000)
-      "java -Dconfig.resource=dummy.deployment.conf -jar data-manager-api/target/scala-2.11/Karedo.jar"
+      "java -Dconfig.resource=dummy.deployment.conf -jar data-manager-api/target/scala-2.11/data-manager-api-assembly-1.3.jar"
     }
     override def isStarted: Boolean = {
       try {

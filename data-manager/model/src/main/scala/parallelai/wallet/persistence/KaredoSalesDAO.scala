@@ -9,5 +9,6 @@ trait KaredoSalesDAO {
   def insertNew(newData: KaredoSales): Option[UUID]
   def findById(id: UUID): Option[KaredoSales]
   def findByCode(code: String): Option[KaredoSales]
+  def consume(code: String): Option[KaredoSales]
 
 }

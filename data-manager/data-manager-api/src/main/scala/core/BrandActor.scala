@@ -11,7 +11,7 @@ import objAPI._
 import org.joda.time.DateTime
 import parallelai.wallet.entity.{Brand, _}
 import parallelai.wallet.persistence._
-import rules.AddPoints
+import rules.ComputePoints
 import spray.json._
 
 import scala.concurrent.Future
@@ -61,7 +61,7 @@ class BrandActor()
     }
   }
   def handleValidOffer(interaction: UserOfferInteraction): ResponseWithFailure[APIError, InteractionResponse] = {
-    val points = AddPoints.GetInteractionPoints(interaction)
+    val points = ComputePoints.GetInteractionPoints(interaction)
     val user = interaction.userId
     val offer = interaction.offerId
     val intType = interaction.interaction
@@ -87,7 +87,7 @@ class BrandActor()
   }
 
   def handleValidBrand(interaction: UserBrandInteraction): ResponseWithFailure[APIError, InteractionResponse] = {
-    val points = AddPoints.GetInteractionPoints(interaction)
+    val points = ComputePoints.GetInteractionPoints(interaction)
     val user = interaction.userId
     val brand = interaction.brandId
     val intType = interaction.interaction

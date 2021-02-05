@@ -45,6 +45,13 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule)
     dbuser
   }
 
+  override def consume(userId: UUID, points: KaredoPoints) : Unit = {
+    dao.update(
+      byId(userId),
+      $inc("totalPoints" -> -points)
+    )
+  }
+
   override def update(userAccount: UserAccount): Unit =
       dao.update(
         byId(userAccount.id),

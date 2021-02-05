@@ -5,7 +5,7 @@ import uuid
 import unittest
 import re
 import logging
-import httplib
+#import http.client
 import os
 
 
@@ -30,7 +30,7 @@ clearDB()
 
 # to enable extra printing from the tests
 DEBUG=int(os.getenv("DEBUG","0"))
-if(DEBUG==1): httplib.HTTPConnection.debuglevel = 1
+#if(DEBUG==1): httpclient.HTTPConnection.debuglevel = 1
 
 HTTP_OK=200
 HTTP_AUTH_ERR=401

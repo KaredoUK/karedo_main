@@ -235,6 +235,8 @@ case class GetMediaResponse(contentType: String, content: Array[Byte]) extends A
 case class OfferData(name: String, brandId: UUID, desc: Option[String], imagePath: Option[String], qrCodeId: Option[UUID], value: Option[Int])
 case class OfferResponse(offerId: UUID)
 case class OfferCode(offerCode: String)
+case class OfferValidate(offerCode: String)
+case class OfferConsume(offerCode: String)
 
 case class GetOfferCodeRequest(userId: UUID, adId: UUID)
 case class GetOfferCodeResponse(saleId: UUID, code: String)

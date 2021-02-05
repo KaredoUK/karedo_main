@@ -2,7 +2,7 @@ package rules
 
 import com.parallelai.wallet.datamanager.data.{UserOfferInteraction, UserBrandInteraction}
 
-object AddPoints {
+object ComputePoints {
 
   def GetInteractionPoints(interaction: UserBrandInteraction) = {
     interaction.interaction.toLowerCase match {
@@ -22,5 +22,6 @@ object AddPoints {
       case "detail" => 2
     }
   }
+
 
 }

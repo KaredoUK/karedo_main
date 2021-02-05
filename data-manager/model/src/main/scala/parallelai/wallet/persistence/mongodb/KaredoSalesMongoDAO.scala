@@ -3,6 +3,7 @@ package parallelai.wallet.persistence.mongodb
 import java.util.UUID
 
 import com.mongodb.casbah.commons.MongoDBObject
+import org.joda.time.DateTime
 import parallelai.wallet.entity.KaredoSales
 import parallelai.wallet.persistence._
 
@@ -27,7 +28,9 @@ class KaredoSalesMongoDAO (implicit val bindingModule: BindingModule)
   RegisterJodaTimeConversionHelpers()
   val dao = new SalatDAO[KaredoSales,UUID](collection = db("KaredoSales")) {}
 
-
+  def byId(id: UUID) = MongoDBObject("_id" -> id)
+  def byCode(code: String) = MongoDBObject("code"->code)
+  def notConsumed = "dateConsumed" -> MongoDBObject("$exists" -> 0)
 
   override def insertNew(t: KaredoSales): Option[UUID] =  {
 
@@ -38,8 +41,19 @@ class KaredoSalesMongoDAO (implicit val bindingModule: BindingModule)
     dao.findOneById(id)
   }
   override def findByCode(code: String): Option[KaredoSales] = {
-    dao.findOne(MongoDBObject("code"->code))
+    // returns only sales with codes not consumed
+
+    dao.findOne(MongoDBObject("code"->code, notConsumed))
   }
+  override def consume(code: String): Option[KaredoSales] = {
+    findByCode(code) match {
+      case Some(sale) =>
+        dao.update(byId(sale.id), MongoDBObject("$set" -> MongoDBObject("dateConsumed" -> new DateTime())))
+        findById(sale.id)
+      case None => None
+    }
+  }
+
 
 
 

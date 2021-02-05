@@ -14,19 +14,19 @@ class TestOffer(unittest.TestCase):
 
 
 
-    def test01_GetCode(self):
-        global sessionId, userId, code
+    def test01_P110_GetCodeMustBeAValid8DigitString(self):
+        global sessionId, userId, code, advId
         title("PARALLELAI-110: GETCODE")
-        r=post("user/"+userId+"/getcode", { "userId": userId, "adId" : newUUID() },sessionId)
+        r=post("user/"+userId+"/getcode", { "userId": userId, "adId" : advId },sessionId)
         assert r.status_code == HTTP_OK
 
         js=json.loads(r.text)
         code = js["code"]
         assert len(code) == 8
 
-    def test01a_OfferCodeValidate(self):
+    def test02_P111_OfferCodeValidate(self):
         global userId, sessionId, code
-        title("P110: Validate Offer Code")
+        title("P111: Validate Offer Code")
         r=post("offer/validate",{ "offerCode": code},sessionId)
 
         assert r.status_code == HTTP_OK
@@ -35,13 +35,49 @@ class TestOffer(unittest.TestCase):
 
         assert valid_uuid(offerid)
 
+    def test02b_P111_OfferCodeInvalidMustBeRejected(self):
+        global userId,sessionId,code
+
         r=post("offer/validate",{ "offerCode": "AAAABBBB"},sessionId)
 
         assert r.status_code == HTTP_BAD_REQUEST
 
-    def test02_InteractionBrand(self):
+    def test03_P112_OfferCodeConsumeAnOfferAndCheckThatUserHasDecrementedPoints(self):
+            global userId, sessionId, code, ua
+            title("P112: Consume Offer Code")
+            r=post("offer/consume",{ "offerCode": code},sessionId)
+
+            assert r.status_code == HTTP_OK
+            js=json.loads(r.text)
+            offerid=js["offerId"]
+
+            assert valid_uuid(offerid)
+
+            user=ua.find_one({"email": "pakkio@gmail.com"})
+            assert user["totalPoints"] == -5
+
+    def test03a_P112_OfferCodeCantBeConsumedTwice(self):
+            global userId,sessionId,code
+            # code can be consumed only ONCE so this should give error (!)
+            r=post("offer/validate",{ "offerCode": code},sessionId)
+
+            assert r.status_code == HTTP_BAD_REQUEST
+
+    def test03b_P112_OfferCodeOnlyForAValidCode(self):
+            global userId,sessionId,code
+            # invalid code must be rejected
+            r=post("offer/validate",{ "offerCode": "foo"},sessionId)
+
+            assert r.status_code == HTTP_BAD_REQUEST
+
+
+    def test11_P107_InteractionBrandAShareOnFacebookMustEarn10Points(self):
         global sessionId, userId, brandId
         title("PARALLELAI-107: Brand Interaction")
+
+        user=ua.find_one({"email": "pakkio@gmail.com"})
+        initialPoints = user["totalPoints"]
+
         r=post("user/"+userId+"/interaction/brand",
             {  "userId" : userId, "brandId" : brandId, "interaction" : "share", "intType" : "facebook" },
                sessionId)
@@ -49,11 +85,13 @@ class TestOffer(unittest.TestCase):
         assert r.status_code == HTTP_OK
         js=json.loads(r.text)
         userTotalPoints=js["userTotalPoints"]
-        assert userTotalPoints == 10
+        assert userTotalPoints == initialPoints + 10
 
-    def test03_InteractionAd(self):
+    def test12_P108_InteractionAdAShareOnFacebookMustEarn25Points(self):
         global sessionId, userId, brandId, advId
         title("PARALLELAI-108: Ad Interaction")
+        user=ua.find_one({"email": "pakkio@gmail.com"})
+        initialPoints = user["totalPoints"]
         r=post("user/"+userId+"/interaction/offer",
                {  "userId" : userId, "offerId" : advId, "interaction" : "share", "intType" : "facebook" },
                sessionId)
@@ -61,7 +99,7 @@ class TestOffer(unittest.TestCase):
         assert r.status_code == HTTP_OK
         js=json.loads(r.text)
         userTotalPoints=js["userTotalPoints"]
-        assert userTotalPoints == 25
+        assert userTotalPoints == (initialPoints + 15)
 
 
 

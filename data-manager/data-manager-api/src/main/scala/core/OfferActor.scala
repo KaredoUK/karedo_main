@@ -10,7 +10,7 @@ import core.OfferActor.{InvalidOfferRequest, InternalOfferError, OfferError}
 import org.apache.commons.lang.RandomStringUtils
 import org.joda.time.DateTime
 import parallelai.wallet.entity.{Brand, _}
-import parallelai.wallet.persistence.{KaredoSalesDAO, OfferDAO, BrandDAO}
+import parallelai.wallet.persistence.{UserAccountDAO, KaredoSalesDAO, OfferDAO, BrandDAO}
 import spray.json._
 
 import scala.concurrent.Future
@@ -50,14 +50,32 @@ object OfferActor {
   }
 }
 
-class OfferActor(implicit val saleDAO: KaredoSalesDAO, implicit val offerDAO: OfferDAO, implicit val bindingModule: BindingModule) extends Actor with ActorLogging with Injectable {
+class OfferActor(implicit val saleDAO: KaredoSalesDAO,
+                 implicit val offerDAO: OfferDAO,
+                 implicit val brandDAO: BrandDAO,
+                 implicit val customerDAO: UserAccountDAO,
+                 implicit val bindingModule: BindingModule) extends Actor with ActorLogging with Injectable {
 
   def receive: Receive = {
     case request: OfferData => replyToSender(createOffer(request))
     case request: GetOfferCodeRequest => replyToSender(handleGetOfferCode(request))
-    case request: OfferCode => replyToSender(handleValidateCode(request))
+    case request: OfferValidate => replyToSender(handleValidateCode(request))
+    case request: OfferConsume => replyToSender(handleConsumeCode(request))
   }
-  def handleValidateCode(request: OfferCode):
+
+  def handleConsumeCode(consume: OfferConsume): Future[ResponseWithFailure[OfferError, OfferResponse]] = successful {
+    saleDAO.consume(consume.offerCode) match {
+      case None => FailureResponse(InvalidOfferRequest("Code invalid"))
+      case Some(sale) =>
+        brandDAO.getAdById(sale.adId) match {
+          case Some(offer) =>
+            customerDAO.consume(sale.userId, offer.value)
+            SuccessResponse(OfferResponse(sale.id))
+          case None =>FailureResponse(InvalidOfferRequest("Cant find offer"))
+        }
+    }
+  }
+  def handleValidateCode(request: OfferValidate):
             Future[ResponseWithFailure[OfferError,OfferResponse]]= successful {
     saleDAO.findByCode(request.offerCode) match {
       case None => FailureResponse(InvalidOfferRequest("Code invalid"))
