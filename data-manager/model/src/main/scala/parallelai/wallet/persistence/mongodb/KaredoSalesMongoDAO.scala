@@ -54,6 +54,15 @@ class KaredoSalesMongoDAO (implicit val bindingModule: BindingModule)
     }
   }
 
+ override def complete(id: UUID): Option[KaredoSales] = {
+    findById(id) match {
+      case Some(sale) =>
+        dao.update(byId(sale.id), MongoDBObject("$set" -> MongoDBObject("dateConsumed" -> new DateTime())))
+        findById(sale.id)
+      case None => None
+    }
+  }
+
 
 
 

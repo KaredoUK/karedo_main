@@ -63,6 +63,10 @@ trait ApiDataJsonProtocol extends DefaultJsonProtocol  {
   implicit val offerDataJson = jsonFormat6(OfferData)
   implicit val offerResponseJson = jsonFormat1(OfferResponse)
   implicit val offerCodeJson = jsonFormat1(OfferCode)
+  implicit val saleDetail = jsonFormat2(SaleDetail)
+  implicit val saleComplete = jsonFormat2(SaleComplete)
+  implicit val saleCreate = jsonFormat3(SaleCreate)
+  implicit val saleResponse = jsonFormat1(SaleResponse)
 
   implicit val imageIdJson = jsonFormat1(ImageId)
 

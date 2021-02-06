@@ -8,12 +8,15 @@ import java.util.UUID
 
 import com.novus.salat.annotations.Key
 import org.joda.time.DateTime
+import parallelai.wallet.entity.KaredoTypes.KaredoPoints
 
 case class KaredoSales(@Key("_id") id: UUID = UUID.randomUUID(),
-                       userId: UUID,
-                       adId: UUID,
-                       code: String,
-                       date: DateTime=new DateTime(),
-                       dateExpires: DateTime=new DateTime().plusDays(3),
-                       dateConsumed: Option[DateTime] = None
+                       saleType: String,
+                       accountId: UUID,
+                       adId: Option[UUID]=None,
+                       code: Option[String]=None,
+                       dateCreated: DateTime=new DateTime(),
+                       dateExpires: DateTime=new DateTime().plusDays(30),
+                       dateConsumed: Option[DateTime] = None,
+                       points: KaredoPoints
                         )

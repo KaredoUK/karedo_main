@@ -101,7 +101,7 @@ class TestOffer(unittest.TestCase):
         userTotalPoints=js["userTotalPoints"]
         assert userTotalPoints == (initialPoints + 15)
 
-
+   
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestOffer)
 

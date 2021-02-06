@@ -22,7 +22,8 @@ class OfferActorSpec
   "Offer Actor" >> {
 
     "should call the actor" in new WithMockedPersistence {
-      mockedSaleDAO.findById(any[UUID]) returns Some(KaredoSales(userId = aUser, adId = aBrand, code=""))
+      mockedSaleDAO.findById(any[UUID]) returns Some(KaredoSales(saleType="OFFER",points=10,accountId = aUser, adId = Some(aBrand),
+        code=Some("")))
       mockedSaleDAO.findByCode(any[String]) returns None
       mockedSaleDAO.insertNew(any[KaredoSales]) returns Some(UUID.randomUUID())
 

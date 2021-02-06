@@ -11,7 +11,7 @@ import unittest, json
 
 class TestMerchant(unittest.TestCase):
     
-    def test01_CreateAccountMerchant(self):
+    def test01_P109_CreateAccountMerchant(self):
         global userId, applicationId
         title("PARALLELAI-109API: Create Account Merchant")
 
@@ -43,7 +43,7 @@ class TestMerchant(unittest.TestCase):
 
 
 
-    def test01d_LoginMerchant(self):
+    def test01d_P102_LoginMerchant(self):
             global userId, applicationId, sessionId
             title("PARALLELAI-102API: Login Merchant")
             #  POST (JavaUUID / "application" / JavaUUID / "login"){
@@ -56,7 +56,7 @@ class TestMerchant(unittest.TestCase):
             self.assertTrue(valid_uuid(sessionId))
             info("login passed sessionId "+sessionId)
 
-    def test02_ResetApplicationMerchant(self):
+    def test02_P49_ResetApplicationMerchant(self):
         global userId, applicationId, sessionId
         applicationId = newUUID()
         title("PARALLELAI-49API: Reset Application for Merchant")
@@ -80,7 +80,7 @@ class TestMerchant(unittest.TestCase):
 
 
 
-    def test03_deleteAccount(self):
+    def test03_P52_deleteMerchantAccount(self):
         global userId, sessionId
         title("PARALLELAI-52API: Delete Account")
         r=delete("account/"+userId,session=sessionId)

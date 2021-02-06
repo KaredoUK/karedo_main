@@ -10,5 +10,6 @@ trait KaredoSalesDAO {
   def findById(id: UUID): Option[KaredoSales]
   def findByCode(code: String): Option[KaredoSales]
   def consume(code: String): Option[KaredoSales]
+  def complete(id : UUID): Option[KaredoSales]
 
 }

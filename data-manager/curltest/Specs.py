@@ -5,6 +5,7 @@ import BrandSpec
 import MediaSpec
 import MerchantSpec
 import OfferSpec
+import SaleSpec
 import sys
 
 
@@ -17,6 +18,7 @@ if __name__ == '__main__':
 		BrandSpec.suite,
 		MerchantSpec.suite,
         OfferSpec.suite,
+        SaleSpec.suite,
 		MediaSpec.suite])
 
     ret = not runner.run(alltests).wasSuccessful()

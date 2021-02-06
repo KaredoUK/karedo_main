@@ -59,23 +59,64 @@ class OfferActor(implicit val saleDAO: KaredoSalesDAO,
   def receive: Receive = {
     case request: OfferData => replyToSender(createOffer(request))
     case request: GetOfferCodeRequest => replyToSender(handleGetOfferCode(request))
-    case request: OfferValidate => replyToSender(handleValidateCode(request))
+    case request: OfferValidate => replyToSender(helperValidateCode(request))
     case request: OfferConsume => replyToSender(handleConsumeCode(request))
+    case request: SaleCreate => replyToSender(handleSaleCreate(request))
+    case request: SaleRequestDetail => replyToSender(handleSaleDetail(request))
+    case request: SaleComplete => replyToSender(handleSaleComplete(request))
+  }
+
+  def handleSaleCreate(create: SaleCreate): Future[ResponseWithFailure[OfferError, SaleResponse]] = successful {
+    saleDAO.insertNew(KaredoSales(
+      saleType="SALE",
+      accountId=create.accountId,
+      points=create.points,
+      dateExpires = new DateTime().plus(create.expireInSeconds*1000))) match {
+      case Some(x) => SuccessResponse(SaleResponse(x))
+      case None => FailureResponse(InvalidOfferRequest("Can't create sale"))
+    }
+  }
+  def handleSaleComplete(request: SaleComplete): Future[ResponseWithFailure[OfferError, SaleResponse]] = successful {
+   saleDAO.findById(request.saleId) match {
+     case None => FailureResponse(InvalidOfferRequest("sale id not existent"))
+     case Some(sale) =>
+       if(sale.saleType!="SALE") FailureResponse(InvalidOfferRequest("sale referring to invalid type"))
+       else
+         saleDAO.complete(request.saleId) match {
+           case Some(sale) => SuccessResponse(SaleResponse(sale.id))
+           case None => FailureResponse(InvalidOfferRequest("cannot complete the sale"))
+         }
+   }
+  }
+
+  def handleSaleDetail(request: SaleRequestDetail): Future[ResponseWithFailure[OfferError, SaleDetail]] = successful {
+    saleDAO.findById(request.saleId) match {
+      case None => FailureResponse(InvalidOfferRequest("Can't find sale"))
+      case Some(sale) =>
+        if (sale.saleType != "SALE") FailureResponse(InvalidOfferRequest("Id illegally refers to an offer"))
+        else {
+          customerDAO.getById(sale.accountId) match {
+            case Some(merchant) => SuccessResponse(SaleDetail(merchant.personalInfo.name, sale.points))
+            case None => FailureResponse(InvalidOfferRequest("Can't find merchant referred by sale"))
+
+          }
+        }
+    }
   }
 
   def handleConsumeCode(consume: OfferConsume): Future[ResponseWithFailure[OfferError, OfferResponse]] = successful {
     saleDAO.consume(consume.offerCode) match {
       case None => FailureResponse(InvalidOfferRequest("Code invalid"))
       case Some(sale) =>
-        brandDAO.getAdById(sale.adId) match {
+        brandDAO.getAdById(sale.adId.get) match {
           case Some(offer) =>
-            customerDAO.consume(sale.userId, offer.value)
+            customerDAO.consume(sale.accountId, offer.value)
             SuccessResponse(OfferResponse(sale.id))
           case None =>FailureResponse(InvalidOfferRequest("Cant find offer"))
         }
     }
   }
-  def handleValidateCode(request: OfferValidate):
+  def helperValidateCode(request: OfferValidate):
             Future[ResponseWithFailure[OfferError,OfferResponse]]= successful {
     saleDAO.findByCode(request.offerCode) match {
       case None => FailureResponse(InvalidOfferRequest("Code invalid"))
@@ -103,21 +144,34 @@ class OfferActor(implicit val saleDAO: KaredoSalesDAO,
 
   def handleGetOfferCode(request: GetOfferCodeRequest): Future[ResponseWithFailure[OfferError, GetOfferCodeResponse]] =
   successful {
-    // returns a randomcode only if NOT already used by other offers
-    var code=""
-    do {
-      code = newOfferCode
+    def getUnusedCode: String = {
+      var code=""
+      do {
+        code = newOfferCode
 
-    } while (saleDAO.findByCode(code)!=None)
-
-    saleDAO.insertNew(KaredoSales(userId = request.userId,adId=request.adId,code=code)) match {
-      case Some(x) => SuccessResponse(GetOfferCodeResponse(x,code))
-      case _ => FailureResponse(InvalidOfferRequest("Can't create code"))
+      } while (saleDAO.findByCode(code)!=None)
+      code
     }
-  }
-  def newOfferCode: String = {
-    RandomStringUtils.randomAlphanumeric(8).toUpperCase()
-  }
+    def newOfferCode: String = {
+      RandomStringUtils.randomAlphanumeric(8).toUpperCase()
+    }
+    brandDAO.getAdById(request.adId) match {
+        case Some(offer) =>
+          // returns a randomcode only if NOT already used by other offers
+          val code = getUnusedCode
+
+          saleDAO.insertNew(KaredoSales(
+          accountId = request.userId,
+          points = offer.value,
+          saleType = "OFFER",
+          adId = Some(request.adId),
+          code = Some(code))) match {
+            case Some(x) => SuccessResponse(GetOfferCodeResponse(x, code))
+            case _ => FailureResponse(InvalidOfferRequest("Can't create code"))
+          }
+        case None => FailureResponse(InvalidOfferRequest("Can't find offer"))
+      }
+    }
 
   def validateOffer(request: OfferData): Option[String] = request match {
     case OfferData("", _, _, _, _, _) => Some("Name must be not empty")
