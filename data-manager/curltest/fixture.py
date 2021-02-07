@@ -105,7 +105,7 @@ advId=mkOffer(brandId,sessionId)
 
 
 def mkSale(merchantId,session):
-    r=post("merchant/"+merchantId+"/sale",
+    r=post("sale/"+merchantId+"/create",
            {  "accountId" : merchantId, "points" : 500, "expireInSeconds": 0 },
            session)
 

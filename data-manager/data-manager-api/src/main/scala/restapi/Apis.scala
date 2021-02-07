@@ -15,7 +15,7 @@ import scala.util.Try
  * Notice that it requires to be mixed in with ``core.CoreActors``, which provides access
  * to the top-level actors that make up the system.
  */
-trait Api extends RouteConcatenation with Injectable {
+trait Apis extends RouteConcatenation with Injectable {
   this: ServiceActors with Core  =>
 
   private implicit val _ = system.dispatcher
@@ -28,6 +28,12 @@ trait Api extends RouteConcatenation with Injectable {
   val serveAccount = new AccountHttpService(registration, editAccount, brand, offer, userAuthentication) {
     override implicit def actorRefFactory: ActorRefFactory = system
   }
+
+  val serveUser = new UserHttpService(registration, editAccount, brand, offer, userAuthentication) {
+    override implicit def actorRefFactory: ActorRefFactory = system
+  }
+
+  
   val serveMedia = new MediaHttpService(media, userAuthentication) {
     override implicit def actorRefFactory: ActorRefFactory = system
   }
@@ -35,13 +41,23 @@ trait Api extends RouteConcatenation with Injectable {
   val serveBrand = new BrandHttpService(brand, userAuthentication) {
     override implicit def actorRefFactory: ActorRefFactory = system
   }
+  
+  val serveOffer = new OfferHttpService(offer, userAuthentication) {
+     override implicit def actorRefFactory: ActorRefFactory = system   
+  }
+  
+  val serveSale = new SaleHttpService(offer, userAuthentication) {
+     override implicit def actorRefFactory: ActorRefFactory = system   
+  }
 
 
   val routes =
     serveAccount.route ~
+    serveUser.route ~
       serveBrand.route ~
       serveMedia.route ~
-      new OfferService(offer, userAuthentication).route ~
+      serveOffer.route ~
+      serveSale.route ~
       new MockService(other, userAuthentication).route
 
   val rootService = system.actorOf(Props(new RoutedHttpService(serviceURL, bindPort, routes,doSwagger)))

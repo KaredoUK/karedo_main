@@ -1,7 +1,7 @@
 package util
 
 import akka.actor.ActorRef
-import restapi.Api
+import restapi.Apis
 import com.escalatesoft.subcut.inject.NewBindingModule._
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import com.typesafe.config.ConfigFactory
@@ -31,7 +31,7 @@ class RestServiceWithMockPersistence(
   with Persistence
   with MessageActors
   with BaseCoreActors
-  with Api
+  with Apis
   with Web {
 
   // Define The Configuration for the tests

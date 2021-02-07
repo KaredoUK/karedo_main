@@ -89,7 +89,13 @@ class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route, doSwag
   lazy val swaggerRoutes = new SwaggerHttpService {
     def actorRefFactory = context
 
-    def apiTypes = Seq(typeOf[AccountHttpService], typeOf[MediaHttpService], typeOf[BrandHttpService])
+    def apiTypes = Seq(
+        typeOf[AccountHttpService], 
+        typeOf[UserHttpService],
+        typeOf[MediaHttpService], 
+        typeOf[BrandHttpService],
+        typeOf[OfferHttpService],
+        typeOf[SaleHttpService])
 
     def modelTypes =
       Seq(

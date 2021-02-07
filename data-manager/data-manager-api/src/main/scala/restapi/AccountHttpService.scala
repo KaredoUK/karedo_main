@@ -2,7 +2,7 @@ package restapi
 
 import javax.ws.rs.Path
 
-import com.wordnik.swagger.annotations.{Api => ApiDoc, _}
+import com.wordnik.swagger.annotations._
 import core.OfferActor.OfferError
 import core.objAPI.APIError
 import restapi.security.AuthorizationSupport
@@ -21,7 +21,7 @@ import core.EditAccountActor._
 import java.util.UUID
 
 // All APIs starting with /account go here
-@ApiDoc(value = "/account", description = "Operations on the account.", position = 0)
+@Api(position=1, value = "/account", description = "Operations on the account")
 abstract class AccountHttpService
 (
   protected val registrationActor: ActorRef,
@@ -58,15 +58,11 @@ extends HttpService
         suggestedAdsForBrand ~ // P59 GET AUTH /account/xxx/brand/xxx
         suggestedBrandsPost ~ // P70 ???
         suggestedBrandsGet   // P70 GET AUTH /account/xxx/suggestedbrands
-    } ~ pathPrefix("user") {
-      userBrandInteraction ~ // P108 POST AUTH /user/xxx/interaction/brand
-      userOfferInteraction ~  // P107 POST AUTH /user/xxx/interaction/offer
-      userOfferCode           // P110 get offer code /user/xxx/getcode
-    }
+    } 
 
   // PARALLELAI-77API: Create Account
 
-  @ApiOperation(httpMethod = "POST", response = classOf[RegistrationRequest], value = "Parallelai-77: Create a new Account")
+  @ApiOperation(position= 1,httpMethod = "POST", response = classOf[RegistrationRequest], value = "Parallelai-77: Create a new Account")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "request", required = true,
       dataType = "com.parallelai.wallet.datamanager.data.RegistrationRequest", paramType = "body",
@@ -87,7 +83,7 @@ extends HttpService
 
   // PARALLELAI-53API: Validate/Activate Account Application
   @Path("/application/validation")
-  @ApiOperation(httpMethod = "POST", response = classOf[RegistrationValidationResponse],
+  @ApiOperation(position=2,httpMethod = "POST", response = classOf[RegistrationValidationResponse],
     value = "Parallelai-53: Validates Registration")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(
@@ -113,7 +109,7 @@ extends HttpService
 
   // PARALLELAI-49
   @Path("/{account}/application/{application}/reset")
-  @ApiOperation(httpMethod = "PUT", response = classOf[RegistrationResponse],
+  @ApiOperation(position=3,httpMethod = "PUT", response = classOf[RegistrationResponse],
     value = "Parallelai-49: Reset an application for a user, allowing them to register again")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
@@ -137,7 +133,7 @@ extends HttpService
     }
 
   @Path("/{account}/application/{application}/login")
-  @ApiOperation(httpMethod = "POST", response = classOf[APISessionResponse],
+  @ApiOperation(position=4,httpMethod = "POST", response = classOf[APISessionResponse],
     value = "Parallelai-102: Perform a login specifying password")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
@@ -170,7 +166,7 @@ extends HttpService
     }
 
   @Path("/{account}")
-  @ApiOperation(httpMethod = "GET", response = classOf[UserProfile],
+  @ApiOperation(position=5,httpMethod = "GET", response = classOf[UserProfile],
     value = "Parallelai-51: Get information about the user")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
@@ -199,7 +195,7 @@ extends HttpService
     }
 
   @Path("/{account}")
-  @ApiOperation(httpMethod = "PUT", response = classOf[String],
+  @ApiOperation(position=6,httpMethod = "PUT", response = classOf[String],
     value = "Parallelai-50: Change User Information")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(
@@ -234,7 +230,7 @@ extends HttpService
     }
 
   @Path("/{account}")
-  @ApiOperation(httpMethod = "DELETE", response = classOf[String],
+  @ApiOperation(position=7,httpMethod = "DELETE", response = classOf[String],
     value = "Parallelai-52: Delete User")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
@@ -260,7 +256,7 @@ extends HttpService
       }
     }
   @Path("/{account}/points")
-  @ApiOperation(httpMethod = "GET", response = classOf[UserPoints],
+  @ApiOperation(position=8,httpMethod = "GET", response = classOf[UserPoints],
     value = "Parallelai-54: Get points gained by the user")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
@@ -289,7 +285,7 @@ extends HttpService
     }
 
   @Path("/{account}/brand")
-  @ApiOperation(httpMethod = "POST", response = classOf[String],
+  @ApiOperation(position=9,httpMethod = "POST", response = classOf[String],
     value = "Parallelai-90: Add Brand to User")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(
@@ -323,7 +319,7 @@ extends HttpService
     }
 
   @Path("/{account}/brand/{brandId}")
-  @ApiOperation(httpMethod = "DELETE", response = classOf[String],
+  @ApiOperation(position=10,httpMethod = "DELETE", response = classOf[String],
     value = "Parallelai-90: Remove User Brand")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
@@ -355,7 +351,7 @@ extends HttpService
     }
 
   @Path("/{account}/brand")
-  @ApiOperation(httpMethod = "GET", response = classOf[List[BrandRecord]],
+  @ApiOperation(position=11,httpMethod = "GET", response = classOf[List[BrandRecord]],
     value = "Parallelai-69: Get Brands for User")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
@@ -383,7 +379,7 @@ extends HttpService
     }
 
   @Path("/application")
-  @ApiOperation(httpMethod = "POST", response = classOf[AddApplicationResponse],
+  @ApiOperation(position=12,httpMethod = "POST", response = classOf[AddApplicationResponse],
     value = "Parallelai-101: Add Application to existing user")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(
@@ -409,7 +405,7 @@ extends HttpService
     }
 
   @Path("/{account}/brand/{brand}/ads")
-  @ApiOperation(httpMethod = "GET", response = classOf[List[AdvertDetailResponse]],
+  @ApiOperation(position=13,httpMethod = "GET", response = classOf[List[AdvertDetailResponse]],
     value = "Parallelai-59: Suggested ads for User/Brand")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
@@ -445,7 +441,7 @@ extends HttpService
     }
 
   @Path("/{account}/suggestedBrands")
-  @ApiOperation(httpMethod = "POST", response = classOf[String],
+  @ApiOperation(position=14,httpMethod = "POST", response = classOf[String],
     value = "Parallelai-70: Add Suggested Brand to user")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
@@ -475,7 +471,7 @@ extends HttpService
       }
     }
   @Path("/{account}/suggestedBrands")
-  @ApiOperation(httpMethod = "GET", response = classOf[List[BrandRecord]],
+  @ApiOperation(position=15,httpMethod = "GET", response = classOf[List[BrandRecord]],
     value = "Parallelai-70: Get Suggested Brands for user")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
@@ -493,75 +489,7 @@ extends HttpService
         }
       }
     }
-  @Path("/{account}/interaction/brand/{brand}")
-  @ApiOperation(httpMethod = "GET", response = classOf[InteractionResponse],
-    value = "Parallelai-55: User interacting with brand")
-  @ApiImplicitParams(Array(
-    new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
-      value = "UUID of user interacting"),
-    new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
-      value = "UUID of brand"),
-    new ApiImplicitParam(name = "intType", required = true, dataType = "String", paramType = "body",
-      value = "interactionType"),
-    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
-          value = "SessionId for authentication/authorization")
-  ))
-  def userBrandInteraction: Route =
+  
 
-  // PARALLELAI-55API: User Brand Interaction
-  // PARALLELAI-108API:
-  // "user/"+userId+"/interaction/brand/"
-    path(JavaUUID / "interaction" / "brand") {
-      (user) => {
-        userAuthorizedFor(canAccessUser(user))(executionContext) { userAuthContext =>
-          post {
-            handleWith((interaction: UserBrandInteraction) =>
-
-              (brandActor ? interaction)
-                .mapTo[ResponseWithFailure[APIError, InteractionResponse]]
-              // s"{${q}userId${q}: ${q}$user${q},${q}userTotalPoints${q}:${q}500${q}}")
-            )
-          }
-        }
-      }
-
-    }
-
-  def userOfferInteraction: Route =
-
-  // PARALLELAI-107API: User Offer Interaction
-  // "user/"+userId+"/interaction/offer"
-    path(JavaUUID / "interaction" / "offer") {
-      (user) => {
-        userAuthorizedFor(canAccessUser(user))(executionContext) { userAuthContext =>
-          post {
-            handleWith((interaction: UserOfferInteraction) =>
-
-              (brandActor ? interaction)
-                .mapTo[ResponseWithFailure[APIError, InteractionResponse]]
-              // s"{${q}userId${q}: ${q}$user${q},${q}userTotalPoints${q}:${q}500${q}}")
-            )
-          }
-        }
-      }
-
-    }
-
-  def userOfferCode: Route =
-  // PARALLELAI-110API: User Offer Code
-  // POST "user/xxx/offer/yyyy/getcode"
-  path(JavaUUID / "getcode"){
-    (userId) => {
-      userAuthorizedFor(canAccessUser(userId))(executionContext){ userAuthContext =>
-        post {
-
-          handleWith { getOfferCode : GetOfferCodeRequest =>
-            (offerActor ? getOfferCode)
-              .mapTo[ResponseWithFailure[OfferError,GetOfferCodeResponse]]
-          }
-        }
-      }
-    }
-  }
 
 }

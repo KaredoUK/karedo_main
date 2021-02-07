@@ -22,7 +22,7 @@ class SaleTest(unittest.TestCase):
         global merchantId, merchantSessionId, saleId
         title("PARALLELAI-116: Create a Sale")
 
-        r=post("merchant/"+merchantId+"/sale",
+        r=post("sale/"+merchantId+"/create",
               {  "accountId" : merchantId, "points" : 500, "expireInSeconds": 0 },
               merchantSessionId)
 

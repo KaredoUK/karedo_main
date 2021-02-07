@@ -1,7 +1,7 @@
 package util
 
 import akka.actor.ActorRef
-import restapi.Api
+import restapi.Apis
 import com.escalatesoft.subcut.inject.NewBindingModule._
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import com.typesafe.config.ConfigFactory
@@ -25,7 +25,7 @@ class RestServiceWithMockServiceActors(
   with BootedCore
   with ServiceActors
   with MessageActors
-  with Api with Web
+  with Apis with Web
 {
   // Define The Configuration for the tests
   implicit def configProvider = AppConfigPropertySource(

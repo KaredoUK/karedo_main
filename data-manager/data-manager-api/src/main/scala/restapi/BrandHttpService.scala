@@ -5,7 +5,7 @@ import javax.ws.rs.Path
 
 import akka.actor.{ActorRef}
 import akka.util.Timeout
-import com.wordnik.swagger.annotations.{Api => ApiDoc, _}
+import com.wordnik.swagger.annotations._
 import restapi.security.AuthorizationSupport
 import com.parallelai.wallet.datamanager.data.{BrandData, BrandResponse, ListBrandsAdverts, _}
 import akka.pattern.ask
@@ -17,7 +17,7 @@ import spray.routing._
 import scala.concurrent.{Future, ExecutionContext}
 
 // All APIs starting with /brand go here
-@ApiDoc(value = "/brand", description = "Operations on the brand.", position = 1)
+@Api(position=2,value = "/brand", description = "Brands")
 abstract class BrandHttpService(protected val brandActor: ActorRef,
                                 override protected val userAuthService: UserAuthService)
                                (implicit protected val executionContext: ExecutionContext)
@@ -58,7 +58,7 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
       }
 
   // P67 CREATE BRAND
-  @ApiOperation(httpMethod = "POST", response = classOf[BrandResponse], value = "Parallelai-67: Create a new Brand")
+  @ApiOperation(position=1,httpMethod = "POST", response = classOf[BrandResponse], value = "Parallelai-67: Create a new Brand")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "request", required = true,
       dataType = "com.parallelai.wallet.datamanager.data.BrandData", paramType = "body",
@@ -83,7 +83,7 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
 
   // P95 LIST BRANDS
 
-  @ApiOperation(httpMethod = "GET", response = classOf[List[BrandRecord]],
+  @ApiOperation(position=2,httpMethod = "GET", response = classOf[List[BrandRecord]],
     value = "Parallelai-95: List Brands")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
@@ -108,7 +108,7 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
     }
 
   // ?????
-  @ApiOperation(httpMethod = "GET", response = classOf[BrandRecord],
+  @ApiOperation(position=3,httpMethod = "GET", response = classOf[BrandRecord],
     value = "Parallelai-XXX: Fetch a single Brand")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
@@ -135,7 +135,7 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
   }
 
   // P68 DEACTIVATE BRAND
-  @ApiOperation(httpMethod = "DELETE", response = classOf[String],
+  @ApiOperation(position=4,httpMethod = "DELETE", response = classOf[String],
     value = "Parallelai-68: Deactivate Brand")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
@@ -159,7 +159,7 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
 
   // P64 LIST ADS PER BRAND
   @Path("/{brandId}/advert")
-  @ApiOperation(httpMethod = "GET", response = classOf[List[AdvertDetailResponse]],
+  @ApiOperation(position=5,httpMethod = "GET", response = classOf[List[AdvertDetailResponse]],
     value = "Parallelai-64: List Ads per Brand...")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
@@ -188,7 +188,7 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
 
   // title("PARALLELAI-61API: Get Ad Details")
   @Path("/{brand}/advert/{adId}")
-  @ApiOperation(httpMethod = "PIPPO", response = classOf[AdvertDetailResponse],
+  @ApiOperation(position=6,httpMethod = "PIPPO", response = classOf[AdvertDetailResponse],
     value = "Parallelai-61: Get Specific Ad per Brand")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
@@ -218,7 +218,7 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
 
   // PARALLELAI-65 CREATE AD
   @Path("/{brandId}/advert")
-  @ApiOperation(httpMethod = "POST", response = classOf[AdvertDetailResponse],
+  @ApiOperation(position=7,httpMethod = "POST", response = classOf[AdvertDetailResponse],
     value = "Parallelai-65: Create Ad")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(
@@ -252,7 +252,7 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
     }
 
   // PARALLELAI-66 DISABLE AD
-  @ApiOperation(httpMethod = "DELETE", response = classOf[String],
+  @ApiOperation(position=8,httpMethod = "DELETE", response = classOf[String],
     value = "Parallelai-66: Disable ad")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",

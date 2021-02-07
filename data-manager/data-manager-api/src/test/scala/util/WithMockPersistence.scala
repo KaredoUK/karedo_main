@@ -7,7 +7,7 @@ import com.typesafe.config.ConfigFactory
 import core._
 import parallelai.wallet.config.AppConfigPropertySource
 import parallelai.wallet.persistence._
-import restapi.Api
+import restapi.Apis
 import web.Web
 
 

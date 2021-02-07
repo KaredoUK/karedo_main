@@ -26,14 +26,15 @@ import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol.addMediaRespon
 import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol.getMediaResponseJson
 import scala.util.{Success, Failure}
 import scala.concurrent.Future
-import com.wordnik.swagger.annotations.{Api => ApiDoc, _}
+import com.wordnik.swagger.annotations._ 
 
 
 object MediaHttpService {
   val logger = Logger("MediaService")
 }
 
-@ApiDoc(value = "/media", description = "Media Manager, creates and retrieve media content.", position = 0)
+
+@Api(value = "/media", description = "Media Manager", position = 6)
 abstract class MediaHttpService (mediaActor: ActorRef,
     override protected val userAuthService: UserAuthService)
     (implicit executionContext: ExecutionContext)
