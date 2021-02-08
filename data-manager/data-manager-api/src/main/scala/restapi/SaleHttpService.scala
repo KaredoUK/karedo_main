@@ -36,13 +36,13 @@ abstract class SaleHttpService(offerActor: ActorRef,
 
   val route: Route =
     pathPrefix("sale") {
-      P116 ~ 
-      P117 ~ 
-      P118
+      P116 ~ // Create Sale
+      P117 ~ // Inquire Sale
+      P118   // Complete Sale
   }
    
   @Path("/{merchantId}/create")
-  @ApiOperation(httpMethod = "POST", response = classOf[OfferResponse], value = "Parallelai-116: check if a code is valid")
+  @ApiOperation(position=1,httpMethod = "POST", response = classOf[SaleResponse], value = "Parallelai-116: creating a code for an ad(offer)")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "merchantId", required = true,
       dataType = "String", paramType = "path",
@@ -69,7 +69,7 @@ abstract class SaleHttpService(offerActor: ActorRef,
       }
   
   @Path("/{saleId}")
-  @ApiOperation(httpMethod = "GET", response = classOf[OfferResponse], value = "Parallelai-117: check if a code is valid")
+  @ApiOperation(position=2,httpMethod = "GET", response = classOf[OfferResponse], value = "Parallelai-117: check if a code is valid")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "saleId", required = true,
       dataType = "String", paramType = "path",
@@ -92,7 +92,7 @@ def P117 : Route =
         }
       }
   @Path("/complete")
-  @ApiOperation(httpMethod = "POST", response = classOf[OfferResponse], value = "Parallelai-118: complete a sale")
+  @ApiOperation(position=3,httpMethod = "POST", response = classOf[OfferResponse], value = "Parallelai-118: complete a sale")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "merchantId", required = true,
       dataType = "com.parallelai.wallet.datamanager.data.OfferCode", paramType = "body",

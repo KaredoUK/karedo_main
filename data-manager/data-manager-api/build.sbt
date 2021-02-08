@@ -16,7 +16,7 @@ Common.settings
 
 test in assembly := {}
 
-version := "1.3"
+version := "1.3.1"
 
 resolvers ++= Common.sprayResolvers 
 

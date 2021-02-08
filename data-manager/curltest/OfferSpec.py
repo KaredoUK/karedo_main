@@ -17,7 +17,7 @@ class TestOffer(unittest.TestCase):
     def test01_P110_GetCodeMustBeAValid8DigitString(self):
         global sessionId, userId, code, advId
         title("PARALLELAI-110: GETCODE")
-        r=post("user/"+userId+"/getcode", { "userId": userId, "adId" : advId },sessionId)
+        r=post("offer/"+userId+"/getcode", { "userId": userId, "adId" : advId },sessionId)
         assert r.status_code == HTTP_OK
 
         js=json.loads(r.text)

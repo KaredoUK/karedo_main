@@ -36,22 +36,57 @@ abstract class OfferHttpService(offerActor: ActorRef,
 
   val route: Route =
     pathPrefix("offer"){
-      P110 ~ 
-      P112
+      P110 ~ // getOfferCode
+      P111 ~ // validateCode
+      P112   // consumeCode
     }
   
    
-  @Path("/validate")
-  @ApiOperation(position=1,httpMethod = "POST", response = classOf[OfferResponse], value = "Parallelai-110: check if a code is valid")
+  @Path("/{userId}/getcode")
+  @ApiOperation(position=1,httpMethod = "POST", response = classOf[GetOfferCodeResponse], 
+      value = "Parallelai-110: getoffer code (creating an offer in sale collection)")
   @ApiImplicitParams(Array(
+     new ApiImplicitParam(name = "userId", required = true,
+      dataType = "String", paramType = "path",
+      value = "user requesting code (creating the offer)"),
     new ApiImplicitParam(name = "request", required = true,
-      dataType = "com.parallelai.wallet.datamanager.data.OfferCode", paramType = "body",
-      value = "Code to be validated")
+      dataType = "com.parallelai.wallet.datamanager.data.GetOfferCodeRequest", paramType = "body",
+      value = "Code to be validated"),
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+      value = "SessionId for authentication/authorization")
   ))
   @ApiResponses(Array(
     new ApiResponse(code = 400, message = "Invalid Parameters")
   ))
-  def P110 : Route =
+  def P110: Route =
+  // PARALLELAI-110API: User Offer Code
+  // POST "offer/userid/getcode"
+  path(JavaUUID / "getcode"){
+    (userId) => {
+      userAuthorizedFor(canAccessUser(userId))(executionContext){ userAuthContext =>
+        post {
+
+          handleWith { getOfferCode : GetOfferCodeRequest =>
+            (offerActor ? getOfferCode)
+              .mapTo[ResponseWithFailure[OfferError,GetOfferCodeResponse]]
+          }
+        }
+      }
+    }
+  }
+  @Path("/validate")
+  @ApiOperation(position=2,httpMethod = "POST", response = classOf[OfferResponse], value = "Parallelai-111: check if an offer code is valid")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "request", required = true,
+      dataType = "com.parallelai.wallet.datamanager.data.OfferCode", paramType = "body",
+      value = "Code to be validated"),
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+      value = "SessionId for authentication/authorization")
+  ))
+  @ApiResponses(Array(
+    new ApiResponse(code = 400, message = "Invalid Parameters")
+  ))
+  def P111 : Route =
     path("validate") {
 
         userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
@@ -63,11 +98,13 @@ abstract class OfferHttpService(offerActor: ActorRef,
         }
       }
     @Path("/consume")
-  @ApiOperation(position=2,httpMethod = "POST", response = classOf[OfferResponse], value = "Parallelai-112: consume an offer")
+  @ApiOperation(position=3,httpMethod = "POST", response = classOf[OfferResponse], value = "Parallelai-112: consume an offer")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "request", required = true,
       dataType = "com.parallelai.wallet.datamanager.data.OfferCode", paramType = "body",
-      value = "Code to be validated")
+      value = "Code to be validated"),
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+      value = "SessionId for authentication/authorization")
   ))
   @ApiResponses(Array(
     new ApiResponse(code = 400, message = "Invalid Parameters")

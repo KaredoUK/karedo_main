@@ -233,12 +233,32 @@ case class GetMediaResponse(contentType: String, content: Array[Byte]) extends A
 
 // Offer types
 case class OfferData(name: String, brandId: UUID, desc: Option[String], imagePath: Option[String], qrCodeId: Option[UUID], value: Option[Int])
-case class OfferResponse(offerId: UUID)
-case class OfferCode(offerCode: String)
+
+@ApiModel(description = "Offer Response")
+case class OfferResponse(
+    @(ApiModelProperty@field)(value="Offer id")
+    offerId: UUID)
+    
+@ApiModel(description = "Offer Response")
+case class OfferCode(
+    @(ApiModelProperty@field)(value="Offer code")
+    offerCode: String)
 case class OfferValidate(offerCode: String)
 case class OfferConsume(offerCode: String)
-case class SaleCreate(accountId: UUID, points: KaredoPoints, expireInSeconds: Long=0)
-case class SaleResponse(saleId: UUID)
+
+@ApiModel(description = "Creation of a new sale")
+case class SaleCreate(
+    @(ApiModelProperty@field)(value="Merchant creating the sale")
+    accountId: UUID, 
+    @(ApiModelProperty@field)(value="Points for this sale")
+    points: KaredoPoints, 
+    @(ApiModelProperty@field)(value="How many seconds the sale lasts")
+    expireInSeconds: Long=0)
+    
+@ApiModel(description = "Sale created")
+case class SaleResponse(
+    @(ApiModelProperty@field)(value="Id of newly created sale")
+    saleId: UUID)
 case class SaleRequestDetail(saleId: UUID)
 case class SaleDetail(merchantName: String, points: KaredoPoints)
 case class SaleComplete(accountId: UUID, saleId: UUID)
@@ -251,21 +271,21 @@ case class StatusResponse(status: String) extends ApiDataResponse
 // Other types
 @ApiModel(description = "User Brand Interaction")
 case class UserBrandInteraction(
-                                 @(ApiModelProperty@field)(value="UserAccount id")
+                                 @(ApiModelProperty@field)(value="UserAccount id",required=true)
                                  userId:UUID,
-                                 @(ApiModelProperty@field)(value="Brand id")
+                                 @(ApiModelProperty@field)(value="Brand id",required=true)
                                  brandId: UUID,
-                                 @(ApiModelProperty@field)(value="Interaction (view/detail/like/dislike/share")
+                                 @(ApiModelProperty@field)(value="Interaction (view/detail/like/dislike/share",required=true)
                                  interaction: String,
                                  @(ApiModelProperty@field)(value="if share, facebook/twitter or other")
                                  intType: String="") extends ApiDataRequest
 @ApiModel(description = "User Offer Interaction")
 case class UserOfferInteraction(
-                                 @(ApiModelProperty@field)(value="UserAccount id")
+                                 @(ApiModelProperty@field)(value="UserAccount id",required=true)
                                  userId:UUID,
-                                 @(ApiModelProperty@field)(value="Offer id")
+                                 @(ApiModelProperty@field)(value="Offer id",required=true)
                                  offerId: UUID,
-                                 @(ApiModelProperty@field)(value="Interaction (view/detail/like/dislike/share")
+                                 @(ApiModelProperty@field)(value="Interaction (view/detail/like/dislike/share",required=true)
                                  interaction: String,
                                  @(ApiModelProperty@field)(value="if share, facebook/twitter or other")
                                  intType: String="") extends ApiDataRequest

@@ -44,19 +44,17 @@ extends HttpService
   def route =
     pathPrefix("user") {
       userBrandInteraction ~ // P108 POST AUTH /user/xxx/interaction/brand
-      userOfferInteraction ~  // P107 POST AUTH /user/xxx/interaction/offer
-      userOfferCode           // P110 get offer code /user/xxx/getcode
+      userOfferInteraction   // P107 POST AUTH /user/xxx/interaction/offer
+      
     }
 
    @Path("/{account}/interaction/brand")
-  @ApiOperation(httpMethod = "GET", response = classOf[InteractionResponse],
+  @ApiOperation(httpMethod = "POST", response = classOf[InteractionResponse],
     value = "Parallelai-55: User interacting with brand")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
       value = "UUID of user interacting"),
-    new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
-      value = "UUID of brand"),
-    new ApiImplicitParam(name = "intType", required = true, dataType = "String", paramType = "body",
+    new ApiImplicitParam(name = "interaction", required = true, dataType = "com.parallelai.wallet.datamanager.data.UserBrandInteraction", paramType = "body",
       value = "interactionType"),
     new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
           value = "SessionId for authentication/authorization")
@@ -81,7 +79,17 @@ extends HttpService
       }
 
     }
-
+  @Path("/{account}/interaction/offer")
+  @ApiOperation(httpMethod = "POST", response = classOf[InteractionResponse],
+    value = "Parallelai-55: User interacting with offer")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
+      value = "UUID of user interacting"),
+    new ApiImplicitParam(name = "interaction", required = true, dataType="com.parallelai.wallet.datamanager.data.UserOfferInteraction", paramType = "body",
+      value = "interactionType"),
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+          value = "SessionId for authentication/authorization")
+  ))
   def userOfferInteraction: Route =
 
   // PARALLELAI-107API: User Offer Interaction
@@ -102,21 +110,6 @@ extends HttpService
 
     }
 
-  def userOfferCode: Route =
-  // PARALLELAI-110API: User Offer Code
-  // POST "user/xxx/offer/yyyy/getcode"
-  path(JavaUUID / "getcode"){
-    (userId) => {
-      userAuthorizedFor(canAccessUser(userId))(executionContext){ userAuthContext =>
-        post {
-
-          handleWith { getOfferCode : GetOfferCodeRequest =>
-            (offerActor ? getOfferCode)
-              .mapTo[ResponseWithFailure[OfferError,GetOfferCodeResponse]]
-          }
-        }
-      }
-    }
-  }
+  
 
 }
