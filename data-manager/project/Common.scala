@@ -13,7 +13,7 @@ object Common {
 
   val sl4jVersion = "1.7.5"
 
-  val sprayVersion = "1.3.1"
+  val sprayVersion = "1.3.3"
   val sprayJsonVersion = "1.3.0" 
 
   val sprayResolvers = Seq (
