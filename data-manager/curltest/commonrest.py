@@ -11,6 +11,8 @@ from util import *
 from commondb import *
 from bson.objectid import ObjectId
 import requests
+
+requests.packages.urllib3.disable_warnings()
 #if(DEBUG==1): httpclient.HTTPConnection.debuglevel = 1
 
 HTTP_OK=200
@@ -59,7 +61,8 @@ def httproute(x):
 def post(route, data={},session=None):
     info("METHOD: POST")
     r=requests.post(httproute(route), data=postdata(data),
-                         headers=getHeaders(session))
+                         headers=getHeaders(session),
+                    verify=False)
     printr(r)
     return r
 
@@ -71,7 +74,8 @@ def postfile(route, file, headers= {'X-Content-Type': 'image/png'}, session=None
                        httproute(route),
                        headers = headers,
                        files=file,
-                       auth=KaredoAuth(session))
+                       auth=KaredoAuth(session),
+                       verify=False)
     printr(r)
     return r
 
@@ -80,7 +84,7 @@ def postfile(route, file, headers= {'X-Content-Type': 'image/png'}, session=None
 def put(route, data={}, session=None):
     info("METHOD: PUT")
     r=requests.put(httproute(route), data=json.dumps(data),
-                        headers=getHeaders(session))
+                        headers=getHeaders(session),  verify=False)
     printr(r)
     return r
 
@@ -88,14 +92,14 @@ def put(route, data={}, session=None):
 def get(route, session=None):
     info("METHOD: GET")
     r=requests.get(httproute(route), #data=json.dumps(data),
-                        headers=getHeaders(session))
+                        headers=getHeaders(session),  verify=False)
     printr(r)
     return r
 
 # GET a stream
 def getstream(route, session=None):
     info("METHOD: GETSTREAM")
-    r=requests.get(httproute(route), auth=KaredoAuth(session), stream=True)
+    r=requests.get(httproute(route), auth=KaredoAuth(session), stream=True,  verify=False)
     #this can produce encoding errors printr(r)
     return r
 
@@ -104,7 +108,7 @@ def delete(route, params={}, session=None):
 
     info("METHOD: DELETE")
     r=requests.delete(httproute(route), #data=json.dumps(data),
-                           headers=getHeaders(session))
+                           headers=getHeaders(session),  verify=False)
     printr(r)
     return r
 
