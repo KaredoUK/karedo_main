@@ -72,10 +72,17 @@ class RestServiceWithMockPersistence(
         |}
         |
         |akka {
+        | log-dead-letters = off
         | log-dead-letters-during-shutdown = off
         | loggers = ["akka.event.slf4j.Slf4jLogger"]
         | loglevel = INFO
         |}
+        |
+        |spray.can.server {
+        |  ssl-encryption = off
+        |  ssl-tracing = off
+        |}
+        |
       """.stripMargin
     )
   )
