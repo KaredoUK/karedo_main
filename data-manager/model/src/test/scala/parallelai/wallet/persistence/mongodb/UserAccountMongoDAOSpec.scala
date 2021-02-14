@@ -18,6 +18,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class UserAccountMongoDAOSpec
   extends Specification
   with MongoTestUtils
+  with Before
 {
   val accountDAO = new UserAccountMongoDAO()
   accountDAO.dao.collection.remove(MongoDBObject())
@@ -30,6 +31,10 @@ class UserAccountMongoDAOSpec
 
   sequential
 
+  def before = {
+    accountDAO.dao.collection.remove(MongoDBObject())
+
+  }
 
 
   "UserAccountMongoDAO" should {
@@ -101,6 +106,7 @@ class UserAccountMongoDAOSpec
 
       wrongPassword should beFalse
 
+
       // this previously failed
       active.get.password should beEqualTo(Some("pass"))
     }
@@ -116,6 +122,7 @@ class UserAccountMongoDAOSpec
       byMsisdn shouldEqual Some(userAccount)
       byEmail shouldEqual Some(userAccount)
       byApplicationId shouldEqual Some(userAccount)
+
       shouldntFind shouldEqual None
     }
 
@@ -126,6 +133,8 @@ class UserAccountMongoDAOSpec
       val byEmail = accountDAO.findByAnyOf(None, None, userAccount.email)
       val byApplicationId = accountDAO.findByAnyOf(Some(clientApplication.id), None, None)
       val shouldntFind = accountDAO.findByAnyOf(None, None, None)
+
+
 
       byMsisdn shouldEqual Some(userAccount)
       byEmail shouldEqual Some(userAccount)
@@ -145,6 +154,7 @@ class UserAccountMongoDAOSpec
       accountDAO.setActive(userAccount.id)
 
       val activeStatus = accountDAO.getById(userAccount.id) map { _.active }
+
 
       activeStatus shouldEqual Some(true)
     }

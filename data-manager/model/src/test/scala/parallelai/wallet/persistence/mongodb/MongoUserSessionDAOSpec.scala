@@ -64,6 +64,7 @@ class MongoUserSessionDAOSpec
       userSessionDAO.isValidSession(session.sessionId) must beFalse
     }
 
+/*
     "Be able to extend a session if using it (this takes around 3 minutes)" in {
       println("((((TEST5 BEGIN))))")
 
@@ -113,6 +114,7 @@ class MongoUserSessionDAOSpec
       userSessionDAO.isValidSession(session.sessionId) must beFalse.eventually(20, 4.seconds)
     }
 
+*/
   }
 
 }

@@ -2,6 +2,7 @@ package parallelai.wallet.persistence.mongodb
 
 import com.escalatesoft.subcut.inject.NewBindingModule._
 import com.escalatesoft.subcut.inject.config.{PropertiesConfigPropertySource, PropertiesConfigMapSource}
+import com.mongodb.casbah.commons.conversions.scala.{RegisterJodaTimeConversionHelpers, RegisterConversionHelpers}
 import scala.concurrent.Future
 import scala.concurrent.Await._
 import scala.concurrent.duration._
@@ -20,6 +21,8 @@ trait MongoTestUtils {
       "mongo.db.pwd" -> ""
     )
 
+  RegisterConversionHelpers()
+  RegisterJodaTimeConversionHelpers()
 
   implicit val bindingModule = newBindingModuleWithConfig  (
     PropertiesConfigPropertySource(defaultBindingConfig)

@@ -16,6 +16,7 @@ import parallelai.wallet.persistence.{InteractionType, Interaction}
 class MongoBrandDAOSpec
   extends Specification
   with MongoTestUtils
+  with Before
 {
   val brandDAO=new BrandMongoDAO()
   brandDAO.dao.collection.remove(MongoDBObject())
@@ -25,6 +26,11 @@ class MongoBrandDAOSpec
   val newBrand=Brand(name="aBrand")
 
   sequential
+
+  def before = {
+    brandDAO.dao.collection.remove(MongoDBObject())
+    brandInteractionsDAO.dao.collection.remove(MongoDBObject())
+  }
 
   "BrandMongoDAO" should {
     "create and retrieve a brand with a generated id " in {
@@ -62,6 +68,7 @@ class MongoBrandDAOSpec
       brandInteractionsDAO.insertNew(id, interaction)
       interaction shouldNotEqual(None)
 
+
     }
     "get it back" in {
 
@@ -97,15 +104,14 @@ class MongoBrandDAOSpec
       val list1=brandInteractionsDAO.getInteractions(id)
       list1 should have size(0)
 
-
     }
   }
 
-  private def addInteraction: Interaction = {
+ /* private def addInteraction: Interaction = {
     val id = brandDAO.insertNew(newBrand).get
     val user = UUID.randomUUID()
     val interaction = Interaction(userId = user, kind = InteractionType.Click, note = "Annotations")
     brandInteractionsDAO.insertNew(id, interaction)
     interaction
-  }
+  }*/
 }
