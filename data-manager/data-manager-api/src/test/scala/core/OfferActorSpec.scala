@@ -6,7 +6,7 @@ import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKitBase}
 import com.parallelai.wallet.datamanager.data.{GetOfferCodeResponse, GetOfferCodeRequest, InteractionResponse, UserBrandInteraction}
 import org.specs2.matcher.BeMatching
-import parallelai.wallet.entity.KaredoSales
+import parallelai.wallet.entity.{AdvertisementDetail, KaredoSales}
 import util.ActorsSpec
 
 class OfferActorSpec
@@ -18,14 +18,16 @@ class OfferActorSpec
   implicit lazy val system = ActorSystem("AkkaCustomSpec")
   val aUser: UUID = UUID.randomUUID()
   val aBrand: UUID = UUID.randomUUID()
+  val anOffer: UUID = UUID.randomUUID()
 
   "Offer Actor" >> {
 
     "should call the actor" in new WithMockedPersistence {
-      mockedSaleDAO.findById(any[UUID]) returns Some(KaredoSales(saleType="OFFER",points=10,accountId = aUser, adId = Some(aBrand),
+      mockedSaleDAO.findById(any[UUID]) returns Some(KaredoSales(saleType="OFFER",points=10,accountId = aUser, adId = Some(anOffer),
         code=Some("")))
       mockedSaleDAO.findByCode(any[String]) returns None
       mockedSaleDAO.insertNew(any[KaredoSales]) returns Some(UUID.randomUUID())
+      mockedBrandDAO.getAdById(any[UUID]) returns Some(AdvertisementDetail(anOffer))
 
       server.offer ! GetOfferCodeRequest(aUser, aBrand)
       expectMsgPF() {

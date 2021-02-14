@@ -38,7 +38,7 @@ class SaleServiceSpec
 
       val request = SaleCreate(merchant.id, 100)
       val response = wait(pipeline {
-        Post(s"$serviceUrl/merchant/" + userId.toString + "/sale", request).withHeaders(headers)
+        Post(s"$serviceUrl/sale/" + userId.toString + "/create", request).withHeaders(headers)
       })
 
       response.saleId.toString must beMatching(UUIDre)

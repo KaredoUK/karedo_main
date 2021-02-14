@@ -24,7 +24,10 @@ case class UserPersonalInfo(name: String, postCode: Option[String] = None, birth
 
 case class AccountSettings(maxMessagesPerWeek: Int)
 
-case class UserAccount(id: UUID, msisdn: Option[String], email: Option[String], userType: String="CUSTOMER",
+case class UserAccount(id: UUID,
+                       msisdn: Option[String],
+                       email: Option[String],
+                       userType: String="CUSTOMER",
                        personalInfo: UserPersonalInfo = defaultUserPersonalInfo,
                        settings: AccountSettings = defaultAccountSettings,
                        active: Boolean = false,
@@ -47,9 +50,16 @@ case class Offer(@Key("_id") id: UUID = UUID.randomUUID(), name: String = "", br
 */
 
 
-case class AdvertisementDetail(@Key("_id") id: UUID = UUID.randomUUID(), publishedDate: DateTime = new DateTime(), text: String = "", imageIds: List[String] = List(), value: KaredoPoints = 0)
+case class AdvertisementDetail(@Key("_id") id: UUID = UUID.randomUUID(),
+                               publishedDate: DateTime = new DateTime(),
+                               text: String = "",
+                               imageIds: List[String] = List(),
+                               value: KaredoPoints = 0)
 
-case class Brand(@Key("_id") id: UUID = UUID.randomUUID(), name: String = "", iconId: String = "", ads: List[AdvertisementDetail] = List())
+case class Brand(@Key("_id") id: UUID = UUID.randomUUID(),
+                 name: String = "",
+                 iconId: String = "",
+                 ads: List[AdvertisementDetail] = List())
 
 case class KaredoLog(@Key("_id") id: UUID = UUID.randomUUID,
                      ts: DateTime = new DateTime(),
