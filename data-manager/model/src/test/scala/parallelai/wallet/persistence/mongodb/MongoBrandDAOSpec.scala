@@ -16,7 +16,7 @@ import parallelai.wallet.persistence.{InteractionType, Interaction}
 class MongoBrandDAOSpec
   extends Specification
   with MongoTestUtils
-  with Before
+ // with Before
 {
   val brandDAO=new BrandMongoDAO()
   brandDAO.dao.collection.remove(MongoDBObject())
@@ -27,7 +27,7 @@ class MongoBrandDAOSpec
 
   sequential
 
-  def before = {
+  def clean = {
     brandDAO.dao.collection.remove(MongoDBObject())
     brandInteractionsDAO.dao.collection.remove(MongoDBObject())
   }
@@ -72,6 +72,7 @@ class MongoBrandDAOSpec
     }
     "get it back" in {
 
+      clean
       val id = brandDAO.insertNew(newBrand).get
       val user = UUID.randomUUID()
       val interaction = Interaction(userId = user, kind = InteractionType.Click, note = "Annotations")
@@ -80,6 +81,7 @@ class MongoBrandDAOSpec
       readback shouldEqual(interaction)
     }
     "get list of interactions" in {
+      clean
       val id = brandDAO.insertNew(newBrand).get
       val user = UUID.randomUUID()
       val interaction = Interaction(userId = user, kind = InteractionType.Click, note = "Annotations")
@@ -93,6 +95,7 @@ class MongoBrandDAOSpec
 
     }
     "delete interaction" in {
+      clean
       val id = brandDAO.insertNew(newBrand).get
       val user = UUID.randomUUID()
       val interaction = Interaction(userId = user, kind = InteractionType.Click, note = "Annotations")

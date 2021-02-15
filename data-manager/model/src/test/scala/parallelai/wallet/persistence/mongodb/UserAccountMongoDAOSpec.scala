@@ -18,7 +18,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class UserAccountMongoDAOSpec
   extends Specification
   with MongoTestUtils
-  with Before
 {
   val accountDAO = new UserAccountMongoDAO()
   accountDAO.dao.collection.remove(MongoDBObject())
@@ -31,7 +30,7 @@ class UserAccountMongoDAOSpec
 
   sequential
 
-  def before = {
+  def clean = {
     accountDAO.dao.collection.remove(MongoDBObject())
 
   }
@@ -48,7 +47,7 @@ class UserAccountMongoDAOSpec
 
 
     "Find account by application ID" in {
-
+      clean
       accountDAO.insertNew(userAccount, clientApplication)
       val findAfterInsert =accountDAO.getByApplicationId(clientApplication.id)
 
@@ -56,19 +55,21 @@ class UserAccountMongoDAOSpec
     }
 
     "Don't find anything with wrong ID" in {
-      //clearAll()
+      clean
       accountDAO.insertNew(userAccount, clientApplication)
 
       accountDAO.getById(UUID.randomUUID()) shouldEqual None
     }
 
     "Not Find account using wrong application ID" in {
+      clean
       accountDAO.insertNew(userAccount, clientApplication)
 
       accountDAO.getByApplicationId(UUID.randomUUID()) shouldEqual None
     }
 
     "Find by email" in {
+      clean
       accountDAO.insertNew(userAccount, clientApplication)
       val findAfterInsert = accountDAO.getByEmail(userAccount.email.get)
 
@@ -76,6 +77,7 @@ class UserAccountMongoDAOSpec
     }
 
     "Find by email filtering with active status" in {
+      clean
 
       accountDAO.insertNew(userAccount, clientApplication)
       accountDAO.insertNew(activeAccount, activeClientApplication)
@@ -89,6 +91,7 @@ class UserAccountMongoDAOSpec
     }
 
     "Find by application_id filtering with active status" in {
+      clean
       accountDAO.insertNew(userAccount, clientApplication)
       accountDAO.insertNew(activeAccount, activeClientApplication)
       accountDAO.setPassword(activeAccount.id,"pass")
@@ -112,6 +115,7 @@ class UserAccountMongoDAOSpec
     }
 
     "Find by any of id, email, application id" in {
+      clean
       accountDAO.insertNew(userAccount, clientApplication)
 
       val byMsisdn = accountDAO.findByAnyOf(Some(UUID.randomUUID()), userAccount.msisdn, None)
@@ -127,6 +131,7 @@ class UserAccountMongoDAOSpec
     }
 
     "Find by any of id, email, application id, passing only one param" in {
+      clean
       accountDAO.insertNew(userAccount, clientApplication)
 
       val byMsisdn = accountDAO.findByAnyOf(None, userAccount.msisdn, None)
@@ -143,6 +148,7 @@ class UserAccountMongoDAOSpec
     }
 
     "Delete by ID" in {
+      clean
       accountDAO.insertNew(userAccount, clientApplication)
       accountDAO.delete(userAccount.id)
 

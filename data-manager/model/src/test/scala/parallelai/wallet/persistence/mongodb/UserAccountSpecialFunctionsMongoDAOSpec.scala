@@ -2,6 +2,7 @@ package parallelai.wallet.persistence.mongodb
 
 import java.util.UUID
 
+import com.mongodb.casbah.commons.MongoDBObject
 import org.specs2.mutable.Specification
 import org.specs2.specification.BeforeExample
 import parallelai.wallet.entity.{ClientApplication, UserAccount}
@@ -11,6 +12,11 @@ class UserAccountSpecialFunctionsMongoDAOSpec
   with MongoTestUtils {
   sequential
 
+  def clean = {
+    accountDAO.dao.collection.remove(MongoDBObject())
+
+  }
+
   val accountDAO = new UserAccountMongoDAO()
   val clientApplication = ClientApplication(UUID.randomUUID(), userAccount.id, "ACT_CODE")
 
@@ -19,6 +25,7 @@ class UserAccountSpecialFunctionsMongoDAOSpec
   "UserAccountMongoDAO" should {
 
     "Add points to account" in {
+      clean
       val initialPoints = 200
       val increment = 5000
 
