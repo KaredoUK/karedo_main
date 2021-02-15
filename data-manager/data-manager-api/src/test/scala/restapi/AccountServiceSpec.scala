@@ -20,9 +20,11 @@ import scala.concurrent.Future._
 import scala.concurrent.duration._
 import org.specs2.mutable.SpecificationLike
 import org.mockito.Matchers.{eq => argEq}
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
 
 
-
+@RunWith(classOf[JUnitRunner])
 class AccountServiceSpec
   extends ApiHttpClientSpec // Mocked instance
   with RestApiSpecMatchers  // specialized Matchers

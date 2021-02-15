@@ -66,8 +66,8 @@ trait ApiHttpClientSpec
       mockedMediaDAO, mockedOfferDAO, mockedUserSessionDAO, mockedSaleDAO,
       messagerActor.ref)
 
-    println("Sleeping 2 seconds to wait for the httpserver to start")
-    Thread.sleep(2000)
+    /*println("Sleeping 2 seconds to wait for the httpserver to start")
+    Thread.sleep(2000)*/
 
     def after = stopServer()
 
