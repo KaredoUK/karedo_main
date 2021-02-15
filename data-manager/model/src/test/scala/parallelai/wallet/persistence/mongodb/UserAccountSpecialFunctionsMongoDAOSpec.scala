@@ -17,9 +17,9 @@ class UserAccountSpecialFunctionsMongoDAOSpec
 
   accountDAO.dao.collection.remove(MongoDBObject())
 
-  val clientApplication = ClientApplication(UUID.randomUUID(), userAccount.id, "ACT_CODE")
-
   val userAccount = UserAccount(UUID.randomUUID(), Some("12345678"), Some("user@email.com"))
+
+  val clientApplication = ClientApplication(UUID.randomUUID(), userAccount.id, "ACT_CODE")
 
   "UserAccountMongoDAO" should {
 
