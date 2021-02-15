@@ -12,12 +12,11 @@ class UserAccountSpecialFunctionsMongoDAOSpec
   with MongoTestUtils {
   sequential
 
-  def clean = {
-    accountDAO.dao.collection.remove(MongoDBObject())
-
-  }
 
   val accountDAO = new UserAccountMongoDAO()
+
+  accountDAO.dao.collection.remove(MongoDBObject())
+
   val clientApplication = ClientApplication(UUID.randomUUID(), userAccount.id, "ACT_CODE")
 
   val userAccount = UserAccount(UUID.randomUUID(), Some("12345678"), Some("user@email.com"))
@@ -25,7 +24,6 @@ class UserAccountSpecialFunctionsMongoDAOSpec
   "UserAccountMongoDAO" should {
 
     "Add points to account" in {
-      clean
       val initialPoints = 200
       val increment = 5000
 
