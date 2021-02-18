@@ -64,6 +64,26 @@ abstract class MerchantHttpService(offerActor: ActorRef,
       }
     }
 
+  @Path("/karedos/{currency}")
+  @ApiOperation(position=1,httpMethod = "POST", response = classOf[KaredoChange],
+    value = "Parallelai-119a: set change for a currency")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "currency", required = true,
+      dataType = "String", paramType = "path",
+      value = "currency for which to get the change for 1 karedo"),
+    new ApiImplicitParam(
+      name = "Change Data",
+      required = true,
+      dataType = "com.parallelai.wallet.datamanager.data.KaredoChange",
+      paramType = "body",
+      value = "Currency and Change value"),  
+      
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+      value = "SessionId for authentication/authorization")
+  ))
+  @ApiResponses(Array(
+    new ApiResponse(code = 400, message = "Invalid Parameters")
+  ))
   def P119a : Route =
     path("karedos" / Segment ) { currency : String =>
 
