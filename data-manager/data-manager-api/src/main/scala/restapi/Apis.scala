@@ -50,6 +50,10 @@ trait Apis extends RouteConcatenation with Injectable {
      override implicit def actorRefFactory: ActorRefFactory = system   
   }
 
+  val serveMerchant = new MerchantHttpService(offer, userAuthentication) {
+    override implicit def actorRefFactory: ActorRefFactory = system
+  }
+
 
   val routes =
     serveAccount.route ~
@@ -58,6 +62,7 @@ trait Apis extends RouteConcatenation with Injectable {
       serveMedia.route ~
       serveOffer.route ~
       serveSale.route ~
+      serveMerchant.route ~
       new MockService(other, userAuthentication).route
 
   val rootService = system.actorOf(Props(new RoutedHttpService(serviceURL, bindPort, routes,doSwagger)))

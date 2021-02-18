@@ -5,7 +5,7 @@ from util import *
 from pymongo import MongoClient
 
 #Root = "http://api.karedo.co.uk:8080/"
-Root = os.getenv("ROOT","https://localhost:8090/")
+Root = os.getenv("ROOT","http://localhost:8090/")
 MongoHost = os.getenv("MONGO_HOST","localhost")
 MongoPort = os.getenv("MONGO_PORT","12345")
 MongoDb = os.getenv("MONGO_DB","wallet_data")

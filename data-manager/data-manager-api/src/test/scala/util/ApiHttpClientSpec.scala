@@ -52,6 +52,7 @@ trait ApiHttpClientSpec
     lazy val mockedOfferDAO = mock[OfferDAO]
     lazy val mockedUserSessionDAO = mock[UserSessionDAO]
     lazy val mockedSaleDAO = mock[KaredoSalesDAO]
+    lazy val mockedChangeDAO = mock[KaredoChangeDAO]
     lazy val messagerActor = TestProbe()
 
     mockedUserSessionDAO.getValidSessionAndRenew(sessionId) returns
@@ -64,6 +65,7 @@ trait ApiHttpClientSpec
       servicePort, mockedBrandDAO, mockedHintDAO, mockedLogDAO,
       mockedClientApplicationDAO, mockedUserAccountDAO,
       mockedMediaDAO, mockedOfferDAO, mockedUserSessionDAO, mockedSaleDAO,
+      mockedChangeDAO,
       messagerActor.ref)
 
     /*println("Sleeping 2 seconds to wait for the httpserver to start")

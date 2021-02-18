@@ -1,5 +1,6 @@
 package restapi
 
+import java.awt.image.ImageConsumer
 import java.util.UUID
 
 import com.parallelai.wallet.datamanager.data._
@@ -12,6 +13,7 @@ import spray.client.pipelining._
 import util.ApiHttpClientSpec
 
 import scala.concurrent.duration._
+import scala.util.Random
 
 
 @RunWith(classOf[JUnitRunner])
@@ -93,7 +95,23 @@ class SaleServiceSpec
       response.saleId === sale.id
 
     }
-  }
+    "PARALLELAI-119/a: set and get change" in new WithMockedPersistenceRestService {
 
+      val p1 = sendReceive ~> unmarshal[KaredoChange]
+      val change = Random.nextDouble() * 1000 + 1000
+      mockedChangeDAO.findByCurrency(any[String]) returns None
+      mockedChangeDAO.insertNew(any[KaredoChangeDB]) returns Some(UUID.randomUUID())
+      val r1 = wait(p1 {
+        Post(s"$serviceUrl/merchant/karedos/GBP", KaredoChange("GBP", change)).withHeaders(headers)
+      })
+
+      mockedChangeDAO.findByCurrency(any[String]) returns Some(KaredoChangeDB(currency="GBP",change=change))
+      val pipeline = sendReceive ~> unmarshal[KaredoChange]
+      val response = wait(pipeline {
+        Get(s"$serviceUrl/merchant/karedos/GBP").withHeaders(headers)
+      })
+      response.change must beCloseTo(change, 1)
+    }
+  }
 
 }

@@ -45,6 +45,7 @@ trait ActorsSpec
     lazy val mockedUserSessionDAO = mock[UserSessionDAO]
     lazy val messagerActor = TestProbe()
     lazy val mockedSaleDAO = mock[KaredoSalesDAO]
+    lazy val mockedChangeDAO = mock[KaredoChangeDAO]
 
 
     mockedUserSessionDAO.getValidSessionAndRenew(sessionId) returns
@@ -54,9 +55,17 @@ trait ActorsSpec
       Seq(ClientApplication(applicationId, userId, "xxxx", active= true))
 
     val server = new WithMockPersistence(
-      8080, mockedBrandDAO, mockedHintDAO, mockedLogDAO,
-      mockedClientApplicationDAO, mockedUserAccountDAO,
-      mockedMediaDAO, mockedOfferDAO, mockedUserSessionDAO, mockedSaleDAO,
+      8080,
+      mockedBrandDAO,
+      mockedHintDAO,
+      mockedLogDAO,
+      mockedClientApplicationDAO,
+      mockedUserAccountDAO,
+      mockedMediaDAO,
+      mockedOfferDAO,
+      mockedUserSessionDAO,
+      mockedSaleDAO,
+      mockedChangeDAO,
       messagerActor.ref)
 
 
