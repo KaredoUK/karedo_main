@@ -67,6 +67,18 @@ class OfferActor(implicit val saleDAO: KaredoSalesDAO,
     case request: SaleComplete => replyToSender(handleSaleComplete(request))
     case request: RequestKaredoChange => replyToSender(handleKaredoChangeInquiry(request))
     case request: KaredoChange => replyToSender(handleKaredoChangeSet(request))
+    case request: Currency => replyToSender(handleConversion(request))
+  }
+   def handleConversion(currency: Currency): Future[ResponseWithFailure[OfferError, Currency]] =
+  {
+    successful {
+      
+       changeDAO.findByCurrency(currency.currency) match {
+        case Some(found) => SuccessResponse(Currency("KAR", found.change * currency.amount))
+        case _ => FailureResponse(InvalidOfferRequest(s"Can't find change for ${currency.currency}"))
+      }
+
+    }
   }
 
   def handleKaredoChangeSet(change: KaredoChange): Future[ResponseWithFailure[OfferError, KaredoChange]] =

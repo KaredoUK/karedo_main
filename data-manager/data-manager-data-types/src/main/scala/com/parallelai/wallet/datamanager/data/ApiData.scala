@@ -266,6 +266,13 @@ case class KaredoChange(
                          currency: String,
                          @(ApiModelProperty@field)(value="actual change")
                          change: Double)
+                         
+@ApiModel(description = "Currency expression")
+case class Currency(
+                         @(ApiModelProperty@field)(value="currency")
+                         currency: String,
+                         @(ApiModelProperty@field)(value="amount in that currency")
+                         amount: Double)
 
 
 case class SaleRequestDetail(saleId: UUID)

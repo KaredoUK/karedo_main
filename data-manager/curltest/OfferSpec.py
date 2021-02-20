@@ -118,6 +118,20 @@ class TestOffer(unittest.TestCase):
         change=js["change"]
         assert almost_equal(change,2310) == True
 
+    def test14_P115_DoMoneyConversion(self):
+        global sessionId
+        title("PARALLELAI-115: do money conversion")
+
+        r=post("merchant/karedos/GBP", { "currency": "GBP", "change": 2310.0 }, sessionId)
+        assert r.status_code == HTTP_OK
+
+        r=put("merchant/convertmoney",{"currency":"GBP","amount":2},sessionId)
+        assert r.status_code == HTTP_OK
+
+        js=json.loads(r.text)
+        amount=js["amount"]
+        assert almost_equal(amount,2310*2) == True
+
 
 
 

@@ -36,7 +36,7 @@ abstract class MerchantHttpService(offerActor: ActorRef,
 
   val route: Route =
     pathPrefix("merchant") {
-      P119 ~ P119a  // Get karedos change
+      P119 ~ P119a ~ P115  // Get karedos change
     }
 
   @Path("/karedos/{currency}")
@@ -59,6 +59,34 @@ abstract class MerchantHttpService(offerActor: ActorRef,
         get {
           complete {
             (offerActor ? RequestKaredoChange(currency)).mapTo[ResponseWithFailure[OfferError,KaredoChange]]
+          }
+        }
+      }
+    }
+  
+  @Path("/convertmoney")
+  @ApiOperation(position=1,httpMethod = "PUT", response = classOf[KaredoChange],
+    value = "Parallelai-115: convert money into karedos")
+  @ApiImplicitParams(Array(
+     new ApiImplicitParam(
+      name = "Currency to convert",
+      required = true,
+      dataType = "com.parallelai.wallet.datamanager.data.Currency",
+      paramType = "body",
+      value = "Currency/amount to convert"),  
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+      value = "SessionId for authentication/authorization")
+  ))
+  @ApiResponses(Array(
+    new ApiResponse(code = 400, message = "Invalid Parameters")
+  ))
+  def P115 : Route =
+    path("convertmoney" ) { 
+
+      userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
+        put {
+          handleWith { currency: Currency  =>
+            (offerActor ? currency).mapTo[ResponseWithFailure[OfferError,Currency]]
           }
         }
       }
