@@ -20,3 +20,8 @@ case class KaredoSales(@Key("_id") id: UUID = UUID.randomUUID(),
                        dateConsumed: Option[DateTime] = None,
                        points: KaredoPoints
                         )
+
+case class KaredoChangeDB(@Key("_id") id: UUID = UUID.randomUUID(),
+                           currency: String,
+                           change: Double,
+                           dateCreated: DateTime=new DateTime())

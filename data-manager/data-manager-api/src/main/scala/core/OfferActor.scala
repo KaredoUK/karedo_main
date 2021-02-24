@@ -10,7 +10,7 @@ import core.OfferActor.{InvalidOfferRequest, InternalOfferError, OfferError}
 import org.apache.commons.lang.RandomStringUtils
 import org.joda.time.DateTime
 import parallelai.wallet.entity.{Brand, _}
-import parallelai.wallet.persistence.{UserAccountDAO, KaredoSalesDAO, OfferDAO, BrandDAO}
+import parallelai.wallet.persistence._
 import spray.json._
 
 import scala.concurrent.Future
@@ -52,6 +52,7 @@ object OfferActor {
 
 class OfferActor(implicit val saleDAO: KaredoSalesDAO,
                  implicit val offerDAO: OfferDAO,
+                 implicit val changeDAO: KaredoChangeDAO,
                  implicit val brandDAO: BrandDAO,
                  implicit val customerDAO: UserAccountDAO,
                  implicit val bindingModule: BindingModule) extends Actor with ActorLogging with Injectable {
@@ -64,6 +65,41 @@ class OfferActor(implicit val saleDAO: KaredoSalesDAO,
     case request: SaleCreate => replyToSender(handleSaleCreate(request))
     case request: SaleRequestDetail => replyToSender(handleSaleDetail(request))
     case request: SaleComplete => replyToSender(handleSaleComplete(request))
+    case request: RequestKaredoChange => replyToSender(handleKaredoChangeInquiry(request))
+    case request: KaredoChange => replyToSender(handleKaredoChangeSet(request))
+    case request: Currency => replyToSender(handleConversion(request))
+  }
+   def handleConversion(currency: Currency): Future[ResponseWithFailure[OfferError, Currency]] =
+  {
+    successful {
+      
+       changeDAO.findByCurrency(currency.currency) match {
+        case Some(found) => SuccessResponse(Currency("KAR", found.change * currency.amount))
+        case _ => FailureResponse(InvalidOfferRequest(s"Can't find change for ${currency.currency}"))
+      }
+
+    }
+  }
+
+  def handleKaredoChangeSet(change: KaredoChange): Future[ResponseWithFailure[OfferError, KaredoChange]] =
+  {
+    successful {
+      changeDAO.insertNew(KaredoChangeDB(currency=change.currency,change=change.change)) match {
+        case Some(uuid) => SuccessResponse(change)
+        case None => FailureResponse(InvalidOfferRequest("Can't insert change"))
+      }
+
+    }
+  }
+
+  def handleKaredoChangeInquiry(change: RequestKaredoChange): Future[ResponseWithFailure[OfferError, KaredoChange]] =
+  {
+    successful {
+      changeDAO.findByCurrency(change.currency) match {
+        case Some(found) => SuccessResponse(KaredoChange(found.currency, found.change))
+        case _ => FailureResponse(InvalidOfferRequest(s"Can't find change for ${change.currency}"))
+      }
+    }
   }
 
   def handleSaleCreate(create: SaleCreate): Future[ResponseWithFailure[OfferError, SaleResponse]] = successful {

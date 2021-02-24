@@ -22,6 +22,7 @@ class WithMockPersistence(
   override val offerDAO: OfferDAO,
   override val userSessionDAO: UserSessionDAO,
   override val saleDAO: KaredoSalesDAO,
+  override val changeDAO: KaredoChangeDAO,
   override val messenger: ActorRef)
 
   extends Injectable

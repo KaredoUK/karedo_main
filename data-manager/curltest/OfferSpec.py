@@ -10,6 +10,9 @@ import unittest, json
 code=""
 from fixture import *
 
+def almost_equal(value_1, value_2, accuracy = 10**-8):
+    return abs(value_1 - value_2) < accuracy
+
 class TestOffer(unittest.TestCase):
 
 
@@ -101,7 +104,36 @@ class TestOffer(unittest.TestCase):
         userTotalPoints=js["userTotalPoints"]
         assert userTotalPoints == (initialPoints + 15)
 
-   
+    def test13_P119_CanSetAndRetrieveChange(self):
+        global sessionId
+        title("PARALLELAI-119: set and retrieve Karedos change")
+
+        r=post("merchant/karedos/GBP", { "currency": "GBP", "change": 2310.0 }, sessionId)
+        assert r.status_code == HTTP_OK
+
+        r=get("merchant/karedos/GBP",sessionId)
+        assert r.status_code == HTTP_OK
+
+        js=json.loads(r.text)
+        change=js["change"]
+        assert almost_equal(change,2310) == True
+
+    def test14_P115_DoMoneyConversion(self):
+        global sessionId
+        title("PARALLELAI-115: do money conversion")
+
+        r=post("merchant/karedos/GBP", { "currency": "GBP", "change": 2310.0 }, sessionId)
+        assert r.status_code == HTTP_OK
+
+        r=put("merchant/convertmoney",{"currency":"GBP","amount":2},sessionId)
+        assert r.status_code == HTTP_OK
+
+        js=json.loads(r.text)
+        amount=js["amount"]
+        assert almost_equal(amount,2310*2) == True
+
+
+
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestOffer)
 

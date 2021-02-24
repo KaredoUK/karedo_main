@@ -259,9 +259,26 @@ case class SaleCreate(
 case class SaleResponse(
     @(ApiModelProperty@field)(value="Id of newly created sale")
     saleId: UUID)
+
+@ApiModel(description = "Change for Karedos in currency")
+case class KaredoChange(
+                         @(ApiModelProperty@field)(value="currency")
+                         currency: String,
+                         @(ApiModelProperty@field)(value="actual change")
+                         change: Double)
+                         
+@ApiModel(description = "Currency expression")
+case class Currency(
+                         @(ApiModelProperty@field)(value="currency")
+                         currency: String,
+                         @(ApiModelProperty@field)(value="amount in that currency")
+                         amount: Double)
+
+
 case class SaleRequestDetail(saleId: UUID)
 case class SaleDetail(merchantName: String, points: KaredoPoints)
 case class SaleComplete(accountId: UUID, saleId: UUID)
+case class RequestKaredoChange(currency: String)
 
 case class GetOfferCodeRequest(userId: UUID, adId: UUID)
 case class GetOfferCodeResponse(saleId: UUID, code: String)

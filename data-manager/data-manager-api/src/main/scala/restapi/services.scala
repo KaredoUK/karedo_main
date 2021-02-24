@@ -95,7 +95,8 @@ class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route, doSwag
         typeOf[MediaHttpService], 
         typeOf[BrandHttpService],
         typeOf[OfferHttpService],
-        typeOf[SaleHttpService])
+        typeOf[SaleHttpService],
+        typeOf[MerchantHttpService])
 
     def modelTypes =
       Seq(

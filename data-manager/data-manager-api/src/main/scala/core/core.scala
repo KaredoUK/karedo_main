@@ -58,6 +58,7 @@ trait Persistence {
   def clientApplicationDAO : ClientApplicationDAO
   def userSessionDAO: UserSessionDAO
   def saleDAO: KaredoSalesDAO
+  def changeDAO: KaredoChangeDAO
 }
 
 trait MongoPersistence extends Persistence {
@@ -72,6 +73,7 @@ trait MongoPersistence extends Persistence {
   override val clientApplicationDAO : ClientApplicationDAO = new ClientApplicationMongoDAO()
   override val userSessionDAO: UserSessionDAO = new MongoUserSessionDAO()
   override val saleDAO: KaredoSalesDAO = new KaredoSalesMongoDAO()
+  override val changeDAO: KaredoChangeDAO = new KaredoChangeMongoDAO()
 }
 
 trait ServiceActors {
@@ -129,6 +131,7 @@ trait BaseCoreActors extends ServiceActors with RestMessageActors  {
   implicit val implicitClientApplicationDAO = clientApplicationDAO
   implicit val implicitUserSessionDAO = userSessionDAO
   implicit val implicitSaleDAO = saleDAO
+  implicit val implicitChangeDAO = changeDAO
 
   override val registration = system.actorOf(
     Props(new RegistrationActor(messenger)) // messenger is "untyped" so it is not clean to implicit it
