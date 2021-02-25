@@ -39,7 +39,7 @@ class BrandServiceSpec
       val newBrandUUID = UUID.randomUUID()
       mockedBrandDAO.insertNew(any[Brand]) returns Some(newBrandUUID)
 
-      val data: BrandData = BrandData("brand X", "iconID")
+      val data: BrandData = BrandData("brand X", iconId="iconID")
 
       val response = wait(pipeline {
         Post(s"$serviceUrl/brand", data).withHeaders(headers)
@@ -59,20 +59,20 @@ class BrandServiceSpec
     "PARALLELAI-95: Get a single brand" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[BrandData]
 
-      val brand = new Brand(UUID.randomUUID(), "brandName", "iconID", List.empty)
+      val brand = new Brand(UUID.randomUUID(), "brandName", iconId="iconID", ads=List.empty)
       mockedBrandDAO.getById(any[UUID]) returns Some(brand)
 
       val response = wait(pipeline {
         Get(s"$serviceUrl/brand/${brand.id}").withHeaders(headers)
       })
 
-      response shouldEqual BrandData(brand.name, brand.iconId)
+      response shouldEqual BrandData(brand.name, iconId=brand.iconId)
     }
 
     "PARALLELAI-68: Deactivate Brand" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[String]
 
-      val brand = new Brand(UUID.randomUUID(), "brandName", "iconID", List.empty)
+      val brand = new Brand(UUID.randomUUID(), "brandName", iconId="iconID", ads=List.empty)
       mockedBrandDAO.getById(any[UUID]) returns Some(brand)
 
       val response = wait(pipeline {
@@ -85,7 +85,7 @@ class BrandServiceSpec
     "PARALLELAI-65: Create Ad" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[AdvertDetailResponse]
 
-      val brand = new Brand(UUID.randomUUID(), "brandName", "iconID", List.empty)
+      val brand = new Brand(UUID.randomUUID(), "brandName", iconId="iconID", ads=List.empty)
       // mockedBrandDAO.getById(any[UUID]) returns Some(brand)
 
       val ad = AdvertDetail(text = "text", imageIds = List(ImageId("image1"), ImageId("image2")), value = 100)

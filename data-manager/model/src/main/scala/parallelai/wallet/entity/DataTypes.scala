@@ -58,6 +58,9 @@ case class AdvertisementDetail(@Key("_id") id: UUID = UUID.randomUUID(),
 
 case class Brand(@Key("_id") id: UUID = UUID.randomUUID(),
                  name: String = "",
+                 createDate: DateTime=DateTime.now(),
+                 startDate: DateTime=DateTime.now(),
+                 endDate: DateTime = DateTime.now().plusDays(30),
                  iconId: String = "",
                  ads: List[AdvertisementDetail] = List())
 

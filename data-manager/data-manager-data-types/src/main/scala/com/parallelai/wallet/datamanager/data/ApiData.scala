@@ -8,6 +8,7 @@ package com.parallelai.wallet.datamanager.data
 import java.util.UUID
 import org.joda.time.DateTime
 import com.wordnik.swagger.annotations._
+import org.joda.time.format.ISODateTimeFormat
 import scala.annotation.meta.field
 
 object KaredoTypes {
@@ -164,12 +165,22 @@ case class BrandRecord(
                         id: UUID,
                         @(ApiModelProperty@field)(value = "Brand Name")
                         name: String,
+                        @(ApiModelProperty@field)(value = "Creation date iso 8601")
+                        createDate: String,
+                        @(ApiModelProperty@field)(value = "Start date iso 8601")
+                        startDate: String,
+                        @(ApiModelProperty@field)(value = "End date iso 8601")
+                        endDate: String,
                         @(ApiModelProperty@field)(value = "Brand Icon")
                         iconId: String) extends ApiDataResponse
 @ApiModel(description = "Brand Data to create")
 case class BrandData(
                       @(ApiModelProperty@field)(value = "Brand Name")
                       name: String,
+                      @(ApiModelProperty@field)(value = "Starting Time format '1997-07-16T19:20:30.45Z'")
+                      startDate: String = ISODateTimeFormat.dateTime().print(DateTime.now()),
+                      @(ApiModelProperty@field)(value = "Ending Time format '1997-07-16T19:20:30.45Z'")
+                      endDate: String = ISODateTimeFormat.dateTime().print(DateTime.now().plusDays(10)),
                       @(ApiModelProperty@field)(value = "Icon Image reference")
                       iconId: String ) extends ApiDataRequest
 

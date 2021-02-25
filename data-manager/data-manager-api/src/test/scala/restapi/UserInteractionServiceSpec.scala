@@ -35,7 +35,7 @@ class UserInteractionServiceSpec
     "PARALLELAI-108: User interaction with a brand" in new WithMockedPersistenceRestService {
       val pipeline = sendReceive ~> unmarshal[InteractionResponse]
       val user = UserAccount(UUID.randomUUID(),Some("1234"),Some("email"))
-      val brand = Brand(UUID.randomUUID(), "brandName", "iconID", List.empty)
+      val brand = Brand(UUID.randomUUID(), "brandName", iconId="iconID", ads=List.empty)
       mockedBrandDAO.getById(any[UUID]) returns Some(brand)
 
       mockedUserAccountDAO.addPoints(any[UUID],any[Long]) returns Some(UserAccountTotalPoints(10))

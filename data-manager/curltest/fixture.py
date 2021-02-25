@@ -83,7 +83,10 @@ nameMerchant(merchantId,merchantSessionId)
 # creating some brand with some ads
 def mkBrand(session):
     iconId="iconId"
-    r = post("brand", {"name": "brandX", "iconId": iconId}, sessionId)
+    r = post("brand", {"name": "brandX", "iconId": iconId, 
+                       "startDate":  datetime.utcnow().isoformat(),
+                       "endDate": (datetime.utcnow()+timedelta(days=10)).isoformat()},
+              sessionId)
     if (r.status_code != HTTP_OK): sys.exit(105)
     js = json.loads(r.text)
     brandId=js["id"]

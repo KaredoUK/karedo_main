@@ -8,7 +8,8 @@ import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import com.parallelai.wallet.datamanager.data._
 import objAPI._
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTimeZone, DateTime}
+import org.joda.time.format.ISODateTimeFormat
 import parallelai.wallet.entity.{Brand, _}
 import parallelai.wallet.persistence._
 import rules.ComputePoints
@@ -26,7 +27,7 @@ class BrandActor()
                  implicit val logDAO: LogDAO,
                  implicit val hintDAO: HintDAO)
 
-  extends Actor with ActorLogging with Injectable {
+  extends Actor with ActorLogging with Injectable with ISODateConversion {
 
   def receive: Receive = {
     case request: BrandData => replyToSender(handleCreateBrand(request))
@@ -117,7 +118,10 @@ class BrandActor()
     validateBrand(request) match {
       case None =>
         log.info("Creating new brand for request {}", request)
-        val newbrand = Brand(name = request.name, iconId = request.iconId, ads = List[AdvertisementDetail]())
+        val newbrand = Brand(name = request.name,
+          startDate=DateTime.parse(request.startDate),
+          endDate=DateTime.parse(request.endDate),
+          iconId = request.iconId, ads = List[AdvertisementDetail]())
         val uuid = brandDAO.insertNew(newbrand).get
         val response = BrandResponse(uuid)
         SuccessResponse(response)
@@ -178,18 +182,27 @@ class BrandActor()
 
   def handleListBrands: List[BrandRecord] = {
 
-    val list = brandDAO.list.map(b => BrandRecord(b.id, b.name, b.iconId))
+    val list = brandDAO.list.map(b => BrandRecord(b.id, b.name,
+      b.createDate,
+      b.startDate,
+      b.endDate,
+      b.iconId))
     log.info(s" returning a list of ${list.size} brands")
     list
 
   }
 
 
+
   def handleGetBrand(request: BrandIDRequest): Future[ResponseWithFailure[APIError, BrandRecord]] = successful {
     brandDAO.getById(request.brandId) match {
       case Some(b) => {
         log.info(s"getting brand ${b.id}")
-        SuccessResponse(BrandRecord(b.id, b.name, b.iconId))
+        SuccessResponse(BrandRecord(b.id, b.name,
+          b.createDate,
+          b.startDate,
+          b.endDate,
+          b.iconId))
       }
       case None => {
         log.info(s" cannot get brand ${request.brandId}")
@@ -214,7 +227,7 @@ class BrandActor()
 
 
   def validateBrand(request: BrandData): Option[String] = request match {
-    case BrandData("", _) => Some("Name must be not empty")
+    case BrandData("", _, _, _) => Some("Name must be not empty")
     case _ => None
   }
 

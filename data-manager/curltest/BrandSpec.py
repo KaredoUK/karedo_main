@@ -1,4 +1,5 @@
 from common import *
+
 import unittest, json
 from fixture import *
 
@@ -9,7 +10,8 @@ class TestBrand(unittest.TestCase):
         title("PARALLELAI-67API: Create Brand")
 
         iconId="iconId"
-        r = post("brand", {"name": "brandX", "iconId": iconId}, sessionId)
+        r = post("brand", {"name": "brandX", "iconId": iconId, "startDate": datetime.utcnow().isoformat(),
+                           "endDate": (datetime.utcnow()+timedelta(days=10)).isoformat()}, sessionId)
         assert r.status_code == HTTP_OK
         js = json.loads(r.text)
         brandId=js["id"]
@@ -25,8 +27,9 @@ class TestBrand(unittest.TestCase):
         global sessionId, brandId, brandId2
         title("PARALLELAI 95 API: Get Brands")
 
-        r = post("brand", {"name": "brandY", "iconId": "iconId"}, sessionId)
-        assert r.status_code == HTTP_OK
+        r = post("brand", {"name": "brandY", "iconId": "iconId", "startDate": datetime.utcnow().isoformat(),
+                           "endDate": (datetime.utcnow()+timedelta(days=10)).isoformat()}, sessionId)
+        self.assertEqual(r.status_code,HTTP_OK)
         js = json.loads(r.text)
         brandId2=js["id"]
 
@@ -125,7 +128,8 @@ class TestBrand(unittest.TestCase):
         global sessionId, brandId, brandId2
         title("PARALLELAI-90API: Add Brand to User")
 
-        r = post("brand", {"name": "brandY", "iconId": "iconId"}, sessionId)
+        r = post("brand", {"name": "brandY", "iconId": "iconId", "startDate": datetime.utcnow().isoformat(),
+                           "endDate": (datetime.utcnow()+timedelta(days=10)).isoformat()}, sessionId)
         assert r.status_code == HTTP_OK
         js = json.loads(r.text)
         brandId2=js["id"]

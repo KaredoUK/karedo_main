@@ -5,6 +5,7 @@ import java.util.UUID
 import akka.actor.{Props, ActorLogging, Actor}
 import akka.actor.Actor.Receive
 import core.common.RequestValidationChaining
+import org.joda.time.format.ISODateTimeFormat
 import parallelai.wallet.persistence.{BrandDAO, ClientApplicationDAO, UserAccountDAO}
 import com.parallelai.wallet.datamanager.data._
 import parallelai.wallet.entity.{Brand, UserPersonalInfo, AccountSettings, UserAccount}
@@ -113,7 +114,7 @@ object EditAccountActor {
 import EditAccountActor._
 
 class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: ClientApplicationDAO, brandDAO: BrandDAO)
-  extends Actor with ActorLogging with RequestValidationChaining {
+  extends Actor with ActorLogging with RequestValidationChaining with ISODateConversion {
 
   import context.dispatcher
 
@@ -213,7 +214,11 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
     val list = userAccountDAO.listUserSubscribedBrands(accountId).map {
       id =>
         brandDAO getById (id) map {
-          brand => BrandRecord(brand.id, brand.name, brand.iconId)
+          brand => BrandRecord(brand.id, brand.name,
+            brand.createDate,
+            brand.startDate,
+            brand.endDate,
+            brand.iconId)
         }
     } filter {
       _.isDefined
