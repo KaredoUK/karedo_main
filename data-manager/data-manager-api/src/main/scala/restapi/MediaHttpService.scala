@@ -98,7 +98,7 @@ abstract class MediaHttpService (mediaActor: ActorRef,
       }
     }
 
-  @ApiOperation(httpMethod = "GET", response = classOf[String],
+  @ApiOperation(httpMethod = "GET", response = classOf[StatusResponse],
     value = "PARALLELAI-97: API: Retrieve Media File")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "mediaId", required = true, dataType = "String", paramType = "path",
@@ -142,7 +142,7 @@ abstract class MediaHttpService (mediaActor: ActorRef,
                 }
               }
 
-            case SuccessResponse(None) => respondWithStatus(StatusCodes.NotFound) { complete { "" } }
+            case SuccessResponse(None) => respondWithStatus(StatusCodes.NotFound) { complete { "KO" } }
           }
         }
       }

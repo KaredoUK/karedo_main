@@ -96,7 +96,7 @@ class BrandServiceSpec
       })
 
       response should beLike {
-        case AdvertDetailResponse(_, ad.text, ad.imageIds, ad.value) => ok
+        case AdvertDetailResponse(_, ad.text, _,_, ad.imageIds, ad.value) => ok
         case _ => ko
       }
       print(s"response.id: ${response.id}")
@@ -104,6 +104,8 @@ class BrandServiceSpec
         brand.id,
         AdvertisementDetail(id=any[UUID],
           publishedDate=any[DateTime],
+          startDate=DateTime.now,
+          endDate=DateTime.now.plusDays(10),
           text=ad.text,
           imageIds=ad.imageIds.map {_.imageId},
           value=ad.value

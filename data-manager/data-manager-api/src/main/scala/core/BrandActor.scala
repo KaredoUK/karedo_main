@@ -134,13 +134,12 @@ class BrandActor()
 
   def handleReturnSuggestedAds(request: RequestSuggestedAdForUsersAndBrand): List[SuggestedAdForUsersAndBrand] = {
 
-    hintDAO.suggestedNAdsForUserAndBrandLimited(request.userId, request.brandId, request.max)
-      .map(x => {
+    for {
+      hint <- hintDAO.suggestedNAdsForUserAndBrandLimited(request.userId, request.brandId, request.max)
+      ad <- brandDAO.getAdById(hint.ad)
+    } yield
+    SuggestedAdForUsersAndBrand(ad.id, ad.text, ad.imageIds.mkString(","))
 
-      val adDetail = brandDAO.getAdById(x.ad).getOrElse(
-        AdvertisementDetail(id = new UUID(0, 0), imageIds = List("empty")))
-      SuggestedAdForUsersAndBrand(x.ad, adDetail.text, adDetail.imageIds.mkString(","))
-    })
 
   }
 
@@ -148,7 +147,8 @@ class BrandActor()
     successful {
       SuccessResponse(
         brandDAO.listAds(adverts.brandId, adverts.max).map {
-          detail => AdvertDetailResponse(id = detail.id, text = detail.text, imageIds = detail.imageIds map {
+          detail => AdvertDetailResponse(id = detail.id, text = detail.text, 
+              startDate=detail.startDate, endDate=detail.endDate, imageIds = detail.imageIds map {
             ImageId
           }, value = detail.value)
         })
@@ -158,25 +158,30 @@ class BrandActor()
   def handleGetBrandAdvert(advert: GetBrandAdvert): Future[ResponseWithFailure[APIError, AdvertDetailResponse]] =
     successful {
       brandDAO.getAdById(advert.adId) match {
-        case Some(detail) => SuccessResponse(AdvertDetailResponse(detail.id, detail.text, detail.imageIds.map(ImageId(_)), detail.value))
+        case Some(detail) => SuccessResponse(AdvertDetailResponse(
+            detail.id, detail.text, detail.startDate, detail.endDate, detail.imageIds.map(ImageId(_)), detail.value))
         case None => FailureResponse(InvalidRequest("Invalid adId"))
       }
     }
 
-  def handleDeleteAdv(request: DeleteAdvRequest): Future[ResponseWithFailure[APIError, String]] = successful {
+  def handleDeleteAdv(request: DeleteAdvRequest): Future[ResponseWithFailure[APIError, StatusResponse]] = successful {
     brandDAO.delAd(request.advId)
 
-    SuccessResponse("OK")
+    SuccessResponse(StatusResponse("OK"))
   }
 
   def handleAddAdvert(request: AddAdvertCommand): Future[ResponseWithFailure[APIError, AdvertDetailResponse]] = successful {
 
-    val detail: AdvertisementDetail = AdvertisementDetail(text = request.text, imageIds = request.imageIds map {
+    val detail: AdvertisementDetail = AdvertisementDetail(
+        text = request.text, startDate = request.startDate,
+      endDate=request.endDate, imageIds = request.imageIds map {
       _.imageId
     }, value = request.value)
     //log.info(s"XXX using detail uuid: ${detail.id}")
     brandDAO.addAd(request.brandId, detail)
-    SuccessResponse(AdvertDetailResponse(detail.id, request.text, request.imageIds, request.value))
+    SuccessResponse(
+        AdvertDetailResponse(
+            detail.id, request.text, request.startDate, request.endDate, request.imageIds, request.value))
   }
 
 
@@ -211,12 +216,12 @@ class BrandActor()
     }
   }
 
-  def handleDeleteBrand(request: DeleteBrandRequest): Future[ResponseWithFailure[APIError, String]] = successful {
+  def handleDeleteBrand(request: DeleteBrandRequest): Future[ResponseWithFailure[APIError, StatusResponse]] = successful {
     brandDAO.getById(request.brandId) match {
       case Some(b) => {
         log.info(s"deleting brand ${request.brandId}")
         brandDAO.delete(request.brandId)
-        SuccessResponse("")
+        SuccessResponse(StatusResponse("OK"))
       }
       case None => {
         log.info(s"cannot delete brand ${request.brandId}")

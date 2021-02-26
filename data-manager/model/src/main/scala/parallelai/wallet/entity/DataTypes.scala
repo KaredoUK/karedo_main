@@ -20,7 +20,11 @@ case class MsisdnUserLookup(msisdn: String, userId: UUID)
 
 case class ClientApplication(id: UUID, accountId: UUID, activationCode: String, active: Boolean = false)
 
-case class UserPersonalInfo(name: String, postCode: Option[String] = None, birthDate: Option[DateTime] = None, gender: Option[String] = None)
+case class UserPersonalInfo(
+                             name: String,
+                             postCode: Option[String] = None,
+                             birthDate: Option[String] = None,
+                             gender: Option[String] = None)
 
 case class AccountSettings(maxMessagesPerWeek: Int)
 
@@ -51,7 +55,9 @@ case class Offer(@Key("_id") id: UUID = UUID.randomUUID(), name: String = "", br
 
 
 case class AdvertisementDetail(@Key("_id") id: UUID = UUID.randomUUID(),
-                               publishedDate: DateTime = new DateTime(),
+                               publishedDate: DateTime = DateTime.now(),
+                               startDate: DateTime,
+                               endDate:  DateTime,
                                text: String = "",
                                imageIds: List[String] = List(),
                                value: KaredoPoints = 0)

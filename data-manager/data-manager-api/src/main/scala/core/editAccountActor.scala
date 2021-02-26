@@ -16,7 +16,7 @@ import scala.concurrent.Future._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-object EditAccountActor {
+object EditAccountActor extends ISODateConversion {
   def props(userAccountDAO: UserAccountDAO, clientApplicationDAO: ClientApplicationDAO, brandDAO: BrandDAO): Props =
     Props(new EditAccountActor(userAccountDAO, clientApplicationDAO, brandDAO))
 
@@ -169,7 +169,7 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
       log.info("Trying to update account with id {}", userProfile.info.userId)
       userAccountDAO.update(userProfileToUserAccount(userProfile))
       replyToSender {
-        SuccessResponse("OK")
+        SuccessResponse(StatusResponse("OK"))
       }
 
     case DeleteAccount(accountId) =>
@@ -178,7 +178,7 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
       replyToSender(
         SuccessResponse {
           userAccountDAO.delete(accountId)
-          ""
+          StatusResponse("OK")
         }
       )
 

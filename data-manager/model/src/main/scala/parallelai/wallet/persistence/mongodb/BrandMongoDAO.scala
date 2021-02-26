@@ -87,8 +87,10 @@ class BrandMongoDAO (implicit val bindingModule: BindingModule)
 
   override def listAds(brandId: UUID, max:Int=0): List[AdvertisementDetail] = {
     dao.findOneById(brandId) match {
-      case Some(brand) => if(max>0) brand.ads.take(max) else brand.ads
-      case _ => List[AdvertisementDetail]()
+      case Some(brand) =>
+        if(max>0) brand.ads.take(max) else brand.ads
+      case _ =>
+        List[AdvertisementDetail]()
     }
 
   }

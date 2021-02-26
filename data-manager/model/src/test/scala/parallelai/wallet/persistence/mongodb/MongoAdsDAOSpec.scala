@@ -28,12 +28,15 @@ class MongoAdsDAOSpec
     val brandId = brandDAO.insertNew(aBrand).get
     val text1 = "adtext"
     val ad1 = AdvertisementDetail(
-      text = text1, imageIds = List("image1", "image2"), value = 100)
+      text = text1, imageIds = List("image1", "image2"), value = 100,
+      startDate=DateTime.now,
+    endDate=DateTime.now.plusDays(10))
 
 
     val text2 = "adtext2"
     val ad2 = AdvertisementDetail(
-      text = text2, imageIds = List("image3"), value = 200)
+      text = text2, imageIds = List("image3"), value = 200, startDate=DateTime.now,
+      endDate=DateTime.now.plusDays(10))
 
     brandDAO.addAd(brandId, ad1)
     brandDAO.addAd(brandId, ad2)

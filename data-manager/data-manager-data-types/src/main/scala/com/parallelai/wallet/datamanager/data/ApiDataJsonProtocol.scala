@@ -73,8 +73,9 @@ trait ApiDataJsonProtocol extends DefaultJsonProtocol  {
   implicit val imageIdJson = jsonFormat1(ImageId)
 
   implicit val statusJson = jsonFormat1(StatusResponse)
-  implicit val advDetailResponseJson = jsonFormat4(AdvertDetailResponse)
-  implicit val advDetailJson = jsonFormat3(AdvertDetail)
+  implicit val advDetailResponseJson = jsonFormat6(AdvertDetailResponse)
+
+  implicit val advDetailJson = jsonFormat5(AdvertDetail)
   implicit val addMediaRequestJson = jsonFormat3(AddMediaRequest)
   implicit val addMediaResponseJson = jsonFormat1(AddMediaResponse)
   implicit val getMediaResponseJson = jsonFormat2(GetMediaResponse)

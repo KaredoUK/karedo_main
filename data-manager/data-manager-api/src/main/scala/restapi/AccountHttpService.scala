@@ -195,7 +195,7 @@ extends HttpService
     }
 
   @Path("/{account}")
-  @ApiOperation(position=6,httpMethod = "PUT", response = classOf[String],
+  @ApiOperation(position=6,httpMethod = "PUT", response = classOf[StatusResponse],
     value = "Parallelai-50: Change User Information")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(
@@ -223,14 +223,14 @@ extends HttpService
             handleWith {
               userProfile: UserProfile =>
                 (editAccountActor ? UpdateAccount(userProfile)).
-                  mapTo[ResponseWithFailure[EditAccountError,String]]
+                  mapTo[ResponseWithFailure[EditAccountError,StatusResponse]]
             }
           }
       }
     }
 
   @Path("/{account}")
-  @ApiOperation(position=7,httpMethod = "DELETE", response = classOf[String],
+  @ApiOperation(position=7,httpMethod = "DELETE", response = classOf[StatusResponse],
     value = "Parallelai-52: Delete User")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
@@ -250,7 +250,7 @@ extends HttpService
           delete {
             complete {
               (editAccountActor ? DeleteAccount(accountId)).
-                mapTo[ResponseWithFailure[EditAccountError, String]]
+                mapTo[ResponseWithFailure[EditAccountError, StatusResponse]]
             }
           }
       }
@@ -285,7 +285,7 @@ extends HttpService
     }
 
   @Path("/{account}/brand")
-  @ApiOperation(position=9,httpMethod = "POST", response = classOf[String],
+  @ApiOperation(position=9,httpMethod = "POST", response = classOf[StatusResponse],
     value = "Parallelai-90: Add Brand to User")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(
@@ -312,14 +312,14 @@ extends HttpService
             handleWith {
               brandIdRequest: BrandIDRequest =>
                 (editAccountActor ? AddBrand(accountId, brandIdRequest.brandId)).
-                  mapTo[ResponseWithFailure[EditAccountError, String]]
+                  mapTo[ResponseWithFailure[EditAccountError, StatusResponse]]
             }
           }
       }
     }
 
   @Path("/{account}/brand/{brandId}")
-  @ApiOperation(position=10,httpMethod = "DELETE", response = classOf[String],
+  @ApiOperation(position=10,httpMethod = "DELETE", response = classOf[StatusResponse],
     value = "Parallelai-90: Remove User Brand")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
@@ -343,7 +343,7 @@ extends HttpService
           delete {
             complete {
               (editAccountActor ? RemoveBrand(user, brand)).
-                mapTo[ResponseWithFailure[EditAccountError, String]]
+                mapTo[ResponseWithFailure[EditAccountError, StatusResponse]]
             }
           }
         }
@@ -441,7 +441,7 @@ extends HttpService
     }
 
   @Path("/{account}/suggestedBrands")
-  @ApiOperation(position=14,httpMethod = "POST", response = classOf[String],
+  @ApiOperation(position=14,httpMethod = "POST", response = classOf[StatusResponse],
     value = "Parallelai-70: Add Suggested Brand to user")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
@@ -465,7 +465,10 @@ extends HttpService
         post {
           handleWith {
             brandIdRequest: BrandIDRequest =>
-              (editAccountActor ? AddBrand(accountId, brandIdRequest.brandId)).mapTo[ResponseWithFailure[EditAccountError, String]]
+              (editAccountActor ?
+                AddBrand(accountId, brandIdRequest.brandId)).
+
+                mapTo[ResponseWithFailure[EditAccountError, StatusResponse]]
           }
         }
       }

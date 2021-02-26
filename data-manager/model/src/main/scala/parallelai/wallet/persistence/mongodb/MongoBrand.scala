@@ -9,7 +9,7 @@ import parallelai.wallet.persistence.Interaction
 
 object MongoBrandAds {
   def fromAd(ad: AdvertisementDetail) =
-    MongoBrandAd(ad.id, ad.text, ad.publishedDate, ad.imageIds, ad.value)
+    MongoBrandAd(ad.id, ad.text, ad.publishedDate, ad.startDate, ad.endDate, ad.imageIds, ad.value)
 }
 
 case class MongoBrandAd
@@ -17,11 +17,13 @@ case class MongoBrandAd
   @Key("_id") id: UUID=UUID.randomUUID(),
   text: String="",
   publishedDate: DateTime = new DateTime(),
+  startDate: DateTime,
+  endDate: DateTime,
   imageIds: List[String] = List[String](),
   value: KaredoPoints=0)
 {
   def toBrandAd(): AdvertisementDetail =
-    AdvertisementDetail(id, publishedDate, text, imageIds, value)
+    AdvertisementDetail(id, publishedDate, startDate, endDate, text, imageIds, value)
 }
 
 case class MongoBrand

@@ -128,7 +128,7 @@ case class UserInfo(
                      @(ApiModelProperty@field)(value = "country")
                      country: Option[String],
                      @(ApiModelProperty@field)(value = "birth date")
-                    birthDate: Option[DateTime],
+                    birthDate: Option[String],
                      @(ApiModelProperty@field)(value = "gender")
                      gender: Option[String]) extends WithUserContacts
 
@@ -198,12 +198,16 @@ case class DeleteBrandRequest(brandId: UUID) extends ApiDataRequest
 // This is here just to please the UI devs who are having problem to parse a list of Strings
 case class ImageId(imageId: String)
 
-case class AddAdvertCommand(brandId: UUID, text: String, imageIds: List[ImageId], value: KaredoPoints) extends ApiDataRequest
+case class AddAdvertCommand(brandId: UUID, text: String, startDate:String, endDate:String,imageIds: List[ImageId], value: KaredoPoints) extends ApiDataRequest
 
 @ApiModel(description = "Detail of returned Ad")
 case class AdvertDetail(
                          @(ApiModelProperty@field)(value = "ad text")
                          text: String,
+                         @(ApiModelProperty@field)(value = "Starting Time format '1997-07-16T19:20:30.45Z'")
+                         startDate: String = ISODateTimeFormat.dateTime().print(DateTime.now()),
+                         @(ApiModelProperty@field)(value = "Ending Time format '1997-07-16T19:20:30.45Z'")
+                         endDate: String = ISODateTimeFormat.dateTime().print(DateTime.now().plusDays(10)),
                          @(ApiModelProperty@field)(value = "list of images")
                          imageIds: List[ImageId],
                          @(ApiModelProperty@field)(value = "points weight of this ad")
@@ -215,6 +219,10 @@ case class AdvertDetailResponse(
                                  id: UUID,
                                  @(ApiModelProperty@field)(value = "text of the ad")
                                  text: String,
+                                 @(ApiModelProperty@field)(value = "Starting Time format '1997-07-16T19:20:30.45Z'")
+                                 startDate: String = ISODateTimeFormat.dateTime().print(DateTime.now()),
+                                 @(ApiModelProperty@field)(value = "Ending Time format '1997-07-16T19:20:30.45Z'")
+                                 endDate: String = ISODateTimeFormat.dateTime().print(DateTime.now().plusDays(10)),
                                  @(ApiModelProperty@field)(value = "listing of images")
                                  imageIds: List[ImageId],
                                  @(ApiModelProperty@field)(value = "points weight of this ad")
@@ -293,6 +301,7 @@ case class RequestKaredoChange(currency: String)
 
 case class GetOfferCodeRequest(userId: UUID, adId: UUID)
 case class GetOfferCodeResponse(saleId: UUID, code: String)
+
 
 case class StatusResponse(status: String) extends ApiDataResponse
 

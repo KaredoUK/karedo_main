@@ -75,7 +75,9 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
         post {
           handleWith {
             brandData: BrandData =>
-              (brandActor ? brandData).mapTo[ResponseWithFailure[APIError, BrandResponse]]
+              (brandActor ? brandData).
+
+                mapTo[ResponseWithFailure[APIError, BrandResponse]]
           }
         }
       }
@@ -100,7 +102,9 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
           rejectEmptyResponse {
 
             complete {
-              (brandActor ? ListBrands).mapTo[List[BrandRecord]]
+              (brandActor ? ListBrands).
+
+                mapTo[List[BrandRecord]]
             }
           }
         }
@@ -126,7 +130,9 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
         get {
           complete {
 
-            (brandActor ? BrandIDRequest(brandId)).mapTo[ResponseWithFailure[APIError, BrandRecord]]
+            (brandActor ? BrandIDRequest(brandId)).
+
+              mapTo[ResponseWithFailure[APIError, BrandRecord]]
           }
         }
 
@@ -135,7 +141,7 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
   }
 
   // P68 DEACTIVATE BRAND
-  @ApiOperation(position=4,httpMethod = "DELETE", response = classOf[String],
+  @ApiOperation(position=4,httpMethod = "DELETE", response = classOf[StatusResponse],
     value = "Parallelai-68: Deactivate Brand")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
@@ -151,7 +157,9 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
     userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
       delete {
         complete {
-          (brandActor ? DeleteBrandRequest(brandId)).mapTo[ResponseWithFailure[APIError, String]]
+          (brandActor ? DeleteBrandRequest(brandId)).
+
+            mapTo[ResponseWithFailure[APIError, StatusResponse]]
         }
       }
     }
@@ -178,7 +186,9 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
           rejectEmptyResponse {
             get {
               complete {
-                (brandActor ? ListBrandsAdverts(brandId)).mapTo[ResponseWithFailure[APIError, List[AdvertDetailResponse]]]
+                (brandActor ? ListBrandsAdverts(brandId)).
+
+                  mapTo[ResponseWithFailure[APIError, List[AdvertDetailResponse]]]
               }
             }
           }
@@ -209,7 +219,9 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
         userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
           get {
             complete {
-              (brandActor ? GetBrandAdvert(brand,advert)).mapTo[ResponseWithFailure[APIError,AdvertDetailResponse]]
+              (brandActor ? GetBrandAdvert(brand,advert)).
+
+                mapTo[ResponseWithFailure[APIError,AdvertDetailResponse]]
             }
           }
         }
@@ -244,7 +256,12 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
           post {
             handleWith {
               request: AdvertDetail => {
-                (brandActor ? AddAdvertCommand(brandId, request.text, request.imageIds, request.value)).mapTo[ResponseWithFailure[APIError, AdvertDetailResponse]]
+                (brandActor ? AddAdvertCommand(
+                  brandId, request.text,
+                  request.startDate, request.endDate, request.imageIds,
+                  request.value)).
+
+                  mapTo[ResponseWithFailure[APIError, AdvertDetailResponse]]
               }
             }
           }
@@ -252,7 +269,7 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
     }
 
   // PARALLELAI-66 DISABLE AD
-  @ApiOperation(position=8,httpMethod = "DELETE", response = classOf[String],
+  @ApiOperation(position=8,httpMethod = "DELETE", response = classOf[StatusResponse],
     value = "Parallelai-66: Disable ad")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
@@ -272,7 +289,7 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
         userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
           delete {
             complete {
-              (brandActor ? DeleteAdvRequest(brandId, advId)).mapTo[ResponseWithFailure[APIError, String]]
+              (brandActor ? DeleteAdvRequest(brandId, advId)).mapTo[ResponseWithFailure[APIError, StatusResponse]]
             }
           }
         }
