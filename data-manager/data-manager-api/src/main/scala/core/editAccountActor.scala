@@ -36,6 +36,9 @@ object EditAccountActor extends ISODateConversion {
 
   case class ListBrandsRequest(brandId: UUID)
 
+  case class GetActiveAccountBrandOffers(accountId:  UserID, brandId: UUID)
+
+
   sealed trait EditAccountError
 
   case class UserNotExistent(user: UserID) extends EditAccountError
@@ -187,8 +190,20 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
     case request@RemoveBrand(accountId, brandId) => replyToSender(removeBrand(request))
 
     case ListBrandsRequest(accountId) => replyToSender(listBrands(accountId))
+
+    case GetActiveAccountBrandOffers(user,brand) => replyToSender(getActiveAccountBrandOffers(user,brand))
   }
 
+  def getActiveAccountBrandOffers(user: UserID, brand: UUID):
+    ResponseWithFailure[EditAccountError,GetActiveAccountBrandOffersResponse] =  {
+     userAccountDAO.getById(user) match {
+      case None => FailureResponse(UserNotExistent(user))
+      case Some(_) =>
+        SuccessResponse(GetActiveAccountBrandOffersResponse(brandDAO.listActiveAds(brand).size))
+    }
+
+
+  }
 
   def validAddBrand(addBrand: AddBrand): Option[EditAccountError] = {
     val AddBrand(user, brand) = addBrand
@@ -229,7 +244,7 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
     SuccessResponse(list)
   }
 
-  def addBrand(request: AddBrand): ResponseWithFailure[EditAccountError, String] =
+  def addBrand(request: AddBrand): ResponseWithFailure[EditAccountError, StatusResponse] =
 
     withValidations(request)(validAddBrand) {
       request => {
@@ -239,11 +254,11 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
 
         userAccountDAO.addBrand(user, brand)
 
-        SuccessResponse("OK")
+        SuccessResponse(StatusResponse("OK"))
       }
     }
 
-  def removeBrand(request: RemoveBrand): ResponseWithFailure[EditAccountError, String] = {
+  def removeBrand(request: RemoveBrand): ResponseWithFailure[EditAccountError, StatusResponse] = {
 
 
     val RemoveBrand(user, brand) = request
@@ -251,7 +266,7 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
 
     userAccountDAO.deleteBrand(user, brand)
 
-    SuccessResponse("OK")
+    SuccessResponse(StatusResponse("OK"))
 
   }
 }

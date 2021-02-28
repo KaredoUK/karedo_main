@@ -57,7 +57,9 @@ extends HttpService
         showUserBrands ~     // P69 GET AUTH /account/xxx/brand
         suggestedAdsForBrand ~ // P59 GET AUTH /account/xxx/brand/xxx
         suggestedBrandsPost ~ // P70 ???
-        suggestedBrandsGet   // P70 GET AUTH /account/xxx/suggestedbrands
+        suggestedBrandsGet ~   // P70 GET AUTH /account/xxx/suggestedbrands
+        P123               // get number of ACTIVE ads for user/brand GET /account/xxxx/brand/yyyy
+
     } 
 
   // PARALLELAI-77API: Create Account
@@ -492,7 +494,31 @@ extends HttpService
         }
       }
     }
-  
 
+  @Path("/{account}/brand/{brand}")
+  @ApiOperation(position=15,httpMethod = "GET", response = classOf[GetActiveAccountBrandOffersResponse],
+    value = "Parallelai-123: Get Number of valid ads for user/brand")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
+      value = "UUID of user to query"),
+    new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
+      value = "UUID of brand to query"),
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+      value = "SessionId for authentication/authorization")
+  ))
+  // GET /account/xxxx/brand/yyyy
+  def P123 =
+    path(JavaUUID / "brand" / JavaUUID ){
+      (accountId: UserID, brandId: UUID) =>
+        userAuthorizedFor(canAccessUser(accountId))(executionContext) { userAuthContext =>
+          get {
+            complete {
+              (editAccountActor ? GetActiveAccountBrandOffers(accountId, brandId)).
+                mapTo[ResponseWithFailure[EditAccountError, GetActiveAccountBrandOffersResponse]]
+
+            }
+          }
+        }
+    }
 
 }

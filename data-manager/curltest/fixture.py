@@ -84,8 +84,8 @@ nameMerchant(merchantId,merchantSessionId)
 def mkBrand(session):
     iconId="iconId"
     r = post("brand", {"name": "brandX", "iconId": iconId, 
-                       "startDate":  datetime.utcnow().isoformat(),
-                       "endDate": (datetime.utcnow()+timedelta(days=10)).isoformat()},
+                       "startDate":   ISONow(),
+                       "endDate":  ISONow(10)},
               sessionId)
     if (r.status_code != HTTP_OK): sys.exit(105)
     js = json.loads(r.text)
@@ -96,7 +96,10 @@ brandId=mkBrand(sessionId)
 
 def mkOffer(brandId, session):
 
-    data={ "text":"adtext", "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" } ], "value":5}
+    data={ "text":"adtext",
+           "startDate":   ISONow(),
+           "endDate":   ISONow(10),
+           "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" } ], "value":5}
     r=post("brand/"+brandId+"/advert",data, session)
     if (r.status_code != HTTP_OK): sys.exit(106)
 

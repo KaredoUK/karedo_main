@@ -4,7 +4,7 @@ import java.util.UUID
 
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
 import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
-
+import org.joda.time.{DateTime, Interval}
 
 
 import parallelai.wallet.entity._
@@ -93,6 +93,14 @@ class BrandMongoDAO (implicit val bindingModule: BindingModule)
         List[AdvertisementDetail]()
     }
 
+  }
+
+  override def listActiveAds(brandId: UUID): List[AdvertisementDetail] = {
+    listAds(brandId,0) filter {
+      ad =>
+        val interval=new Interval(ad.startDate,ad.endDate)
+        interval.contains(DateTime.now())
+    }
   }
 
 

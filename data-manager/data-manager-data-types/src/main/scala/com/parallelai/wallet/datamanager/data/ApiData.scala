@@ -246,9 +246,14 @@ case class DeleteAdvRequest(brandId: UUID, advId: UUID) extends ApiDataRequest
 // MEDIA
 case class AddMediaRequest(name: String, contentType: String, bytes: Array[Byte]) extends ApiDataRequest
 case class AddMediaResponse(mediaId: String) extends ApiDataResponse
+@ApiModel(description = "Number of active offers for user/brand")
+case class GetActiveAccountBrandOffersResponse(
+                                                @(ApiModelProperty@field)(value="the number")
+                                                numValidOffers: Int) extends ApiDataResponse
 
 case class GetMediaRequest(mediaId: String) extends ApiDataRequest
 case class GetMediaResponse(contentType: String, content: Array[Byte]) extends ApiDataResponse
+case class GetAccountBrandOffersResponse(numOfActiveOffers: Int)
 
 // Offer types
 case class OfferData(name: String, brandId: UUID, desc: Option[String], imagePath: Option[String], qrCodeId: Option[UUID], value: Option[Int])

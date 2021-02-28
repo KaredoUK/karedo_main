@@ -1,5 +1,6 @@
 #import http.client
 import os
+from datetime import datetime, date, time, timedelta
 
 from util import *
 from pymongo import MongoClient
@@ -10,6 +11,11 @@ MongoHost = os.getenv("MONGO_HOST","localhost")
 MongoPort = os.getenv("MONGO_PORT","12345")
 MongoDb = os.getenv("MONGO_DB","wallet_data")
 client = MongoClient(MongoHost,int(MongoPort))
+
+def ISONow(ndays=0):
+    ret= (datetime.utcnow()+timedelta(days=ndays)).isoformat()
+    return ret
+
 
 def clearDB():
     global client,MongoDb

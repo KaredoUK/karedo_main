@@ -10,8 +10,12 @@ class TestBrand(unittest.TestCase):
         title("PARALLELAI-67API: Create Brand")
 
         iconId="iconId"
-        r = post("brand", {"name": "brandX", "iconId": iconId, "startDate": datetime.utcnow().isoformat(),
-                           "endDate": (datetime.utcnow()+timedelta(days=10)).isoformat()}, sessionId)
+        r = post("brand", {
+            "name": "brandX",
+            "iconId": iconId,
+            "startDate": ISONow(),
+            "endDate": ISONow(10)
+        }, sessionId)
         assert r.status_code == HTTP_OK
         js = json.loads(r.text)
         brandId=js["id"]
@@ -27,8 +31,12 @@ class TestBrand(unittest.TestCase):
         global sessionId, brandId, brandId2
         title("PARALLELAI 95 API: Get Brands")
 
-        r = post("brand", {"name": "brandY", "iconId": "iconId", "startDate": datetime.utcnow().isoformat(),
-                           "endDate": (datetime.utcnow()+timedelta(days=10)).isoformat()}, sessionId)
+        r = post("brand",
+                 {"name": "brandY",
+                  "iconId": "iconId",
+                  "startDate": ISONow(),
+                  "endDate": ISONow(10)},
+                 sessionId)
         self.assertEqual(r.status_code,HTTP_OK)
         js = json.loads(r.text)
         brandId2=js["id"]
@@ -71,7 +79,13 @@ class TestBrand(unittest.TestCase):
         global sessionId, brandId, advId
         title("PARALLELAI-65API: Create Ad")
 
-        data={ "text":"adtext", "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" } ], "value":5}
+        data={
+            "text":"adtext",
+            "startDate":ISONow(),
+            "endDate":ISONow(10),
+            "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" } ],
+            "value":5}
+
         r=post("brand/"+brandId+"/advert",data, sessionId)
         assert r.status_code == HTTP_OK
 
@@ -85,7 +99,12 @@ class TestBrand(unittest.TestCase):
         global sessionId, brandId, advId, advId2
 
         title("PARALLELAI-66API: Disable Ad")
-        data={ "text":"adtext1", "imageIds": [ { "imageId" : "iconId" }, { "imageId" : "iconId" } ], "value":5}
+        data={
+            "text":"adtext1",
+            "startDate":ISONow(),
+            "endDate":ISONow(10),
+            "imageIds": [ { "imageId" : "iconId" }, { "imageId" : "iconId" } ],
+            "value":5}
         r=post("brand/"+brandId+"/advert",data, sessionId)
 
         assert r.status_code == HTTP_OK
@@ -103,11 +122,23 @@ class TestBrand(unittest.TestCase):
 
         title("PARALLELAI-64API: List Ads per Brand")
 
-        data={ "text":"A", "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" }], "value":6}
+        data={
+            "text":"A",
+            "startDate":ISONow(),
+            "endDate":ISONow(10),
+            "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" }],
+            "value":6}
         r=post("brand/"+brandId+"/advert",data, sessionId)
         assert r.status_code == HTTP_OK
 
-        data={ "text":"B", "imageIds": [ { "imageId" : "iconIdB" }, { "imageId" : "iconIdB" }], "value":7}
+        data={
+            "text":"B",
+            "startDate":ISONow(),
+            "endDate":ISONow(10),
+            "imageIds": [ { "imageId" : "iconIdB" }, { "imageId" : "iconIdB" }],
+            "value":7}
+
+
         r=post("brand/"+brandId+"/advert",data, sessionId)
         assert r.status_code == HTTP_OK
 
@@ -128,8 +159,12 @@ class TestBrand(unittest.TestCase):
         global sessionId, brandId, brandId2
         title("PARALLELAI-90API: Add Brand to User")
 
-        r = post("brand", {"name": "brandY", "iconId": "iconId", "startDate": datetime.utcnow().isoformat(),
-                           "endDate": (datetime.utcnow()+timedelta(days=10)).isoformat()}, sessionId)
+        r = post("brand",
+                 {"name": "brandY",
+                  "iconId": "iconId",
+                  "startDate": ISONow(),
+                  "endDate":  ISONow(10)},
+                 sessionId)
         assert r.status_code == HTTP_OK
         js = json.loads(r.text)
         brandId2=js["id"]
@@ -158,6 +193,44 @@ class TestBrand(unittest.TestCase):
 
         r=get("account/"+userId+"/brand", newUUID())
         assert r.status_code == HTTP_AUTH_ERR
+
+    def test08_P123_GetActiveOffersNumber(self):
+        global sessionId, userId, brandId
+        title("Testing P123: multiple offers for brand")
+        r=get("account/"+userId+"/brand/"+brandId,sessionId)
+        assert r.status_code == HTTP_OK
+
+        js=json.loads(r.text)
+        assert js["numValidOffers"] == 3
+
+        data={
+            "text":"A",
+            "startDate":ISONow(5),
+            "endDate":ISONow(10),
+            "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" }],
+            "value":6}
+        r=post("brand/"+brandId+"/advert",data, sessionId)
+        assert r.status_code == HTTP_OK
+        r=get("account/"+userId+"/brand/"+brandId,sessionId)
+        assert r.status_code == HTTP_OK
+
+        js=json.loads(r.text)
+        assert js["numValidOffers"] == 3
+        data={
+            "text":"A",
+            "startDate":ISONow(),
+            "endDate":ISONow(10),
+            "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" }],
+            "value":6}
+        r=post("brand/"+brandId+"/advert",data, sessionId)
+        assert r.status_code == HTTP_OK
+
+        r=get("account/"+userId+"/brand/"+brandId,sessionId)
+        assert r.status_code == HTTP_OK
+
+        js=json.loads(r.text)
+        assert js["numValidOffers"] == 4
+
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestBrand)
