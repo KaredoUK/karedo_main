@@ -37,6 +37,13 @@ class KaredoSalesMongoDAO (implicit val bindingModule: BindingModule)
     dao.insert( t )
 
   }
+
+  override def getAcceptedOffers(uid: UUID): List[KaredoSales] = {
+    dao.find(MongoDBObject(
+      "accountId" -> uid,
+      "saleType" -> "OFFER",
+      notConsumed)).toList
+  }
   override def findById(id: UUID): Option[KaredoSales] = {
     dao.findOneById(id)
   }

@@ -251,6 +251,29 @@ case class GetActiveAccountBrandOffersResponse(
                                                 @(ApiModelProperty@field)(value="the number")
                                                 numValidOffers: Int) extends ApiDataResponse
 
+
+@ApiModel(description = "Offer/Sale with data")
+case class KaredoSalesApi(
+                           @(ApiModelProperty@field)(value="Specific 'sale' id")
+                           id: UUID = UUID.randomUUID(),
+                           @(ApiModelProperty@field)(value="Sale type: 'OFFER' or 'SALE'")
+                            saleType: String,
+                           @(ApiModelProperty@field)(value="User requesting offer")
+                           accountId: UUID,
+                           @(ApiModelProperty@field)(value="Offer id (empty for sales)")
+                           adId: Option[UUID]=None,
+                           @(ApiModelProperty@field)(value="Offer code (empty for sales)")
+                           code: Option[String]=None,
+                           @(ApiModelProperty@field)(value="Date Created")
+                           dateCreated: String,
+                           @(ApiModelProperty@field)(value="Expiration date 30 days?")
+                           dateExpires: String,
+                           @(ApiModelProperty@field)(value="when has been claimed")
+                           dateConsumed: Option[String] = None,
+                           @(ApiModelProperty@field)(value="Associated Karedo Points")
+                           points: KaredoPoints
+                        ) extends ApiDataResponse
+
 case class GetMediaRequest(mediaId: String) extends ApiDataRequest
 case class GetMediaResponse(contentType: String, content: Array[Byte]) extends ApiDataResponse
 case class GetAccountBrandOffersResponse(numOfActiveOffers: Int)

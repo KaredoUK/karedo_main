@@ -5,6 +5,7 @@ import javax.ws.rs.Path
 import com.wordnik.swagger.annotations._
 import core.OfferActor.OfferError
 import core.objAPI.APIError
+import parallelai.wallet.entity.KaredoSales
 import restapi.security.AuthorizationSupport
 import com.parallelai.wallet.datamanager.data._
 
@@ -58,8 +59,8 @@ extends HttpService
         suggestedAdsForBrand ~ // P59 GET AUTH /account/xxx/brand/xxx
         suggestedBrandsPost ~ // P70 ???
         suggestedBrandsGet ~   // P70 GET AUTH /account/xxx/suggestedbrands
-        P123               // get number of ACTIVE ads for user/brand GET /account/xxxx/brand/yyyy
-
+        P123 ~              // get number of ACTIVE ads for user/brand GET /account/xxxx/brand/yyyy
+        P124                // get offers active for this account
     } 
 
   // PARALLELAI-77API: Create Account
@@ -515,6 +516,29 @@ extends HttpService
             complete {
               (editAccountActor ? GetActiveAccountBrandOffers(accountId, brandId)).
                 mapTo[ResponseWithFailure[EditAccountError, GetActiveAccountBrandOffersResponse]]
+
+            }
+          }
+        }
+    }
+
+  @Path("/{account}/acceptedoffers")
+  @ApiOperation(position=16,httpMethod = "GET", response = classOf[KaredoSalesApi],
+    value = "Parallelai-124: Get offers for which user has requested the code")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
+      value = "UUID of user to query"),
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+      value = "SessionId for authentication/authorization")
+  ))
+  def P124 =
+    path(JavaUUID / "acceptedoffers" ){
+      (accountId: UserID) =>
+        userAuthorizedFor(canAccessUser(accountId))(executionContext) { userAuthContext =>
+          get {
+            complete {
+              (offerActor ? GetAcceptedOffers(accountId)).
+                mapTo[ResponseWithFailure[OfferError, List[KaredoSalesApi]]]
 
             }
           }

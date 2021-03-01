@@ -82,7 +82,7 @@ trait ApiDataJsonProtocol extends DefaultJsonProtocol  {
 
 
   implicit val getActiveAccountBrandOffersResponseJson = jsonFormat1(GetActiveAccountBrandOffersResponse)
-
+  implicit val karedoSalesJson = jsonFormat9(KaredoSalesApi)
 
 
   implicit val interactionResponse = jsonFormat2(InteractionResponse)

@@ -2,7 +2,7 @@ package restapi
 
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import com.gettyimages.spray.swagger.SwaggerHttpService
-import com.parallelai.wallet.datamanager.data.{RegistrationRequest, OfferResponse}
+import com.parallelai.wallet.datamanager.data.{KaredoSalesApi, RegistrationRequest, OfferResponse}
 import core.security.UserAuthService
 import spray.http.StatusCodes._
 import spray.http._
@@ -102,6 +102,7 @@ class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route, doSwag
       Seq(
         typeOf[RegistrationRequest]
         ,typeOf[OfferResponse]
+        ,typeOf[KaredoSalesApi]
         //,typeOf[RegistrationResponse]
         //,typeOf[RegistrationValidation]//,
         //            typeOf[RegistrationValidationResponse]

@@ -108,6 +108,9 @@ def mkOffer(brandId, session):
     return advId
 
 advId=mkOffer(brandId,sessionId)
+advId2=mkOffer(brandId,sessionId)
+advId3=mkOffer(brandId,sessionId)
+
 
 
 def mkSale(merchantId,session):

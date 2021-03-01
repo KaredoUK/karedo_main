@@ -5,6 +5,8 @@ import java.util.UUID
 import parallelai.wallet.entity.KaredoSales
 
 trait KaredoSalesDAO {
+  def getAcceptedOffers(uid: UUID): List[KaredoSales]
+
 
   def insertNew(newData: KaredoSales): Option[UUID]
   def findById(id: UUID): Option[KaredoSales]

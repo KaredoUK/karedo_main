@@ -5,11 +5,12 @@ import java.util.UUID
 import akka.actor.{Actor, ActorLogging, Props}
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import com.parallelai.wallet.datamanager.data._
+import core.EditAccountActor.GetAcceptedOffers
 
 import core.OfferActor.{InvalidOfferRequest, InternalOfferError, OfferError}
 import org.apache.commons.lang.RandomStringUtils
 import org.joda.time.DateTime
-import parallelai.wallet.entity.{Brand, _}
+import parallelai.wallet.entity.{Offer, KaredoSales, KaredoChangeDB, Brand}
 import parallelai.wallet.persistence._
 import spray.json._
 
@@ -55,7 +56,9 @@ class OfferActor(implicit val saleDAO: KaredoSalesDAO,
                  implicit val changeDAO: KaredoChangeDAO,
                  implicit val brandDAO: BrandDAO,
                  implicit val customerDAO: UserAccountDAO,
-                 implicit val bindingModule: BindingModule) extends Actor with ActorLogging with Injectable {
+                 implicit val bindingModule: BindingModule)
+
+  extends Actor with ActorLogging with Injectable with ISODateConversion {
 
   def receive: Receive = {
     case request: OfferData => replyToSender(createOffer(request))
@@ -68,7 +71,19 @@ class OfferActor(implicit val saleDAO: KaredoSalesDAO,
     case request: RequestKaredoChange => replyToSender(handleKaredoChangeInquiry(request))
     case request: KaredoChange => replyToSender(handleKaredoChangeSet(request))
     case request: Currency => replyToSender(handleConversion(request))
+    case request: GetAcceptedOffers => replyToSender(handleGetAcceptedOffers(request.accountId))
   }
+
+  def handleGetAcceptedOffers(userId:UserID): Future[ResponseWithFailure[OfferError, List[KaredoSalesApi]]] =
+  successful {
+    val list = saleDAO.getAcceptedOffers(userId)
+    SuccessResponse(list map(x => KaredoSalesApi
+      (x.id, x.saleType, x.accountId, x.adId, x.code, x.dateCreated,x.dateExpires,
+          x.dateConsumed, x.points )))
+  }
+
+
+
    def handleConversion(currency: Currency): Future[ResponseWithFailure[OfferError, Currency]] =
   {
     successful {

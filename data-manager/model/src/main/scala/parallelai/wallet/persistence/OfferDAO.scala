@@ -7,6 +7,8 @@ import parallelai.wallet.entity.{Offer}
 import scala.concurrent.Future
 
 trait OfferDAO {
+
+
   def getById(id: UUID) : Option[Offer]
 
   def insertNew(offer: Offer) : Option[UUID]

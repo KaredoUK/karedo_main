@@ -10,6 +10,11 @@ import com.escalatesoft.subcut.inject.Injectable
 trait MongoConnection  {
   self: Injectable =>
 
+  lazy val mongoHost: String = injectProperty[String]("mongo.server.host")
+  lazy val mongoPort: Int = injectProperty[Int]("mongo.server.port")
+  lazy val mongoDbName: String = injectProperty[String]("mongo.db.name")
+  lazy val mongoDbUser: String = injectProperty[String]("mongo.db.user")
+  lazy val mongoDbPwd: String = injectProperty[String]("mongo.db.pwd")
   lazy val mongoClient = {
     println(s"*** mongoHost: $mongoHost, mongoPort: $mongoPort")
     if (mongoDbUser.isEmpty) {
@@ -21,10 +26,5 @@ trait MongoConnection  {
 
   lazy val db = mongoClient(mongoDbName)
 
-  lazy val mongoHost: String = injectProperty[String]("mongo.server.host")
-  lazy val mongoPort: Int = injectProperty[Int]("mongo.server.port")
-  lazy val mongoDbName: String = injectProperty[String]("mongo.db.name")
-  lazy val mongoDbUser: String = injectProperty[String]("mongo.db.user")
-  lazy val mongoDbPwd: String = injectProperty[String]("mongo.db.pwd")
 
 }

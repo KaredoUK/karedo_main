@@ -132,6 +132,41 @@ class TestOffer(unittest.TestCase):
         amount=js["amount"]
         assert almost_equal(amount,2310*2) == True
 
+    def test15_P124_GetAcceptedOffers(self):
+        global sessionId, userId, advId, advId2, advId3
+        title("PARALLELAI-124: which offers has been requested code")
+
+        # create 3 codes for offers
+        r=post("offer/"+userId+"/getcode", { "userId": userId, "adId" : advId },sessionId)
+        assert r.status_code == HTTP_OK
+
+        js=json.loads(r.text)
+        code = js["code"]
+
+        r=post("offer/"+userId+"/getcode", { "userId": userId, "adId" : advId2 },sessionId)
+        assert r.status_code == HTTP_OK
+
+        r=post("offer/"+userId+"/getcode", { "userId": userId, "adId" : advId3 },sessionId)
+        assert r.status_code == HTTP_OK
+
+        # consume 1
+        r=post("offer/consume",{ "offerCode": code},sessionId)
+
+        assert r.status_code == HTTP_OK
+
+        # now read how many valid offers we have requested code for (should be 2 since 1 already consumed)
+        r=get("account/"+userId+"/acceptedoffers",sessionId)
+        assert r.status_code == HTTP_OK
+
+        js=json.loads(r.text)
+        assert len(js) == 2
+
+
+
+
+
+
+
 
 
 

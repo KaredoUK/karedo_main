@@ -38,6 +38,8 @@ object EditAccountActor extends ISODateConversion {
 
   case class GetActiveAccountBrandOffers(accountId:  UserID, brandId: UUID)
 
+  case class GetAcceptedOffers(accountId: UserID)
+
 
   sealed trait EditAccountError
 
