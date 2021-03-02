@@ -9,21 +9,44 @@ import parallelai.wallet.persistence.Interaction
 
 object MongoBrandAds {
   def fromAd(ad: AdvertisementDetail) =
-    MongoBrandAd(ad.id, ad.text, ad.publishedDate, ad.startDate, ad.endDate, ad.imageIds, ad.value)
+    MongoBrandAd(
+      ad.id,
+      ad.shortText,
+      ad.detailedText,
+      ad.termsAndConditions,
+      ad.summaryImages,
+      ad.publishedDate,
+      ad.startDate,
+      ad.endDate,
+      ad.detailImages,
+      ad.karedos)
 }
 
 case class MongoBrandAd
 (
   @Key("_id") id: UUID=UUID.randomUUID(),
-  text: String="",
+  shortText: String="",
+  detailedText: String="",
+  termsAndConditions: String="",
+  summaryImages: List[SummaryImageDB],
   publishedDate: DateTime = new DateTime(),
   startDate: DateTime,
   endDate: DateTime,
-  imageIds: List[String] = List[String](),
-  value: KaredoPoints=0)
+  detailImages: List[String] = List[String](),
+  karedos: KaredoPoints=0)
 {
   def toBrandAd(): AdvertisementDetail =
-    AdvertisementDetail(id, publishedDate, startDate, endDate, text, imageIds, value)
+    AdvertisementDetail(
+      id,
+      shortText,
+      detailedText,
+      termsAndConditions,
+      summaryImages,
+      publishedDate,
+      startDate,
+      endDate,
+      detailImages,
+      karedos)
 }
 
 case class MongoBrand

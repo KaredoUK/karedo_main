@@ -96,10 +96,15 @@ brandId=mkBrand(sessionId)
 
 def mkOffer(brandId, session):
 
-    data={ "text":"adtext",
+    data={ "shortText":"adtext",
+           "detailedText":"longtext",
+           "termsAndConditions":"T&C",
+           "summaryImages": [
+               { "imageId":"aaa", "imageType": 3 },
+               { "imageId":"omega", "imageType": 4 }],
            "startDate":   ISONow(),
            "endDate":   ISONow(10),
-           "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" } ], "value":5}
+           "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" } ], "karedos":5}
     r=post("brand/"+brandId+"/advert",data, session)
     if (r.status_code != HTTP_OK): sys.exit(106)
 

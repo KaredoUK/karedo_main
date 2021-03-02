@@ -181,7 +181,7 @@ trait BrandHelpers {
 
     val adR = wait {
       add {
-        Post(s"$serviceUrl/brand/$brand/advert", AdvertDetail(text = ad, imageIds = List(), value = 10))
+        Post(s"$serviceUrl/brand/$brand/advert", AdvertDetailApi(text = ad, imageIds = List(), value = 10))
 
       }
     }

@@ -198,35 +198,64 @@ case class DeleteBrandRequest(brandId: UUID) extends ApiDataRequest
 // This is here just to please the UI devs who are having problem to parse a list of Strings
 case class ImageId(imageId: String)
 
-case class AddAdvertCommand(brandId: UUID, text: String, startDate:String, endDate:String,imageIds: List[ImageId], value: KaredoPoints) extends ApiDataRequest
+case class AddAdvertCommand(
+     brandId: UUID,
+     shortText: String,
+     detailedText: String,
+     termsAndConditions: String,
+     summaryImages:List[SummaryImageApi],
+     startDate:String,
+     endDate:String,
+     imageIds: List[ImageId],
+     karedos: KaredoPoints) extends ApiDataRequest
+
+@ApiModel(description = "A summary image with its type")
+case class SummaryImageApi(
+            @(ApiModelProperty@field)(value = "image id")
+            imageId: String,
+            @(ApiModelProperty@field)(value = "type: 1(SQUARE 160x160), 2(HOR 320x160), 3(BIG 320x320), 4(VERT 160x320)")
+            imageType: Int
+)
 
 @ApiModel(description = "Detail of returned Ad")
-case class AdvertDetail(
-                         @(ApiModelProperty@field)(value = "ad text")
-                         text: String,
+case class AdvertDetailApi(
+                         @(ApiModelProperty@field)(value = "short text")
+                         shortText: String,
+                         @(ApiModelProperty@field)(value = "detailed text")
+                         detailedText: String,
+                         @(ApiModelProperty@field)(value = "terms and conditions")
+                         termsAndConditions: String,
+                         @(ApiModelProperty@field)(value = "List of summary images")
+                         summaryImages: List[SummaryImageApi],
                          @(ApiModelProperty@field)(value = "Starting Time format '1997-07-16T19:20:30.45Z'")
                          startDate: String = ISODateTimeFormat.dateTime().print(DateTime.now()),
                          @(ApiModelProperty@field)(value = "Ending Time format '1997-07-16T19:20:30.45Z'")
                          endDate: String = ISODateTimeFormat.dateTime().print(DateTime.now().plusDays(10)),
-                         @(ApiModelProperty@field)(value = "list of images")
+                         @(ApiModelProperty@field)(value = "list of big detailed images 400x400")
                          imageIds: List[ImageId],
                          @(ApiModelProperty@field)(value = "points weight of this ad")
-                         value: KaredoPoints)
+                         karedos: KaredoPoints)
 
 @ApiModel(description = "Detail of returned Ad")
 case class AdvertDetailResponse(
                                  @(ApiModelProperty@field)(value = "detail UUID")
                                  id: UUID,
-                                 @(ApiModelProperty@field)(value = "text of the ad")
-                                 text: String,
+                                 @(ApiModelProperty@field)(value = "short text of the ad")
+                                 shortText: String,
+                                 @(ApiModelProperty@field)(value = "detailed text")
+                                 detailedText: String,
+                                 @(ApiModelProperty@field)(value = "terms and conditions")
+                                 termsAndConditions: String,
+                                 @(ApiModelProperty@field)(value = "List of summary images")
+                                 summaryImages: List[SummaryImageApi],
                                  @(ApiModelProperty@field)(value = "Starting Time format '1997-07-16T19:20:30.45Z'")
                                  startDate: String = ISODateTimeFormat.dateTime().print(DateTime.now()),
                                  @(ApiModelProperty@field)(value = "Ending Time format '1997-07-16T19:20:30.45Z'")
                                  endDate: String = ISODateTimeFormat.dateTime().print(DateTime.now().plusDays(10)),
-                                 @(ApiModelProperty@field)(value = "listing of images")
+                                 @(ApiModelProperty@field)(value = "listing of detailed images")
                                  imageIds: List[ImageId],
-                                 @(ApiModelProperty@field)(value = "points weight of this ad")
-                                 value: KaredoPoints) extends ApiDataResponse
+                                 @(ApiModelProperty@field)(value = "karedos associated to this ad")
+                                 karedos: KaredoPoints) extends ApiDataResponse
 
 @ApiModel(description = "Brand to add")
 case class SuggestedAdForUsersAndBrand(

@@ -88,7 +88,13 @@ class BrandServiceSpec
       val brand = new Brand(UUID.randomUUID(), "brandName", iconId="iconID", ads=List.empty)
       // mockedBrandDAO.getById(any[UUID]) returns Some(brand)
 
-      val ad = AdvertDetail(text = "text", imageIds = List(ImageId("image1"), ImageId("image2")), value = 100)
+      val ad = AdvertDetailApi(
+        shortText = "text",
+        detailedText="detailed",
+        termsAndConditions="T&C",
+        summaryImages = List(),
+        imageIds = List(ImageId("image1"), ImageId("image2")),
+        karedos = 100)
 
       val response = wait(pipeline {
 
@@ -96,7 +102,8 @@ class BrandServiceSpec
       })
 
       response should beLike {
-        case AdvertDetailResponse(_, ad.text, _,_, ad.imageIds, ad.value) => ok
+        case AdvertDetailResponse(
+        _, ad.shortText,_,_, _, _,_, ad.imageIds, ad.karedos) => ok
         case _ => ko
       }
       print(s"response.id: ${response.id}")
@@ -106,9 +113,12 @@ class BrandServiceSpec
           publishedDate=any[DateTime],
           startDate=DateTime.now,
           endDate=DateTime.now.plusDays(10),
-          text=ad.text,
-          imageIds=ad.imageIds.map {_.imageId},
-          value=ad.value
+          shortText=ad.shortText,
+          detailedText=ad.detailedText,
+          termsAndConditions=ad.termsAndConditions,
+          summaryImages=ad.summaryImages.map(api => SummaryImageDB(api.imageId,api.imageType)),
+          detailImages=ad.imageIds.map {_.imageId},
+          karedos=ad.karedos
         )
       )
 

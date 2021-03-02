@@ -255,11 +255,12 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
 
           post {
             handleWith {
-              request: AdvertDetail => {
+              request: AdvertDetailApi => {
                 (brandActor ? AddAdvertCommand(
-                  brandId, request.text,
+                  brandId, request.shortText, request.detailedText, request.termsAndConditions,
+                  request.summaryImages,
                   request.startDate, request.endDate, request.imageIds,
-                  request.value)).
+                  request.karedos)).
 
                   mapTo[ResponseWithFailure[APIError, AdvertDetailResponse]]
               }

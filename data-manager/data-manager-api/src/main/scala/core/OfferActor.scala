@@ -161,7 +161,7 @@ class OfferActor(implicit val saleDAO: KaredoSalesDAO,
       case Some(sale) =>
         brandDAO.getAdById(sale.adId.get) match {
           case Some(offer) =>
-            customerDAO.consume(sale.accountId, offer.value)
+            customerDAO.consume(sale.accountId, offer.karedos)
             SuccessResponse(OfferResponse(sale.id))
           case None =>FailureResponse(InvalidOfferRequest("Cant find offer"))
         }
@@ -213,7 +213,7 @@ class OfferActor(implicit val saleDAO: KaredoSalesDAO,
 
           saleDAO.insertNew(KaredoSales(
           accountId = request.userId,
-          points = offer.value,
+          points = offer.karedos,
           saleType = "OFFER",
           adId = Some(request.adId),
           code = Some(code))) match {

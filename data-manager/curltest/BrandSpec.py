@@ -80,11 +80,14 @@ class TestBrand(unittest.TestCase):
         title("PARALLELAI-65API: Create Ad")
 
         data={
-            "text":"adtext",
+            "shortText":"adtext",
+            "detailedText":"longtext",
+            "termsAndConditions":"T&C",
+            "summaryImages": [ { "imageId":"aaa", "imageType":1 }],
             "startDate":ISONow(),
             "endDate":ISONow(10),
             "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" } ],
-            "value":5}
+            "karedos":5}
 
         r=post("brand/"+brandId+"/advert",data, sessionId)
         assert r.status_code == HTTP_OK
@@ -100,11 +103,14 @@ class TestBrand(unittest.TestCase):
 
         title("PARALLELAI-66API: Disable Ad")
         data={
-            "text":"adtext1",
+            "shortText":"adtext1",
+            "detailedText":"longtext",
+            "termsAndConditions":"T&C",
+            "summaryImages": [ { "imageId":"aaa", "imageType":1 }],
             "startDate":ISONow(),
             "endDate":ISONow(10),
-            "imageIds": [ { "imageId" : "iconId" }, { "imageId" : "iconId" } ],
-            "value":5}
+            "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" } ],
+            "karedos":5}
         r=post("brand/"+brandId+"/advert",data, sessionId)
 
         assert r.status_code == HTTP_OK
@@ -123,20 +129,26 @@ class TestBrand(unittest.TestCase):
         title("PARALLELAI-64API: List Ads per Brand")
 
         data={
-            "text":"A",
+            "shortText":"A",
+            "detailedText":"longtext",
+            "termsAndConditions":"T&C",
+            "summaryImages": [ { "imageId":"aaa", "imageType":1 }],
             "startDate":ISONow(),
             "endDate":ISONow(10),
-            "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" }],
-            "value":6}
+            "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" } ],
+            "karedos":5}
         r=post("brand/"+brandId+"/advert",data, sessionId)
         assert r.status_code == HTTP_OK
 
         data={
-            "text":"B",
+            "shortText":"B",
+            "detailedText":"longtext",
+            "termsAndConditions":"T&C",
+            "summaryImages": [ { "imageId":"aaa", "imageType":1 }],
             "startDate":ISONow(),
             "endDate":ISONow(10),
-            "imageIds": [ { "imageId" : "iconIdB" }, { "imageId" : "iconIdB" }],
-            "value":7}
+            "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" } ],
+            "karedos":7}
 
 
         r=post("brand/"+brandId+"/advert",data, sessionId)
@@ -149,8 +161,14 @@ class TestBrand(unittest.TestCase):
         js=json.loads(r.text)
         assert len(js) == 3
 
-        assert js[2]['text'] == 'B'
-        assert js[2]['value'] == 7
+        assert js[2]['shortText'] == 'B'
+        assert js[2]['karedos'] == 7
+
+        list=js[2]['summaryImages']
+        assert len(list) == 1
+
+        assert list[0]["imageId"]=="aaa"
+        assert list[0]["imageType"]==1
 
         r=get("brand/"+brandId+"/advert", newUUID())
         assert r.status_code == HTTP_AUTH_ERR
@@ -204,11 +222,14 @@ class TestBrand(unittest.TestCase):
         assert js["numValidOffers"] == 3
 
         data={
-            "text":"A",
+            "shortText":"A",
+            "detailedText":"longtext",
+            "termsAndConditions":"T&C",
+            "summaryImages": [ { "imageId":"aaa", "imageType":1 }],
             "startDate":ISONow(5),
             "endDate":ISONow(10),
-            "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" }],
-            "value":6}
+            "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" } ],
+            "karedos":7}
         r=post("brand/"+brandId+"/advert",data, sessionId)
         assert r.status_code == HTTP_OK
         r=get("account/"+userId+"/brand/"+brandId,sessionId)
@@ -217,11 +238,15 @@ class TestBrand(unittest.TestCase):
         js=json.loads(r.text)
         assert js["numValidOffers"] == 3
         data={
-            "text":"A",
+            "shortText":"B",
+            "detailedText":"longtext",
+            "termsAndConditions":"T&C",
+            "summaryImages": [ { "imageId":"aaa", "imageType":1 }],
             "startDate":ISONow(),
             "endDate":ISONow(10),
-            "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" }],
-            "value":6}
+            "imageIds": [{ "imageId" : "iconId" }, { "imageId" : "iconId" } ],
+            "karedos":7}
+
         r=post("brand/"+brandId+"/advert",data, sessionId)
         assert r.status_code == HTTP_OK
 

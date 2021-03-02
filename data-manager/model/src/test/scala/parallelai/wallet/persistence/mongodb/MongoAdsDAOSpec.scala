@@ -8,7 +8,7 @@ import com.mongodb.casbah.commons.MongoDBObject
 import org.joda.time.DateTime
 import org.specs2.mutable.Specification
 import org.specs2.time.NoTimeConversions
-import parallelai.wallet.entity.{AdvertisementDetail, Brand}
+import parallelai.wallet.entity.{SummaryImageDB, AdvertisementDetail, Brand}
 
 
 class MongoAdsDAOSpec
@@ -28,14 +28,25 @@ class MongoAdsDAOSpec
     val brandId = brandDAO.insertNew(aBrand).get
     val text1 = "adtext"
     val ad1 = AdvertisementDetail(
-      text = text1, imageIds = List("image1", "image2"), value = 100,
+      shortText = text1,
+      detailedText = "long "+text1,
+      termsAndConditions = "T&C",
+      summaryImages = List(SummaryImageDB("imagea",1)),
+      detailImages = List("image1", "image2"),
+      karedos = 100,
       startDate=DateTime.now,
-    endDate=DateTime.now.plusDays(10))
+      endDate=DateTime.now.plusDays(10))
 
 
     val text2 = "adtext2"
     val ad2 = AdvertisementDetail(
-      text = text2, imageIds = List("image3"), value = 200, startDate=DateTime.now,
+      shortText = text2,
+      detailedText = "long "+text2,
+      termsAndConditions = "T&C",
+      summaryImages = List(SummaryImageDB("imagex",1), SummaryImageDB("imagey",2)),
+      detailImages = List("image1", "image2"),
+      karedos = 200,
+      startDate=DateTime.now,
       endDate=DateTime.now.plusDays(10))
 
     brandDAO.addAd(brandId, ad1)
@@ -48,13 +59,13 @@ class MongoAdsDAOSpec
     }
     "get single ads" in {
       val ads1 = brandDAO.getAdById(ad1.id).get
-      ads1.text must beEqualTo(text1)
+      ads1.shortText must beEqualTo(text1)
 
       val ads2 = brandDAO.getAdById(ad2.id).get
-      ads2.text must beEqualTo(text2)
+      ads2.shortText must beEqualTo(text2)
 
-      ads2.imageIds(0) must beEqualTo("image3")
-      ads2.value must beEqualTo(200)
+      ads2.detailImages(0) must beEqualTo("image3")
+      ads2.karedos must beEqualTo(200)
     }
 
     "delete an ad" in {

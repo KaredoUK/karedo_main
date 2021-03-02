@@ -53,14 +53,18 @@ case class Offer(@Key("_id") id: UUID = UUID.randomUUID(), name: String = "", br
                   redeemedTs: Option[DateTime]=None, expireTs: DateTime)
 */
 
+case class SummaryImageDB(imageId: String, imageType: Int)
 
 case class AdvertisementDetail(@Key("_id") id: UUID = UUID.randomUUID(),
+                               shortText: String,
+                               detailedText: String,
+                               termsAndConditions: String,
+                               summaryImages: List[SummaryImageDB],
                                publishedDate: DateTime = DateTime.now(),
                                startDate: DateTime,
                                endDate:  DateTime,
-                               text: String = "",
-                               imageIds: List[String] = List(),
-                               value: KaredoPoints = 0)
+                               detailImages: List[String] = List(),
+                               karedos: KaredoPoints = 0)
 
 case class Brand(@Key("_id") id: UUID = UUID.randomUUID(),
                  name: String = "",

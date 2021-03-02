@@ -28,8 +28,15 @@ class OfferActorSpec
         code=Some("")))
       mockedSaleDAO.findByCode(any[String]) returns None
       mockedSaleDAO.insertNew(any[KaredoSales]) returns Some(UUID.randomUUID())
-      mockedBrandDAO.getAdById(any[UUID]) returns Some(AdvertisementDetail(anOffer, startDate=DateTime.now,
-        endDate=DateTime.now.plusDays(10)))
+      mockedBrandDAO.getAdById(any[UUID]) returns Some(
+        AdvertisementDetail(
+          anOffer,
+          shortText="short",
+          detailedText="detailed",
+          termsAndConditions="T&C",
+          startDate=DateTime.now,
+          summaryImages=List(),
+          endDate=DateTime.now.plusDays(10)))
 
       server.offer ! GetOfferCodeRequest(aUser, aBrand)
       expectMsgPF() {

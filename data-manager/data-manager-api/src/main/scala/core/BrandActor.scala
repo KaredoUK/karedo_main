@@ -138,19 +138,30 @@ class BrandActor()
       hint <- hintDAO.suggestedNAdsForUserAndBrandLimited(request.userId, request.brandId, request.max)
       ad <- brandDAO.getAdById(hint.ad)
     } yield
-    SuggestedAdForUsersAndBrand(ad.id, ad.text, ad.imageIds.mkString(","))
+    SuggestedAdForUsersAndBrand(ad.id, ad.shortText, ad.detailImages.mkString(","))
 
 
   }
 
-  def handleListBrandAdverts(adverts: ListBrandsAdverts): Future[ResponseWithFailure[APIError, List[AdvertDetailResponse]]] =
+  def handleListBrandAdverts(adverts: ListBrandsAdverts):
+    Future[ResponseWithFailure[APIError, List[AdvertDetailResponse]]] =
     successful {
       SuccessResponse(
         brandDAO.listAds(adverts.brandId, adverts.max).map {
-          detail => AdvertDetailResponse(id = detail.id, text = detail.text, 
-              startDate=detail.startDate, endDate=detail.endDate, imageIds = detail.imageIds map {
-            ImageId
-          }, value = detail.value)
+          detail =>
+            val summaryApi:List[SummaryImageApi]=detail.summaryImages.map(db => SummaryImageApi(db.imageId,db.imageType))
+            AdvertDetailResponse(
+            id = detail.id,
+            shortText = detail.shortText,
+            summaryImages = summaryApi,
+            detailedText = detail.detailedText,
+            termsAndConditions = detail.termsAndConditions,
+            startDate=detail.startDate,
+            endDate=detail.endDate,
+            imageIds = detail.detailImages map {
+              ImageId
+            },
+            karedos = detail.karedos)
         })
     }
 
@@ -158,8 +169,20 @@ class BrandActor()
   def handleGetBrandAdvert(advert: GetBrandAdvert): Future[ResponseWithFailure[APIError, AdvertDetailResponse]] =
     successful {
       brandDAO.getAdById(advert.adId) match {
-        case Some(detail) => SuccessResponse(AdvertDetailResponse(
-            detail.id, detail.text, detail.startDate, detail.endDate, detail.imageIds.map(ImageId(_)), detail.value))
+        case Some(detail) =>
+
+          val summaryApi:List[SummaryImageApi]=detail.summaryImages.map(db => SummaryImageApi(db.imageId,db.imageType))
+          SuccessResponse(AdvertDetailResponse(
+            detail.id,
+            detail.shortText,
+            detail.detailedText,
+            detail.termsAndConditions,
+            summaryApi,
+            detail.startDate,
+            detail.endDate,
+            detail.detailImages.map(ImageId(_)),
+            detail.karedos))
+
         case None => FailureResponse(InvalidRequest("Invalid adId"))
       }
     }
@@ -170,18 +193,33 @@ class BrandActor()
     SuccessResponse(StatusResponse("OK"))
   }
 
-  def handleAddAdvert(request: AddAdvertCommand): Future[ResponseWithFailure[APIError, AdvertDetailResponse]] = successful {
+  def handleAddAdvert(request: AddAdvertCommand):
+    Future[ResponseWithFailure[APIError, AdvertDetailResponse]] = successful {
 
+    val summaryDB:List[SummaryImageDB]=request.summaryImages.map(api => SummaryImageDB(api.imageId,api.imageType))
     val detail: AdvertisementDetail = AdvertisementDetail(
-        text = request.text, startDate = request.startDate,
-      endDate=request.endDate, imageIds = request.imageIds map {
-      _.imageId
-    }, value = request.value)
+      shortText = request.shortText,
+      detailedText = request.detailedText,
+      termsAndConditions = request.termsAndConditions,
+      summaryImages = summaryDB,
+      startDate = request.startDate,
+      endDate = request.endDate,
+      detailImages = request.imageIds map {
+        _.imageId
+      }, karedos = request.karedos)
     //log.info(s"XXX using detail uuid: ${detail.id}")
     brandDAO.addAd(request.brandId, detail)
     SuccessResponse(
         AdvertDetailResponse(
-            detail.id, request.text, request.startDate, request.endDate, request.imageIds, request.value))
+          detail.id,
+          request.shortText,
+          request.detailedText,
+          request.termsAndConditions,
+          request.summaryImages,
+          request.startDate,
+          request.endDate,
+          request.imageIds,
+          request.karedos))
   }
 
 
