@@ -238,16 +238,10 @@ case class AdvertDetailApi(
 
 @ApiModel(description = "Detail of returned Ad")
 case class AdvertDetailResponse(
-                                 @(ApiModelProperty@field)(value = "detail UUID")
-                                 id: UUID,
-                                 @(ApiModelProperty@field)(value = "short text of the ad")
-                                 shortText: String,
                                  @(ApiModelProperty@field)(value = "detailed text")
                                  detailedText: String,
                                  @(ApiModelProperty@field)(value = "terms and conditions")
                                  termsAndConditions: String,
-                                 @(ApiModelProperty@field)(value = "List of summary images")
-                                 summaryImages: List[SummaryImageApi],
                                  @(ApiModelProperty@field)(value = "Starting Time format '1997-07-16T19:20:30.45Z'")
                                  startDate: String = ISODateTimeFormat.dateTime().print(DateTime.now()),
                                  @(ApiModelProperty@field)(value = "Ending Time format '1997-07-16T19:20:30.45Z'")
@@ -255,7 +249,45 @@ case class AdvertDetailResponse(
                                  @(ApiModelProperty@field)(value = "listing of detailed images")
                                  imageIds: List[ImageId],
                                  @(ApiModelProperty@field)(value = "karedos associated to this ad")
-                                 karedos: KaredoPoints) extends ApiDataResponse
+                                 karedos: KaredoPoints,
+                                 @(ApiModelProperty@field)(value = "OFFER State NotCreated/Created/Consumed")
+                                 state: String,
+                                 @(ApiModelProperty@field)(value = "OFFER Code")
+                                 code: String
+
+
+
+                                 ) extends ApiDataResponse
+
+@ApiModel(description = "Offer minimum data for listings")
+case class AdvertDetailListResponse(
+                                 @(ApiModelProperty@field)(value = "offerId")
+                                 offerId: UUID,
+                                 @(ApiModelProperty@field)(value = "shortText")
+                                 shortText: String,
+                                 @(ApiModelProperty@field)(value = "karedos")
+                                 karedos: KaredoPoints
+                                     )
+
+
+@ApiModel(description = "summary of offer")
+case class AdvertSummaryResponse(
+
+                                 @(ApiModelProperty@field)(value = "short text of the ad")
+                                 shortText: String,
+
+                                 @(ApiModelProperty@field)(value = "List of summary images")
+                                 summaryImages: List[SummaryImageApi],
+                                 @(ApiModelProperty@field)(value = "Starting Time format '1997-07-16T19:20:30.45Z'")
+                                 startDate: String = ISODateTimeFormat.dateTime().print(DateTime.now()),
+                                 @(ApiModelProperty@field)(value = "Ending Time format '1997-07-16T19:20:30.45Z'")
+                                 endDate: String = ISODateTimeFormat.dateTime().print(DateTime.now().plusDays(10)),
+
+                                 @(ApiModelProperty@field)(value = "karedos associated to this ad")
+                                 karedos: KaredoPoints,
+
+                                @(ApiModelProperty@field)(value = "status TRUE: code created, FALSE no offer created")
+                                status: Boolean) extends ApiDataResponse
 
 @ApiModel(description = "Brand to add")
 case class SuggestedAdForUsersAndBrand(
@@ -268,7 +300,8 @@ case class SuggestedAdForUsersAndBrand(
 case class RequestSuggestedAdForUsersAndBrand(userId: UUID, brandId: UUID, max: Int) extends ApiDataRequest
 case class ListBrandsAdverts(brandId: UUID, max:Int=0) extends ApiDataRequest
 case class ListbrandsAdvertsTemp(brandId: UUID)
-case class GetBrandAdvert(brandId:UUID, adId:UUID) extends ApiDataRequest
+case class GetAdvertSummary(brandId:UUID, adId:UUID) extends ApiDataRequest
+case class GetAdvertDetail(brandId:UUID, adId:UUID) extends ApiDataRequest
 case class DeleteAdvRequest(brandId: UUID, advId: UUID) extends ApiDataRequest
 
 

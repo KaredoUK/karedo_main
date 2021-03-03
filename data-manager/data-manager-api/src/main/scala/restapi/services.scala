@@ -102,6 +102,8 @@ class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route, doSwag
       Seq(
         typeOf[RegistrationRequest]
         ,typeOf[AdvertDetailResponse]
+        ,typeOf[AdvertDetailListResponse]
+        ,typeOf[AdvertSummaryResponse]
         ,typeOf[AdvertDetailApi]
         ,typeOf[SummaryImageApi]
         ,typeOf[OfferResponse]

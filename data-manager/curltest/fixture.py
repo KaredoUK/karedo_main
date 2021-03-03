@@ -11,6 +11,7 @@ brandId2=newUUID()
 userId=newUUID()
 merchantId=newUUID()
 applicationId=newUUID()
+applicationId2=newUUID()
 sessionId=newUUID()
 merchantSessionId=newUUID()
 advId=newUUID()
@@ -38,6 +39,7 @@ def mkAccount(applicationId,userType,telephone,email):
     return userId
 
 userId=mkAccount(applicationId,"CUSTOMER","1234","pakkio@gmail.com")
+userId2=mkAccount(applicationId2,"CUSTOMER","9876","oikkap@gmail.com")
 merchantId=mkAccount(app2,"MERCHANT","12345","merchant@gmail.com")
 
 
@@ -109,7 +111,7 @@ def mkOffer(brandId, session):
     if (r.status_code != HTTP_OK): sys.exit(106)
 
     js = json.loads(r.text)
-    advId=js["id"]
+    advId=js["offerId"]
     return advId
 
 advId=mkOffer(brandId,sessionId)

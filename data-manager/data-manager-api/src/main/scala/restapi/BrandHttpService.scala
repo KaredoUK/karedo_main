@@ -40,7 +40,8 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
         deleteBrand ~       // P68 DELETE AUTH /brand/xxx
         listBrandsAdverts ~ // P64 GET AUTH /brand/xxx/advert
         addAdvert ~         // P65 POST AUTH /brand/xxx
-        getAdvert ~         // P61 GET AUTH /brand/xxx/advert/xxx
+        getAdvertSummary ~         // P61 GET AUTH /brand/xxx/advert/xxx/summary
+        getAdvertDetail ~   // P126 get detail of offer
         deleteAdvert ~       // P66 DELETE AUTH /brand/xxx/advert/xxx
         addInteraction       // P108 add Interaction
     }
@@ -167,7 +168,7 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
 
   // P64 LIST ADS PER BRAND
   @Path("/{brandId}/advert")
-  @ApiOperation(position=5,httpMethod = "GET", response = classOf[List[AdvertDetailResponse]],
+  @ApiOperation(position=5,httpMethod = "GET", response = classOf[List[AdvertDetailListResponse]],
     value = "Parallelai-64: List Ads per Brand...")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
@@ -188,7 +189,7 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
               complete {
                 (brandActor ? ListBrandsAdverts(brandId)).
 
-                  mapTo[ResponseWithFailure[APIError, List[AdvertDetailResponse]]]
+                  mapTo[ResponseWithFailure[APIError, List[AdvertDetailListResponse]]]
               }
             }
           }
@@ -197,9 +198,9 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
 
 
   // title("PARALLELAI-61API: Get Ad Details")
-  @Path("/{brand}/advert/{adId}")
-  @ApiOperation(position=6,httpMethod = "PIPPO", response = classOf[AdvertDetailResponse],
-    value = "Parallelai-61: Get Specific Ad per Brand")
+  @Path("/{brand}/advert/{adId}/summary")
+  @ApiOperation(position=6,httpMethod = "GET", response = classOf[AdvertSummaryResponse],
+    value = "Parallelai-61/ P125: Get Specific Ad per Brand / summary")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
       value = "UUID of brand "),
@@ -212,14 +213,46 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
     new ApiResponse(code = 400, message = "Invalid Parameters"),
     new ApiResponse(code = 401, message = "Authentication Error")
   ))
-  lazy val getAdvert : Route =
-    path(JavaUUID / "advert" / JavaUUID) {
+  lazy val getAdvertSummary : Route =
+    path(JavaUUID / "advert" / JavaUUID / "summary") {
       (brand, advert) =>
       {
         userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
           get {
             complete {
-              (brandActor ? GetBrandAdvert(brand,advert)).
+              (brandActor ? GetAdvertSummary(brand,advert)).
+
+                mapTo[ResponseWithFailure[APIError,AdvertSummaryResponse]]
+            }
+          }
+        }
+      }
+    }
+
+  // title("PARALLELAI-61API: Get Ad Details")
+  @Path("/{brand}/advert/{adId}/detail")
+  @ApiOperation(position=6,httpMethod = "GET", response = classOf[AdvertDetailResponse],
+    value = "Parallelai-61/ P126: Get Specific Ad per Brand / detail")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "brand", required = true, dataType = "String", paramType = "path",
+      value = "UUID of brand "),
+    new ApiImplicitParam(name = "adId", required = true, dataType = "String", paramType = "path",
+      value = "UUID of ad"),
+    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
+      value = "SessionId for authentication/authorization")
+  ))
+  @ApiResponses(Array(
+    new ApiResponse(code = 400, message = "Invalid Parameters"),
+    new ApiResponse(code = 401, message = "Authentication Error")
+  ))
+  lazy val getAdvertDetail : Route =
+    path(JavaUUID / "advert" / JavaUUID / "detail") {
+      (brand, advert) =>
+      {
+        userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
+          get {
+            complete {
+              (brandActor ? GetAdvertDetail(brand,advert)).
 
                 mapTo[ResponseWithFailure[APIError,AdvertDetailResponse]]
             }
@@ -228,9 +261,9 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
       }
     }
 
-  // PARALLELAI-65 CREATE AD
+  // PARALLELAI-65
   @Path("/{brandId}/advert")
-  @ApiOperation(position=7,httpMethod = "POST", response = classOf[AdvertDetailResponse],
+  @ApiOperation(position=7,httpMethod = "POST", response = classOf[AdvertDetailListResponse],
     value = "Parallelai-65: Create Ad")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(
@@ -262,7 +295,7 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
                   request.startDate, request.endDate, request.imageIds,
                   request.karedos)).
 
-                  mapTo[ResponseWithFailure[APIError, AdvertDetailResponse]]
+                  mapTo[ResponseWithFailure[APIError, AdvertDetailListResponse]]
               }
             }
           }

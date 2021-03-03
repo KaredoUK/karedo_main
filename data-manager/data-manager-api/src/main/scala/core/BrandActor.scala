@@ -25,6 +25,7 @@ class BrandActor()
                  implicit val userAccountDAO: UserAccountDAO,
                  implicit val brandDAO: BrandDAO,
                  implicit val logDAO: LogDAO,
+                 implicit val saleDAO: KaredoSalesDAO,
                  implicit val hintDAO: HintDAO)
 
   extends Actor with ActorLogging with Injectable with ISODateConversion {
@@ -37,7 +38,8 @@ class BrandActor()
     case request: DeleteBrandRequest => replyToSender(handleDeleteBrand(request))
     case request: DeleteAdvRequest => replyToSender(handleDeleteAdv(request))
     case request: ListBrandsAdverts => replyToSender(handleListBrandAdverts(request))
-    case request: GetBrandAdvert => replyToSender(handleGetBrandAdvert(request))
+    case request: GetAdvertSummary => replyToSender(handleGetAdvertSummary(request))
+    case request: GetAdvertDetail => replyToSender(handleGetAdvertDetail(request))
     case request: RequestSuggestedAdForUsersAndBrand => sender ! handleReturnSuggestedAds(request)
     case request: UserBrandInteraction => replyToSender(handleBrandInteraction(request))
     case request: UserOfferInteraction => replyToSender(handleOfferInteraction(request))
@@ -144,48 +146,75 @@ class BrandActor()
   }
 
   def handleListBrandAdverts(adverts: ListBrandsAdverts):
-    Future[ResponseWithFailure[APIError, List[AdvertDetailResponse]]] =
+    Future[ResponseWithFailure[APIError, List[AdvertDetailListResponse]]] =
     successful {
       SuccessResponse(
         brandDAO.listAds(adverts.brandId, adverts.max).map {
           detail =>
-            val summaryApi:List[SummaryImageApi]=detail.summaryImages.map(db => SummaryImageApi(db.imageId,db.imageType))
-            AdvertDetailResponse(
-            id = detail.id,
-            shortText = detail.shortText,
-            summaryImages = summaryApi,
-            detailedText = detail.detailedText,
-            termsAndConditions = detail.termsAndConditions,
-            startDate=detail.startDate,
-            endDate=detail.endDate,
-            imageIds = detail.detailImages map {
-              ImageId
-            },
-            karedos = detail.karedos)
+            AdvertDetailListResponse(
+            detail.id,
+            detail.shortText,
+            detail.karedos)
         })
     }
 
 
-  def handleGetBrandAdvert(advert: GetBrandAdvert): Future[ResponseWithFailure[APIError, AdvertDetailResponse]] =
+  def handleGetAdvertSummary(advert: GetAdvertSummary):
+  Future[ResponseWithFailure[APIError, AdvertSummaryResponse]] =
     successful {
       brandDAO.getAdById(advert.adId) match {
         case Some(detail) =>
 
           val summaryApi:List[SummaryImageApi]=detail.summaryImages.map(db => SummaryImageApi(db.imageId,db.imageType))
-          SuccessResponse(AdvertDetailResponse(
-            detail.id,
+          SuccessResponse(AdvertSummaryResponse(
             detail.shortText,
-            detail.detailedText,
-            detail.termsAndConditions,
             summaryApi,
             detail.startDate,
             detail.endDate,
-            detail.detailImages.map(ImageId(_)),
-            detail.karedos))
+            detail.karedos,
+            saleDAO.findByOffer(detail.id) match {
+              case Some(sale) => true
+              case _ => false
+            }))
 
         case None => FailureResponse(InvalidRequest("Invalid adId"))
       }
     }
+
+
+  def handleGetAdvertDetail(advert: GetAdvertDetail):
+  Future[ResponseWithFailure[APIError, AdvertDetailResponse]] =
+    successful {
+      brandDAO.getAdById(advert.adId) match {
+        case Some(detail) =>
+
+          val sale=saleDAO.findByOffer(detail.id)
+          val summaryApi:List[SummaryImageApi]=detail.summaryImages.map(db => SummaryImageApi(db.imageId,db.imageType))
+          SuccessResponse(AdvertDetailResponse(
+            detail.detailedText,
+            detail.termsAndConditions,
+            detail.startDate,
+            detail.endDate,
+            detail.detailImages.map(ImageId(_)),
+            detail.karedos,
+            sale match {
+              case Some(s) => s.dateConsumed match {
+                case None => "Created"
+                case Some(_) => "Consumed"
+              }
+              case _ => "NotCreated"
+            },
+            sale match {
+              case Some(s) => s.code.getOrElse("")
+              case _ => ""
+            }
+          ))
+
+        case None => FailureResponse(InvalidRequest("Invalid adId"))
+      }
+    }
+
+
 
   def handleDeleteAdv(request: DeleteAdvRequest): Future[ResponseWithFailure[APIError, StatusResponse]] = successful {
     brandDAO.delAd(request.advId)
@@ -194,9 +223,9 @@ class BrandActor()
   }
 
   def handleAddAdvert(request: AddAdvertCommand):
-    Future[ResponseWithFailure[APIError, AdvertDetailResponse]] = successful {
+    Future[ResponseWithFailure[APIError, AdvertDetailListResponse]] = successful {
 
-    val summaryDB:List[SummaryImageDB]=request.summaryImages.map(api => SummaryImageDB(api.imageId,api.imageType))
+    val summaryDB: List[SummaryImageDB] = request.summaryImages.map(api => SummaryImageDB(api.imageId, api.imageType))
     val detail: AdvertisementDetail = AdvertisementDetail(
       shortText = request.shortText,
       detailedText = request.detailedText,
@@ -210,16 +239,11 @@ class BrandActor()
     //log.info(s"XXX using detail uuid: ${detail.id}")
     brandDAO.addAd(request.brandId, detail)
     SuccessResponse(
-        AdvertDetailResponse(
-          detail.id,
-          request.shortText,
-          request.detailedText,
-          request.termsAndConditions,
-          request.summaryImages,
-          request.startDate,
-          request.endDate,
-          request.imageIds,
-          request.karedos))
+      AdvertDetailListResponse(
+        detail.id,
+        request.shortText,
+        detail.karedos))
+
   }
 
 

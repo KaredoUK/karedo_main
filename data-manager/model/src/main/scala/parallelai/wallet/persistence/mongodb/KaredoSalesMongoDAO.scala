@@ -47,6 +47,9 @@ class KaredoSalesMongoDAO (implicit val bindingModule: BindingModule)
   override def findById(id: UUID): Option[KaredoSales] = {
     dao.findOneById(id)
   }
+  override def findByOffer(offerId: UUID): Option[KaredoSales] = {
+    dao.findOne(MongoDBObject("adId" -> offerId))
+  }
   override def findByCode(code: String): Option[KaredoSales] = {
     // returns only sales with codes not consumed
 

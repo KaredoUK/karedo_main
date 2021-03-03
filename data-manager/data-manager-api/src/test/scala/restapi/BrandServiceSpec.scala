@@ -83,7 +83,7 @@ class BrandServiceSpec
     }
 
     "PARALLELAI-65: Create Ad" in new WithMockedPersistenceRestService {
-      val pipeline = sendReceive ~> unmarshal[AdvertDetailResponse]
+      val pipeline = sendReceive ~> unmarshal[AdvertDetailListResponse]
 
       val brand = new Brand(UUID.randomUUID(), "brandName", iconId="iconID", ads=List.empty)
       // mockedBrandDAO.getById(any[UUID]) returns Some(brand)
@@ -102,11 +102,11 @@ class BrandServiceSpec
       })
 
       response should beLike {
-        case AdvertDetailResponse(
-        _, ad.shortText,_,_, _, _,_, ad.imageIds, ad.karedos) => ok
+        case AdvertDetailListResponse(
+        _, ad.shortText) => ok
         case _ => ko
       }
-      print(s"response.id: ${response.id}")
+      print(s"response.id: ${response.offerId}")
       there was one(mockedBrandDAO).addAd(
         brand.id,
         AdvertisementDetail(id=any[UUID],
