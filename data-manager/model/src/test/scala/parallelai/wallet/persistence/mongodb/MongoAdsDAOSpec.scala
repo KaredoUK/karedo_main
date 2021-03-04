@@ -44,7 +44,7 @@ class MongoAdsDAOSpec
       detailedText = "long "+text2,
       termsAndConditions = "T&C",
       summaryImages = List(SummaryImageDB("imagex",1), SummaryImageDB("imagey",2)),
-      detailImages = List("image1", "image2"),
+      detailImages = List("image3"),
       karedos = 200,
       startDate=DateTime.now,
       endDate=DateTime.now.plusDays(10))
