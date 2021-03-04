@@ -66,7 +66,9 @@ class BrandServiceSpec
         Get(s"$serviceUrl/brand/${brand.id}").withHeaders(headers)
       })
 
-      response shouldEqual BrandData(brand.name, iconId=brand.iconId)
+      // this has issues with dates because they are created with different values
+      response.name shouldEqual brand.name
+      response.iconId shouldEqual brand.iconId
     }
 
     "PARALLELAI-68: Deactivate Brand" in new WithMockedPersistenceRestService {
