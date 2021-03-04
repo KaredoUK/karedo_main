@@ -103,7 +103,7 @@ class BrandServiceSpec
 
       response should beLike {
         case AdvertDetailListResponse(
-        _, ad.shortText) => ok
+        _, ad.shortText, _) => ok
         case _ => ko
       }
       print(s"response.id: ${response.offerId}")
