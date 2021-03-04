@@ -39,7 +39,8 @@ class MongoBrandDAOSpec
       val findAfterInsert = brandDAO.getById(id).get
 
       brandDAO.delete(id)
-      findAfterInsert shouldEqual n1
+      findAfterInsert.name shouldEqual n1.name
+      findAfterInsert.iconId shouldEqual n1.iconId
     }
 
     "can delete one instance" in {
