@@ -2,6 +2,7 @@ package core
 
 import org.joda.time.{DateTimeZone, DateTime}
 import org.joda.time.format.ISODateTimeFormat
+import scala.language.implicitConversions
 
 trait ISODateConversion {
   implicit def dateWrapper(s: DateTime) =

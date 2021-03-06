@@ -4,6 +4,7 @@ from datetime import datetime, date, time, timedelta
 
 from util import *
 from pymongo import MongoClient
+from bson.codec_options import CodecOptions
 
 #Root = "http://api.karedo.co.uk:8080/"
 Root = os.getenv("ROOT","http://localhost:8090/")
@@ -31,16 +32,15 @@ db = client.wallet_data
 JAVA=5 # uuid_type to properly understand UUIDS from DB
 
 # Users collection
-ua = db.UserAccount
-ua.uuid_subtype=JAVA
+ua = db.get_collection('UserAccount', codec_options=CodecOptions(uuid_representation=JAVA))
 
 # Brand collection
-br = db.Brand
-br.uuid_subtype=JAVA
+#br = db.Brand
+br=db.get_collection('Brand', codec_options=CodecOptions(uuid_representation=JAVA))
+
 
 # Offer collection
-of = db.Offer
-of.uuid_subtype=JAVA
+of = db.get_collection('Offer', codec_options=CodecOptions(uuid_representation=JAVA))
 
 # media
 fs = db["fs.files"]

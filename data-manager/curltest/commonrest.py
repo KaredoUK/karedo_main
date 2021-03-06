@@ -12,7 +12,7 @@ from commondb import *
 from bson.objectid import ObjectId
 import requests
 
-requests.packages.urllib3.disable_warnings()
+#requests.packages.urllib3.disable_warnings()
 #if(DEBUG==1): httpclient.HTTPConnection.debuglevel = 1
 
 HTTP_OK=200

@@ -43,7 +43,11 @@ trait DependencyInjection extends Injectable {
     println(java.lang.management.ManagementFactory.getRuntimeMXBean().getInputArguments)
     println(s"\n**** config.resource: ${System.getProperty("config.resource")}")
     println(  s"**** config.file: ${System.getProperty("config.file")}\n")
-    AppConfigPropertySource( ConfigFactory.load().withFallback(ConfigFactory.parseResources("application.default.conf")) )
+    AppConfigPropertySource( ConfigFactory.load().
+        withFallback(
+            ConfigFactory.parseResources("application.default.conf")
+        ) 
+    )
   }
   override implicit val bindingModule : BindingModule = newBindingModuleWithConfig
 }
