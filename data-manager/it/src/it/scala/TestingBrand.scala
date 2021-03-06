@@ -30,11 +30,11 @@ class TestingBrand
       val ads=listAds(r.sessionId,b)
       ads.size should_==(3)
 
-      ads.filter(_.text=="second ad").size should_==(1)
-      ads.filter(_.text=="4th ad").size should_==(0)
+      ads.filter(_.shortText=="second ad").size should_==(1)
+      ads.filter(_.shortText=="4th ad").size should_==(0)
 
       val read2 = getAd(r.sessionId,b,a2.toString)
-      read2.text should_==("second ad")
+      read2.shortText should_==("second ad")
 
       val adscompany=listAds(r.sessionId,b1)
       adscompany.size should_==(1)
@@ -65,7 +65,7 @@ class TestingBrand
     val suggested=getSuggestedAds(r.sessionId, r.userId, b, 2)
 
     suggested.size should_==(2)
-    suggested(0).text should_==("AD1")
+    suggested(0).detailedText should_==("AD1")
 
     val suggested2=getSuggestedAds(r2.sessionId,r2.userId,b2,2)
     suggested2.size should_==(0)

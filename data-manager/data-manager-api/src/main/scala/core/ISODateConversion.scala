@@ -13,5 +13,7 @@ trait ISODateConversion {
     case None => None
     case Some(d) => Some(dateWrapper(d))
   }
+  def ISONowPlus(days:Int=0) =
+    ISODateTimeFormat.dateTime().print(DateTime.now().plusDays(0))
 
 }

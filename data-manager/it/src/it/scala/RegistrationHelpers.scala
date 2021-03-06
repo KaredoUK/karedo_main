@@ -1,6 +1,7 @@
 import java.util.UUID
 
 import com.parallelai.wallet.datamanager.data._
+import core.ISODateConversion
 import parallelai.wallet.entity.KaredoTypes.KaredoPoints
 import parallelai.wallet.persistence.mongodb.{ClientApplicationMongoDAO, UserAccountMongoDAO}
 import restapi.security.AuthenticationSupport._
@@ -126,7 +127,7 @@ trait RegistrationHelpers {
   }
 }
 
-trait BrandHelpers {
+trait BrandHelpers extends ISODateConversion {
   this: ItEnvironment =>
 
   def addBrand(sessionId: String, name: String): UUID = {
@@ -177,19 +178,27 @@ trait BrandHelpers {
   }
 
   def addAd(sessionId: String, brand: UUID, ad: String): UUID = {
-    val add = addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> sendReceive ~> unmarshal[AdvertDetailResponse]
+    val add = addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> sendReceive ~> unmarshal[AdvertDetailListResponse]
 
     val adR = wait {
       add {
-        Post(s"$serviceUrl/brand/$brand/advert", AdvertDetailApi(text = ad, imageIds = List(), value = 10))
+        Post(s"$serviceUrl/brand/$brand/advert", AdvertDetailApi(
+          shortText = ad,
+          detailedText = "detailed",
+          termsAndConditions = "T&C",
+          startDate=ISONowPlus(0),
+          endDate=ISONowPlus(20),
+          imageIds = List(),
+          summaryImages = List(),
+          karedos = 10))
 
       }
     }
-    adR.id
+    adR.offerId
   }
 
-  def getAd(sessionId: String, brand: UUID, ad: String): AdvertDetailResponse = {
-    val add = addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> sendReceive ~> unmarshal[AdvertDetailResponse]
+  def getAd(sessionId: String, brand: UUID, ad: String): AdvertSummaryResponse = {
+    val add = addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> sendReceive ~> unmarshal[AdvertSummaryResponse]
 
     val adR = wait {
       add {
@@ -200,12 +209,12 @@ trait BrandHelpers {
     adR
   }
 
-  def listAds(sessionId: String, brand: UUID): List[AdvertDetailResponse] = {
-    val add = addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> sendReceive ~> unmarshal[List[AdvertDetailResponse]]
+  def listAds(sessionId: String, brand: UUID): List[AdvertSummaryResponse] = {
+    val add = addHeader(HEADER_NAME_SESSION_ID, sessionId) ~> sendReceive ~> unmarshal[List[AdvertSummaryResponse]]
 
     val adR = wait {
       add {
-        Get(s"$serviceUrl/brand/$brand/advert")
+        Get(s"$serviceUrl/brand/$brand/summary")
 
       }
     }
