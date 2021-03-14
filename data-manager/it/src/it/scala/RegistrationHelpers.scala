@@ -186,6 +186,7 @@ trait BrandHelpers extends ISODateConversion {
           shortText = ad,
           detailedText = "detailed",
           termsAndConditions = "T&C",
+          shareDetails="share details",
           startDate=ISONowPlus(0),
           endDate=ISONowPlus(20),
           imageIds = List(),

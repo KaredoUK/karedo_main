@@ -101,6 +101,7 @@ def mkOffer(brandId, session):
     data={ "shortText":"adtext",
            "detailedText":"longtext",
            "termsAndConditions":"T&C",
+           "shareDetails":"share details",
            "summaryImages": [
                { "imageId":"aaa", "imageType": 3 },
                { "imageId":"omega", "imageType": 4 }],

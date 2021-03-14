@@ -193,6 +193,7 @@ class BrandActor()
           SuccessResponse(AdvertDetailResponse(
             detail.detailedText,
             detail.termsAndConditions,
+            detail.shareDetails,
             detail.startDate,
             detail.endDate,
             detail.detailImages.map(ImageId(_)),
@@ -230,6 +231,7 @@ class BrandActor()
       shortText = request.shortText,
       detailedText = request.detailedText,
       termsAndConditions = request.termsAndConditions,
+      shareDetails = request.shareDetails,
       summaryImages = summaryDB,
       startDate = request.startDate,
       endDate = request.endDate,

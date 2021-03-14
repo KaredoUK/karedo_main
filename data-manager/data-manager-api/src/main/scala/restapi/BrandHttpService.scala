@@ -290,7 +290,7 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
             handleWith {
               request: AdvertDetailApi => {
                 (brandActor ? AddAdvertCommand(
-                  brandId, request.shortText, request.detailedText, request.termsAndConditions,
+                  brandId, request.shortText, request.detailedText, request.termsAndConditions, request.shareDetails,
                   request.summaryImages,
                   request.startDate, request.endDate, request.imageIds,
                   request.karedos)).

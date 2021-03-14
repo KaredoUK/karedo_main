@@ -83,6 +83,7 @@ class TestBrand(unittest.TestCase):
             "shortText":"adtext",
             "detailedText":"longtext",
             "termsAndConditions":"T&C",
+            "shareDetails":"share details",
             "summaryImages": [ { "imageId":"aaa", "imageType":1 }],
             "startDate":ISONow(),
             "endDate":ISONow(10),
@@ -106,6 +107,7 @@ class TestBrand(unittest.TestCase):
             "shortText":"adtext1",
             "detailedText":"longtext",
             "termsAndConditions":"T&C",
+            "shareDetails":"share details",
             "summaryImages": [ { "imageId":"aaa", "imageType":1 }],
             "startDate":ISONow(),
             "endDate":ISONow(10),
@@ -132,6 +134,7 @@ class TestBrand(unittest.TestCase):
             "shortText":"A",
             "detailedText":"longtext",
             "termsAndConditions":"T&C",
+            "shareDetails":"share details",
             "summaryImages": [ { "imageId":"aaa", "imageType":1 }],
             "startDate":ISONow(),
             "endDate":ISONow(10),
@@ -144,6 +147,7 @@ class TestBrand(unittest.TestCase):
             "shortText":"B",
             "detailedText":"longtext",
             "termsAndConditions":"T&C",
+            "shareDetails":"share details",
             "summaryImages": [ { "imageId":"aaa", "imageType":1 }],
             "startDate":ISONow(),
             "endDate":ISONow(10),
@@ -222,6 +226,7 @@ class TestBrand(unittest.TestCase):
             "shortText":"A",
             "detailedText":"longtext",
             "termsAndConditions":"T&C",
+            "shareDetails":"share details",
             "summaryImages": [ { "imageId":"aaa", "imageType":1 }],
             "startDate":ISONow(5),
             "endDate":ISONow(10),
@@ -238,6 +243,7 @@ class TestBrand(unittest.TestCase):
             "shortText":"B",
             "detailedText":"longtext",
             "termsAndConditions":"T&C",
+            "shareDetails":"share details",
             "summaryImages": [ { "imageId":"aaa", "imageType":1 }],
             "startDate":ISONow(),
             "endDate":ISONow(10),
@@ -262,6 +268,7 @@ class TestBrand(unittest.TestCase):
             "shortText":"A",
             "detailedText":"longtext",
             "termsAndConditions":"T&C",
+            "shareDetails":"share details",
             "summaryImages": [ { "imageId":"aaa", "imageType":1 }],
             "startDate":ISONow(),
             "endDate":ISONow(10),
@@ -294,6 +301,7 @@ class TestBrand(unittest.TestCase):
 
         assert js["detailedText"] == "longtext"
         assert js["termsAndConditions"]== "T&C"
+        assert js["shareDetails"]== "share details"
         assert js["state"] == "NotCreated"
         assert js["code"] == ""
         imageIds=js["imageIds"]

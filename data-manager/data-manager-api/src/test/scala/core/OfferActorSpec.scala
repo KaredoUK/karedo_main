@@ -34,6 +34,7 @@ class OfferActorSpec
           shortText="short",
           detailedText="detailed",
           termsAndConditions="T&C",
+          shareDetails="share details",
           startDate=DateTime.now,
           summaryImages=List(),
           endDate=DateTime.now.plusDays(10)))

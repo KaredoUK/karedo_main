@@ -7,11 +7,15 @@ from pymongo import MongoClient
 from bson.codec_options import CodecOptions
 
 #Root = "http://api.karedo.co.uk:8080/"
-Root = os.getenv("ROOT","http://localhost:8090/")
-MongoHost = os.getenv("MONGO_HOST","localhost")
-MongoPort = os.getenv("MONGO_PORT","12345")
+Root = ("http://" +
+    os.getenv("KAREDO_PORT_8080_TCP_ADDR","localhost")+
+    ":"+os.getenv("KAREDO_PORT_8080_TCP_PORT","8090")+"/")
+    
+MongoHost = os.getenv("MONGO_PORT_27017_TCP_ADDR","localhost")
+MongoPort = os.getenv("MONGO_PORT_27017_TCP_PORT","12345")
 MongoDb = os.getenv("MONGO_DB","wallet_data")
 client = MongoClient(MongoHost,int(MongoPort))
+
 
 def ISONow(ndays=0):
     ret= (datetime.utcnow()+timedelta(days=ndays)).isoformat()

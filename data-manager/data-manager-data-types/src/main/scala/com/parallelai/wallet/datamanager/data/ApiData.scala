@@ -203,6 +203,7 @@ case class AddAdvertCommand(
      shortText: String,
      detailedText: String,
      termsAndConditions: String,
+     shareDetails: String,
      summaryImages:List[SummaryImageApi],
      startDate:String,
      endDate:String,
@@ -225,6 +226,8 @@ case class AdvertDetailApi(
                          detailedText: String,
                          @(ApiModelProperty@field)(value = "terms and conditions")
                          termsAndConditions: String,
+                         @(ApiModelProperty@field)(value = "share details (on facebook etc)")
+                         shareDetails: String,
                          @(ApiModelProperty@field)(value = "List of summary images")
                          summaryImages: List[SummaryImageApi],
                          @(ApiModelProperty@field)(value = "Starting Time format '1997-07-16T19:20:30.45Z'")
@@ -242,6 +245,8 @@ case class AdvertDetailResponse(
                                  detailedText: String,
                                  @(ApiModelProperty@field)(value = "terms and conditions")
                                  termsAndConditions: String,
+                                 @(ApiModelProperty@field)(value = "share details")
+                                 shareDetails: String,
                                  @(ApiModelProperty@field)(value = "Starting Time format '1997-07-16T19:20:30.45Z'")
                                  startDate: String = ISODateTimeFormat.dateTime().print(DateTime.now()),
                                  @(ApiModelProperty@field)(value = "Ending Time format '1997-07-16T19:20:30.45Z'")

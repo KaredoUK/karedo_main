@@ -94,6 +94,7 @@ class BrandServiceSpec
         shortText = "text",
         detailedText="detailed",
         termsAndConditions="T&C",
+        shareDetails="share details",
         summaryImages = List(),
         imageIds = List(ImageId("image1"), ImageId("image2")),
         karedos = 100)
@@ -118,6 +119,7 @@ class BrandServiceSpec
           shortText=ad.shortText,
           detailedText=ad.detailedText,
           termsAndConditions=ad.termsAndConditions,
+          shareDetails=ad.shareDetails,
           summaryImages=ad.summaryImages.map(api => SummaryImageDB(api.imageId,api.imageType)),
           detailImages=ad.imageIds.map {_.imageId},
           karedos=ad.karedos
