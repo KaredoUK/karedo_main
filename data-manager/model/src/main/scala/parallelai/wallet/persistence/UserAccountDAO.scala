@@ -3,7 +3,7 @@ package parallelai.wallet.persistence
 import java.util.UUID
 import parallelai.wallet.entity.KaredoTypes.KaredoPoints
 import parallelai.wallet.entity._
-import parallelai.wallet.persistence.mongodb.SubscribedBrands
+
 import scala.concurrent.Future
 
 trait UserAccountDAO {

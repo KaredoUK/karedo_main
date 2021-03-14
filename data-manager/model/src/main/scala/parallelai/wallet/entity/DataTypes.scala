@@ -28,6 +28,7 @@ case class UserPersonalInfo(
 
 case class AccountSettings(maxMessagesPerWeek: Int)
 
+case class SubscribedBrand(brandId:UUID, lastAction: DateTime=new DateTime(DateTimeZone.UTC))
 case class UserAccount(id: UUID,
                        msisdn: Option[String],
                        email: Option[String],
@@ -36,7 +37,7 @@ case class UserAccount(id: UUID,
                        settings: AccountSettings = defaultAccountSettings,
                        active: Boolean = false,
                        totalPoints: KaredoPoints = 0,
-                       subscribedBrands: List[UUID] = List(),
+                       subscribedBrands: List[SubscribedBrand] = List(),
                        password: Option[String] = None)
 case class UserAccountTotalPoints(totalPoints: KaredoPoints)
 

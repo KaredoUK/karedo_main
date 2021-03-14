@@ -13,17 +13,19 @@ import com.novus.salat.dao._
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import com.novus.salat._
 import com.novus.salat.global._
+import userAccountMongoUtils._
+import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
 
 
 object userAccountMongoUtils {
   def byId(userId: UUID) = MongoDBObject("_id" -> userId)
 
-  def bySubscribedBrands(brandId: UUID) = MongoDBObject("subscribedBrands" -> brandId)
+  def bySubscribedBrands(brandId: UUID) = MongoDBObject("subscribedBrands.brandId" -> brandId)
+  def projectSubscribedBrands = MongoDBObject("subscribedBrands.$" -> 1)
 
   def byApplicationId(applicationId: UUID) = "applications" $elemMatch MongoDBObject("_id" -> applicationId)
 }
-
-import userAccountMongoUtils._
 
 
 class UserAccountMongoDAO(implicit val bindingModule: BindingModule)
@@ -207,17 +209,23 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule)
   override def delete(userId: UUID): Unit =
       dao.removeById(userId, WriteConcern.Safe)
 
-  override def addBrand(userId: UUID, brandId: UUID): Unit =
+  override def addBrand(userId: UUID, brandId: UUID): Unit = {
+    
       dao.update(byId(userId),
-        $push("subscribedBrands" -> brandId)
-      )
+        $push("subscribedBrands" -> grater[SubscribedBrand].asDBObject(SubscribedBrand(brandId))
+      ))
+    
+  }
+      
 
   override def getBrand(userId: UUID, brandId: UUID) : Boolean = {
       val query = $and(byId(userId), bySubscribedBrands(brandId))
-      dao.findOne(query) match {
-        case Some(_) => true
-        case None => false
-      }
+      val cursor = dao.find(query,projectSubscribedBrands)
+      // if cursor has next than we have found this brand and return true otherwise false
+      if(cursor.hasNext){
+        val r=cursor.next
+        true
+      } else false
     }
 
   override def deleteBrand(userId: UUID, brandId: UUID): Unit =
@@ -236,7 +244,7 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule)
       case None => List()
       case Some(account) => account.subscribedBrands
     }
-    list
+    list.map(_.brandId)
   }
 }
 
