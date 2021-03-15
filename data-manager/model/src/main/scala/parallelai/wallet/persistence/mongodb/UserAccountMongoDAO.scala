@@ -115,6 +115,11 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule)
     ret
 
   }
+
+
+
+
+
 /*
   @param query query to match
   * @param fields fields to be returned
@@ -218,15 +223,33 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule)
   }
       
 
-  override def getBrand(userId: UUID, brandId: UUID) : Boolean = {
+  override def getBrand(userId: UUID, brandId: UUID) : Option[SubscribedBrand] = {
       val query = $and(byId(userId), bySubscribedBrands(brandId))
       val cursor = dao.find(query,projectSubscribedBrands)
       // if cursor has next than we have found this brand and return true otherwise false
       if(cursor.hasNext){
+        // we have at least and exactly one subscribed brand so return the  first
         val r=cursor.next
-        true
-      } else false
+        Some(r.subscribedBrands(0))
+      } else None
     }
+
+  override def updateBrandLastAction(userId: UUID, brandId: UUID): Option[SubscribedBrand] = {
+
+    getBrand(userId,brandId) match {
+      case Some(s) => {
+        val query = $and(byId(userId), bySubscribedBrands(brandId))
+
+        dao.update(query, MongoDBObject("$set" ->
+          MongoDBObject("subscribedBrands.$"->
+            grater[SubscribedBrand].asDBObject(SubscribedBrand(s.brandId)))))
+
+        Some(s)
+      }
+      case None => None
+    }
+
+  }
 
   override def deleteBrand(userId: UUID, brandId: UUID): Unit =
     try {

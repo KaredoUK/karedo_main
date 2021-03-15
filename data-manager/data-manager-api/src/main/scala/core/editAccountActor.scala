@@ -218,9 +218,10 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
           case None => Some(BrandNotExistent(brand))
           case _ => {
 
-            if (userAccountDAO.getBrand(user, brand))
-              Some(BrandAlreadySubscribed(brand))
-            else None
+            userAccountDAO.getBrand(user, brand) match {
+              case Some(s) => Some (BrandAlreadySubscribed (brand) )
+              case None => None
+            }
           }
         }
       }

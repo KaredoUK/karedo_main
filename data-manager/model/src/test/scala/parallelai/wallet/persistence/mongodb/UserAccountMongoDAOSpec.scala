@@ -7,7 +7,7 @@ import com.escalatesoft.subcut.inject.NewBindingModule
 import NewBindingModule._
 import com.escalatesoft.subcut.inject.config.PropertiesConfigMapSource
 import org.specs2.specification.BeforeExample
-import parallelai.wallet.entity.{ClientApplication, UserPersonalInfo, UserAccount}
+import parallelai.wallet.entity.{Brand, ClientApplication, UserPersonalInfo, UserAccount}
 import java.util.UUID
 import scala.concurrent.{Future, Await}
 import Await._
@@ -20,6 +20,7 @@ class UserAccountMongoDAOSpec
   with MongoTestUtils
 {
   val accountDAO = new UserAccountMongoDAO()
+  val brandDAO = new BrandMongoDAO()
   accountDAO.dao.collection.remove(MongoDBObject())
 
   val userAccount = UserAccount(UUID.randomUUID(), Some("12345678"), Some("user@email.com"))
@@ -165,6 +166,22 @@ class UserAccountMongoDAOSpec
       activeStatus shouldEqual Some(true)
     }
 
+    "Add some subscribed brands and checks that if we act on one of them we get lastAction updated" in {
+      clean
+      accountDAO.insertNew(userAccount,clientApplication)
+      val Some(brand1), Some(brand2) =brandDAO.insertNew(Brand())
+
+      accountDAO.addBrand(userAccount.id,brand1)
+      accountDAO.addBrand(userAccount.id,brand2)
+
+      val Some(previous)=accountDAO.getBrand(userAccount.id,brand2)
+
+      accountDAO.updateBrandLastAction(userAccount.id,brand2)
+
+      val Some(updated)=accountDAO.getBrand(userAccount.id,brand2)
+
+      previous.lastAction must be_!=(updated.lastAction)
+    }
 
 
   }

@@ -22,6 +22,8 @@ trait UserAccountDAO {
 
   def addPoints(userId: UUID, points: KaredoPoints): Option[UserAccountTotalPoints]
 
+  def updateBrandLastAction(userId: UUID, brandId: UUID): Option[SubscribedBrand]
+
   def update(userAccount: UserAccount): Unit
 
   def updateSubInfo(id: UUID, userInfo: UserPersonalInfo, personalSettings: AccountSettings): Unit
@@ -42,7 +44,7 @@ trait UserAccountDAO {
 
   def addBrand(userId: UUID, brandId: UUID): Unit
 
-  def getBrand(userId: UUID, brandId: UUID) : Boolean
+  def getBrand(userId: UUID, brandId: UUID) : Option[SubscribedBrand]
 
   def deleteBrand(userId: UUID, brandId: UUID): Unit
 

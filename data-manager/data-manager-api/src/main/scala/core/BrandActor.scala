@@ -95,22 +95,28 @@ class BrandActor()
     val brand = interaction.brandId
     val intType = interaction.interaction
     val intSubType = interaction.intType
-    userAccountDAO.addPoints(user, points) match {
-      case Some(p: UserAccountTotalPoints) => {
+    userAccountDAO.updateBrandLastAction(user, brand) match {
+      case Some(s) =>
 
-        val l: KaredoLog = KaredoLog(
-          user = Some(user),
-          brand = Some(brand),
-          logType = Some(intType + " " + intSubType),
-          text = s"interacted total points: $p")
+        userAccountDAO.addPoints(user, points) match {
+          case Some(p: UserAccountTotalPoints) => {
 
-        logDAO.addLog(l)
-        val response = InteractionResponse(interaction.userId, p.totalPoints.toLong)
-        SuccessResponse(response)
-      }
-      case _ => {
-        FailureResponse(InvalidRequest("User not found"))
-      }
+            val l: KaredoLog = KaredoLog(
+              user = Some(user),
+              brand = Some(brand),
+              logType = Some(intType + " " + intSubType),
+              text = s"interacted total points: $p")
+
+            logDAO.addLog(l)
+            val response = InteractionResponse(interaction.userId, p.totalPoints.toLong)
+            SuccessResponse(response)
+          }
+          case _ => {
+            FailureResponse(InvalidRequest("User not found"))
+          }
+        }
+      case None =>
+        FailureResponse(InvalidRequest("Brand not subscribed"))
     }
 
   }

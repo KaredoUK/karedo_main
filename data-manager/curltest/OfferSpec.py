@@ -80,6 +80,10 @@ class TestOffer(unittest.TestCase):
 
         user=ua.find_one({"email": "pakkio@gmail.com"})
         initialPoints = user["totalPoints"]
+        
+        # be sure user is subscribed to that brand otherwise we get an error
+        r=post("account/"+userId+"/brand",{ "brandId": brandId }, sessionId)
+        assert r.status_code == HTTP_OK
 
         r=post("user/"+userId+"/interaction/brand",
             {  "userId" : userId, "brandId" : brandId, "interaction" : "share", "intType" : "facebook" },
