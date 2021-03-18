@@ -187,9 +187,7 @@ abstract class BrandHttpService(protected val brandActor: ActorRef,
           rejectEmptyResponse {
             get {
               complete {
-                (brandActor ? ListBrandsAdverts(brandId)).
-
-                  mapTo[ResponseWithFailure[APIError, List[AdvertDetailListResponse]]]
+                (brandActor ? ListBrandsAdverts(brandId)).mapTo[ResponseWithFailure[APIError, List[AdvertDetailListResponse]]]
               }
             }
           }

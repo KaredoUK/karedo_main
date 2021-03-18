@@ -30,4 +30,3 @@ scalacOptions ++= Seq(
 testOptions in Test += Tests.Setup( () => Embedder.startMongo)
 
 testOptions in Test += Tests.Cleanup( () => println("After Tests"))
-

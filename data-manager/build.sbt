@@ -3,6 +3,7 @@ import sbt._
 import sbtassembly.Plugin._
 import AssemblyKeys._
 
+scalaVersion in ThisBuild := "2.11.4"
 
 name := "data-manager"
 
@@ -15,17 +16,32 @@ javacOptions in ThisBuild ++= Seq("-source", "1.6")
 
 exportJars := true
 
+ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
+
+
+
 lazy val common = (project.in(file("common" ))).
-  settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
+settings(//net.virtualvoid.sbt.graph.Plugin.graphSettings: _*,
+    ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) })
+
 lazy val data = (project.in(file("data-manager-data-types" ))).
-  dependsOn(common).
-  settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
+dependsOn(common).
+settings(//net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
+    ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) })
+
 lazy val model = (project.in(file("model")).
   dependsOn(common)).dependsOn(common).
-  settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
+settings(//net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
+    ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) })
+
+
+
+
+
 lazy val api = (project.in(file("data-manager-api"))).
   dependsOn(data,model,common).
-  settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*).
+  settings(//net.virtualvoid.sbt.graph.Plugin.graphSettings: _*).
+    ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }).
   settings(assemblySettings: _*) /*.
   settings(mainClass in assembly := Some("Rest")).
   settings(jarName in assembly := "Karedo.jar")*/

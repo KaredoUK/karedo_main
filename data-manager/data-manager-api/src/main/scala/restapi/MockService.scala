@@ -68,7 +68,7 @@ class MockService(otherActor: ActorRef,
 
   implicit val timeout = Timeout(20.seconds)
 
-  val route= route56 ~ /* 57 */ route59 ~
+  val route= route56 ~ /* 57  route59 ~ */
     route63 ~ route79 ~ route80 ~ route81 ~ route82 ~ route92
 
   lazy val route56: Route =
@@ -88,28 +88,28 @@ class MockService(otherActor: ActorRef,
 
   //title("PARALLELAI-59API: Get Next N Ads For User For Brand")
   //r = get("account/"+userId+"/brand/"+brandId+"/ads?max=5")
-  lazy val route59: Route =
-    path("account" / JavaUUID / "brand" / JavaUUID / "ads") {
-      (user, brand) =>
-        {
-          userAuthorizedFor(canAccessUser(user))(executionContext) { userAuthContext =>
-
-            get {
-              parameters('max) { max =>
-                rejectEmptyResponse {
-                  complete {
-                    """[
-                  |{"id":"f135e16d-da0c-4b12-ab7f-d19ae1c7abe3","name":"name1","iconId":"5678666666"},
-                  |{"id":"f135e16d-da0c-4b12-ab7f-d19ae1c7abe3","name":"name2","iconId":"5678666667"}
-                  |]
-                """.stripMargin
-                  }
-                }
-              }
-            }
-          }
-        }
-    }
+//  lazy val route59: Route =
+//    path("account" / JavaUUID / "brand" / JavaUUID / "ads") {
+//      (user, brand) =>
+//        {
+//          userAuthorizedFor(canAccessUser(user))(executionContext) { userAuthContext =>
+//
+//            get {
+//              parameters('max) { max =>
+//                rejectEmptyResponse {
+//                  complete {
+//                    """[
+//                  |{"id":"f135e16d-da0c-4b12-ab7f-d19ae1c7abe3","name":"name1","iconId":"5678666666"},
+//                  |{"id":"f135e16d-da0c-4b12-ab7f-d19ae1c7abe3","name":"name2","iconId":"5678666667"}
+//                  |]
+//                """.stripMargin
+//                  }
+//                }
+//              }
+//            }
+//          }
+//        }
+//    }
 
 
 

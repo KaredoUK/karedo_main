@@ -259,6 +259,18 @@ class TestBrand(unittest.TestCase):
         js=json.loads(r.text)
         assert js["numValidOffers"] == 4
 
+    def test59(self):
+        global userId, sessionId
+        title("PARALLELAI-59API: Get Next N Ads For User For Brand")
+        r = get("account/"+userId+"/brand/"+brandId+"/ads?max=5", session=sessionId)
+        self.assertEqual( r.status_code,  HTTP_OK)
+        js = json.loads(r.text)
+        for i in range(0,len(js)):
+            info("id: %s, name: %s, iconId: %s" %
+                 (js[i]["id"], js[i]["name"], js[i]["iconId"]))
+
+
+
     def test09_P125_126_GetAd(self):
         global sessionId, brandId
 

@@ -19,7 +19,6 @@ test in assembly := {}
 version := Common.globalVersion
 
 
-
 resolvers ++= Common.sprayResolvers 
 
 libraryDependencies ++= Seq(

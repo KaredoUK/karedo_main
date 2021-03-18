@@ -12,6 +12,7 @@ libraryDependencies ++= Seq(
   Common.sprayJson
 )
 
+
 scalacOptions ++= Seq(
   "-unchecked",
   "-deprecation",

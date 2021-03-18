@@ -82,7 +82,7 @@ case class KaredoLog(@Key("_id") id: UUID = UUID.randomUUID,
                      brand: Option[UUID]=None,
                      offer: Option[UUID]=None,
                      logType: Option[String]=None,
-                     text: String )
+                     text: String="" )
 
 case class Hint(@Key("_id") id: UUID = UUID.randomUUID(), userId: UUID, brandId: UUID, ad: UUID, score: Double)
 

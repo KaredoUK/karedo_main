@@ -171,7 +171,7 @@ trait BaseCoreActors extends ServiceActors with RestMessageActors  {
   )
 
   override val editAccount = system.actorOf(
-    EditAccountActor.props(userAccountDAO, clientApplicationDAO, brandDAO)
+    EditAccountActor.props(userAccountDAO, clientApplicationDAO, brandDAO, logDAO)
       .withRouter( RoundRobinPool(nrOfInstances = editAccountActorPoolSize) ),
     "EditAccount"
   )

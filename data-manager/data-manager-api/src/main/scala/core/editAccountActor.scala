@@ -1,7 +1,6 @@
 package core
 
 import java.util.UUID
-
 import akka.actor.{Props, ActorLogging, Actor}
 import akka.actor.Actor.Receive
 import core.common.RequestValidationChaining
@@ -15,10 +14,17 @@ import scala.async.Async._
 import scala.concurrent.Future._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
+import EditAccountActor._
+import parallelai.wallet.persistence.LogDAO
+import parallelai.wallet.entity.KaredoLog
 
 object EditAccountActor extends ISODateConversion {
-  def props(userAccountDAO: UserAccountDAO, clientApplicationDAO: ClientApplicationDAO, brandDAO: BrandDAO): Props =
-    Props(new EditAccountActor(userAccountDAO, clientApplicationDAO, brandDAO))
+  def props(
+      userAccountDAO: UserAccountDAO, 
+      clientApplicationDAO: ClientApplicationDAO, 
+      brandDAO: BrandDAO,
+      logDAO: LogDAO): Props =
+    Props(new EditAccountActor(userAccountDAO, clientApplicationDAO, brandDAO, logDAO))
 
   case class GetAccount(accountId: UserID)
 
@@ -116,9 +122,11 @@ object EditAccountActor extends ISODateConversion {
     )
 }
 
-import EditAccountActor._
-
-class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: ClientApplicationDAO, brandDAO: BrandDAO)
+class EditAccountActor(
+    userAccountDAO: UserAccountDAO, 
+    clientApplicationDAO: ClientApplicationDAO, 
+    brandDAO: BrandDAO,
+    logDAO: LogDAO)
   extends Actor with ActorLogging with RequestValidationChaining with ISODateConversion {
 
   import context.dispatcher
@@ -256,6 +264,8 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
         log.info("Trying to add brand {}, to user {}, sender is ", brand, user, sender)
 
         userAccountDAO.addBrand(user, brand)
+        logDAO.addLog(KaredoLog(user=Some(user), brand=Some(brand), logType=Some("ADDBRAND")))
+        
 
         SuccessResponse(StatusResponse("OK"))
       }
@@ -268,6 +278,7 @@ class EditAccountActor(userAccountDAO: UserAccountDAO, clientApplicationDAO: Cli
     log.info("Trying to remove brand {}, from user {}, sender is ", brand, user, sender)
 
     userAccountDAO.deleteBrand(user, brand)
+    logDAO.addLog(KaredoLog(user=Some(user), brand=Some(brand), logType=Some("REMOVEBRAND")))
 
     SuccessResponse(StatusResponse("OK"))
 

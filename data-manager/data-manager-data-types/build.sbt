@@ -18,3 +18,4 @@ scalacOptions ++= Seq(
   "-target:jvm-1.6",
   "-encoding", "UTF-8"
 )
+

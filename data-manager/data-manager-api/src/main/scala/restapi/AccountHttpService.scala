@@ -431,11 +431,10 @@ extends HttpService
           parameters('max.as[Int]) { max =>
             rejectEmptyResponse {
               complete {
-               // (brandActor ? RequestSuggestedAdForUsersAndBrand(accountId, brandId, max)).
-               // mapTo[List[SuggestedAdForUsersAndBrand]]
-                (brandActor ? ListBrandsAdverts(brandId,max)).
-                  mapTo[ResponseWithFailure[APIError,List[AdvertDetailResponse]]]
-
+                val ret = (brandActor ? RequestSuggestedAdForUsersAndBrand(accountId, brandId, max)).
+                mapTo[List[SuggestedAdForUsersAndBrand]]
+                ret
+                
               }
             }
           }

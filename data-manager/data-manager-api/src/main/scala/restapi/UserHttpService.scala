@@ -55,7 +55,7 @@ extends HttpService
     new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
       value = "UUID of user interacting"),
     new ApiImplicitParam(name = "interaction", required = true, dataType = "com.parallelai.wallet.datamanager.data.UserBrandInteraction", paramType = "body",
-      value = "interactionType"),
+      value = "interactionType VIEW/CLICK/LIKE/DISLIKE/SHARE"),
     new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
           value = "SessionId for authentication/authorization")
   ))
