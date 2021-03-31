@@ -41,7 +41,8 @@ trait ApiHttpClientSpec
 
     implicit val system = ActorSystem(s"${getClass.getSimpleName}ClientSystem".replace('$', 'S'))
 
-    def wait[T](future: Future[T]): T = result(future, responseTimeout)
+    def wait[T](future: Future[T]): T = 
+      result(future, responseTimeout)
 
     lazy val mockedBrandDAO = mock[BrandDAO]
     lazy val mockedHintDAO = mock[HintDAO]

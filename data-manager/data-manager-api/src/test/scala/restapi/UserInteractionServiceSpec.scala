@@ -37,6 +37,9 @@ class UserInteractionServiceSpec
       val user = UserAccount(UUID.randomUUID(),Some("1234"),Some("email"))
       val brand = Brand(UUID.randomUUID(), "brandName", iconId="iconID", ads=List.empty)
       mockedBrandDAO.getById(any[UUID]) returns Some(brand)
+      
+      val subsbrand=SubscribedBrand(brand.id)
+      mockedUserAccountDAO.updateBrandLastAction(any[UUID], any[UUID]) returns Some(subsbrand)
 
       mockedUserAccountDAO.addPoints(any[UUID],any[Long]) returns Some(UserAccountTotalPoints(10))
 
