@@ -3,7 +3,7 @@ import Keys._
 
 object Common {
 
-  val globalVersion="1.3.3"
+  val globalVersion="1.3.4"
 
   val settings: Seq[Setting[_]] = Seq (
     version := globalVersion,
