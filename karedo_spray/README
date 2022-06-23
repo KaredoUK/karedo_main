@@ -1,0 +1,5 @@
+karedo_spray project should be used for the main Spray Service.
+
+This package will be a wrapper around the actual API pack in project karedo_api.
+
+
