@@ -16,4 +16,5 @@ dist
 **/RUNNING_PID
 **/.settings
 **/.project
+**/.cache-main
     
