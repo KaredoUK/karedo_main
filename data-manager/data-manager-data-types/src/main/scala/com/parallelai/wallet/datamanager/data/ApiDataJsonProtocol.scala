@@ -10,13 +10,14 @@ import spray.http.StatusCodes._
 import spray.json._
 import java.util.UUID
 
-trait ApiDataJsonProtocol extends DefaultJsonProtocol  {
+trait ApiDataJsonProtocol extends DefaultJsonProtocol {
 
   implicit object UuidJsonFormat extends RootJsonFormat[UUID] {
     def write(x: UUID) = JsString(x.toString)
+
     def read(value: JsValue) = value match {
       case JsString(x) => UUID.fromString(x)
-      case x           => deserializationError("Expected UUID as JsString, but got " + x)
+      case x => deserializationError("Expected UUID as JsString, but got " + x)
     }
   }
 
@@ -33,6 +34,24 @@ trait ApiDataJsonProtocol extends DefaultJsonProtocol  {
         case _ => throw new IllegalArgumentException(s"Expected JsString with content having format $DATE_FORMAT for a DateTime attribute value")
       }
     }
+  }
+
+  case class RtbCurrency(value: BigDecimal, name: String)
+  implicit object currencyJson extends JsonFormat[RtbCurrency] {
+    // 1
+    def write(currency: RtbCurrency) = {
+      JsArray(JsNumber(currency.value), JsString(currency.name))
+    }
+    def read(json: JsValue): RtbCurrency = {
+      json match {
+        case JsArray(jsvector) =>
+          val (JsNumber(value),JsString(name)) = (jsvector(0),jsvector(1))
+          RtbCurrency(value,name)
+        case _ => throw new IllegalArgumentException(s"Expected JsVector with content having currency money value and name of currency")
+      }
+    }
+
+
   }
 
   implicit val registrationRequestJson = jsonFormat4(RegistrationRequest)
@@ -73,7 +92,7 @@ trait ApiDataJsonProtocol extends DefaultJsonProtocol  {
   implicit val imageIdJson = jsonFormat1(ImageId)
 
   implicit val statusJson = jsonFormat1(StatusResponse)
-  implicit val summaryImageApiJson= jsonFormat2(SummaryImageApi)
+  implicit val summaryImageApiJson = jsonFormat2(SummaryImageApi)
   implicit val advDetailResponseJson = jsonFormat9(AdvertDetailResponse)
   implicit val advListResponseJson = jsonFormat3(AdvertDetailListResponse)
   implicit val advSummaryResponseJson = jsonFormat6(AdvertSummaryResponse)
@@ -101,10 +120,13 @@ object ApiDataJsonProtocol extends ApiDataJsonProtocol
 trait RtbJsonProtocol extends ApiDataJsonProtocol {
 
   case class Location(countryCode: String, regionCode: String, cityName: String, dma: Int = -1, metro: Int = -1, timezoneOffsetMinutes: Int = -1)
-  case class UserId(prov: Int, xchg: Int)
+
+  case class UserId(prov: String, xchg: String)
 
   case class Impression(id: Int, formats: List[String], position: Int = 0)
+
   case class Spot(id: Int, formats: List[String], position: Int = 0)
+
   case class Rtb(id: Long, timestamp: String, isTest: Boolean = false, url: String, language: String, exchange: String,
                  location: Location, userIds: UserId, imp: List[Impression], spots: List[Spot])
 
@@ -114,5 +136,13 @@ trait RtbJsonProtocol extends ApiDataJsonProtocol {
   implicit val impressionJson = jsonFormat3(Impression)
   implicit val rtbJson = jsonFormat10(Rtb)
 
+  // "account":["hello", "world"],
+  // "adSpotId":"1", "auctionId":"3438835179", "bidTimestamp":0.0, "channels":[], "timestamp":1470865069.551620,
+  // "type":1, "uids":{"prov":"2046608033", "xchg":"678906006"}, "winPrice":[62, "USD/1M"]}
+  
+  case class Win(account: List[String], adSpotId: String, auctionId: String, bidTimestamp: BigDecimal,
+                 channels: List[String], timestamp: Double, atype: Int, uids: UserId, winPrice: RtbCurrency)
+
+  implicit val winJson = jsonFormat(Win, "account", "adSpotId", "auctionId", "bidTimestamp", "channels", "timestamp", "type", "uids", "winPrice")
 
 }
