@@ -93,6 +93,26 @@ trait ApiDataJsonProtocol extends DefaultJsonProtocol  {
   implicit val getOfferCodeResponse = jsonFormat2(GetOfferCodeResponse)
   implicit val getOfferCode = jsonFormat2(Pakkio)
 
-}
 
+
+}
 object ApiDataJsonProtocol extends ApiDataJsonProtocol
+
+trait RtbJsonProtocol extends ApiDataJsonProtocol {
+
+  case class Location(countryCode: String, regionCode: String, cityName: String, dma: Int = -1, metro: Int = -1, timezoneOffsetMinutes: Int = -1)
+  case class UserId(prov: Int, xchg: Int)
+
+  case class Impression(id: Int, formats: List[String], position: Int = 0)
+  case class Spot(id: Int, formats: List[String], position: Int = 0)
+  case class Rtb(id: Long, timestamp: String, isTest: Boolean = false, url: String, language: String, exchange: String,
+                 location: Location, userIds: UserId, imp: List[Impression], spots: List[Spot])
+
+  implicit val locationJson = jsonFormat6(Location)
+  implicit val userIdJson = jsonFormat2(UserId)
+  implicit val spotJson = jsonFormat3(Spot)
+  implicit val impressionJson = jsonFormat3(Impression)
+  implicit val rtbJson = jsonFormat10(Rtb)
+
+
+}
