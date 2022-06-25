@@ -26,7 +26,7 @@ import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol.addMediaRespon
 import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol.getMediaResponseJson
 import scala.util.{Success, Failure}
 import scala.concurrent.Future
-import com.wordnik.swagger.annotations._ 
+import com.wordnik.swagger.annotations._
 
 
 object MediaHttpService {
