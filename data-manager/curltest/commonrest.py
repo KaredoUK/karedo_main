@@ -45,7 +45,7 @@ def getHeaders(s):
     return {'content-type': 'application/json', 'X-Session-Id': s}
 
 def getHeadersJson():
-    return {'content-type': 'application/json' }
+    return {'Content-Type': 'application/json', 'X-Openrtb-Version' : '2.1' }
     
 
 def postdata(x):
@@ -77,7 +77,10 @@ def post(route, data={},session=None):
     return r
 
 def postrtb(route,port,data):
-    r=requests.post("http://rtb.karedo.co.uk:"+str(port)+route,json.dumps(data),getHeadersJson())
+    r=requests.post("http://rtb.karedo.co.uk:"+str(port)+route,
+                    data=json.dumps(data),
+                    headers=getHeadersJson(),
+                    verify=False)
     printr(r) 
     return r
 
