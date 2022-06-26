@@ -1,4 +1,4 @@
-from common import *
+from commontest import *
 import util
 import json
 import sys

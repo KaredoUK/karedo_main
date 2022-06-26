@@ -13,7 +13,7 @@ Root = ("http://" +
     
 MongoHost = os.getenv("MONGO_PORT_27017_TCP_ADDR","localhost")
 MongoPort = os.getenv("MONGO_PORT_27017_TCP_PORT","12345")
-MongoDb = os.getenv("MONGO_DB","wallet_test")
+MongoDb = os.getenv("MONGO_DB","wallet_data")
 client = MongoClient(MongoHost,int(MongoPort))
 
 

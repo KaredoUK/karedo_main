@@ -4,7 +4,7 @@ import logging
 #import http.client
 import os
 
-DEBUG=1
+DEBUG=0
 
 
 
