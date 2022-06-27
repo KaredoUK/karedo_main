@@ -1,4 +1,5 @@
-from commontest import *
+from common import *
+from parse import *
 
 import unittest, json
 from fixture import *
@@ -43,10 +44,24 @@ class TestMultiThreading(unittest.TestCase):
         global sessionId, brandId
         title("MULTITHREADING: Create multiple Brands")
 
-        for i in range(5000):
-            Worker(i).start()
+        threads = []
+        for i in range(1000):
+            t=Worker(i)
+            threads.append(t)
+            t.start()
+            
+        for t in threads:
+            t.join()
 
-
+    def test02_CheckResults(self):
+        print "test02 running"
+        for doc in br.find():
+            icon = doc["iconId"]
+            parsed = parse("iconId{}.{}",icon)
+            
+            #print "\n"+str(doc)+"\n"
+            assert icon == 'iconId' or parsed[0]==parsed[1]
+           
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestMultiThreading)
 

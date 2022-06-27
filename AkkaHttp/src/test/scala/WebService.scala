@@ -9,7 +9,7 @@ import scala.concurrent.duration._
 /**
   * Created by gerrit on 8/14/16.
   */
-trait WebService extends Directives {
+object WebService extends Directives {
 
   val host = "localhost"
   val port = 8080

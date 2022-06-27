@@ -1,4 +1,4 @@
-from commontest import *
+from common import *
 import pytest
 import json
 import uuid
