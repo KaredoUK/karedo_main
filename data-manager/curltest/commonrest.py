@@ -15,6 +15,13 @@ import requests
 #requests.packages.urllib3.disable_warnings()
 #if(DEBUG==1): httpclient.HTTPConnection.debuglevel = 1
 
+try:
+    import http.client as http_client
+except ImportError:
+    # Python 2
+    import httplib as http_client
+http_client.HTTPConnection.debuglevel = 0
+
 HTTP_OK=200
 HTTP_AUTH_ERR=401
 HTTP_BAD_REQUEST=400
@@ -36,6 +43,9 @@ class KaredoAuth(AuthBase):
 
 def getHeaders(s):
     return {'content-type': 'application/json', 'X-Session-Id': s}
+
+def getHeadersJson():
+    return {'Content-Type': 'application/json', 'X-Openrtb-Version' : '2.1' }
     
 
 def postdata(x):
@@ -64,6 +74,14 @@ def post(route, data={},session=None):
                          headers=getHeaders(session),
                     verify=False)
     printr(r)
+    return r
+
+def postrtb(route,port,data):
+    r=requests.post("http://rtb.karedo.co.uk:"+str(port)+route,
+                    data=json.dumps(data),
+                    headers=getHeadersJson(),
+                    verify=False)
+    printr(r) 
     return r
 
 # POST a file

@@ -26,13 +26,11 @@ def clearDB():
     global client,MongoDb
     client.drop_database(MongoDb)
 
-clearDB()
-
 userId=newUUID()
 applicationId=newUUID()
 
 
-db = client.wallet_data
+db = client[MongoDb]
 JAVA=5 # uuid_type to properly understand UUIDS from DB
 
 # Users collection

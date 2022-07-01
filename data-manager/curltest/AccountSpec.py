@@ -1,6 +1,7 @@
 from common import *
 import unittest, json
 
+clearDB()
 #
 # This is testing many things in the
 # "User Profile" section contained in

@@ -6,7 +6,9 @@ import java.util.UUID
 import scala.reflect.ClassTag
 import spray.httpx.marshalling.{MarshallingContext, MetaMarshallers, Marshaller, CollectingMarshallingContext}
 import spray.http.StatusCode
-import parallelai.wallet.util.SprayJsonSupport
+import spray.httpx.SprayJsonSupport
+
+//import parallelai.wallet.util.SprayJsonSupport
 
 /**
  * Contains useful JSON formats: ``j.u.Date``, ``j.u.UUID`` and others; it is useful
