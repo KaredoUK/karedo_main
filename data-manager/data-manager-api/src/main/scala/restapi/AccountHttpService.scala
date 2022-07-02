@@ -20,6 +20,7 @@ import akka.util.Timeout
 import core.RegistrationActor._
 import core.EditAccountActor._
 import java.util.UUID
+import scala.concurrent.Future
 
 // All APIs starting with /account go here
 @Api(position=1, value = "/account", description = "Operations on the account")
@@ -44,6 +45,7 @@ extends HttpService
 
   def route =
     pathPrefix("account") {
+      getInfo ~
       create ~               // P77 POST /account
         validate ~           // P53 POST /account/validation/validate
         reset ~              // P49 PUT  /account/xxx/application/xxx/reset
@@ -61,8 +63,9 @@ extends HttpService
         suggestedBrandsGet ~   // P70 GET AUTH /account/xxx/suggestedbrands
         P123 ~              // get number of ACTIVE ads for user/brand GET /account/xxxx/brand/yyyy
         P124                // get offers active for this account
-    } 
-
+    }
+    
+  
   // PARALLELAI-77API: Create Account
 
   @ApiOperation(position= 1,httpMethod = "POST", response = classOf[RegistrationRequest], value = "Parallelai-77: Create a new Account")
@@ -81,6 +84,23 @@ extends HttpService
           (registrationActor ? registrationRequest).
             mapTo[ResponseWithFailure[RegistrationError, RegistrationResponse]]
       }
+    }
+  }
+
+  @Path("/getInfo")
+  @ApiOperation(position = 1, httpMethod = "GET", response = classOf[UserProfileExt], value = "KAR-200: GetInfo2")
+  @ApiImplicitParams(Array())
+  @ApiResponses(Array(
+    new ApiResponse(code = 400, message = "Invalid Parameters")))
+  def getInfo = path("getInfo") {
+    get {
+      complete(UserProfileExt(
+          UserInfo(userType = "USER",fullName = "John Doe"),
+        Intent(want = "buy"),
+        Preferences(List("IAB1","IAB2")),
+        UserSettings(2),
+        770
+      ));
     }
   }
 
@@ -196,6 +216,9 @@ extends HttpService
           }
       }
     }
+
+
+
 
   @Path("/{account}")
   @ApiOperation(position=6,httpMethod = "PUT", response = classOf[StatusResponse],

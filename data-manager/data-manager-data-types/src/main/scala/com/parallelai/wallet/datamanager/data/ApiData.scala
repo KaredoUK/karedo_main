@@ -114,23 +114,23 @@ case class UserSettings(
 @ApiModel(description = "General User Info")
 case class UserInfo(
                      @(ApiModelProperty@field)(value = "userId")
-                     userId: UserID,
+                     userId: UserID = UUID.randomUUID(),
                      @(ApiModelProperty@field)(value = "userType")
-                     userType: String,
+                     userType: String = "USER",
                      @(ApiModelProperty@field)(value = "full name")
-                     fullName: String,
+                     fullName: String = "unspecified",
                      @(ApiModelProperty@field)(value = "email")
-                     email: Option[String],
+                     email: Option[String] = None,
                      @(ApiModelProperty@field)(value = "phone number")
-                     msisdn: Option[String],
+                     msisdn: Option[String] = None,
                      @(ApiModelProperty@field)(value = "postal code")
-                    postCode: Option[String],
+                    postCode: Option[String] = None,
                      @(ApiModelProperty@field)(value = "country")
-                     country: Option[String],
+                     country: Option[String] = None,
                      @(ApiModelProperty@field)(value = "birth date")
-                    birthDate: Option[String],
+                    birthDate: Option[String] = None,
                      @(ApiModelProperty@field)(value = "gender")
-                     gender: Option[String]) extends WithUserContacts
+                     gender: Option[String]=None) extends WithUserContacts
 
 @ApiModel(description = "Returned Information about the user")
 case class UserProfile(
@@ -141,6 +141,29 @@ case class UserProfile(
                         @(ApiModelProperty@field)(value = "total points")
                         totalPoints: KaredoPoints)
 
+                        
+@ApiModel(description = "Intent")
+case class Intent(
+    @(ApiModelProperty@field)(value = "Want") want: String = "",
+    @(ApiModelProperty@field)(value = "What") what: String = "",
+    @(ApiModelProperty@field)(value = "Where") where: String = "")
+    
+@ApiModel(description = "Preferences")
+case class Preferences(
+    @(ApiModelProperty@field)(value = "Interested Topics") topics: List[String]=List())                        
+                        
+@ApiModel(description = "Returned Extended Information about the user")
+case class UserProfileExt(
+  @(ApiModelProperty @field)(value = "user info") info: UserInfo,
+  @(ApiModelProperty @field)(value = "intent") intent: Intent,
+  @(ApiModelProperty @field)(value = "preferences") preferences: Preferences,
+  @(ApiModelProperty @field)(value = "user settings") settings: UserSettings,
+  @(ApiModelProperty @field)(value = "total points") totalPoints: KaredoPoints)
+
+  
+  
+
+  
 @ApiModel(description = "Points gained by the user")
 case class UserPoints(
                        @(ApiModelProperty@field)(value = "userId")
