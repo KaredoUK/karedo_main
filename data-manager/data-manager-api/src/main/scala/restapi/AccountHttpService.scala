@@ -20,6 +20,7 @@ import akka.util.Timeout
 import core.RegistrationActor._
 import core.EditAccountActor._
 import java.util.UUID
+
 import scala.concurrent.Future
 
 // All APIs starting with /account go here
@@ -38,13 +39,14 @@ extends HttpService
   with DefaultJsonFormats
   with ApiErrorsJsonProtocol
   with ApiDataJsonProtocol
+  with CORSDirectives
   with AuthorizationSupport {
 
   import scala.concurrent.duration._
   implicit val timeout = Timeout(20.seconds)
 
   def route =
-    pathPrefix("account") {
+    pathPrefix("account")  {
       getInfo ~
       create ~               // P77 POST /account
         validate ~           // P53 POST /account/validation/validate
@@ -77,12 +79,15 @@ extends HttpService
   @ApiResponses(Array(
     new ApiResponse(code = 400, message = "Invalid Parameters")
   ))
-  def create = pathEnd {
-    post {
-      handleWith {
-        registrationRequest: RegistrationRequest =>
-          (registrationActor ? registrationRequest).
-            mapTo[ResponseWithFailure[RegistrationError, RegistrationResponse]]
+  def create = corsFilter(List("*")) {
+    pathEnd {
+      post {
+        handleWith {
+
+          registrationRequest: RegistrationRequest =>
+            (registrationActor ? registrationRequest).
+              mapTo[ResponseWithFailure[RegistrationError, RegistrationResponse]]
+        }
       }
     }
   }
