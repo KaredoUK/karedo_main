@@ -3,11 +3,11 @@ import Keys._
 
 object Common {
 
-  val globalVersion="1.3.4"
+  val globalVersion="2.0.0"
 
   val settings: Seq[Setting[_]] = Seq (
     version := globalVersion,
-    scalaVersion := "2.11.5",
+    scalaVersion := "2.11.8",
     organization := "parallelai.wallet"
   )
 

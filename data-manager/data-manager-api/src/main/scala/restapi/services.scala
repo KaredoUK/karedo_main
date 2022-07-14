@@ -90,24 +90,25 @@ class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route, doSwag
     def actorRefFactory = context
 
     def apiTypes = Seq(
-        typeOf[AccountHttpService], 
+        typeOf[AccountHttpService2]/*, 
         typeOf[UserHttpService],
         typeOf[MediaHttpService], 
         typeOf[BrandHttpService],
         typeOf[OfferHttpService],
         typeOf[SaleHttpService],
-        typeOf[MerchantHttpService])
+        typeOf[MerchantHttpService]*/
+        )
 
     def modelTypes =
       Seq(
         typeOf[RegistrationRequest]
-        ,typeOf[AdvertDetailResponse]
+        /*,typeOf[AdvertDetailResponse]
         ,typeOf[AdvertDetailListResponse]
         ,typeOf[AdvertSummaryResponse]
         ,typeOf[AdvertDetailApi]
         ,typeOf[SummaryImageApi]
         ,typeOf[OfferResponse]
-        ,typeOf[KaredoSalesApi]
+        ,typeOf[KaredoSalesApi]*/
         //,typeOf[RegistrationResponse]
         //,typeOf[RegistrationValidation]//,
         //            typeOf[RegistrationValidationResponse]
