@@ -30,9 +30,9 @@ trait Web  {
   // if there is no SSLContext in scope implicitly the HttpServer uses the default SSLContext,
   // since we want non-default settings in this example we make a custom SSLContext available here
   implicit def sslContext: SSLContext = {
-    println("Preparing SSLContext")
-    val keyStoreResource = "/identity.jks"//"/ssl-test-keystore.jks"
-    val password = "password"
+    //println("Preparing SSLContext")
+    val keyStoreResource = injectOptionalProperty[String]("service.jksstore") getOrElse "/identity.jks"
+    val password = injectOptionalProperty[String]("service.jkspassword") getOrElse "password"
 
     val keyStore = KeyStore.getInstance("jks")
     keyStore.load(getClass.getResourceAsStream(keyStoreResource), password.toCharArray)
@@ -49,7 +49,7 @@ trait Web  {
   // since we want to explicitly enable cipher suites and protocols we make a custom ServerSSLEngineProvider
   // available here
   implicit def sslEngineProvider: ServerSSLEngineProvider = {
-    println("Preparing sslEngineProvider")
+    //println("Preparing sslEngineProvider")
     ServerSSLEngineProvider { engine =>
       engine.setEnabledCipherSuites(Array("TLS_RSA_WITH_AES_256_CBC_SHA"))
       engine.setEnabledProtocols(Array("SSLv3", "TLSv1"))
