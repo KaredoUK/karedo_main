@@ -3,19 +3,18 @@ package restapi
 import java.util.UUID
 import java.util.UUID._
 
-
-
 import restapi.security.AuthenticationSupport
 import com.parallelai.wallet.datamanager.data._
 import core.EditAccountActor
 import org.apache.commons.lang.StringUtils
 import org.specs2.matcher._
 import org.specs2.mutable.Specification
-import parallelai.wallet.entity.{UserSession, UserAccount, ClientApplication}
+import parallelai.wallet.entity.{ClientApplication, UserAccount, UserSession}
 import spray.client.pipelining._
 import spray.http.StatusCodes._
-import spray.http.{StatusCodes, StatusCode, HttpResponse}
-import util.{RestApiSpecMatchers, ApiHttpClientSpec}
+import spray.http.{HttpResponse, StatusCode, StatusCodes}
+import util.{ApiHttpClientSpec, RestApiSpecMatchers}
+
 import scala.concurrent.Future._
 import scala.concurrent.duration._
 import org.specs2.mutable.SpecificationLike

@@ -23,41 +23,40 @@ import java.util.UUID
 
 import spray.http.StatusCodes
 
+//import spray.http.Uri.Path
+
 import scala.concurrent.Future
 
 // All APIs starting with /account go here
 @Api(position = 1, value = "/account", description = "Operations on the account")
-abstract class AccountHttpService2(
-  /*protected val registrationActor: ActorRef,
-  protected val editAccountActor: ActorRef,
-  protected val brandActor: ActorRef,
-  protected val offerActor: ActorRef,*/
-  override protected val userAuthService: UserAuthService)(protected implicit val executionContext: ExecutionContext)
+abstract class AccountHttpService2
 
-    extends HttpService
+
+  extends HttpService
     with Directives
     with DefaultJsonFormats
+    with AccountAds
     with ApiErrorsJsonProtocol
     with ApiDataJsonProtocol
-    with CORSDirectives
-    with AuthorizationSupport {
+    with CORSDirectives {
 
   import scala.concurrent.duration._
+
   implicit val timeout = Timeout(20.seconds)
 
   def route =
     pathPrefix("account") {
-      getInfo ~ getInfoOptions
+      getAds ~ getInfoOptions ~ postAccount
 
     }
 
-  @Path("/getInfo")
+  @Path("/getads")
   @ApiOperation(position = 1, httpMethod = "GET", response = classOf[UserProfileExt], value = "KAR-200: GetInfo2")
   @ApiImplicitParams(Array())
   @ApiResponses(Array(
     new ApiResponse(code = 400, message = "Invalid Parameters")))
-  def getInfo = corsFilter(List("*")) {
-    path("getInfo") {
+  def getAds = corsFilter(List("*")) {
+    path("getads") {
       get {
         complete(UserProfileExt(
           UserInfo(userType = "USER", fullName = "John Doe"),
@@ -68,9 +67,19 @@ abstract class AccountHttpService2(
       }
     }
   }
-  
-   @Path("/getInfo")
-  @ApiOperation(position = 1, httpMethod = "OPTIONS", value = "KAR-200: GetInfo2")
+
+  def postAccount = {
+    path("getads") {
+      post {
+        entity(as[AccountGetadsRequest]) { data =>
+          complete(AccountGetadsResponse(data.accountId, data.deviceId, data.sessionId, List("ad1", "ad2")))
+        }
+      }
+    }
+  }
+
+  @Path("/getInfo")
+  @ApiOperation(position = 1, httpMethod = "OPTIONS", response = classOf[String], value = "KAR-200: GetInfo2")
   @ApiImplicitParams(Array())
   @ApiResponses(Array(
     new ApiResponse(code = 400, message = "Invalid Parameters")))
