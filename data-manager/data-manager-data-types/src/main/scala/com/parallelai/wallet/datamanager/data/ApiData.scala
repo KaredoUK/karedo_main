@@ -18,8 +18,8 @@ import KaredoTypes._
 
 // if a type acts either as a request and response can extends both
 
-sealed trait ApiDataRequest // to mark all requests in this file
-sealed trait ApiDataResponse // to mark responses
+trait ApiDataRequest // to mark all requests in this file
+trait ApiDataResponse // to mark responses
 
 //
 // Registration/User section

@@ -1,8 +1,9 @@
 package restapi
 
 import java.util.UUID
+import javax.ws.rs.Path
 
-import com.parallelai.wallet.datamanager.data._
+import com.wordnik.swagger.annotations.{ApiImplicitParams, ApiOperation, ApiResponses, _}
 import org.junit.runner.RunWith
 import org.mockito.Matchers.{eq => argEq}
 import org.specs2.mutable.SpecificationLike
@@ -11,6 +12,11 @@ import spray.http.StatusCodes._
 import spray.json.DefaultJsonProtocol
 import spray.testkit.Specs2RouteTest
 import sun.security.provider.MD5
+import javax.ws.rs.Path
+
+import com.parallelai.wallet.datamanager.data.AccountAds
+
+import scala.util.Try
 
 
 @RunWith(classOf[JUnitRunner])
@@ -30,18 +36,56 @@ class AccountService2Spec
     }
   }
 
-  "simple GET account/getads" should {
-    " getAds" in {
 
-      val md5 = MD5.hash("dev1")
-      val sessionId = UUID.randomUUID().toString
-      val accountId = ""
+  "KAR-126 [prototype]" should {
+    "/1 simple POST account/0/suggestedOffers returns valid sessionId" in {
 
-      Post("/account/getads", AccountGetadsRequest(accountId, md5,sessionId)) ~> route ~> check {
+      Post("/account/0/suggestedOffers", AccountSuggestedOffersRequest
+      (deviceId = fixedDevIdMd5,sessionId = "")) ~>
+        route ~>
+        check {
+
         status === OK
 
-        responseAs[AccountGetadsResponse] === AccountGetadsResponse(accountId,md5,sessionId,List("ad1","ad2"))
+        val AccountSuggestedOffersResponse(recvSessionId) = responseAs[AccountSuggestedOffersResponse]
+
+        isUUID(recvSessionId) === true
+        recvSessionId === fixedSessionId
       }
+    }
+    "/2 simple POST account/0/suggestedOffers with a sessionId" in {
+      Post("/account/0/suggestedOffers", AccountSuggestedOffersRequest
+      (deviceId = fixedDevIdMd5,sessionId = fixedSessionId)) ~>
+        route ~>
+        check {
+
+          status === OK
+
+          val AccountSuggestedOffersResponse(recvSessionId) = responseAs[AccountSuggestedOffersResponse]
+
+          isUUID(recvSessionId) === true
+          recvSessionId === fixedSessionId2
+        }
+    }
+    "/3 simple POST account/xxxxx/suggestedOffers with a sessionId" in {
+      Post("/account/"+fixedAccountId+"/suggestedOffers", AccountSuggestedOffersRequest
+      (deviceId = fixedDevIdMd5,sessionId = fixedSessionId)) ~>
+        route ~>
+        check {
+
+          status === OK
+
+          val AccountSuggestedOffersResponse(recvSessionId) = responseAs[AccountSuggestedOffersResponse]
+
+          isUUID(recvSessionId) === true
+          recvSessionId === fixedSessionId2
+        }
+    }
+  }
+  def isUUID(x:String) = {
+    Try (UUID.fromString(x)) match {
+      case scala.util.Success(_) => true
+      case _ => false
     }
   }
 }

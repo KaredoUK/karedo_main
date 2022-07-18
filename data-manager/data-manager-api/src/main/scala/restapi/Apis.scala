@@ -25,11 +25,14 @@ trait Apis extends RouteConcatenation with Injectable {
   private val doSwagger = injectOptionalProperty[String]("swagger").getOrElse("true").toBoolean
 
 
-  val serveAccount = new AccountHttpService2 { //registration, editAccount, brand, offer, userAuthentication) {
+  val serveAccount = new AccountHttpService(registration, editAccount, brand, offer, userAuthentication) {
+    override implicit def actorRefFactory: ActorRefFactory = system
+  }
+  val serveAccount2 = new AccountHttpService2 {
     override implicit def actorRefFactory: ActorRefFactory = system
   }
 
-  /*val serveUser = new UserHttpService(registration, editAccount, brand, offer, userAuthentication) {
+  val serveUser = new UserHttpService(registration, editAccount, brand, offer, userAuthentication) {
     override implicit def actorRefFactory: ActorRefFactory = system
   }
 
@@ -53,17 +56,17 @@ trait Apis extends RouteConcatenation with Injectable {
   val serveMerchant = new MerchantHttpService(offer, userAuthentication) {
     override implicit def actorRefFactory: ActorRefFactory = system
   }
-*/
 
   val routes =
-    serveAccount.route /*~
+    serveAccount.route ~
+    serveAccount2.route ~
     serveUser.route ~
       serveBrand.route ~
       serveMedia.route ~
       serveOffer.route ~
       serveSale.route ~
       serveMerchant.route ~
-      new MockService(other, userAuthentication).route*/
+      new MockService(other, userAuthentication).route
 
   val rootService = system.actorOf(Props(new RoutedHttpService(serviceURL, bindPort, routes,doSwagger)))
 

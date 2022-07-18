@@ -2,30 +2,13 @@ package restapi
 
 import javax.ws.rs.Path
 
-import com.wordnik.swagger.annotations._
-import core.OfferActor.OfferError
-import core.objAPI.APIError
-import parallelai.wallet.entity.KaredoSales
-import restapi.security.AuthorizationSupport
+import akka.util.Timeout
 import com.parallelai.wallet.datamanager.data._
-import core.EditAccountActor.EditAccountError
-import core.security.UserAuthService
+import com.wordnik.swagger.annotations.{ApiImplicitParams, ApiOperation, ApiResponses, _}
+import spray.http.StatusCodes
 import spray.routing._
 
-import scala.concurrent.ExecutionContext
-import akka.actor.ActorRef
-import akka.pattern.ask
-import core.{ResponseWithFailure, SuccessResponse}
-import akka.util.Timeout
-import core.RegistrationActor._
-import core.EditAccountActor._
-import java.util.UUID
-
-import spray.http.StatusCodes
-
 //import spray.http.Uri.Path
-
-import scala.concurrent.Future
 
 // All APIs starting with /account go here
 @Api(position = 1, value = "/account", description = "Operations on the account")
@@ -46,45 +29,81 @@ abstract class AccountHttpService2
 
   def route =
     pathPrefix("account") {
-      getAds ~ getInfoOptions ~ postAccount
+      myOptions ~ postAccount
 
     }
 
-  @Path("/getads")
-  @ApiOperation(position = 1, httpMethod = "GET", response = classOf[UserProfileExt], value = "KAR-200: GetInfo2")
-  @ApiImplicitParams(Array())
+  @Path("/{account}/suggestedOffers")
+  @ApiOperation(position=1,httpMethod = "POST", response = classOf[AccountSuggestedOffersResponse],
+    value = "KAR-126: account deviceId, sessionId, accountId [PROTOTYPE]")
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
+      value = "UUID of user account"),
+    new ApiImplicitParam(
+      name = "ask for requested offers",
+      required = true,
+      dataType = "com.parallelai.wallet.datamanager.data.AccountSuggestedOffersRequest",
+      paramType = "body",
+      value = "identification parameters")
+  ))
   @ApiResponses(Array(
-    new ApiResponse(code = 400, message = "Invalid Parameters")))
-  def getAds = corsFilter(List("*")) {
-    path("getads") {
-      get {
-        complete(UserProfileExt(
-          UserInfo(userType = "USER", fullName = "John Doe"),
-          Intent(want = "buy"),
-          Preferences(List("IAB1", "IAB2")),
-          UserSettings(2),
-          770));
-      }
-    }
-  }
-
+    new ApiResponse(code = 400, message = "Invalid Parameters")
+  ))
   def postAccount = {
-    path("getads") {
-      post {
-        entity(as[AccountGetadsRequest]) { data =>
-          complete(AccountGetadsResponse(data.accountId, data.deviceId, data.sessionId, List("ad1", "ad2")))
+    path(Segment / "suggestedOffers") {
+
+      accountId: String =>
+        post {
+          entity(as[AccountSuggestedOffersRequest]) {
+            data: AccountSuggestedOffersRequest =>
+              if (accountId == "0") {
+                if (data.sessionId == "") {
+                  // KAR-126/1 ACCOUNT0 - DEVID - SESSION EMPTY RETURNS A SESSION
+                  complete(AccountSuggestedOffersResponse(fixedSessionId))
+                }
+                else {
+                  // KAR-126/2 ACCOUNT0 - DEVID - SESSION FULL
+                  if (data.sessionId != fixedSessionId && data.sessionId != fixedSessionId2) {
+                    complete(StatusCodes.Forbidden) // wrong session id
+                  } else {
+                    if (data.deviceId != fixedDevIdMd5) {
+                      complete(StatusCodes.BadRequest) // wrong device id
+                    } else {
+                      complete(AccountSuggestedOffersResponse(fixedSessionId2))
+                    }
+                  }
+                }
+              } else {
+                // KAR-126/3 ACCOUNT NOT ZERO, DEVID, SESSION FULL
+                if (data.sessionId != fixedSessionId && data.sessionId != fixedSessionId2) {
+                  complete(StatusCodes.Forbidden) // wrong session id
+                } else {
+                  if (data.deviceId != fixedDevIdMd5) {
+                    complete(StatusCodes.BadRequest) // wrong device id
+                  } else {
+                    if (accountId != fixedAccountId) {
+                      complete(StatusCodes.NoContent) // 204
+                    } else {
+                      complete(AccountSuggestedOffersResponse(fixedSessionId2))
+                    }
+                  }
+                }
+                //complete(StatusCodes.NotImplemented)
+              }
+          }
         }
-      }
+
     }
+
   }
 
-  @Path("/getInfo")
-  @ApiOperation(position = 1, httpMethod = "OPTIONS", response = classOf[String], value = "KAR-200: GetInfo2")
+  @Path("/options")
+  @ApiOperation(position = 2, httpMethod = "OPTIONS", response = classOf[String], value = "KAR- options implemented")
   @ApiImplicitParams(Array())
   @ApiResponses(Array(
     new ApiResponse(code = 400, message = "Invalid Parameters")))
-  def getInfoOptions = corsFilter(List("*")) {
-    path("getInfo") {
+  def myOptions = corsFilter(List("*")) {
+    path("options") {
       options {
         complete(StatusCodes.Accepted -> "OK")
       }
