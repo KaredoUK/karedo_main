@@ -1,27 +1,22 @@
 package restapi
 
+import java.util.UUID
 import javax.ws.rs.Path
 
-import com.wordnik.swagger.annotations._
-import core.OfferActor.OfferError
-import core.objAPI.APIError
-import parallelai.wallet.entity.KaredoSales
-import restapi.security.AuthorizationSupport
-import com.parallelai.wallet.datamanager.data._
-
-import core.EditAccountActor.EditAccountError
-import core.security.UserAuthService
-import spray.routing._
-import scala.concurrent.ExecutionContext
 import akka.actor.ActorRef
 import akka.pattern.ask
-import core.{SuccessResponse, ResponseWithFailure}
 import akka.util.Timeout
+import com.parallelai.wallet.datamanager.data._
+import com.wordnik.swagger.annotations._
+import core.EditAccountActor.{EditAccountError, _}
+import core.OfferActor.OfferError
 import core.RegistrationActor._
-import core.EditAccountActor._
-import java.util.UUID
+import core.ResponseWithFailure
+import core.security.UserAuthService
+import restapi.security.AuthorizationSupport
+import spray.routing._
 
-import scala.concurrent.Future
+import scala.concurrent.ExecutionContext
 
 // All APIs starting with /account go here
 @Api(position=1, value = "/account", description = "Operations on the account")
@@ -47,7 +42,7 @@ extends HttpService
 
   def route =
     pathPrefix("account")  {
-      getInfo ~
+
       create ~               // P77 POST /account
         validate ~           // P53 POST /account/validation/validate
         reset ~              // P49 PUT  /account/xxx/application/xxx/reset
@@ -92,22 +87,7 @@ extends HttpService
     }
   }
 
-  @Path("/getInfo")
-  @ApiOperation(position = 1, httpMethod = "GET", response = classOf[UserProfileExt], value = "KAR-200: GetInfo2")
-  @ApiImplicitParams(Array())
-  @ApiResponses(Array(
-    new ApiResponse(code = 400, message = "Invalid Parameters")))
-  def getInfo = path("getInfo") {
-    get {
-      complete(UserProfileExt(
-          UserInfo(userType = "USER",fullName = "John Doe"),
-        Intent(want = "buy"),
-        Preferences(List("IAB1","IAB2")),
-        UserSettings(2),
-        770
-      ));
-    }
-  }
+
 
   // PARALLELAI-53API: Validate/Activate Account Application
   @Path("/application/validation")

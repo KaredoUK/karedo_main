@@ -6,17 +6,20 @@ import akka.actor.ActorSystem
 import akka.testkit.TestProbe
 import org.specs2.mock.Mockito
 import org.specs2.mutable.{After, SpecificationLike}
-import org.specs2.specification.{Step, Fragments}
+import org.specs2.specification.{Fragments, Step}
 import org.specs2.time.NoTimeConversions
 import parallelai.wallet.entity.{ClientApplication, UserSession}
 import parallelai.wallet.persistence._
 import spray.http.HttpHeaders.RawHeader
 import spray.testkit.TestUtils
+
 import scala.concurrent.Await._
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.Random
 import org.specs2.mutable.Specification
+import spray.client.pipelining._
+import spray.http.HttpRequest
 
 
 trait ApiHttpClientSpec
@@ -29,8 +32,12 @@ trait ApiHttpClientSpec
   val  sessionId = UUID.randomUUID()
   val userId = UUID.randomUUID()
   val applicationId = UUID.randomUUID()
+  val servicePort : Int = Math.abs( Random.nextInt(3000) ) + 10000
+  val serviceUrl = s"http://localhost:$servicePort"
 
   val  headers = List(RawHeader("X-Session-Id",sessionId.toString()))
+
+
 
   trait WithMockedPersistenceRestService extends After {
 
@@ -41,7 +48,7 @@ trait ApiHttpClientSpec
 
     implicit val system = ActorSystem(s"${getClass.getSimpleName}ClientSystem".replace('$', 'S'))
 
-    def wait[T](future: Future[T]): T = 
+    def wait[T](future: Future[T]): T =
       result(future, responseTimeout)
 
     lazy val mockedBrandDAO = mock[BrandDAO]
@@ -69,8 +76,8 @@ trait ApiHttpClientSpec
       mockedChangeDAO,
       messagerActor.ref)
 
-    /*println("Sleeping 2 seconds to wait for the httpserver to start")
-    Thread.sleep(2000)*/
+    println("Sleeping 2 seconds to wait for the httpserver to start")
+    Thread.sleep(2000)
 
     def after = stopServer()
 
@@ -79,4 +86,5 @@ trait ApiHttpClientSpec
       system.shutdown()
     }
   }
+
 }

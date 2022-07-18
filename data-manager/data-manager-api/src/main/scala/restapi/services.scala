@@ -8,14 +8,14 @@ import spray.http.StatusCodes._
 import spray.http._
 import spray.routing._
 import spray.routing.directives.{LogEntry, RouteDirectives}
+import spray.util.{LoggingContext, SprayActorLogging}
 
-
-import spray.util.{SprayActorLogging, LoggingContext}
 import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
-import spray.httpx.marshalling.{ToResponseMarshallingContext, Marshaller}
+import spray.httpx.marshalling.{Marshaller, ToResponseMarshallingContext}
 import spray.http.HttpHeaders.RawHeader
 import akka.actor._
+
 import scala.reflect.runtime.universe._
 
 /**
@@ -76,7 +76,7 @@ trait FailureHandling {
  */
 class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route, doSwagger: Boolean = true)
   extends Actor
-
+  with AccountAds
   with HttpService
   with ActorLogging {
 
@@ -90,13 +90,16 @@ class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route, doSwag
     def actorRefFactory = context
 
     def apiTypes = Seq(
-        typeOf[AccountHttpService], 
-        typeOf[UserHttpService],
-        typeOf[MediaHttpService], 
-        typeOf[BrandHttpService],
-        typeOf[OfferHttpService],
-        typeOf[SaleHttpService],
-        typeOf[MerchantHttpService])
+        typeOf[AccountHttpService]
+        ,typeOf[AccountHttpService2]
+        ,typeOf[UserHttpService]
+        ,typeOf[MediaHttpService]
+        ,typeOf[BrandHttpService]
+        ,typeOf[OfferHttpService]
+        ,typeOf[SaleHttpService]
+        ,typeOf[MerchantHttpService]
+
+        )
 
     def modelTypes =
       Seq(
@@ -108,9 +111,11 @@ class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route, doSwag
         ,typeOf[SummaryImageApi]
         ,typeOf[OfferResponse]
         ,typeOf[KaredoSalesApi]
-        //,typeOf[RegistrationResponse]
-        //,typeOf[RegistrationValidation]//,
-        //            typeOf[RegistrationValidationResponse]
+        ,typeOf[RegistrationResponse]
+        ,typeOf[RegistrationValidation]
+        ,typeOf[RegistrationValidationResponse]
+        ,typeOf[AccountSuggestedOffersRequest]
+        ,typeOf[AccountSuggestedOffersResponse]
       )
 
 

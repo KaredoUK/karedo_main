@@ -18,8 +18,8 @@ import KaredoTypes._
 
 // if a type acts either as a request and response can extends both
 
-sealed trait ApiDataRequest // to mark all requests in this file
-sealed trait ApiDataResponse // to mark responses
+trait ApiDataRequest // to mark all requests in this file
+trait ApiDataResponse // to mark responses
 
 //
 // Registration/User section
@@ -59,13 +59,13 @@ case class APISessionResponse(
 @ApiModel(description = "Application request")
 case class AddApplicationRequest(
                                   @(ApiModelProperty@field)(value = "unique identifier for the application")
-                                  applicationId: ApplicationID,
+                                  applicationId: ApplicationID = UUID.randomUUID(),
                                   @(ApiModelProperty@field)(value = "User msisdn (optional)")
-                                  msisdn: Option[String],
+                                  msisdn: Option[String] = None,
                                   @(ApiModelProperty@field)(value = "User type (CUSTOMER/MERCHANT)")
-                                  userType: String,
+                                  userType: String = "",
                                   @(ApiModelProperty@field)(value = "User email (optional)")
-                                  email: Option[String])
+                                  email: Option[String] = None)
   extends WithUserContacts with ApiDataRequest
 
 @ApiModel(description = "Data to be validated from previous application")
@@ -109,7 +109,7 @@ case class RegistrationValidationResponse(
 @ApiModel(description = "General User Info")
 case class UserSettings(
                          @(ApiModelProperty@field)(value = "Max ads allowable for each week")
-                         maxAdsPerWeek: Int)
+                         maxAdsPerWeek: Int = 5)
 
 @ApiModel(description = "General User Info")
 case class UserInfo(
@@ -154,11 +154,11 @@ case class Preferences(
                         
 @ApiModel(description = "Returned Extended Information about the user")
 case class UserProfileExt(
-  @(ApiModelProperty @field)(value = "user info") info: UserInfo,
-  @(ApiModelProperty @field)(value = "intent") intent: Intent,
-  @(ApiModelProperty @field)(value = "preferences") preferences: Preferences,
-  @(ApiModelProperty @field)(value = "user settings") settings: UserSettings,
-  @(ApiModelProperty @field)(value = "total points") totalPoints: KaredoPoints)
+  @(ApiModelProperty @field)(value = "user info") info: UserInfo = UserInfo(),
+  @(ApiModelProperty @field)(value = "intent") intent: Intent = Intent(),
+  @(ApiModelProperty @field)(value = "preferences") preferences: Preferences = Preferences(),
+  @(ApiModelProperty @field)(value = "user settings") settings: UserSettings = UserSettings(),
+  @(ApiModelProperty @field)(value = "total points") totalPoints: KaredoPoints = 0)
 
   
   
@@ -452,3 +452,5 @@ case class InteractionResponse(
                                 userTotalPoints: KaredoPoints) extends ApiDataResponse
 
 case class Pakkio(x:Int,s:String)
+
+///////

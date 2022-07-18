@@ -72,7 +72,7 @@ class WithMockPersistence(
         |akka {
         | log-dead-letters-during-shutdown = off
         | loggers = ["akka.event.slf4j.Slf4jLogger"]
-        | loglevel = INFO
+        | loglevel = WARN
         |}
       """.stripMargin
     )
