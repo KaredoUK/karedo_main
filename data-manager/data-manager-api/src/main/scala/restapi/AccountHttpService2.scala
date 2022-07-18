@@ -49,7 +49,7 @@ abstract class AccountHttpService2
   @ApiResponses(Array(
     new ApiResponse(code = 400, message = "Invalid Parameters")
   ))
-  def postAccount = {
+  def postAccount = corsFilter(List("*")){
     path(Segment / "suggestedOffers") {
 
       accountId: String =>
