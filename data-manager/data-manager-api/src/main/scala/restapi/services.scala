@@ -91,7 +91,7 @@ class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route, doSwag
 
     def apiTypes = Seq(
         typeOf[AccountHttpService]
-        ,typeOf[AccountHttpService2]
+        ,typeOf[AccountSuggestedOffersHttpService]
         ,typeOf[UserHttpService]
         ,typeOf[MediaHttpService]
         ,typeOf[BrandHttpService]

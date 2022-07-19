@@ -21,7 +21,7 @@ import scala.util.Try
 
 @RunWith(classOf[JUnitRunner])
 class AccountService2Spec
-  extends AccountHttpService2
+  extends AccountSuggestedOffersHttpService
     with SpecificationLike
     with AccountAds
     with Specs2RouteTest {
@@ -35,55 +35,116 @@ class AccountService2Spec
       new java.math.BigInteger(1, m.digest()).toString(16)
     }
   }
+  sequential
 
+  "KAR-129 [prototype]" should {
+    "list /intent/what" in {
+      Get("/intent/what") ~> route2 ~> check {
+        status === OK
+        responseAs[List[String]] === List(
+          "buy",
+          "rent",
+          "travel",
+          "hire",
+          "compare",
+          "switch",
+          "borrow",
+          "visit"
+
+        )
+      }
+    }
+  }
+  "KAR-127 [prototype]" should {
+    "list /pref/names" in {
+      Get("/pref/names") ~> route2 ~> check {
+        status === OK
+
+        responseAs[List[(String,String)]] === List(
+
+          ("IAB22", "offers & discounts"),
+          ("IAB18", "fashion & style"),
+          ("IAB8", "food & drink"),
+          ("IAB20", "travel & holidays"),
+          ("IAB17", "sports"),
+          ("IAB6", "family & children"),
+          ("IAB7", "health & fitness"),
+          ("IAB19", "computers & gadgets"),
+          ("IAB4", "jobs & career"),
+          ("IAB10", "home & garden"),
+          ("IAB2", "cars & bikes"),
+          ("IAB13", "personal finance"),
+          ("IAB3", "business & finance"),
+          ("IAB1", "arts & entertainment"),
+          ("IAB14", "community & society"),
+          ("IAB15", "science"),
+          ("IAB16", "pets"),
+          ("IAB5", "education"),
+          ("IAB21", "property & housing"),
+          ("IAB9", "hobbies & interests"),
+          ("IAB11", "law, govt & politics"),
+          ("IAB12", "news & current affairs"),
+          ("IAB23", "religion & spirituality")
+        )
+      }
+    }
+  }
 
   "KAR-126 [prototype]" should {
     "/1 simple POST account/0/suggestedOffers returns valid sessionId" in {
 
       Post("/account/0/suggestedOffers", AccountSuggestedOffersRequest
-      (deviceId = fixedDevIdMd5,sessionId = "")) ~>
+      (deviceId = fixedDevIdMd5, sessionId = "")) ~>
         route ~>
         check {
 
-        status === OK
+          status === OK
 
-        val AccountSuggestedOffersResponse(recvSessionId) = responseAs[AccountSuggestedOffersResponse]
+          val AccountSuggestedOffersResponse(recvSessionId, list) = responseAs[AccountSuggestedOffersResponse]
 
-        isUUID(recvSessionId) === true
-        recvSessionId === fixedSessionId
-      }
+          isUUID(recvSessionId) === true
+          recvSessionId === fixedSessionId
+
+          list === fixedListAds
+        }
     }
     "/2 simple POST account/0/suggestedOffers with a sessionId" in {
       Post("/account/0/suggestedOffers", AccountSuggestedOffersRequest
-      (deviceId = fixedDevIdMd5,sessionId = fixedSessionId)) ~>
+      (deviceId = fixedDevIdMd5, sessionId = fixedSessionId)) ~>
         route ~>
         check {
 
           status === OK
 
-          val AccountSuggestedOffersResponse(recvSessionId) = responseAs[AccountSuggestedOffersResponse]
+          val AccountSuggestedOffersResponse(recvSessionId, list) = responseAs[AccountSuggestedOffersResponse]
 
           isUUID(recvSessionId) === true
           recvSessionId === fixedSessionId2
+
+          list === fixedListAds
         }
     }
     "/3 simple POST account/xxxxx/suggestedOffers with a sessionId" in {
-      Post("/account/"+fixedAccountId+"/suggestedOffers", AccountSuggestedOffersRequest
-      (deviceId = fixedDevIdMd5,sessionId = fixedSessionId)) ~>
+      Post("/account/" + fixedAccountId + "/suggestedOffers", AccountSuggestedOffersRequest
+      (deviceId = fixedDevIdMd5, sessionId = fixedSessionId)) ~>
         route ~>
         check {
 
           status === OK
 
-          val AccountSuggestedOffersResponse(recvSessionId) = responseAs[AccountSuggestedOffersResponse]
+          val AccountSuggestedOffersResponse(recvSessionId, list) = responseAs[AccountSuggestedOffersResponse]
 
           isUUID(recvSessionId) === true
           recvSessionId === fixedSessionId2
+
+          list === fixedListAds
         }
     }
+
   }
-  def isUUID(x:String) = {
-    Try (UUID.fromString(x)) match {
+
+  def isUUID(x: String) = {
+    Try(UUID.fromString(x)) match {
       case scala.util.Success(_) => true
       case _ => false
     }
