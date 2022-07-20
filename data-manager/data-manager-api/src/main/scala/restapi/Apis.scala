@@ -35,6 +35,10 @@ trait Apis extends RouteConcatenation with Injectable {
     override implicit def actorRefFactory: ActorRefFactory = system
   }
 
+  val servePref = new PrefHttpService {
+    override implicit def actorRefFactory: ActorRefFactory = system
+  }
+
   val serveUser = new UserHttpService(registration, editAccount, brand, offer, userAuthentication) {
     override implicit def actorRefFactory: ActorRefFactory = system
   }
@@ -64,6 +68,7 @@ trait Apis extends RouteConcatenation with Injectable {
     serveAccount.route ~
     serveAccountSuggestedOffers.routeAccountSuggestedOffers ~
     serveIntents.routeIntent ~
+  servePref.routePref ~
     serveUser.route ~
       serveBrand.route ~
       serveMedia.route ~

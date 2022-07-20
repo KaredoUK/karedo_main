@@ -1,21 +1,15 @@
-package restapi
+package restapi.kar
 
 import java.util.UUID
-import javax.ws.rs.Path
 
-import com.wordnik.swagger.annotations.{ApiImplicitParams, ApiOperation, ApiResponses, _}
+import com.parallelai.wallet.datamanager.data.AccountAds
 import org.junit.runner.RunWith
 import org.mockito.Matchers.{eq => argEq}
 import org.specs2.mutable.SpecificationLike
 import org.specs2.runner.JUnitRunner
+import restapi.AccountSuggestedOffersHttpService
 import spray.http.StatusCodes._
-import spray.json.DefaultJsonProtocol
 import spray.testkit.Specs2RouteTest
-import sun.security.provider.MD5
-import javax.ws.rs.Path
-
-import akka.util.Timeout
-import com.parallelai.wallet.datamanager.data.AccountAds
 
 import scala.util.Try
 
@@ -39,40 +33,6 @@ class AccountService2Spec
   sequential
 
 
-  "KAR-127 [prototype]" should {
-    "list /pref/names" in {
-      Get("/pref/names") ~> routeAccountSuggestedOffers ~> check {
-        status === OK
-
-        responseAs[List[(String,String)]] === List(
-
-          ("IAB22", "offers & discounts"),
-          ("IAB18", "fashion & style"),
-          ("IAB8", "food & drink"),
-          ("IAB20", "travel & holidays"),
-          ("IAB17", "sports"),
-          ("IAB6", "family & children"),
-          ("IAB7", "health & fitness"),
-          ("IAB19", "computers & gadgets"),
-          ("IAB4", "jobs & career"),
-          ("IAB10", "home & garden"),
-          ("IAB2", "cars & bikes"),
-          ("IAB13", "personal finance"),
-          ("IAB3", "business & finance"),
-          ("IAB1", "arts & entertainment"),
-          ("IAB14", "community & society"),
-          ("IAB15", "science"),
-          ("IAB16", "pets"),
-          ("IAB5", "education"),
-          ("IAB21", "property & housing"),
-          ("IAB9", "hobbies & interests"),
-          ("IAB11", "law, govt & politics"),
-          ("IAB12", "news & current affairs"),
-          ("IAB23", "religion & spirituality")
-        )
-      }
-    }
-  }
 
   "KAR-126 [prototype]" should {
     "/1 simple POST account/0/suggestedOffers returns valid sessionId" in {

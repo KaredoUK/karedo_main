@@ -1,4 +1,4 @@
-package restapi
+package restapi.kar
 
 import java.util.UUID
 
@@ -7,6 +7,7 @@ import org.junit.runner.RunWith
 import org.mockito.Matchers.{eq => argEq}
 import org.specs2.mutable.SpecificationLike
 import org.specs2.runner.JUnitRunner
+import restapi.IntentHttpService
 import spray.http.StatusCodes._
 import spray.testkit.Specs2RouteTest
 
