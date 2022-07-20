@@ -28,7 +28,10 @@ trait Apis extends RouteConcatenation with Injectable {
   val serveAccount = new AccountHttpService(registration, editAccount, brand, offer, userAuthentication) {
     override implicit def actorRefFactory: ActorRefFactory = system
   }
-  val serveAccount2 = new AccountSuggestedOffersHttpService {
+  val serveAccountSuggestedOffers = new AccountSuggestedOffersHttpService {
+    override implicit def actorRefFactory: ActorRefFactory = system
+  }
+  val serveIntents = new IntentHttpService {
     override implicit def actorRefFactory: ActorRefFactory = system
   }
 
@@ -36,7 +39,7 @@ trait Apis extends RouteConcatenation with Injectable {
     override implicit def actorRefFactory: ActorRefFactory = system
   }
 
-  
+
   val serveMedia = new MediaHttpService(media, userAuthentication) {
     override implicit def actorRefFactory: ActorRefFactory = system
   }
@@ -44,13 +47,13 @@ trait Apis extends RouteConcatenation with Injectable {
   val serveBrand = new BrandHttpService(brand, userAuthentication) {
     override implicit def actorRefFactory: ActorRefFactory = system
   }
-  
+
   val serveOffer = new OfferHttpService(offer, userAuthentication) {
-     override implicit def actorRefFactory: ActorRefFactory = system   
+     override implicit def actorRefFactory: ActorRefFactory = system
   }
-  
+
   val serveSale = new SaleHttpService(offer, userAuthentication) {
-     override implicit def actorRefFactory: ActorRefFactory = system   
+     override implicit def actorRefFactory: ActorRefFactory = system
   }
 
   val serveMerchant = new MerchantHttpService(offer, userAuthentication) {
@@ -59,8 +62,8 @@ trait Apis extends RouteConcatenation with Injectable {
 
   val routes =
     serveAccount.route ~
-    serveAccount2.route ~
-    serveAccount2.route2 ~
+    serveAccountSuggestedOffers.routeAccountSuggestedOffers ~
+    serveIntents.routeIntent ~
     serveUser.route ~
       serveBrand.route ~
       serveMedia.route ~

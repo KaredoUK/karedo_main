@@ -14,6 +14,7 @@ import spray.testkit.Specs2RouteTest
 import sun.security.provider.MD5
 import javax.ws.rs.Path
 
+import akka.util.Timeout
 import com.parallelai.wallet.datamanager.data.AccountAds
 
 import scala.util.Try
@@ -37,27 +38,10 @@ class AccountService2Spec
   }
   sequential
 
-  "KAR-129 [prototype]" should {
-    "list /intent/what" in {
-      Get("/intent/what") ~> route2 ~> check {
-        status === OK
-        responseAs[List[String]] === List(
-          "buy",
-          "rent",
-          "travel",
-          "hire",
-          "compare",
-          "switch",
-          "borrow",
-          "visit"
 
-        )
-      }
-    }
-  }
   "KAR-127 [prototype]" should {
     "list /pref/names" in {
-      Get("/pref/names") ~> route2 ~> check {
+      Get("/pref/names") ~> routeAccountSuggestedOffers ~> check {
         status === OK
 
         responseAs[List[(String,String)]] === List(
@@ -95,7 +79,7 @@ class AccountService2Spec
 
       Post("/account/0/suggestedOffers", AccountSuggestedOffersRequest
       (deviceId = fixedDevIdMd5, sessionId = "")) ~>
-        route ~>
+        routeAccountSuggestedOffers ~>
         check {
 
           status === OK
@@ -111,7 +95,7 @@ class AccountService2Spec
     "/2 simple POST account/0/suggestedOffers with a sessionId" in {
       Post("/account/0/suggestedOffers", AccountSuggestedOffersRequest
       (deviceId = fixedDevIdMd5, sessionId = fixedSessionId)) ~>
-        route ~>
+        routeAccountSuggestedOffers ~>
         check {
 
           status === OK
@@ -127,7 +111,7 @@ class AccountService2Spec
     "/3 simple POST account/xxxxx/suggestedOffers with a sessionId" in {
       Post("/account/" + fixedAccountId + "/suggestedOffers", AccountSuggestedOffersRequest
       (deviceId = fixedDevIdMd5, sessionId = fixedSessionId)) ~>
-        route ~>
+        routeAccountSuggestedOffers ~>
         check {
 
           status === OK

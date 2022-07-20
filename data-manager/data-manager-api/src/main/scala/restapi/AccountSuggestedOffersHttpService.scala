@@ -27,13 +27,11 @@ abstract class AccountSuggestedOffersHttpService
 
   implicit val timeout = Timeout(20.seconds)
 
-  def route =
+  def routeAccountSuggestedOffers =
     pathPrefix("account") {
-      myOptions ~ postAccount
+      myOptions ~ postAccount ~ prefNames
 
     }
-
-  def route2 = intentWhat ~ prefNames
 
 
   @Path("/{account}/suggestedOffers")
