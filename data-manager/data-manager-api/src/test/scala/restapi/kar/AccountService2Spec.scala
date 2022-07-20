@@ -13,6 +13,23 @@ import spray.testkit.Specs2RouteTest
 
 import scala.util.Try
 
+object MD5 {
+  def hash(s: String) = {
+    val m = java.security.MessageDigest.getInstance("MD5")
+    val b = s.getBytes("UTF-8")
+    m.update(b, 0, b.length)
+    new java.math.BigInteger(1, m.digest()).toString(16)
+  }
+}
+
+object Helper {
+  def isUUID(x: String) = {
+    Try(UUID.fromString(x)) match {
+      case scala.util.Success(_) => true
+      case _ => false
+    }
+  }
+}
 
 @RunWith(classOf[JUnitRunner])
 class AccountService2Spec
@@ -22,14 +39,7 @@ class AccountService2Spec
     with Specs2RouteTest {
   def actorRefFactory = system
 
-  object MD5 {
-    def hash(s: String) = {
-      val m = java.security.MessageDigest.getInstance("MD5")
-      val b = s.getBytes("UTF-8")
-      m.update(b, 0, b.length)
-      new java.math.BigInteger(1, m.digest()).toString(16)
-    }
-  }
+
   sequential
 
 
@@ -46,7 +56,7 @@ class AccountService2Spec
 
           val AccountSuggestedOffersResponse(recvSessionId, list) = responseAs[AccountSuggestedOffersResponse]
 
-          isUUID(recvSessionId) === true
+          Helper.isUUID(recvSessionId) === true
           recvSessionId === fixedSessionId
 
           list === fixedListAds
@@ -62,7 +72,7 @@ class AccountService2Spec
 
           val AccountSuggestedOffersResponse(recvSessionId, list) = responseAs[AccountSuggestedOffersResponse]
 
-          isUUID(recvSessionId) === true
+          Helper.isUUID(recvSessionId) === true
           recvSessionId === fixedSessionId2
 
           list === fixedListAds
@@ -78,7 +88,7 @@ class AccountService2Spec
 
           val AccountSuggestedOffersResponse(recvSessionId, list) = responseAs[AccountSuggestedOffersResponse]
 
-          isUUID(recvSessionId) === true
+          Helper.isUUID(recvSessionId) === true
           recvSessionId === fixedSessionId2
 
           list === fixedListAds
@@ -87,10 +97,5 @@ class AccountService2Spec
 
   }
 
-  def isUUID(x: String) = {
-    Try(UUID.fromString(x)) match {
-      case scala.util.Success(_) => true
-      case _ => false
-    }
-  }
+
 }
