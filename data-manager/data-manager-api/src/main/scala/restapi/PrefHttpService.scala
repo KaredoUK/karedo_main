@@ -32,7 +32,7 @@ trait PrefHttpService
 
 
 
-  @Path("/pref/names")
+  @Path("/names")
   @ApiOperation(position = 4, httpMethod = "GET", response = classOf[List[(String,String)]], value = "KAR-127 pref/names")
   @ApiImplicitParams(Array())
   @ApiResponses(Array(

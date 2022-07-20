@@ -31,7 +31,7 @@ trait IntentHttpService
       intentWhat
     }
 
-  @Path("/intent/what")
+  @Path("/what")
   @ApiOperation(position = 3, httpMethod = "GET", response = classOf[List[String]], value = "KAR-129 intent/what")
   @ApiImplicitParams(Array())
   @ApiResponses(Array(
