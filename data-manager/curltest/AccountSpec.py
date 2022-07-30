@@ -31,7 +31,7 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(r.status_code, HTTP_OK)
 
         js = json.loads(r.text)
-        self.assertEqual(js["channel"], "msisdn")
+        self.assertEqual(js["channel"], "email")
 
         doc = ua.find_one({"email": "customer@gmail.com"})
         activationCode = doc["applications"][0]["activationCode"]
