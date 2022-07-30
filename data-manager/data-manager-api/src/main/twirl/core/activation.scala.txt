@@ -1,0 +1,1 @@
+@(validationCode: String, url: String)Welcome to Karedo, your activation code is @validationCode. Please click on @url

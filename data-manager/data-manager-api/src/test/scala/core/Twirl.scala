@@ -7,15 +7,19 @@ import org.specs2.mutable._
   */
 object Twirl extends Specification {
   "Twirl" should {
-    "resolve a template" in {
-      val render = core.html.hello("Bob", 22)
+    "resolve a html template" in {
+      val render = core.html.activation("*secretcode*", "*urlwheretogo*")
       render.toString mustEqual
         """
           |<html>
-          |
-          |<h1>Welcome Bob!!</h1>
-          |<p>You are 22 years old, <i>have a great evening !</i></p>
+          |Welcome to Karedo, your activation code is *secretcode*.<br>
+          |Please click on <a href="*urlwheretogo*">this link</a>
           |</html>""".stripMargin
+    }
+    "resolve a txt template" in {
+      val render = core.txt.activation("*secretcode*", "*urlwheretogo*")
+      render.toString mustEqual
+        """Welcome to Karedo, your activation code is *secretcode*. Please click on *urlwheretogo*""".stripMargin
     }
 
   }
