@@ -41,7 +41,7 @@ class EmailActor(implicit val bindingModule: BindingModule) extends Actor with A
 
   import context.dispatcher
 
-  val requestPipeline = addCredentials(BasicHttpCredentials("api", s"key-$userKey")) ~> sendReceive
+  val requestPipeline = addCredentials(BasicHttpCredentials("api", userKey)) ~> sendReceive
 
   def receive: Receive = {
 
