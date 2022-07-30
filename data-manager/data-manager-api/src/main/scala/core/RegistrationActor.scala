@@ -114,6 +114,7 @@ class RegistrationActor( messengerActor: ActorRef)
 {
 
   import RegistrationActor._
+  import scala.language.reflectiveCalls
 
   import context.dispatcher
 
@@ -317,14 +318,10 @@ class RegistrationActor( messengerActor: ActorRef)
       val activationMessage = s"Welcome to Karedo, your activation code is $validationCode. " +
         s"Please click on $uiServerAddress/confirmActivation?applicationId=$applicationId&activationCode=$validationCode"
 
-      // if (userContacts.msisdn.isDefined) {
         messengerActor ! SendMessage(URI.create(s"sms:${userContacts.msisdn.get}"), activationMessage)
         SuccessResponse(RegistrationResponse(applicationId, "msisdn", userContacts.msisdn.get))
-      //}
-      //else {
         messengerActor ! SendMessage(URI.create(s"mailto:${userContacts.email.get}"), activationMessage, "Welcome to Karedo")
         SuccessResponse(RegistrationResponse(applicationId, "email", userContacts.email.get))
-      //}
     }
 
 
