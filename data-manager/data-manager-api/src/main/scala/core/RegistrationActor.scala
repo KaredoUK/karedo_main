@@ -315,7 +315,7 @@ class RegistrationActor( messengerActor: ActorRef)
 
     wrapLog("activateApplication",(deviceId, validationCode)) {
 
-      val url = s"$uiServerAddress/confirmActivation?deviceId=$applicationId&activationCode=$validationCode"
+      val url = s"$uiServerAddress/confirmActivation?deviceId=$deviceId&activationCode=$validationCode"
 
       val emailActivationMessage = core.html.activation(validationCode,url).toString
       val smsActivationMessage = core.txt.activation(validationCode,url).toString

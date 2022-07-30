@@ -21,7 +21,7 @@ trait RestApiSpecMatchers {
 
   def beAnAppWithId(deviceId: UUID): Matcher[ClientApplication] =
     ({ app: ClientApplication => app.id == deviceId },
-      s"App should have an deviceId == $applicationId" )
+      s"App should have an deviceId == $deviceId" )
 
   def haveMsisdn(msisdn: String): Matcher[UserAccount] =
     ({user: UserAccount => user.msisdn == Some(msisdn) },
