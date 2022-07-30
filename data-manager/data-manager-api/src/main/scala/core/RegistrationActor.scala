@@ -315,12 +315,16 @@ class RegistrationActor( messengerActor: ActorRef)
 
     wrapLog("activateApplication",(applicationId, validationCode)) {
 
-      val activationMessage = s"Welcome to Karedo, your activation code is $validationCode. " +
-        s"Please click on $uiServerAddress/confirmActivation?applicationId=$applicationId&activationCode=$validationCode"
+      val url = s"$uiServerAddress/confirmActivation?applicationId=$applicationId&activationCode=$validationCode"
 
-        messengerActor ! SendMessage(URI.create(s"sms:${userContacts.msisdn.get}"), activationMessage)
+      val emailActivationMessage = core.html.activation(validationCode,url).toString
+      val smsActivationMessage = core.txt.activation(validationCode,url).toString
+      val emailTitle = core.txt.activationEmailTitle.toString
+
+
+        messengerActor ! SendMessage(URI.create(s"sms:${userContacts.msisdn.get}"), smsActivationMessage)
         SuccessResponse(RegistrationResponse(applicationId, "msisdn", userContacts.msisdn.get))
-        messengerActor ! SendMessage(URI.create(s"mailto:${userContacts.email.get}"), activationMessage, "Welcome to Karedo")
+        messengerActor ! SendMessage(URI.create(s"mailto:${userContacts.email.get}"), emailActivationMessage, emailTitle)
         SuccessResponse(RegistrationResponse(applicationId, "email", userContacts.email.get))
     }
 
