@@ -59,7 +59,7 @@ case class APISessionResponse(
 @ApiModel(description = "Application request")
 case class AddApplicationRequest(
                                   @(ApiModelProperty@field)(value = "unique identifier for the application")
-                                  applicationId: ApplicationID = UUID.randomUUID(),
+                                  applicationId: DeviceID = UUID.randomUUID(),
                                   @(ApiModelProperty@field)(value = "User msisdn (optional)")
                                   msisdn: Option[String] = None,
                                   @(ApiModelProperty@field)(value = "User type (CUSTOMER/MERCHANT)")
@@ -71,7 +71,7 @@ case class AddApplicationRequest(
 @ApiModel(description = "Data to be validated from previous application")
 case class RegistrationValidation(
                                    @(ApiModelProperty@field)(value = "unique identifier for the application")
-                                   applicationId: ApplicationID,
+                                   applicationId: DeviceID,
                                    @(ApiModelProperty@field)(value = "validation code sent by email/sms")
                                    validationCode: String,
                                    @(ApiModelProperty@field)(value = "user password to be set")
@@ -81,7 +81,7 @@ case class RegistrationValidation(
 @ApiModel(description = "Data returned on first application (or reset of application)")
 case class RegistrationResponse(
                                  @(ApiModelProperty@field)(value = "unique identifier for the application")
-                                 applicationId: ApplicationID,
+                                 applicationId: DeviceID,
                                  @(ApiModelProperty@field)(value = "which channel used for sending activation code (sms/email)")
                                  channel: String,
                                  @(ApiModelProperty@field)(value = "address")
@@ -91,7 +91,7 @@ case class RegistrationResponse(
 @ApiModel(description = "Add application response")
 case class AddApplicationResponse(
                                    @(ApiModelProperty@field)(value = "unique identifier for the application")
-                                   applicationId: ApplicationID,
+                                   applicationId: DeviceID,
                                    @(ApiModelProperty@field)(value = "which channel used for sending activation code (sms/email)")
                                    channel: String,
                                    @(ApiModelProperty@field)(value = "address")
@@ -101,7 +101,7 @@ case class AddApplicationResponse(
 @ApiModel(description = "Returns user data for successful validation")
 case class RegistrationValidationResponse(
                                            @(ApiModelProperty@field)(value = "unique identifier for the application")
-                                           applicationId: ApplicationID,
+                                           applicationId: DeviceID,
                                            @(ApiModelProperty@field)(value = "userId")
                                            userID: UUID)
   extends ApiDataResponse

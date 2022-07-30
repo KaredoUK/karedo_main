@@ -12,10 +12,10 @@ import unittest, json
 class TestMerchant(unittest.TestCase):
     
     def test01_P109_CreateAccountMerchant(self):
-        global userId, applicationId
+        global userId, deviceId
         title("PARALLELAI-109API: Create Account Merchant")
 
-        r = post("account", {"applicationId": applicationId,
+        r = post("account", {"deviceId": deviceId,
                              "msisdn": "004479097386290", # need to specify a different number here too
                              "email": "merchant@gmail.com",
                              "userType": "MERCHANT"
@@ -33,7 +33,7 @@ class TestMerchant(unittest.TestCase):
 
         title("PARALLELAI-53API: Validate/Activate Account Application")
         r = post("account/application/validation",
-                 {"applicationId": applicationId, "validationCode": activationCode, "password": "newPass"})
+                 {"deviceId": deviceId, "validationCode": activationCode, "password": "newPass"})
 
         self.assertEqual(r.status_code, HTTP_OK)
 
@@ -44,10 +44,10 @@ class TestMerchant(unittest.TestCase):
 
 
     def test01d_P102_LoginMerchant(self):
-            global userId, applicationId, sessionId
+            global userId, deviceId, sessionId
             title("PARALLELAI-102API: Login Merchant")
             #  POST (JavaUUID / "application" / JavaUUID / "login"){
-            r = post("account/"+userId+"/application/"+applicationId+"/login",
+            r = post("account/"+userId+"/application/"+deviceId+"/login",
                      {"password" : "newPass"})
             self.assertEqual(r.status_code, HTTP_OK)
             js = json.loads(r.text)
@@ -57,14 +57,14 @@ class TestMerchant(unittest.TestCase):
             info("login passed sessionId "+sessionId)
 
     def test02_P49_ResetApplicationMerchant(self):
-        global userId, applicationId, sessionId
-        applicationId = newUUID()
+        global userId, deviceId, sessionId
+        deviceId = newUUID()
         title("PARALLELAI-49API: Reset Application for Merchant")
 
-        info("app: " + applicationId)
+        info("app: " + deviceId)
 
         info("Question001: /reset is needed? doc is specifying it but original implementation didn't")
-        r = put("account/" + userId + "/application/" + applicationId + "/reset")
+        r = put("account/" + userId + "/application/" + deviceId + "/reset")
 
         self.assertEqual(r.status_code, HTTP_OK)
 
@@ -74,7 +74,7 @@ class TestMerchant(unittest.TestCase):
 
         info("activationCode: "+activationCode)
 
-        r = post("account/application/validation", {"applicationId": applicationId, "validationCode": activationCode})
+        r = post("account/application/validation", {"deviceId": deviceId, "validationCode": activationCode})
 
         self.assertEqual(r.status_code, HTTP_OK)
 

@@ -30,7 +30,7 @@ object EditAccountActor extends ISODateConversion {
 
   case class GetAccountPoints(accountId: UserID)
 
-  case class FindAccount(applicationId: Option[UserID], msisdn: Option[String], email: Option[String]) extends WithUserContacts
+  case class FindAccount(deviceId: Option[UserID], msisdn: Option[String], email: Option[String]) extends WithUserContacts
 
   case class UpdateAccount(userAccount: UserProfile)
 

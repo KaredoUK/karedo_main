@@ -4,13 +4,13 @@ import json
 import sys
 
 
-global applicationId,userId,sessionId, DEBUG
+global deviceId,userId,sessionId, DEBUG
 
 brandId=newUUID()
 brandId2=newUUID()
 userId=newUUID()
 merchantId=newUUID()
-applicationId=newUUID()
+deviceId=newUUID()
 applicationId2=newUUID()
 sessionId=newUUID()
 merchantSessionId=newUUID()
@@ -26,33 +26,33 @@ util.DEBUG=0
 
 
 
-def mkAccount(applicationId,userType,telephone,email):
-    r = post("account", {"applicationId": applicationId, "userType":userType, "msisdn": telephone,
+def mkAccount(deviceId,userType,telephone,email):
+    r = post("account", {"deviceId": deviceId, "userType":userType, "msisdn": telephone,
                          "email": email})
     if (r.status_code != HTTP_OK): sys.exit(101)
     doc = ua.find_one({"email": email})
     activationCode = doc["applications"][0]["activationCode"]
-    r = post("account/application/validation", {"applicationId": applicationId, "validationCode": activationCode, "password":"PASS"})
+    r = post("account/application/validation", {"deviceId": deviceId, "validationCode": activationCode, "password":"PASS"})
     if (r.status_code != HTTP_OK): sys.exit(102)
     js = json.loads(r.text)
     userId = js["userID"]
     return userId
 
-userId=mkAccount(applicationId,"CUSTOMER","1234","pakkio@gmail.com")
+userId=mkAccount(deviceId,"CUSTOMER","1234","pakkio@gmail.com")
 userId2=mkAccount(applicationId2,"CUSTOMER","9876","oikkap@gmail.com")
 merchantId=mkAccount(app2,"MERCHANT","12345","merchant@gmail.com")
 
 
 #################### Login account having back sessionID
-def loginAccount(accountId,applicationId):
-    r = post("account/"+accountId+"/application/"+applicationId+"/login",
+def loginAccount(accountId,deviceId):
+    r = post("account/"+accountId+"/application/"+deviceId+"/login",
              {"password" : "PASS"})
     if (r.status_code != HTTP_OK): sys.exit(103)
     js = json.loads(r.text)
     sessionId = js["sessionId"]
     return sessionId
 
-sessionId=loginAccount(userId,applicationId)
+sessionId=loginAccount(userId,deviceId)
 merchantSessionId=loginAccount(merchantId,app2)
 ################################# Update Merchant with some name for Sale API we need to have a name
 def nameMerchant(merchantId,session):

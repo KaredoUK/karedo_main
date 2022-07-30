@@ -4,10 +4,10 @@ import java.util.UUID
 
 package object data {
 
-  type ApplicationID = UUID
+  type DeviceID = UUID
   type UserID = UUID
 
 
-  def applicationIdFromString(appId: String) : ApplicationID = UUID.fromString(appId)
-  def userIdFromString(userId: String) : ApplicationID = UUID.fromString(userId)
+  def applicationIdFromString(appId: String) : DeviceID = UUID.fromString(appId)
+  def userIdFromString(userId: String) : DeviceID = UUID.fromString(userId)
 }

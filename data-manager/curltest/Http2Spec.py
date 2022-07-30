@@ -10,7 +10,7 @@ import unittest, json
 
 class TestHttp2(unittest.TestCase):
     def test01_KAR126_1_AnonymousFirst(self):
-        global userId, applicationId
+        global userId, deviceId
         title("KAR-126/1: Anonymous access")
 
         r = post("account/0/suggestedOffers",
@@ -25,7 +25,7 @@ class TestHttp2(unittest.TestCase):
 
 
     def test02_KAR126_2_AnonymousReturning(self):
-        global userId, applicationId
+        global userId, deviceId
         title("KAR-126/2: Returning Anonymous access")
 
         r = post("account/0/suggestedOffers",
@@ -39,7 +39,7 @@ class TestHttp2(unittest.TestCase):
         self.assertEqual(js["sessionId"], "28850c9a-276a-44a5-b773-7b74f1afcfc2")
 
     def test03_KAR126_2_NonAnonymous(self):
-        global userId, applicationId
+        global userId, deviceId
         title("KAR-126/3: NON Anonymous access")
 
         r = post("account/adf959bd-d591-441b-931c-fcd426c4d923/suggestedOffers",

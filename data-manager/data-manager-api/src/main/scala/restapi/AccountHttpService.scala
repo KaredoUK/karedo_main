@@ -131,10 +131,10 @@ extends HttpService
   ))
   def reset =
     path(JavaUUID / "application" / JavaUUID / "reset") {
-      (accountId: UserID, applicationId: ApplicationID) =>
+      (accountId: UserID, deviceId: DeviceID) =>
         put {
           complete {
-            (registrationActor ? AddApplicationToKnownUserRequest(applicationId, accountId)).
+            (registrationActor ? AddApplicationToKnownUserRequest(deviceId, accountId)).
               mapTo[ResponseWithFailure[RegistrationError, RegistrationResponse]]
           }
         }
@@ -162,12 +162,12 @@ extends HttpService
   def login =
   // POST /account/$UserID/application/$ApplicationId/login {
     path(JavaUUID / "application" / JavaUUID / "login") {
-      (accountId: UserID, applicationId: ApplicationID) =>
+      (accountId: UserID, deviceId: DeviceID) =>
         post {
           handleWith {
             loginRequest: APILoginRequest =>
 
-              (registrationActor ? LoginRequest(accountId, applicationId, loginRequest.password)).
+              (registrationActor ? LoginRequest(accountId, deviceId, loginRequest.password)).
                 mapTo[ResponseWithFailure[RegistrationError, APISessionResponse]]
           }
         }

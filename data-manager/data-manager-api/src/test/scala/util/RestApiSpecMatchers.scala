@@ -19,9 +19,9 @@ trait RestApiSpecMatchers {
     ({ app: ClientApplication => StringUtils.isNotEmpty(app.activationCode) },
       "App should have a validation code" )
 
-  def beAnAppWithId(applicationId: UUID): Matcher[ClientApplication] =
-    ({ app: ClientApplication => app.id == applicationId },
-      s"App should have an applicationId == $applicationId" )
+  def beAnAppWithId(deviceId: UUID): Matcher[ClientApplication] =
+    ({ app: ClientApplication => app.id == deviceId },
+      s"App should have an deviceId == $applicationId" )
 
   def haveMsisdn(msisdn: String): Matcher[UserAccount] =
     ({user: UserAccount => user.msisdn == Some(msisdn) },

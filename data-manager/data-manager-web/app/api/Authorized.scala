@@ -19,7 +19,7 @@ import scala.util.matching.Regex
 object authorization {
 
   val COOKIE_UUID = "uuid"
-  val COOKIE_APP_ID = "applicationId"
+  val COOKIE_APP_ID = "deviceId"
 
   def readUUIDCookie(cookieName: String)(implicit requestHeaders: RequestHeader) : Option[UUID] =
     Try {

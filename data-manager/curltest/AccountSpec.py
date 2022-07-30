@@ -10,7 +10,7 @@ clearDB()
 #
 
 userId=newUUID()
-applicationId=newUUID()
+deviceId=newUUID()
 appid2=newUUID()
 sessionId=newUUID()
 
@@ -19,10 +19,10 @@ class TestAccount(unittest.TestCase):
     
 
     def test01_P77P53_CreateAccountCustomer(self):
-        global userId, applicationId
+        global userId, deviceId
         title("PARALLELAI-77API: Create Account")
 
-        r = post("account", {"applicationId": applicationId,
+        r = post("account", {"deviceId": deviceId,
                              "msisdn": "00447909738629",
                              "email": "customer@gmail.com",
                              "userType": "CUSTOMER"
@@ -40,7 +40,7 @@ class TestAccount(unittest.TestCase):
 
         title("PARALLELAI-53API: Validate/Activate Account Application")
         r = post("account/application/validation",
-                 {"applicationId": applicationId, "validationCode": activationCode, "password": "newPass"})
+                 {"deviceId": deviceId, "validationCode": activationCode, "password": "newPass"})
 
         self.assertEqual(r.status_code, HTTP_OK)
 
@@ -49,10 +49,10 @@ class TestAccount(unittest.TestCase):
         info("UserId returned: " + js["userID"])
 
     def test01c_P102_LoginCustomer(self):
-        global userId, applicationId, sessionId
+        global userId, deviceId, sessionId
         title("PARALLELAI-102API: Login")
         #  POST (JavaUUID / "application" / JavaUUID / "login"){
-        r = post("account/"+userId+"/application/"+applicationId+"/login",
+        r = post("account/"+userId+"/application/"+deviceId+"/login",
                  {"password" : "newPass"})
         self.assertEqual(r.status_code, HTTP_OK)
         js = json.loads(r.text)
@@ -63,14 +63,14 @@ class TestAccount(unittest.TestCase):
 
 
     def test02_P49_ResetApplication(self):
-        global userId, applicationId, sessionId
-        applicationId = newUUID()
+        global userId, deviceId, sessionId
+        deviceId = newUUID()
         title("PARALLELAI-49API: Reset Application for Account")
 
-        info("app: " + applicationId)
+        info("app: " + deviceId)
 
         info("Question001: /reset is needed? doc is specifying it but original implementation didn't")
-        r = put("account/" + userId + "/application/" + applicationId + "/reset")
+        r = put("account/" + userId + "/application/" + deviceId + "/reset")
 
         self.assertEqual(r.status_code, HTTP_OK)
 
@@ -80,7 +80,7 @@ class TestAccount(unittest.TestCase):
 
         info("activationCode: "+activationCode)
 
-        r = post("account/application/validation", {"applicationId": applicationId, "validationCode": activationCode})
+        r = post("account/application/validation", {"deviceId": deviceId, "validationCode": activationCode})
 
         self.assertEqual(r.status_code, HTTP_OK)
 
@@ -88,7 +88,7 @@ class TestAccount(unittest.TestCase):
         super(TestAccount, self).assertNotIn(member, container, msg)
 
     def test03_P50_UpdateInfo(self):
-        global userId, sessionId,applicationId
+        global userId, sessionId,deviceId
         title("PARALLELAI-50API: Update Account Settings")
 
         info("Question002: not present in documentation")

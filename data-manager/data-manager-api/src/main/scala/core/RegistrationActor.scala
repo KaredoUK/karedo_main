@@ -90,7 +90,7 @@ object RegistrationActor {
 
   }
 
-  case class AddApplicationToKnownUserRequest(applicationId: ApplicationID, accountId: UserID)
+  case class AddApplicationToKnownUserRequest(deviceId: DeviceID, accountId: UserID)
 
 
   def newActivationCode: String = {
@@ -151,14 +151,14 @@ class RegistrationActor( messengerActor: ActorRef)
     def getUserAccountWithAppStatus:
     Option[(UserAccount, Option[Boolean])] =
 
-      wrapLog("getUserAccountWithAppStatus",loginRequest.applicationId) {
+      wrapLog("getUserAccountWithAppStatus",loginRequest.deviceId) {
         // gets information of current accountId and status active false/true
         // very strange we don't have password field as return so I needed to craft a special method
         val userAccountWithAppStatusOp = userAccountDAO.getById(loginRequest.accountId) filter { userAccount =>
           //userAccountDAO.checkPassword(loginRequest.accountId,loginRequest.password)
           userAccount.password == Some(loginRequest.password)
         } map { userAccount =>
-          val clientAppStatusOp = clientApplicationDAO.getById(loginRequest.applicationId) filter {
+          val clientAppStatusOp = clientApplicationDAO.getById(loginRequest.deviceId) filter {
             _.accountId == userAccount.id
           } map {
             _.active
@@ -174,7 +174,7 @@ class RegistrationActor( messengerActor: ActorRef)
       status match {
         case Some((account, Some(true))) =>
           log.info("found active account")
-          val newSession = userSessionDAO.createNewSession(loginRequest.accountId, loginRequest.applicationId)
+          val newSession = userSessionDAO.createNewSession(loginRequest.accountId, loginRequest.deviceId)
           SuccessResponse(APISessionResponse(newSession.sessionId.toString))
 
         case Some((account, Some(false))) =>
@@ -207,9 +207,9 @@ class RegistrationActor( messengerActor: ActorRef)
       wrapLog("registerUser", request) {
         val account = UserAccount(id = UUID.randomUUID(), userType=request.userType, email = request.email, msisdn = request.msisdn)
         val activationCode = newActivationCode
-        val firstApplication = ClientApplication(request.applicationId, account.id, activationCode)
+        val firstApplication = ClientApplication(request.deviceId, account.id, activationCode)
         userAccountDAO.insertNew(account, firstApplication)
-        activateApplication(request.applicationId, account.id, request, activationCode)
+        activateApplication(request.deviceId, account.id, request, activationCode)
       }
     }
   }
@@ -226,10 +226,10 @@ class RegistrationActor( messengerActor: ActorRef)
               FailureResponse(InvalidRegistrationRequest("Unable to find user with specified identification"))
 
             case Some(userAccount) =>
-              log.debug("Adding new application {} to account {}", request.applicationId, userAccount.id)
-              val registrationResponse = registerApplication(AddApplicationToKnownUserRequest(request.applicationId, userAccount.id))
+              log.debug("Adding new application {} to account {}", request.deviceId, userAccount.id)
+              val registrationResponse = registerApplication(AddApplicationToKnownUserRequest(request.deviceId, userAccount.id))
 
-              registrationResponse map { resp => AddApplicationResponse(resp.applicationId, resp.channel, resp.address)}
+              registrationResponse map { resp => AddApplicationResponse(resp.deviceId, resp.channel, resp.address)}
           }
 
         }
@@ -249,10 +249,10 @@ class RegistrationActor( messengerActor: ActorRef)
         case Some(userAccount) =>
           val activationCode = newActivationCode
 
-          clientApplicationDAO.insertNew(ClientApplication(registrationRequest.applicationId, registrationRequest.accountId, activationCode))
+          clientApplicationDAO.insertNew(ClientApplication(registrationRequest.deviceId, registrationRequest.accountId, activationCode))
 
           activateApplication(
-            registrationRequest.applicationId,
+            registrationRequest.deviceId,
             userAccount.id,
             UserContacts(userAccount.email, userAccount.msisdn),
             activationCode
@@ -264,22 +264,22 @@ class RegistrationActor( messengerActor: ActorRef)
   def validateUser(validation: RegistrationValidation):
   ResponseWithFailure[RegistrationError, RegistrationValidationResponse] =
     wrapLog("ValidateUser", validation) {
-      val clientAppOption = clientApplicationDAO.getById(validation.applicationId)
+      val clientAppOption = clientApplicationDAO.getById(validation.deviceId)
 
       clientAppOption match {
-        case None => FailureResponse(InvalidRegistrationRequest(s"Unable to find client application with ID '${validation.applicationId}'"))
+        case None => FailureResponse(InvalidRegistrationRequest(s"Unable to find client application with ID '${validation.deviceId}'"))
 
         case Some(clientApplication) =>
           // I don't care if the user validates twice. I just check the validation code
           if (clientApplication.activationCode == validation.validationCode) {
-            val userOpt = userAccountDAO.getByApplicationId(validation.applicationId)
+            val userOpt = userAccountDAO.getByApplicationId(validation.deviceId)
 
             userOpt map { user =>
               def saveValidationInfo = {
                 clientApplicationDAO.update(clientApplication copy (active = true))
                 userAccountDAO.setActive(user.id)
 
-                SuccessResponse(RegistrationValidationResponse(validation.applicationId, user.id))
+                SuccessResponse(RegistrationValidationResponse(validation.deviceId, user.id))
               }
 
               (user.password, validation.password) match {
@@ -297,7 +297,7 @@ class RegistrationActor( messengerActor: ActorRef)
                   FailureResponse(InvalidValidationRequest("Missing password for a new user validation"))
               }
             } getOrElse {
-              FailureResponse(InternalRegistrationError(new IllegalStateException(s"Unable to find user for valid application ID '${validation.applicationId}'")))
+              FailureResponse(InternalRegistrationError(new IllegalStateException(s"Unable to find user for valid application ID '${validation.deviceId}'")))
             }
           } else {
             FailureResponse(InvalidValidationCode)
@@ -307,15 +307,15 @@ class RegistrationActor( messengerActor: ActorRef)
 
 
 
-  private def activateApplication(applicationId: ApplicationID,
+  private def activateApplication(deviceId: DeviceID,
                                   accountId: UserID,
                                   userContacts: WithUserContacts,
                                   validationCode: String):
   ResponseWithFailure[RegistrationError, RegistrationResponse] =
 
-    wrapLog("activateApplication",(applicationId, validationCode)) {
+    wrapLog("activateApplication",(deviceId, validationCode)) {
 
-      val url = s"$uiServerAddress/confirmActivation?applicationId=$applicationId&activationCode=$validationCode"
+      val url = s"$uiServerAddress/confirmActivation?deviceId=$applicationId&activationCode=$validationCode"
 
       val emailActivationMessage = core.html.activation(validationCode,url).toString
       val smsActivationMessage = core.txt.activation(validationCode,url).toString
@@ -323,9 +323,9 @@ class RegistrationActor( messengerActor: ActorRef)
 
 
         messengerActor ! SendMessage(URI.create(s"sms:${userContacts.msisdn.get}"), smsActivationMessage)
-        SuccessResponse(RegistrationResponse(applicationId, "msisdn", userContacts.msisdn.get))
+        SuccessResponse(RegistrationResponse(deviceId, "msisdn", userContacts.msisdn.get))
         messengerActor ! SendMessage(URI.create(s"mailto:${userContacts.email.get}"), emailActivationMessage, emailTitle)
-        SuccessResponse(RegistrationResponse(applicationId, "email", userContacts.email.get))
+        SuccessResponse(RegistrationResponse(deviceId, "email", userContacts.email.get))
     }
 
 
@@ -342,8 +342,8 @@ class RegistrationActor( messengerActor: ActorRef)
     }
   }
 
-  def applicationNotRegistered(withApplicationId: {def applicationId: ApplicationID}): Option[RegistrationError] =
-    clientApplicationDAO.getById(withApplicationId.applicationId) map { _ => ApplicationAlreadyRegistered}
+  def applicationNotRegistered(withApplicationId: {def deviceId: DeviceID}): Option[RegistrationError] =
+    clientApplicationDAO.getById(withApplicationId.deviceId) map { _ => ApplicationAlreadyRegistered}
 
   def validUserIdentification(userIdentification: WithUserContacts): Option[RegistrationError] =
     if (userIdentification.isValid) None else Some(InvalidRegistrationRequest("Invalid user identification"))

@@ -31,7 +31,7 @@ trait ApiHttpClientSpec
 
   val  sessionId = UUID.randomUUID()
   val userId = UUID.randomUUID()
-  val applicationId = UUID.randomUUID()
+  val deviceId = UUID.randomUUID()
   val servicePort : Int = Math.abs( Random.nextInt(3000) ) + 10000
   val serviceUrl = s"http://localhost:$servicePort"
 
@@ -64,10 +64,10 @@ trait ApiHttpClientSpec
     lazy val messagerActor = TestProbe()
 
     mockedUserSessionDAO.getValidSessionAndRenew(sessionId) returns
-      Some(UserSession(sessionId, userId, applicationId))
+      Some(UserSession(sessionId, userId, deviceId))
 
     mockedClientApplicationDAO.findByUserId(userId) returns
-      Seq(ClientApplication(applicationId, userId, "xxxx", active= true))
+      Seq(ClientApplication(deviceId, userId, "xxxx", active= true))
 
     val server = new RestServiceWithMockPersistence(
       servicePort, mockedBrandDAO, mockedHintDAO, mockedLogDAO,

@@ -43,22 +43,22 @@ class AccountServiceSpec
         mockedClientApplicationDAO.getById(any[UUID]) returns None
         mockedUserAccountDAO.findByAnyOf(any[Option[UUID]], any[Option[String]], any[Option[String]]) returns None
 
-        val applicationId = randomUUID()
+        val deviceId = randomUUID()
         val msisdn = "00123123123"
         val registrationResponse = wait {
           pipeline {
-            Post(s"$serviceUrl/account", RegistrationRequest(applicationId, Some(msisdn), userType="CUSTOMER",None))
+            Post(s"$serviceUrl/account", RegistrationRequest(deviceId, Some(msisdn), userType="CUSTOMER",None))
           }
         }
 
-        registrationResponse shouldEqual RegistrationResponse(applicationId, "msisdn", msisdn)
+        registrationResponse shouldEqual RegistrationResponse(deviceId, "msisdn", msisdn)
 
         there was one(mockedUserAccountDAO).insertNew(
           userAccount = argThat(haveMsisdn(msisdn)),
           firstApplication = argThat(
             beInactive and
               haveActivationCode and
-              beAnAppWithId(applicationId))
+              beAnAppWithId(deviceId))
         )
       }
 
@@ -87,18 +87,18 @@ class AccountServiceSpec
         any[Option[UUID]], any[Option[String]], any[Option[String]]
       ) returns Some(userAccount)
 
-      val applicationId = randomUUID()
+      val deviceId = randomUUID()
 
       val registrationResponse = wait {
         pipeline {
-          Post(s"$serviceUrl/account/application", AddApplicationRequest(applicationId, Some(msisdn), "CUSTOMER", None))
+          Post(s"$serviceUrl/account/application", AddApplicationRequest(deviceId, Some(msisdn), "CUSTOMER", None))
         }
       }
 
-      registrationResponse shouldEqual AddApplicationResponse(applicationId, "msisdn", msisdn)
+      registrationResponse shouldEqual AddApplicationResponse(deviceId, "msisdn", msisdn)
 
       there was no(mockedUserAccountDAO).insertNew(any[UserAccount], any[ClientApplication])
-      there was one(mockedClientApplicationDAO).insertNew(ClientApplication(applicationId, userAccount.id, anyString))
+      there was one(mockedClientApplicationDAO).insertNew(ClientApplication(deviceId, userAccount.id, anyString))
     }
   }
 

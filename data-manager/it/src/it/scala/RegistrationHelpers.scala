@@ -14,7 +14,7 @@ import parallelai.wallet.util.SprayJsonSupport._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-case class Registration(application: ApplicationID, pass: String, userId: UUID, sessionId: String)
+case class Registration(application: DeviceID, pass: String, userId: UUID, sessionId: String)
 
 /**
  * Created by pakkio on 13/02/2015.
@@ -23,7 +23,7 @@ trait RegistrationHelpers {
   this: ItEnvironment =>
 
   def RegisterAccount = {
-    val applicationId: ApplicationID = UUID.randomUUID()
+    val applicationId: DeviceID = UUID.randomUUID()
     val msisdn = generateMobile
     val email = generateEmail
 
@@ -49,7 +49,7 @@ trait RegistrationHelpers {
 
     val activationCode0 = ca.getById(r.application).get.activationCode
 
-    val applicationId: ApplicationID = UUID.randomUUID()
+    val applicationId: DeviceID = UUID.randomUUID()
 
     try {
       doResetApplication(r.application, r.userId)
@@ -73,7 +73,7 @@ trait RegistrationHelpers {
 
 
   //val pipeline = sendReceive ~> unmarshal[RegistrationResponse]
-  def doRegister(applicationId: ApplicationID, msisdn: String): Unit = {
+  def doRegister(applicationId: DeviceID, msisdn: String): Unit = {
 
     // execution context for futures
     val register: HttpRequest => Future[AddApplicationResponse] =
@@ -86,7 +86,7 @@ trait RegistrationHelpers {
     }
   }
 
-  def doValidate(applicationId: ApplicationID, activationCode: String, password: String): UUID = {
+  def doValidate(applicationId: DeviceID, activationCode: String, password: String): UUID = {
 
     // execution context for futures
     val validate: HttpRequest => Future[RegistrationValidationResponse] =
@@ -100,7 +100,7 @@ trait RegistrationHelpers {
     validationResponse.userID
   }
 
-  def doLogin(applicationId: ApplicationID, userId: UUID, password: String): String = {
+  def doLogin(applicationId: DeviceID, userId: UUID, password: String): String = {
 
     // execution context for futures
     val login = sendReceive ~> unmarshal[APISessionResponse]
@@ -114,7 +114,7 @@ trait RegistrationHelpers {
     loginResponse.sessionId
   }
 
-  def doResetApplication(applicationId: ApplicationID, userId: UUID): Unit = {
+  def doResetApplication(applicationId: DeviceID, userId: UUID): Unit = {
     val reset = sendReceive ~> unmarshal[RegistrationResponse]
 
     val resetResponse = wait {

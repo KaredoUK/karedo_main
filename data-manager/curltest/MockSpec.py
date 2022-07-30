@@ -11,24 +11,24 @@ brandId=newUUID()
 advertId=newUUID()
 userId=newUUID()
 offerId=newUUID()
-applicationId=newUUID()
+deviceId=newUUID()
 sessionId=newUUID()
 
 @pytest.mark.run(order=0)
 def test00_CreateAndValidateUser():
-    global applicationId,userId,sessionId
+    global deviceId,userId,sessionId
     title("Setting up an initial user...")
 
-    r = post("account", {"applicationId": applicationId, "msisdn": "0044712345678", "email": "pakkio@gmail.com"})
+    r = post("account", {"deviceId": deviceId, "msisdn": "0044712345678", "email": "pakkio@gmail.com"})
     assert r.status_code == HTTP_OK
     doc = ua.find_one({"email": "pakkio@gmail.com"})
     activationCode = doc["applications"][0]["activationCode"]
-    r = post("account/application/validation", {"applicationId": applicationId, "validationCode": activationCode, "password":"PASS"})
+    r = post("account/application/validation", {"deviceId": deviceId, "validationCode": activationCode, "password":"PASS"})
     assert r.status_code == HTTP_OK
     js = json.loads(r.text)
     userId = js["userID"]
 
-    r = post("account/"+userId+"/application/"+applicationId+"/login",
+    r = post("account/"+userId+"/application/"+deviceId+"/login",
              {"password" : "PASS"})
     assert r.status_code == HTTP_OK
     js = json.loads(r.text)

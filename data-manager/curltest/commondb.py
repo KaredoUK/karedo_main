@@ -27,7 +27,7 @@ def clearDB():
     client.drop_database(MongoDb)
 
 userId=newUUID()
-applicationId=newUUID()
+deviceId=newUUID()
 
 
 db = client[MongoDb]
