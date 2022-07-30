@@ -90,5 +90,7 @@ ProcessRunnerPlugin.processRunnerSettings ++ Seq(
   processInfoList in ProcessRunner := Seq(Build.restapi)
 )
 
+Twirl.settings
+
 
 
