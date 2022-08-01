@@ -64,6 +64,8 @@
   <classpathentry kind="lib" path="/Users/pakkio/.ivy2/cache/net.databinder.dispatch/dispatch-core_2.11/jars/dispatch-core_2.11-0.11.2.jar"/>
   <classpathentry kind="lib" path="/Users/pakkio/.ivy2/cache/com.ning/async-http-client/jars/async-http-client-1.8.10.jar"/>
   <classpathentry kind="lib" path="/Users/pakkio/.ivy2/cache/io.netty/netty/bundles/netty-3.9.2.Final.jar"/>
+  <classpathentry kind="lib" path="/Users/pakkio/.ivy2/cache/io.spray/twirl-api_2.11/jars/twirl-api_2.11-0.7.0.jar"/>
+  <classpathentry kind="lib" path="/Users/pakkio/.ivy2/cache/commons-lang/commons-lang/jars/commons-lang-2.6.jar"/>
   <classpathentry kind="lib" path="/Users/pakkio/.ivy2/cache/org.specs2/specs2_2.11/jars/specs2_2.11-2.3.13.jar"/>
   <classpathentry kind="lib" path="/Users/pakkio/.ivy2/cache/junit/junit/jars/junit-4.11.jar"/>
   <classpathentry kind="lib" path="/Users/pakkio/.ivy2/cache/org.hamcrest/hamcrest-core/jars/hamcrest-core-1.3.jar"/>
@@ -95,7 +97,6 @@
   <classpathentry kind="lib" path="/Users/pakkio/.ivy2/cache/log4j/log4j/bundles/log4j-1.2.16.jar"/>
   <classpathentry kind="lib" path="/Users/pakkio/.ivy2/cache/com.jayway.jsonpath/json-path/bundles/json-path-0.8.1.jar"/>
   <classpathentry kind="lib" path="/Users/pakkio/.ivy2/cache/net.minidev/json-smart/jars/json-smart-1.1.1.jar"/>
-  <classpathentry kind="lib" path="/Users/pakkio/.ivy2/cache/commons-lang/commons-lang/jars/commons-lang-2.6.jar"/>
   <classpathentry kind="lib" path="/Users/pakkio/.ivy2/cache/org.apache.httpcomponents/httpclient/jars/httpclient-4.2.3.jar"/>
   <classpathentry kind="lib" path="/Users/pakkio/.ivy2/cache/org.apache.httpcomponents/httpcore/jars/httpcore-4.2.2.jar"/>
   <classpathentry kind="lib" path="/Users/pakkio/.ivy2/cache/commons-logging/commons-logging/jars/commons-logging-1.1.1.jar"/>

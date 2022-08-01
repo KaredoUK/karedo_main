@@ -96,6 +96,8 @@ object RegistrationActor {
   def newActivationCode: String = {
     RandomStringUtils.randomAlphanumeric(6)
   }
+
+  def newPassword: String = RandomStringUtils.randomAlphanumeric(8)
 }
 
 /**
@@ -140,6 +142,49 @@ class RegistrationActor( messengerActor: ActorRef)
     }
     case loginRequest: LoginRequest => replyToSender {
       loginUser(loginRequest)
+    }
+    case confirmActivationReq: RegistrationConfirmActivationResponse => replyToSender {
+      confirmActivation(confirmActivationReq.deviceId,confirmActivationReq.userId)
+    }
+  }
+
+  def confirmActivation(deviceId: DeviceID, userId: UserID): ResponseWithFailure[RegistrationError,RegistrationConfirmActivationResponse] = {
+    wrapLog("ConfirmActivation",s"deviceId: $deviceId, userId: $userId") {
+      val clientAppOption = clientApplicationDAO.getById(deviceId)
+
+      clientAppOption match {
+        case None => FailureResponse(InvalidRegistrationRequest(s"Unable to find client application with devideID '$deviceId'"))
+
+        case Some(clientApplication) =>
+          val userOpt = userAccountDAO.getByApplicationId(deviceId)
+
+          userOpt map { user =>
+            def saveValidationInfo = {
+
+              clientApplicationDAO.update(clientApplication copy (active = true))
+              userAccountDAO.setActive(user.id)
+              val password: String = newPassword
+              userAccountDAO.setPassword(user.id,password)
+
+              SuccessResponse(RegistrationConfirmActivationResponse(deviceId, user.id, password))
+
+            }
+
+            user.password match {
+              case Some(_) =>
+                val err = "Password already set. need a reset probably to allow for a re-registering"
+                log.warning(err)
+                FailureResponse(InvalidValidationRequest(err))
+              case None =>
+                log.warning("Generating a new password and returning it")
+                saveValidationInfo
+            }
+          } getOrElse {
+            FailureResponse(InternalRegistrationError(new IllegalStateException
+            (s"Unable to find user for valid application ID '${deviceId}'")))
+          }
+
+      }
     }
   }
 
@@ -315,17 +360,26 @@ class RegistrationActor( messengerActor: ActorRef)
 
     wrapLog("activateApplication",(deviceId, validationCode)) {
 
-      val url = s"$uiServerAddress/confirmActivation?deviceId=$deviceId&activationCode=$validationCode"
+      val url = s"$uiServerAddress/account/confirmActivation?deviceId=$deviceId&activationCode=$validationCode"
 
       val emailActivationMessage = core.html.activation(validationCode,url).toString
       val smsActivationMessage = core.txt.activation(validationCode,url).toString
       val emailTitle = core.txt.activationEmailTitle.toString
 
-
-        messengerActor ! SendMessage(URI.create(s"sms:${userContacts.msisdn.get}"), smsActivationMessage)
-        SuccessResponse(RegistrationResponse(deviceId, "msisdn", userContacts.msisdn.get))
-        messengerActor ! SendMessage(URI.create(s"mailto:${userContacts.email.get}"), emailActivationMessage, emailTitle)
-        SuccessResponse(RegistrationResponse(deviceId, "email", userContacts.email.get))
+      
+      val smspart = userContacts.msisdn map { x: String =>
+        messengerActor ! SendMessage(URI.create(s"sms:$x"), smsActivationMessage)
+        s"sms sent to $x "
+      }
+      val emailpart = userContacts.email map { x: String =>
+        messengerActor ! SendMessage(URI.create(s"mailto:$x"), emailActivationMessage, emailTitle)
+        s"email sent to $x"
+      }
+      val channel = (smspart,emailpart) match {
+        case (Some(_),_) => "sms"
+        case _ => "email"
+      }
+      SuccessResponse(RegistrationResponse(deviceId, channel, s"${smspart.getOrElse("")}${emailpart.getOrElse("")}"))
     }
 
 

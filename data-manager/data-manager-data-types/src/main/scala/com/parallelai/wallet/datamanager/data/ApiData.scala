@@ -78,6 +78,18 @@ case class RegistrationValidation(
                                    password: Option[String] = None)
   extends ApiDataRequest
 
+case class RegistrationConfirmActivation(
+                                          deviceId: DeviceID,
+                                          userId: UserID
+                                        )
+case class RegistrationConfirmActivationResponse(
+                                          deviceId: DeviceID,
+                                          userId: UserID,
+                                          password: String
+                                        )
+
+
+
 @ApiModel(description = "Data returned on first application (or reset of application)")
 case class RegistrationResponse(
                                  @(ApiModelProperty@field)(value = "unique identifier for the application")
