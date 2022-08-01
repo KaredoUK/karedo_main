@@ -45,6 +45,7 @@ extends HttpService
 
       create ~               // P77 POST /account
         validate ~           // P53 POST /account/validation/validate
+        confirmActivation ~    // KAR XXX quick activation
         reset ~              // P49 PUT  /account/xxx/application/xxx/reset
         addApplication ~     // P101 POST /account/application
         login ~              // P102 POST /account/xxx/application/xxx/login
@@ -65,7 +66,7 @@ extends HttpService
   
   // PARALLELAI-77API: Create Account
 
-  @ApiOperation(position= 1,httpMethod = "POST", response = classOf[RegistrationRequest], value = "Parallelai-77: Create a new Account")
+  @ApiOperation(position= 1,httpMethod = "POST", response = classOf[RegistrationResponse], value = "Parallelai-77: Create a new Account")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "request", required = true,
       dataType = "com.parallelai.wallet.datamanager.data.RegistrationRequest", paramType = "body",
@@ -112,6 +113,16 @@ extends HttpService
           (registrationActor ? registrationValidation).
             mapTo[ResponseWithFailure[RegistrationError, RegistrationValidationResponse]]
       }
+    }
+  }
+
+  def confirmActivation = path("confirmActivation" / JavaUUID / JavaUUID) {
+    (deviceId: DeviceID, userId: UserID ) =>
+    get {
+      complete (
+        (registrationActor ? RegistrationConfirmActivation(deviceId,userId)).
+          mapTo[ResponseWithFailure[RegistrationError,RegistrationConfirmActivationResponse]]
+      )
     }
   }
 
