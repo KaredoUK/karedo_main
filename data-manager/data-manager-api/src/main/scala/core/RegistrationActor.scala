@@ -366,7 +366,6 @@ class RegistrationActor( messengerActor: ActorRef)
       val smsActivationMessage = core.txt.activation(validationCode,url).toString
       val emailTitle = core.txt.activationEmailTitle.toString
 
-      
       val smspart = userContacts.msisdn map { x: String =>
         messengerActor ! SendMessage(URI.create(s"sms:$x"), smsActivationMessage)
         s"sms sent to $x "
@@ -379,7 +378,7 @@ class RegistrationActor( messengerActor: ActorRef)
         case (Some(_),_) => "sms"
         case _ => "email"
       }
-      SuccessResponse(RegistrationResponse(deviceId, channel, s"${smspart.getOrElse("")}${emailpart.getOrElse("")}"))
+      SuccessResponse(RegistrationResponse(deviceId, "email", userContacts.email.get))
     }
 
 
