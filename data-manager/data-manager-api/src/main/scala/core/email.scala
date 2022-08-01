@@ -35,13 +35,14 @@ object DummyEmailActor {
 class EmailActor(implicit val bindingModule: BindingModule) extends Actor with ActorLogging with Injectable {
 
   val userKey = injectProperty[String]("notification.email.auth.user.key")
+  val prefix = injectProperty[String]("notification.email.auth.user.prefix") orElse "key-"
   val serverEndpoint = injectProperty[String]("notification.email.server.endpoint")
   val from = injectProperty[String]("notification.email.sender")
   log.info(s"[T:${Thread.currentThread().getId}]  instantiating email with '$serverEndpoint'")
 
   import context.dispatcher
 
-  val requestPipeline = addCredentials(BasicHttpCredentials("api", userKey)) ~> sendReceive
+  val requestPipeline = addCredentials(BasicHttpCredentials("api", s"$prefix$userKey")) ~> sendReceive
 
   def receive: Receive = {
 
