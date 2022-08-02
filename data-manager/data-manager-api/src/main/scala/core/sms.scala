@@ -58,7 +58,7 @@ class SMSActor(implicit val bindingModule: BindingModule) extends Actor with Act
   val serverEndpoint = injectProperty[String]("notification.sms.server.endpoint")
   val from = injectProperty[String]("notification.sms.sender")
 
-  log.info(s"[SMS] [T:${Thread.currentThread().getId}]  instantiating SMS with '$serverEndpoint' and accessKey '${accessKey.substring(0,5)}'")
+  log.info(s"[SMS] [T:${Thread.currentThread().getId}]  instantiating SMS with '$serverEndpoint' and accessKey '${accessKey}'")
 
   import context.dispatcher
 
