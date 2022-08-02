@@ -54,7 +54,7 @@ trait EmailTrait {
             "from" -> from,
             "to" -> to,
             "subject" -> subject,
-            "text" -> body
+            "html" -> body
           )
         )
       )

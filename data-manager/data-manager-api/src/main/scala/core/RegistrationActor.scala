@@ -364,7 +364,7 @@ class RegistrationActor( messengerActor: ActorRef)
 
       val emailActivationMessage = core.html.activation(validationCode,url).toString
       val smsActivationMessage = core.txt.activation(validationCode,url).toString
-      val emailTitle = core.txt.activationEmailTitle.toString
+      val emailTitle = core.txt.activationEmailTitle().toString
 
       val smspart = userContacts.msisdn map { x: String =>
         messengerActor ! SendMessage(URI.create(s"sms:$x"), smsActivationMessage)
