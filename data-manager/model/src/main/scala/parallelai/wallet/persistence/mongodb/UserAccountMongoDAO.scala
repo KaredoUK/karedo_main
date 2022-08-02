@@ -16,6 +16,8 @@ import com.novus.salat.global._
 import userAccountMongoUtils._
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 
 object userAccountMongoUtils {
@@ -33,6 +35,9 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule)
   with MongoConnection
   with Injectable
 {
+
+  val logger = LoggerFactory.getLogger(classOf[UserAccountMongoDAO])
+  logger.info("setting up UserAccountMongoDAO")
   implicit def mongoUserAccountToUserAccount(mongoUserAccount: MongoUserAccount): UserAccount = mongoUserAccount.toUserAccount
 
   implicit def mongoUserAccountOptionToUserAccountOption(mongoUserAccount: Option[MongoUserAccount]): Option[UserAccount] = mongoUserAccount map {
@@ -43,28 +48,34 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule)
   //val brandDao = new SalatDAO[Brand, UUID](collection = db("Brand")) {}
 
   override def getById(userId: UUID): Option[UserAccount] = {
+    logger.info(s"getById $userId")
     val dbuser=dao.findOneById(userId)
+    logger.info(s"getById returning $dbuser")
+
     dbuser
   }
 
   override def consume(userId: UUID, points: KaredoPoints) : Unit = {
+    logger.info(s"update $userId removing points: $points")
     dao.update(
       byId(userId),
       $inc("totalPoints" -> -points)
     )
   }
 
-  override def update(userAccount: UserAccount): Unit =
-      dao.update(
-        byId(userAccount.id),
-        $set(
-          "active" -> userAccount.active,
-          "email" -> userAccount.email,
-          "msisdn" -> userAccount.msisdn,
-          "personalInfo" -> grater[UserPersonalInfo].asDBObject(userAccount.personalInfo),
-          "settings" -> grater[AccountSettings].asDBObject(userAccount.settings)
-        )
+  override def update(userAccount: UserAccount): Unit = {
+    logger.info(s"updating userAccount: $userAccount")
+    dao.update(
+      byId(userAccount.id),
+      $set(
+        "active" -> userAccount.active,
+        "email" -> userAccount.email,
+        "msisdn" -> userAccount.msisdn,
+        "personalInfo" -> grater[UserPersonalInfo].asDBObject(userAccount.personalInfo),
+        "settings" -> grater[AccountSettings].asDBObject(userAccount.settings)
       )
+    )
+  }
 
   def updateSubInfo(id: UUID, userInfo: UserPersonalInfo, personalSettings: AccountSettings): Unit =
       dao.update(
@@ -87,20 +98,24 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule)
       )
 
 
-  override def insertNew(userAccount: UserAccount, firstApplication: ClientApplication): Unit =
-      dao.insert(
-        MongoUserAccount(userAccount.id, userAccount.msisdn, userAccount.email, userAccount.userType,
-          userAccount.personalInfo, userAccount.settings, userAccount.password, userAccount.active, userAccount.totalPoints,
-          List(),
-          List(
-            MongoUserApplicationInfo(firstApplication.id, firstApplication.activationCode, firstApplication.active)
-          )
+  override def insertNew(userAccount: UserAccount, firstApplication: ClientApplication): Unit = {
+    logger.info(s"insertNew $userAccount, firstApplication: $firstApplication")
+    dao.insert(
+      MongoUserAccount(userAccount.id, userAccount.msisdn, userAccount.email, userAccount.userType,
+        userAccount.personalInfo, userAccount.settings, userAccount.password, userAccount.active, userAccount.totalPoints,
+        List(),
+        List(
+          MongoUserApplicationInfo(firstApplication.id, firstApplication.activationCode, firstApplication.active)
         )
       )
+    )
+  }
 
 
 
   override def addPoints(userId: UUID, points: KaredoPoints): Option[UserAccountTotalPoints] = {
+    logger.info(s"addPoints $userId, points: $points")
+
     val query: DBObject = byId(userId)
     val updateQuery: DBObject = MongoDBObject("$inc" -> MongoDBObject("totalPoints" -> points))
     val fields: DBObject = MongoDBObject("totalPoints" -> "1")
@@ -120,14 +135,6 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule)
 
 
 
-/*
-  @param query query to match
-  * @param fields fields to be returned
-    * @param sort sort to apply before picking first document
-  * @param remove if true, document found will be removed
-  * @param update update to apply
-  * @param returnNew if true, the updated document is returned, otherwise the old document is returned (or it would be lost forever)
-  * @param upsert do upsert*/
 
 
 
@@ -141,7 +148,9 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule)
       )
 
   override def getByApplicationId(applicationId: UUID, mustBeActive: Boolean): Option[UserAccount] = {
-      val query = if (mustBeActive) {
+    logger.info(s"getByApplicationId $applicationId, mustBeActive: $mustBeActive")
+
+    val query = if (mustBeActive) {
         $and(byApplicationId(applicationId), MongoDBObject("active" -> true))
       } else {
         byApplicationId(applicationId)
@@ -151,7 +160,9 @@ class UserAccountMongoDAO(implicit val bindingModule: BindingModule)
     }
 
   override def findByAnyOf(applicationId: Option[UUID], msisdn: Option[String], email: Option[String]): Option[UserAccount] = {
-      val byAppIdOpt = applicationId map { value => byApplicationId(value)}
+    logger.info(s"findByAnyOf  applicationId: $applicationId, msisdn: $msisdn, email: $email")
+
+    val byAppIdOpt = applicationId map { value => byApplicationId(value)}
       val byMsisdnOpt = msisdn map { value => MongoDBObject("msisdn" -> value)}
       val byEmailOpt = email map { value => MongoDBObject("email" -> value)}
 
@@ -276,15 +287,20 @@ class ClientApplicationMongoDAO(implicit val bindingModule: BindingModule)
   with MongoConnection
   with Injectable
 {
+  val logger = LoggerFactory.getLogger(classOf[ClientApplicationMongoDAO])
   val dao = new SalatDAO[MongoUserAccount, UUID](collection = db("UserAccount")) {}
 
-  override def getById(applicationId: UUID): Option[ClientApplication] =
-      dao.findOne(byApplicationId(applicationId)) flatMap {
-        account =>
-          account.applications.find(_.id == applicationId).map {
-            _.toClientApplication(account.id)
-          }
-      }
+  override def getById(applicationId: UUID): Option[ClientApplication] = {
+    logger.info(s"getByApplicationId: $applicationId")
+    val ret = dao.findOne(byApplicationId(applicationId)) flatMap {
+      account =>
+        account.applications.find(_.id == applicationId).map {
+          _.toClientApplication(account.id)
+        }
+    }
+    logger.info(s"returning $ret")
+    ret
+  }
 
   override def findByUserId(userId: UUID): Seq[ClientApplication] =
       dao.projections[MongoUserApplicationInfo](byId(userId), "applications") map {
