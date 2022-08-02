@@ -24,7 +24,7 @@ class DummyEmailActor(implicit val bindingModule: BindingModule) extends Actor w
 
   def receive: Receive = {
     case request@SendEmail(to, body, subject, retryCount) =>
-      log.debug(s"[T:${Thread.currentThread().getId}] (((((Dummy Email not sent to $to, subject: $subject, body: $body)))))")
+      log.info(s"[DUMMYEMAIL] [T:${Thread.currentThread().getId}] (Email should be sent to $to, subject: $subject, body: $body)")
   }
 }
 
@@ -57,7 +57,7 @@ class EmailActor(implicit val bindingModule: BindingModule) extends Actor with A
 
   def sendEmail(to: String, body: String, subject: String)(implicit actorRefFactory: ActorRefFactory): Future[Unit] = {
 
-    log.debug(s"======> actual sending email to $to")
+    log.info(s"[EMAIL] Sending email endpoint: $serverEndpoint from $from to $to subject $subject")
     requestPipeline {
       Post(
         serverEndpoint,
@@ -72,6 +72,7 @@ class EmailActor(implicit val bindingModule: BindingModule) extends Actor with A
       )
     } map { httpResponse: HttpResponse =>
       if (httpResponse.status.isFailure) {
+        log.info(s"[EMAIL] Got an error response is ${httpResponse.entity.asString}")
         throw new IOException(s"Request failed for reason ${httpResponse.status.value}:${httpResponse.status.defaultMessage}")
       } else {
         ()

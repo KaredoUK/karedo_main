@@ -9,7 +9,7 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>log/akka1.log</file>
+        <file>log/karedo.log</file>
         <append>false</append>
         <encoder>
             <pattern>%d %-5level [%thread] %X{akkaSource} %logger{1} - %msg%n</pattern>
@@ -18,7 +18,7 @@
 
     <logger name="akka" level="INFO" />
 
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
     </root>

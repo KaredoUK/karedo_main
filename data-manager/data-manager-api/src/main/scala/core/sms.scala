@@ -37,10 +37,10 @@ import SMSActor._
 // used for tests
 class DummySMSActor(implicit val bindingModule: BindingModule) extends Actor with ActorLogging with Injectable {
 
-  log.info(s"[T:${Thread.currentThread().getId}]  instantiating DUMMY SMSActor")
+  log.info(s"[DUMMYSMS] [T:${Thread.currentThread().getId}]  instantiating DUMMY SMSActor")
   def receive: Receive = {
     case request @ SendSMS(number, body, retryCount) =>
-      log.info(s"(((((Dummy sending sms to: $number, body: $body)))))")
+      log.info(s"[DUMMYSMS] (sms to: $number, body: $body)")
   }
 }
 object DummySMSActor {
@@ -58,7 +58,7 @@ class SMSActor(implicit val bindingModule: BindingModule) extends Actor with Act
   val serverEndpoint = injectProperty[String]("notification.sms.server.endpoint")
   val from = injectProperty[String]("notification.sms.sender")
 
-  log.info(s"[T:${Thread.currentThread().getId}]  instantiating SMS with '$serverEndpoint' and accessKey '${accessKey.substring(0,5)}'")
+  log.info(s"[SMS] [T:${Thread.currentThread().getId}]  instantiating SMS with '$serverEndpoint' and accessKey '${accessKey.substring(0,5)}'")
 
   import context.dispatcher
 
@@ -82,16 +82,17 @@ class SMSActor(implicit val bindingModule: BindingModule) extends Actor with Act
   def sendSMS(to: String, body: String): Future[Unit] = {
     implicit val jsonSMSRequest = jsonFormat3(SMSRequest)
 
-    log.debug(s"=====> Actual sending sms to $to")
+    val msisdn: String = normaliseMsisdn(to)
+    log.debug(s"[SMS] Sending sms serverEndpoint: $serverEndpoint from: $from to: $msisdn body: $body")
     pipeline {
       Post(
-        Uri(serverEndpoint), SMSRequest(normaliseMsisdn(to), from, body))
+        Uri(serverEndpoint), SMSRequest(msisdn, from, body))
     } map { httpResponse: HttpResponse =>
       if (httpResponse.status.isFailure) {
         throw new IOException(s"Request failed for reason ${httpResponse.status.value}:${httpResponse.status.defaultMessage}")
 
       } else {
-        log.info(s"Sent a sms, response from service is $httpResponse")
+        log.error(s"[SMS] Sent a sms, response from service is $httpResponse")
       }
     }
 
