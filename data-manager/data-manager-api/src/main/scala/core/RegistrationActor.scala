@@ -123,7 +123,7 @@ class RegistrationActor( messengerActor: ActorRef)
   // core.WrapLog trait use this for logging purposes
   override val log=context.system.log
 
-  val uiServerAddress = injectProperty[String]("ui.web.server.address")
+  val uiServerAddress = injectProperty[String]("service.url")+":"+injectProperty[String]("service.port")
 
   // notice that we don't actually perform any DB operations.
   // that's for another template
@@ -360,7 +360,7 @@ class RegistrationActor( messengerActor: ActorRef)
 
     wrapLog("activateApplication",(deviceId, validationCode)) {
 
-      val url = s"$uiServerAddress/account/confirmActivation?deviceId=$deviceId&activationCode=$validationCode"
+      val url = s"http://$uiServerAddress/account/confirmActivation?deviceId=$deviceId&accountId=$accountId"
 
       val emailActivationMessage = core.html.activation(validationCode,url).toString
       val smsActivationMessage = core.txt.activation(validationCode,url).toString

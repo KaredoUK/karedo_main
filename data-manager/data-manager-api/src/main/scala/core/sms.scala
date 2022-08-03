@@ -81,7 +81,7 @@ trait SMSTrait {
         throw new IOException(err)
 
       } else {
-        logger.error(s"[SMS] Sent a sms, response from service is $httpResponse")
+        logger.info(s"[SMS] Sent a sms, response from service is $httpResponse")
       }
     }
 

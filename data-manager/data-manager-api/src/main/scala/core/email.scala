@@ -45,7 +45,7 @@ trait EmailTrait {
     import scala.concurrent.ExecutionContext.Implicits.global
     val requestPipeline = addCredentials(BasicHttpCredentials("api", s"$prefix$userKey")) ~> sendReceive
 
-    logger.info(s"[EMAIL] Sending email endpoint: $serverEndpoint from $from to $to subject $subject")
+    logger.info(s"[EMAIL] Sending email endpoint: $serverEndpoint from $from to $to subject $subject body is $body")
     requestPipeline {
       Post(
         serverEndpoint,
@@ -60,10 +60,10 @@ trait EmailTrait {
       )
     } map { httpResponse: HttpResponse =>
       if (httpResponse.status.isFailure) {
-        logger.info(s"[EMAIL] Got an error response is ${httpResponse.entity.asString}")
+        logger.error(s"[EMAIL] Got an error response is ${httpResponse.entity.asString}")
         throw new IOException(s"Request failed for reason ${httpResponse.status.value}:${httpResponse.status.defaultMessage}")
       } else {
-        ()
+        (logger.info(s"[EMAIL] Email sent correctly answer is ${httpResponse.entity}"))
       }
     }
   }
