@@ -28,7 +28,9 @@ object Common {
   val jodaTime = Seq( "joda-time" % "joda-time" % "2.0", "org.joda" % "joda-convert" % "1.2" )
 
   val specs2 = "org.specs2" %% "specs2" % "2.3.13"
-  val sprayJson = "io.spray" %% "spray-json" % sprayJsonVersion
+  val sprayJson = "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaVersion,
+
+  //val sprayJson = "io.spray" %% "spray-json" % sprayJsonVersion
   val sprayClient = "io.spray" %% "spray-client" % sprayVersion
   val spraySwagger = "com.gettyimages" %% "spray-swagger" % "0.5.1"
   val subcutExt = "com.pragmasoft" %% "subcut_ext" % "2.0" exclude("org.scala-lang", "scala-compiler")
