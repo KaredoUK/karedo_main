@@ -9,7 +9,7 @@ from bson.codec_options import CodecOptions
 #Root = "http://api.karedo.co.uk:8080/"
 Root = ("http://" +
     os.getenv("KAREDO_PORT_8080_TCP_ADDR","localhost")+
-    ":"+os.getenv("KAREDO_PORT_8080_TCP_PORT","8090")+"/")
+    ":"+os.getenv("KAREDO_PORT_8080_TCP_PORT","9000")+"/")
     
 MongoHost = os.getenv("MONGO_PORT_27017_TCP_ADDR","localhost")
 MongoPort = os.getenv("MONGO_PORT_27017_TCP_PORT","12345")

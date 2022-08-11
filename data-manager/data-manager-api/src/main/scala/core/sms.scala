@@ -88,7 +88,7 @@ trait SMSTrait {
   }
 
 }
-object testSMS extends App {
+/*object testSMS extends App {
   val it = new SMSTrait {
     override val from: String = "Karedo"
     override val serverEndpoint: String = "https://rest.messagebird.com/messages"
@@ -98,7 +98,7 @@ object testSMS extends App {
 
   implicit val system = ActorSystem("demo")
   it.sendSMS("00393319345235","text of message")
-}
+}*/
 
 class SMSActor(implicit val bindingModule: BindingModule) extends Actor with SMSTrait with ActorLogging with Injectable {
   override val accessKey = injectProperty[String]("notification.sms.auth.accesskey")
