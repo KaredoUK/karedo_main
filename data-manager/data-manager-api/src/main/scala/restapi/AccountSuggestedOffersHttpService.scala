@@ -1,17 +1,14 @@
 package restapi
 
-import javax.ws.rs.Path
 
 import akka.util.Timeout
 import com.parallelai.wallet.datamanager.data._
-import com.wordnik.swagger.annotations.{ApiImplicitParams, ApiOperation, ApiResponses, _}
 import spray.http.StatusCodes
 import spray.routing._
 
 //import spray.http.Uri.Path
 
 // All APIs starting with /account go here
-@Api(position = 1, value = "/account", description = "Operations on the account")
 abstract class AccountSuggestedOffersHttpService
 
 
@@ -34,22 +31,6 @@ abstract class AccountSuggestedOffersHttpService
     }
 
 
-  @Path("/{account}/suggestedOffers")
-  @ApiOperation(position=1,httpMethod = "POST", response = classOf[AccountSuggestedOffersResponse],
-    value = "KAR-126: account deviceId, sessionId, accountId [PROTOTYPE]")
-  @ApiImplicitParams(Array(
-    new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
-      value = "UUID of user account"),
-    new ApiImplicitParam(
-      name = "ask for requested offers",
-      required = true,
-      dataType = "com.parallelai.wallet.datamanager.data.AccountSuggestedOffersRequest",
-      paramType = "body",
-      value = "identification parameters")
-  ))
-  @ApiResponses(Array(
-    new ApiResponse(code = 400, message = "Invalid Parameters")
-  ))
   def postAccount = corsFilter(List("*")){
     path(Segment / "suggestedOffers") {
 
@@ -98,11 +79,6 @@ abstract class AccountSuggestedOffersHttpService
 
   }
 
-  @Path("/options")
-  @ApiOperation(position = 2, httpMethod = "OPTIONS", response = classOf[String], value = "KAR- options implemented")
-  @ApiImplicitParams(Array())
-  @ApiResponses(Array(
-    new ApiResponse(code = 400, message = "Invalid Parameters")))
   def myOptions = corsFilter(List("*")) {
     path("options") {
       options {

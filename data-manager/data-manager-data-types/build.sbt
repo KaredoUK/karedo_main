@@ -5,8 +5,8 @@ Common.settings
 resolvers ++= Common.sprayResolvers
 
 libraryDependencies ++= Seq(
-  Common.sprayJson,
-  Common.spraySwagger
+  Common.sprayJson
+  //,Common.spraySwagger
 ) ++ Common.jodaTime
 
 scalacOptions ++= Seq(

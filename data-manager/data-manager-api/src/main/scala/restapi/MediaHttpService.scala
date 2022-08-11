@@ -26,7 +26,6 @@ import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol.addMediaRespon
 import com.parallelai.wallet.datamanager.data.ApiDataJsonProtocol.getMediaResponseJson
 import scala.util.{Success, Failure}
 import scala.concurrent.Future
-import com.wordnik.swagger.annotations._
 
 
 object MediaHttpService {
@@ -34,7 +33,6 @@ object MediaHttpService {
 }
 
 
-@Api(value = "/media", description = "Media Manager", position = 6)
 abstract class MediaHttpService (mediaActor: ActorRef,
     override protected val userAuthService: UserAuthService)
     (implicit executionContext: ExecutionContext)
@@ -50,18 +48,6 @@ abstract class MediaHttpService (mediaActor: ActorRef,
 
   implicit val timeout = Timeout(20.seconds)
 
-  @ApiOperation(httpMethod = "POST", response = classOf[AddMediaResponse],
-    value = "PARALLELAI-94: API: Upload Media File")
-  @ApiImplicitParams(Array(
-    new ApiImplicitParam(name = "media file to attach", required = true, dataType = "file", paramType = "body"),
-    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
-      value = "SessionId for authentication/authorization"),
-    new ApiImplicitParam(name = "X-Content-Type", required = true, dataType = "String", paramType = "header",
-      value = "ContentType")
-  ))
-  @ApiResponses(Array(
-    new ApiResponse(code = 400, message = "Invalid Content")
-  ))
   def routeput =
     path("media") {
       userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
@@ -98,18 +84,6 @@ abstract class MediaHttpService (mediaActor: ActorRef,
       }
     }
 
-  @ApiOperation(httpMethod = "GET", response = classOf[StatusResponse],
-    value = "PARALLELAI-97: API: Retrieve Media File")
-  @ApiImplicitParams(Array(
-    new ApiImplicitParam(name = "mediaId", required = true, dataType = "String", paramType = "path",
-      value = "The ID of the media to retrieve"),
-    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
-      value = "SessionId for authentication/authorization")
-  ))
-  @ApiResponses(Array(
-    new ApiResponse(code = 400, message = "Invalid Parameters"),
-    new ApiResponse(code = 404, message = "Not found")
-  ))
   def routeget = path("media" / Segment) { mediaId: String =>
     //userAuthorizedFor(isLoggedInUser)(executionContext) { userAuthContext =>
       get {

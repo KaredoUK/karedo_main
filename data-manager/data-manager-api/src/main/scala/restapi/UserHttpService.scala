@@ -1,8 +1,6 @@
 package restapi
 
-import javax.ws.rs.Path
 
-import com.wordnik.swagger.annotations._
 import core.OfferActor.OfferError
 import core.objAPI.APIError
 import restapi.security.AuthorizationSupport
@@ -21,7 +19,6 @@ import core.EditAccountActor._
 import java.util.UUID
 
 // All APIs starting with /account go here
-@Api(value = "/user", description = "user interactions.", position = 5)
 abstract class UserHttpService
 (
   protected val registrationActor: ActorRef,
@@ -48,17 +45,6 @@ extends HttpService
       
     }
 
-   @Path("/{account}/interaction/brand")
-  @ApiOperation(httpMethod = "POST", response = classOf[InteractionResponse],
-    value = "Parallelai-55: User interacting with brand")
-  @ApiImplicitParams(Array(
-    new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
-      value = "UUID of user interacting"),
-    new ApiImplicitParam(name = "interaction", required = true, dataType = "com.parallelai.wallet.datamanager.data.UserBrandInteraction", paramType = "body",
-      value = "interactionType VIEW/CLICK/LIKE/DISLIKE/SHARE"),
-    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
-          value = "SessionId for authentication/authorization")
-  ))
   def userBrandInteraction: Route =
 
   // PARALLELAI-55API: User Brand Interaction
@@ -79,17 +65,6 @@ extends HttpService
       }
 
     }
-  @Path("/{account}/interaction/offer")
-  @ApiOperation(httpMethod = "POST", response = classOf[InteractionResponse],
-    value = "Parallelai-55: User interacting with offer")
-  @ApiImplicitParams(Array(
-    new ApiImplicitParam(name = "account", required = true, dataType = "String", paramType = "path",
-      value = "UUID of user interacting"),
-    new ApiImplicitParam(name = "interaction", required = true, dataType="com.parallelai.wallet.datamanager.data.UserOfferInteraction", paramType = "body",
-      value = "interactionType"),
-    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
-          value = "SessionId for authentication/authorization")
-  ))
   def userOfferInteraction: Route =
 
   // PARALLELAI-107API: User Offer Interaction

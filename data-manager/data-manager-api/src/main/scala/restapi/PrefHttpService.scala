@@ -1,16 +1,13 @@
 package restapi
 
-import javax.ws.rs.Path
 
 import akka.util.Timeout
 import com.parallelai.wallet.datamanager.data._
-import com.wordnik.swagger.annotations.{ApiImplicitParams, ApiOperation, ApiResponses, _}
 import spray.routing._
 
 //import spray.http.Uri.Path
 
 // All APIs starting with /account go here
-@Api(position = 1, value = "/pref", description = "Operations on preferences")
 trait PrefHttpService
 
 
@@ -30,13 +27,6 @@ trait PrefHttpService
       prefNames
     }
 
-
-
-  @Path("/names")
-  @ApiOperation(position = 4, httpMethod = "GET", response = classOf[List[(String,String)]], value = "KAR-127 pref/names")
-  @ApiImplicitParams(Array())
-  @ApiResponses(Array(
-    new ApiResponse(code = 400, message = "Invalid Parameters")))
   def prefNames =
     path("names") {
       get {

@@ -1,7 +1,6 @@
 package restapi
 
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
-import com.gettyimages.spray.swagger.SwaggerHttpService
 import com.parallelai.wallet.datamanager.data._
 import core.security.UserAuthService
 import spray.http.StatusCodes._
@@ -86,56 +85,6 @@ class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route, doSwag
   //val bindAddress = injectOptionalProperty[String]("service.bindAddress") getOrElse "0.0.0.0"
 
 
-  lazy val swaggerRoutes = new SwaggerHttpService {
-    def actorRefFactory = context
-
-    def apiTypes = Seq(
-        typeOf[AccountHttpService]
-        ,typeOf[AccountSuggestedOffersHttpService]
-        ,typeOf[IntentHttpService]
-        ,typeOf[PrefHttpService]
-        ,typeOf[UserHttpService]
-        ,typeOf[MediaHttpService]
-        ,typeOf[BrandHttpService]
-        ,typeOf[OfferHttpService]
-        ,typeOf[SaleHttpService]
-        ,typeOf[MerchantHttpService]
-
-        )
-
-    def modelTypes =
-      Seq(
-        typeOf[RegistrationRequest]
-        ,typeOf[AdvertDetailResponse]
-        ,typeOf[AdvertDetailListResponse]
-        ,typeOf[AdvertSummaryResponse]
-        ,typeOf[AdvertDetailApi]
-        ,typeOf[SummaryImageApi]
-        ,typeOf[OfferResponse]
-        ,typeOf[KaredoSalesApi]
-        ,typeOf[RegistrationResponse]
-        ,typeOf[RegistrationValidation]
-        ,typeOf[RegistrationValidationResponse]
-        ,typeOf[AccountSuggestedOffersRequest]
-        ,typeOf[AccountSuggestedOffersResponse]
-      )
-
-
-    def apiVersion = getClass.getPackage.getImplementationVersion
-
-    def baseUrl = s"http://$serviceURL:$bindPort"
-
-    def specPath = "api"
-
-    def resourcePath = "api-docs"
-  }.routes ~ get {
-    pathPrefix("swagger") {
-      pathEndOrSingleSlash {
-        getFromResource("swagger/index.html")
-      }
-    } ~
-      getFromResourceDirectory("swagger")
-  }
 
 
   implicit val handler = ExceptionHandler {
@@ -173,9 +122,7 @@ class RoutedHttpService(serviceURL: String, bindPort: Int, routes: Route, doSwag
   }
   def routeWithLogging = logRequestResponse(myLog _)(routes)
 
-  def finalRoutes = if(doSwagger)
-    routeWithLogging ~ swaggerRoutes
-  else
+  def finalRoutes =
     routeWithLogging
 
   def receive: Receive =

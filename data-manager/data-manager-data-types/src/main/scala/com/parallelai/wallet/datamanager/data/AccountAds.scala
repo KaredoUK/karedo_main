@@ -1,6 +1,6 @@
 package com.parallelai.wallet.datamanager.data
 
-import com.wordnik.swagger.annotations.{ApiModel, ApiModelProperty}
+//import com.wordnik.swagger.annotations.{ApiModel, ApiModelProperty}
 import spray.json.DefaultJsonProtocol
 
 import scala.annotation.meta.field
@@ -9,21 +9,15 @@ import scala.annotation.meta.field
 trait AccountAds extends DefaultJsonProtocol {
 
 
-  @ApiModel(description = "Account suggested Offers (request)")
   case class AccountSuggestedOffersRequest
   (
-    @(ApiModelProperty@field)(value = "deviceId in md5 format")
     deviceId: String = "",
-    @(ApiModelProperty@field)(value = "session UUID as returned by previous calls")
     sessionId: String = "") extends ApiDataRequest
   implicit val accountGetadsRequest = jsonFormat2(AccountSuggestedOffersRequest)
 
-  @ApiModel(description = "Account suggested Offers (response)")
   case class AccountSuggestedOffersResponse
   (
-    @(ApiModelProperty@field)(value = "returned sessionId")
     sessionId: String = "",
-    @(ApiModelProperty@field)(value = "List of URL to ads")
     urls: List[String] = List()) extends ApiDataResponse
   implicit val accountGetadsResponse = jsonFormat2(AccountSuggestedOffersResponse)
 

@@ -1,17 +1,14 @@
 package restapi
 
-import javax.ws.rs.Path
 
 import akka.util.Timeout
 import com.parallelai.wallet.datamanager.data._
-import com.wordnik.swagger.annotations.{ApiImplicitParams, ApiOperation, ApiResponses, _}
 import spray.http.StatusCodes
 import spray.routing._
 
 //import spray.http.Uri.Path
 
 // All APIs starting with /account go here
-@Api(position = 1, value = "/intent", description = "Operations on the intent")
 trait IntentHttpService
 
 
@@ -31,11 +28,6 @@ trait IntentHttpService
       intentWhat
     }
 
-  @Path("/what")
-  @ApiOperation(position = 3, httpMethod = "GET", response = classOf[List[String]], value = "KAR-129 intent/what")
-  @ApiImplicitParams(Array())
-  @ApiResponses(Array(
-    new ApiResponse(code = 400, message = "Invalid Parameters")))
   def intentWhat =
     path("what") {
       get {

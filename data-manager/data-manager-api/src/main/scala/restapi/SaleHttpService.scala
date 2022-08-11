@@ -12,15 +12,12 @@ import akka.pattern.ask
 import restapi.security.AuthorizationSupport
 import core.security.UserAuthService
 import scala.concurrent.ExecutionContext
-import com.wordnik.swagger.annotations._
-import javax.ws.rs.Path
 import spray.routing.HttpService
 
 object SaleHttpService {
   val logger = Logger("SaleService")
 }
 
-@Api(value = "/sale", description = "merchant sales", position = 4)
 abstract class SaleHttpService(offerActor: ActorRef,
      override protected val userAuthService: UserAuthService)
     (implicit executionContext: ExecutionContext)
@@ -41,21 +38,6 @@ abstract class SaleHttpService(offerActor: ActorRef,
       P118   // Complete Sale
   }
    
-  @Path("/{merchantId}/create")
-  @ApiOperation(position=1,httpMethod = "POST", response = classOf[SaleResponse], value = "Parallelai-116: creating a code for an ad(offer)")
-  @ApiImplicitParams(Array(
-    new ApiImplicitParam(name = "merchantId", required = true,
-      dataType = "String", paramType = "path",
-      value = "merchant creating this sale"),
-    new ApiImplicitParam(name = "", required = true,
-      dataType = "com.parallelai.wallet.datamanager.data.SaleCreate", paramType = "body",
-      value = "Sale to be created"),
-    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
-      value = "SessionId for authentication/authorization")
-  ))
-  @ApiResponses(Array(
-    new ApiResponse(code = 400, message = "Invalid Parameters")
-  ))
  def P116 : Route =
     path(JavaUUID / "create") { accountId =>
 
@@ -68,18 +50,6 @@ abstract class SaleHttpService(offerActor: ActorRef,
         }
       }
   
-  @Path("/{saleId}")
-  @ApiOperation(position=2,httpMethod = "GET", response = classOf[OfferResponse], value = "Parallelai-117: check if a code is valid")
-  @ApiImplicitParams(Array(
-    new ApiImplicitParam(name = "saleId", required = true,
-      dataType = "String", paramType = "path",
-      value = "SaleId to be read"),
-    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
-      value = "SessionId for authentication/authorization")
-  ))
-  @ApiResponses(Array(
-    new ApiResponse(code = 400, message = "Invalid Parameters")
-  ))
 def P117 : Route =
     path(JavaUUID) { saleId =>
 
@@ -91,18 +61,6 @@ def P117 : Route =
           }
         }
       }
-  @Path("/complete")
-  @ApiOperation(position=3,httpMethod = "POST", response = classOf[OfferResponse], value = "Parallelai-118: complete a sale")
-  @ApiImplicitParams(Array(
-    new ApiImplicitParam(name = "merchantId", required = true,
-      dataType = "com.parallelai.wallet.datamanager.data.OfferCode", paramType = "body",
-      value = "merchant creating this sale"),
-    new ApiImplicitParam(name = "X-Session-Id", required = true, dataType = "String", paramType = "header",
-      value = "SessionId for authentication/authorization")
-  ))
-  @ApiResponses(Array(
-    new ApiResponse(code = 400, message = "Invalid Parameters")
-  ))
 def P118 : Route =
     path("complete") {
 
