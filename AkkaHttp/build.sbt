@@ -7,7 +7,7 @@ scalaVersion := "2.11.8" //
 scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 
 libraryDependencies ++= {
-  val akkaVersion = "2.4.8" // akka 2.4 is supporting akkahttp
+  val akkaVersion = "2.4.10" // akka 2.4 is supporting akkahttp
 
   Seq(
     /*"com.typesafe.akka" %% "akka-actor" % akkaV, */
