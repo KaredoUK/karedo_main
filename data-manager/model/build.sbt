@@ -10,7 +10,7 @@ resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases/"
 
 libraryDependencies ++= Seq(
   Common.scalaAsync,
-  "com.novus"               %% "salat"                  % "1.9.8", // 1.9.9 doesnot work!
+  "com.novus"               %% "salat"                  % "1.9.9",
   "org.mongodb"             %% "casbah"                 % "2.7.1",
   Common.subcutExt,
 //  Common.walletCommon,
