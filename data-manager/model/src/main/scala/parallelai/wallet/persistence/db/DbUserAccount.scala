@@ -1,4 +1,4 @@
-package parallelai.wallet.persistence.db.ua
+package parallelai.wallet.persistence.db
 
 import java.util.UUID
 
@@ -36,3 +36,5 @@ case class UserAccount
   temp: Boolean = true,
   ts_created: DateTime = DateTime.now()
 )
+
+trait DbUserAccount extends DbMongoDAO[UserAccount]
