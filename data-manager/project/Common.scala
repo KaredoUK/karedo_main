@@ -20,14 +20,16 @@ object Common {
 
   val sprayResolvers = Seq (
     "spray repo" at "http://repo.spray.io",
-    "spray nightlies" at "http://nightlies.spray.io"
+    "spray nightlies" at "http://nightlies.spray.io",
+    "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
+
   )
 
   val conjarResolver = "conjars.org" at "http://conjars.org/repo"
 
   val jodaTime = Seq( "joda-time" % "joda-time" % "2.0", "org.joda" % "joda-convert" % "1.2" )
 
-  val specs2 = "org.specs2" %% "specs2" % "2.3.13"
+  val specs2 = "org.specs2" %% "specs2-core" % "3.0"
   val sprayJson = "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaVersion
 
   //val sprayJson = "io.spray" %% "spray-json" % sprayJsonVersion
