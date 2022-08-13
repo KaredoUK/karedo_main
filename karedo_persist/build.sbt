@@ -1,5 +1,5 @@
+organization := "co.uk.karedo"
 name := "karedo_persist"
-
 version := "0.1_DEV"
 
 scalaVersion := "2.11.8"
