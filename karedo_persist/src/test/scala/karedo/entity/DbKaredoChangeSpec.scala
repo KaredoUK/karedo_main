@@ -12,6 +12,7 @@ class DbKaredoChangeSpec
     with MongoTestUtils {
 
   val test = new DbKaredoChange {}
+  test.deleteAll()
 
   sequential
 

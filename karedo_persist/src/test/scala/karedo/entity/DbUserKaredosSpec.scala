@@ -12,6 +12,7 @@ class DbUserKaredosSpec
       with MongoTestUtils {
 
     val test = new DbUserKaredos {}
+    test.deleteAll()
 
     sequential
 

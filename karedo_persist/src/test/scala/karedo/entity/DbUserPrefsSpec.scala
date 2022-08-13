@@ -12,6 +12,7 @@ class DbUserPrefsSpec
       with MongoTestUtils {
 
     val test = new DbUserPrefs {}
+    test.deleteAll()
 
     sequential
 
