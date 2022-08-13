@@ -10,7 +10,6 @@ import salat.annotations._
 case class UserPref
 (
   code: String
-  , description: String
   , value: Int
 )
 
@@ -23,7 +22,7 @@ case class UserPrefs
   , ts_updated: DateTime = new DateTime(DateTimeZone.UTC).plusMinutes(20)
 )
 
-trait DbUserPrefs extends DbMongoDAO[UUID,Pref]
+trait DbUserPrefs extends DbMongoDAO[UUID,UserPrefs]
 
 
 

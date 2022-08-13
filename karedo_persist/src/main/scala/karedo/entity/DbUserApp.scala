@@ -8,6 +8,7 @@ import salat.annotations._
 
 case class UserApp
 (
+  // this is the application id which must be univoque
   @Key("_id") id: UUID = UUID.randomUUID()
   , account_id: UUID
   , map_confirmed: Boolean = false

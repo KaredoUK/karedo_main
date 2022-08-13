@@ -13,7 +13,7 @@ case class UserSession
   , account_id: UUID
   , ts_created: DateTime = new DateTime(DateTimeZone.UTC)
   , ts_expire: DateTime = new DateTime(DateTimeZone.UTC).plusMinutes(20)
-  , info: String
+  , info: Option[String] = None
 )
 
 trait DbUserSession extends DbMongoDAO[UUID,UserSession]

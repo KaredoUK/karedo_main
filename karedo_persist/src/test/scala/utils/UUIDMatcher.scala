@@ -1,4 +1,4 @@
-package karedo.persistence.mongodb
+package utils
 
 /**
  * Created on 21/03/2015.

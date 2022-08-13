@@ -1,12 +1,10 @@
-package karedo.persistence.mongodb
+package karedo.entity
 
-import java.util.UUID
-
-import karedo.entity._
 import org.specs2.matcher.{MatchResult, TryMatchers}
 import org.specs2.mutable.Specification
+import utils.MongoTestUtils
 
-class PrefSpec
+class DbPrefSpec
   extends Specification
     with TryMatchers
     with MongoTestUtils {
