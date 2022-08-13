@@ -2,174 +2,86 @@ package karedo.persistence.mongodb
 
 import java.util.UUID
 
+import karedo.entity.{DbUserAccount, Email, Mobile, UserAccount}
+import org.specs2.matcher.{MatchResult, TryMatchers}
+import org.specs2.mutable.Specification
+
 class UserAccountMongoDAOSpec
   extends Specification
-  with MongoTestUtils
-{
-  val accountDAO = new UserAccountMongoDAO()
-  val brandDAO = new BrandMongoDAO()
-  accountDAO.dao.collection.remove(MongoDBObject())
+    with TryMatchers
+    with MongoTestUtils {
 
-  val userAccount = UserAccount(UUID.randomUUID(), Some("12345678"), Some("user@email.com"))
-  val clientApplication = ClientApplication(UUID.randomUUID(), userAccount.id, "ACT_CODE")
-  val activeAccount = UserAccount(UUID.randomUUID(), Some("87654321"), Some("other.user@email.com"), active = true)
-  val activeClientApplication = ClientApplication(UUID.randomUUID(), activeAccount.id, "ACT_CODE_1", active = true)
+  val accountDAO = new DbUserAccount {}
+
+  val userAccount = UserAccount(info=Some("just for test"))
+  val filledUserAccount = UserAccount(
+
+    password=Some("hashed"),
+    mobile=List(Mobile(msisdn = "12345678"),Mobile(msisdn="44444")),
+    email=List(Email(address = "pakkio@gmail.com"),Email( address = "daisy@gmail.com")))
 
 
   sequential
 
-  def clean = {
-    accountDAO.dao.collection.remove(MongoDBObject())
 
-  }
+
+  accountDAO.deleteAll()
 
 
   "UserAccountMongoDAO" should {
 
     "Save and retrieve a user account" in {
-      accountDAO.insertNew(userAccount, clientApplication)
-      val findAfterInsert = accountDAO.getById(userAccount.id)
+      checkInsert(userAccount)
 
-      findAfterInsert shouldEqual Some(userAccount)
+      // must fail if using the same id twice
+      accountDAO.insertNew(userAccount.id,userAccount) must beFailedTry
+
     }
-
-
-    "Find account by application ID" in {
-      clean
-      accountDAO.insertNew(userAccount, clientApplication)
-      val findAfterInsert =accountDAO.getByApplicationId(clientApplication.id)
-
-      findAfterInsert shouldEqual Some(userAccount)
+    "Save and retrieve a user account with data" in {
+      checkInsert(filledUserAccount)
     }
-
-    "Don't find anything with wrong ID" in {
-      clean
-      accountDAO.insertNew(userAccount, clientApplication)
-
+    "should give error with invalid UUID" in {
       accountDAO.getById(UUID.randomUUID()) shouldEqual None
     }
+    "should update the data for this user" in {
+      accountDAO.getById(userAccount.id) match {
+        case Some(account) =>
+          val updated = account.copy(
+            mobile=List(Mobile(msisdn = "12345678")),
+            email=List(Email(address = "pluto@gmail.com")),
+            password=Some("Hash2")
+            )
 
-    "Not Find account using wrong application ID" in {
-      clean
-      accountDAO.insertNew(userAccount, clientApplication)
+          accountDAO.update(updated.id,updated) must beSuccessfulTry
+          val reread = accountDAO.getById(account.id)
+          reread match {
+            case Some(x) =>
+              x.id must beEqualTo(userAccount.id)
+              x.email(0).address must beEqualTo(updated.email(0).address)
+              x.password must beEqualTo(updated.password)
+              x.info must beEqualTo(userAccount.info)
+            case _ => fail()
+          }
 
-      accountDAO.getByApplicationId(UUID.randomUUID()) shouldEqual None
+        case _ => fail()
+      }
     }
-
-    "Find by email" in {
-      clean
-      accountDAO.insertNew(userAccount, clientApplication)
-      val findAfterInsert = accountDAO.getByEmail(userAccount.email.get)
-
-      findAfterInsert shouldEqual Some(userAccount)
+    "should be able to delete the user if needed" in {
+      val tobedeleted = UserAccount()
+      checkInsert(tobedeleted)
+      accountDAO.getById(tobedeleted.id) match {
+        case Some(account) =>
+          accountDAO.delete(account.id,account) must beSuccessfulTry
+          accountDAO.getById(account.id) must beEqualTo(None)
+        case _ => fail()
+      }
     }
+  }
+  def fail(): MatchResult[Any] = 1===0
 
-    "Find by email filtering with active status" in {
-      clean
-
-      accountDAO.insertNew(userAccount, clientApplication)
-      accountDAO.insertNew(activeAccount, activeClientApplication)
-
-      val inactive = accountDAO.getByEmail(userAccount.email.get, true)
-      val active = accountDAO.getByEmail(activeAccount.email.get, true)
-
-
-      inactive shouldEqual None
-      active shouldEqual Some(activeAccount)
-    }
-
-    "Find by application_id filtering with active status" in {
-      clean
-      accountDAO.insertNew(userAccount, clientApplication)
-      accountDAO.insertNew(activeAccount, activeClientApplication)
-      accountDAO.setPassword(activeAccount.id,"pass")
-
-      val inactive = accountDAO.getByApplicationId(clientApplication.id, true)
-      val active = accountDAO.getByApplicationId(activeClientApplication.id, true)
-      val checkPassword = accountDAO.checkPassword(activeAccount.id,"pass")
-      val wrongPassword = accountDAO.checkPassword(activeAccount.id,"pass2")
-
-      inactive shouldEqual None
-      val activeAddingPassword=activeAccount.copy(password=Some("pass"))
-      active shouldEqual Some(activeAddingPassword)
-
-      checkPassword should beTrue
-
-      wrongPassword should beFalse
-
-
-      // this previously failed
-      active.get.password should beEqualTo(Some("pass"))
-    }
-
-    "Find by any of id, email, application id" in {
-      clean
-      accountDAO.insertNew(userAccount, clientApplication)
-
-      val byMsisdn = accountDAO.findByAnyOf(Some(UUID.randomUUID()), userAccount.msisdn, None)
-      val byEmail = accountDAO.findByAnyOf(None, Some("-----"), userAccount.email)
-      val byApplicationId = accountDAO.findByAnyOf(Some(clientApplication.id), Some("____"), Some("____"))
-      val shouldntFind = accountDAO.findByAnyOf(Some(UUID.randomUUID()), Some("-----"), Some("notanemail"))
-
-      byMsisdn shouldEqual Some(userAccount)
-      byEmail shouldEqual Some(userAccount)
-      byApplicationId shouldEqual Some(userAccount)
-
-      shouldntFind shouldEqual None
-    }
-
-    "Find by any of id, email, application id, passing only one param" in {
-      clean
-      accountDAO.insertNew(userAccount, clientApplication)
-
-      val byMsisdn = accountDAO.findByAnyOf(None, userAccount.msisdn, None)
-      val byEmail = accountDAO.findByAnyOf(None, None, userAccount.email)
-      val byApplicationId = accountDAO.findByAnyOf(Some(clientApplication.id), None, None)
-      val shouldntFind = accountDAO.findByAnyOf(None, None, None)
-
-
-
-      byMsisdn shouldEqual Some(userAccount)
-      byEmail shouldEqual Some(userAccount)
-      byApplicationId shouldEqual Some(userAccount)
-      shouldntFind shouldEqual None
-    }
-
-    "Delete by ID" in {
-      clean
-      accountDAO.insertNew(userAccount, clientApplication)
-      accountDAO.delete(userAccount.id)
-
-      accountDAO.getById(userAccount.id) shouldEqual None
-    }
-
-    "Set account active" in {
-      accountDAO.insertNew(userAccount, clientApplication)
-      accountDAO.setActive(userAccount.id)
-
-      val activeStatus = accountDAO.getById(userAccount.id) map { _.active }
-
-
-      activeStatus shouldEqual Some(true)
-    }
-
-    "Add some subscribed brands and checks that if we act on one of them we get lastAction updated" in {
-      clean
-      accountDAO.insertNew(userAccount,clientApplication)
-      val Some(brand1), Some(brand2) =brandDAO.insertNew(Brand())
-
-      accountDAO.addBrand(userAccount.id,brand1)
-      accountDAO.addBrand(userAccount.id,brand2)
-
-      val Some(previous)=accountDAO.getBrand(userAccount.id,brand2)
-
-      accountDAO.updateBrandLastAction(userAccount.id,brand2)
-
-      val Some(updated)=accountDAO.getBrand(userAccount.id,brand2)
-
-      previous.lastAction must be_!=(updated.lastAction)
-    }
-
+  def checkInsert(ua:UserAccount): MatchResult[Any] = {
+    accountDAO.insertNew(ua.id,ua) must beSuccessfulTry
+    accountDAO.getById(ua.id) must beSome[UserAccount]
 
   }
 }

@@ -2,17 +2,16 @@ name := "karedo_persist"
 
 version := "0.1_DEV"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
 
 resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases/"
 
 libraryDependencies ++= Seq(
-  Common.scalaAsync,
-  "com.novus"               %% "salat"                  % "1.9.8", // 1.9.9 doesnot work!
-  "org.mongodb"             %% "casbah"                 % "2.7.1",
-  Common.subcutExt,
-  //  Common.walletCommon,
-  "com.github.athieriot"    %% "specs2-embedmongo"      % "0.7.0" % "test"
+	
+	"com.github.salat" %% "salat" % "1.10.0"
+  ,"com.typesafe" % "config" % "1.3.1"
+
+  ,"org.specs2" %% "specs2-core" % "3.8.5" % "test"
 )
 
 scalacOptions ++= Seq(
@@ -22,9 +21,7 @@ scalacOptions ++= Seq(
   "-Ywarn-dead-code",
   "-language:_",
   "-target:jvm-1.7",
-  "-encoding", "UTF-8"
+  "-encoding", "UTF-8",
+  "-Yrangepos"
 )
 
-testOptions in Test += Tests.Setup( () => Embedder.startMongo)
-
-testOptions in Test += Tests.Cleanup( () => println("After Tests"))

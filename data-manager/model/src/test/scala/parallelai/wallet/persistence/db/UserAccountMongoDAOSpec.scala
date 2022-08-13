@@ -15,9 +15,10 @@ class UserAccountMongoDAOSpec
 
   val userAccount = UserAccount()
   val filledUserAccount = UserAccount(
+    userProfile=UserProfile(gender="M",first_name = "claudio", last)
     password=Some("hashed"),
     mobile=List(Mobile(msisdn = "12345678"),Mobile(msisdn="44444")),
-    email=List(Email(address = "pakkio@gmail.com"),Email("daisy@gmail.com")))
+    email=List(Email(address = "pakkio@gmail.com"),Email( address = "daisy@gmail.com")))
 
 
   sequential
@@ -46,8 +47,8 @@ class UserAccountMongoDAOSpec
       accountDAO.getById(userAccount.id) match {
         case Some(account) =>
           val updated = account.copy(
-            mobile=List(Mobile("12345678")),
-            email=List(Email("pluto@gmail.com")),
+            mobile=List(Mobile(msisdn = "12345678")),
+            email=List(Email(address = "pluto@gmail.com")),
             password=Some("Hash2"))
 
           accountDAO.update(updated.id,updated) must beSuccessfulTry
