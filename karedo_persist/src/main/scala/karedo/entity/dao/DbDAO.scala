@@ -6,11 +6,11 @@ import com.mongodb.WriteResult
 
 import scala.util.Try
 
-trait DbDAO[T<:AnyRef] {
-  def insertNew(id:UUID,r:T): Try[Option[UUID]]
-  def getById(id:UUID): Option[T]
-  def update(id:UUID,r:T): Try[String]
-  def delete(id:UUID,r:T): Try[String]
+trait DbDAO[K, T<:AnyRef] {
+  def insertNew(id:K,r:T): Try[Option[K]]
+  def getById(id:K): Option[T]
+  def update(id:K,r:T): Try[String]
+  def delete(id:K,r:T): Try[String]
   def deleteAll()
 }
 
