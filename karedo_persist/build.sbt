@@ -1,6 +1,6 @@
 organization := "co.uk.karedo"
-name := "karedo_persist"
-version := "0.1_DEV"
+name := "persist"
+version := "0.0.1-SNAPSHOT"
 
 scalaVersion := "2.11.8"
 
