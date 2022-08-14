@@ -13,8 +13,6 @@ object Api
   with Routes
   with DefaultActorSystem {
 
-  conf = ConfigFactory.load()
-
   val test = new DbPrefs {}
   val rows = test.preload()
   println(s"done loading $rows")

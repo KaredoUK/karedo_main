@@ -29,43 +29,40 @@ trait Kar134 {
   }
 
 
+  // exec will be moved to proper actor (or stream in business logic layer)
   def exec(accountId: String,
            deviceId: Option[String],
            applicationId: String,
-           sessionId: String,
+           sessionId: Option[String],
            adCount: Option[String]): Either[String, (Int, String)] = {
 
     logger.info(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\napplicationId: $applicationId\nsessionId: $sessionId\nadCount: $adCount")
 
 
     if (accountId == "0") {
-      val appId: UUID = UUID.fromString(applicationId)
-      (dbUserApp.getById(appId) match {
-        case Some(app) => Right(app)
+      val uapp = dbUserApp.getById(applicationId)
+      (dbUserApp.getById(applicationId) match {
+        case ret @ Right(app) => ret
 
-        case None => {
+        case Left(x) =>
           // Create a new userAccount and connect it to applicationId
           val emptyAccount = UserAccount()
           dbUserAccount.insertNew(emptyAccount.id, emptyAccount) match {
-            case Success(Some(accountId)) => {
-              val app = UserApp(account_id = accountId)
+            case Right(_) =>
+              val app = UserApp(id = "appId2", account_id = emptyAccount.id)
               dbUserApp.insertNew(app.id, app) match {
-                case Success(Some(id)) => Right(app)
-                case Failure(x) => Left(s"Error $x while inserting new app")
+                case Right(_) => Right(app)
+                case Left(error) => Left(s"Cant insert $app because of $error")
               }
-            }
-            case Failure(x) => Left(s"Error $x while inserting new account")
+            case Left(x) => Left(s"Error $x while inserting new account")
           }
-
-        }
       }) match {
 
-        case Right(app) => {
+        case Right(app) =>
           getAdsFor(app.account_id) match {
-            case Right(x: List[String]) => Right(201, x.toString())
+            case Right(x: List[String]) => Right((201, x.toString()))
             case Left(error) => Left(error)
           }
-        }
         case Left(error) => Left(error)
       }
     }
@@ -137,7 +134,7 @@ trait Kar134 {
         accountId =>
           optionalHeaderValueByName("X_Identification") { deviceId =>
             get {
-              parameters('p, 's, 'c ?) {
+              parameters('p, 's ?, 'c ?) {
                 (applicationId, sessionId, adCount) => complete(Future {
                   exec(accountId, deviceId, applicationId, sessionId, adCount)
                 })

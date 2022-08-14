@@ -6,11 +6,9 @@ import com.mongodb.casbah.MongoClientOptions
 import com.mongodb.casbah.commons.conversions.scala.{RegisterConversionHelpers, RegisterJodaTimeConversionHelpers}
 import com.typesafe.config.Config
 
-/**
- * Created by crajah on 06/07/2014.
- */
-trait MongoConnection {
-  val conf: Config;
+
+trait MongoConnection extends Configurable {
+
 
   lazy val mongoHost = conf.getString("mongo.server.host")
   lazy val mongoPort = conf.getInt("mongo.server.port")
@@ -43,7 +41,7 @@ object MongoInstance {
         }
       }
       
-      if (instance == None) instance = Some(open)
+      if (instance.isEmpty) instance = Some(open)
       
       instance.get
     }

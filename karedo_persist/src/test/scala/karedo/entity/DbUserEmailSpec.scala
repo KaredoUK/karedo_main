@@ -2,13 +2,13 @@ package karedo.entity
 
 import java.util.UUID
 
-import org.specs2.matcher.TryMatchers
+import org.specs2.matcher.{EitherMatchers, TryMatchers}
 import org.specs2.mutable.Specification
 import utils.MongoTestUtils
 
 class DbUserEmailSpec
   extends Specification
-      with TryMatchers
+      with EitherMatchers
       with MongoTestUtils {
 
     val test = new DbUserEmail {}
@@ -20,12 +20,13 @@ class DbUserEmailSpec
       val emailId = "pakkio@gmail.com"
       val acctId = UUID.randomUUID()
       val r = UserEmail(emailId, acctId, active = false)
-      test.insertNew(emailId,r) must beSuccessfulTry
+      test.insertNew(emailId,r) must beRight
       val updated = r.copy(active = true)
       test.update(emailId,updated)
-      val reread = test.getById(emailId)
-      reread must beSome
-      reread.get.active  must beTrue
+      test.getById(emailId) match {
+        case Right(x) => x.active must beTrue
+        case Left(x) => ko(x)
+      }
 
     }
   }

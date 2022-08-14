@@ -1,9 +1,6 @@
 package utils
 
 import com.typesafe.config.{Config, ConfigFactory}
+import karedo.entity.dao.Configurable
 
-trait MongoTestUtils {
-  implicit val conf:Config = ConfigFactory.load()
-
-
-}
+trait MongoTestUtils extends Configurable

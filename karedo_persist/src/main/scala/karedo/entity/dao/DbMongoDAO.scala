@@ -10,11 +10,11 @@ import salat.dao.SalatDAO
 import salat._
 import salat.global._
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 class DbMongoDAO[K, T <: AnyRef]
-(implicit val conf: Config
- , val manifestT: Manifest[T]
+(implicit
+   val manifestT: Manifest[T]
  , val manifestK: Manifest[K]
 )
 
@@ -30,40 +30,62 @@ class DbMongoDAO[K, T <: AnyRef]
 
   val dao = new SalatDAO[T, K](collection = db(s"X$simpleName")) {}
 
-  override def insertNew(id: K, r: T): Try[Option[K]] = {
+  override def insertNew(id: K, r: T): Either[String,Unit] = {
     logger.info(s"insertNew $r")
     Try(
       dao.insert(
         r
       )
-    )
+    ) match {
+      case Success(x) => Right(Unit)
+      case Failure(error) => Left(error.toString)
+
+    }
   }
 
-  override def getById(id: K) = {
+  override def getById(id: K) : Either[String,T] = {
     logger.info(s"getById $id")
-    val dbuser = dao.findOneById(id)
-    logger.info(s"getById returning $dbuser")
+    val ret = Try {
+      dao.findOneById(id)
+    } match {
+      case Success(Some(x)) => Right(x)
+      case Success(None) => Left("No record found")
+      case Failure(x) => Left(x.toString)
 
-    dbuser
+    }
+    logger.info(s"getById returning $ret")
+    ret
+
   }
 
-  override def update(id: K, r: T) = {
+  override def update(id: K, r: T): Either[String,Unit] = {
     logger.info(s"updating $r")
     Try {
       dao.update(byId(id), grater[T].asDBObject(r))
-    }.map(r => r.toString)
+    } match {
+      case Success(x) => Right(Unit)
+      case Failure(error) => Left(error.toString)
+    }
   }
 
-  override def delete(id: K, r: T) = {
+  override def delete(id: K, r: T): Either[String,Unit] = {
     logger.info(s"deleting id: $id}")
     Try {
       dao.removeById(id)
-    }.map(r => r.toString)
+    } match {
+      case Success(x) => Right(Unit)
+      case Failure(error) => Left(error.toString)
+    }
   }
 
-  override def deleteAll() = {
+  override def deleteAll(): Either[String,Unit] = {
     logger.warn(s"deleting all from $simpleName")
-    dao.collection.remove(MongoDBObject())
+    Try {
+      dao.collection.remove(MongoDBObject())
+    } match {
+      case Success(x) => Right(Unit)
+      case Failure(error) => Left(error.toString)
+    }
   }
 }
 
