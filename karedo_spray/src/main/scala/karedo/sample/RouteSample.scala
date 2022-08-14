@@ -3,8 +3,10 @@ package karedo.sample
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import com.sun.prism.impl.Disposer.Record
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Created by pakkio on 10/3/16.
@@ -32,13 +34,13 @@ trait RouteSample {
             s: String => HttpEntity(ContentTypes.`text/html(UTF-8)`, s"<h1>Hello post $s</h1>")
           }
         }
-      } ~
-      path("json") {
-        post {
-          entity(as[Record]) {
-            s => complete(Record(s.a + 1, s.b + "!"))
-          }
-        }
       }
+//      ~ path("json") {
+//        post {
+//          entity(as[Record]) {
+//            s => complete(Record(s.a + 1, s.b + "!"))
+//          }
+//        }
+//      }
   )
 }

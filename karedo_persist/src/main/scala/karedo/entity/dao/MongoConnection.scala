@@ -10,7 +10,7 @@ import com.typesafe.config.Config
  * Created by crajah on 06/07/2014.
  */
 trait MongoConnection {
-  implicit val conf: Config;
+  val conf: Config;
 
   lazy val mongoHost = conf.getString("mongo.server.host")
   lazy val mongoPort = conf.getInt("mongo.server.port")

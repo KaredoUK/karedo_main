@@ -10,9 +10,10 @@ import karedo.sample.{DefaultActorSystem, Routes, Ssl}
 object Api
   extends App
   with MongoConnection
+  with Routes
   with DefaultActorSystem {
 
-  implicit val conf:Config = ConfigFactory.load()
+  conf = ConfigFactory.load()
 
   val test = new DbPrefs {}
   val rows = test.preload()
@@ -22,5 +23,5 @@ object Api
 
   val doSsl=false
   val connContext = if(doSsl) Ssl.sslContext else ConnectionContext.noEncryption()
-  Http().bindAndHandle(Routes.routesWithLogging,conf.getString("web.host"),conf.getInt("web.port"),connContext)
+  Http().bindAndHandle(routesWithLogging,conf.getString("web.host"),conf.getInt("web.port"),connContext)
 }
