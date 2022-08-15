@@ -91,17 +91,18 @@ trait SMSTrait extends SprayJsonSupport with DefaultJsonProtocol {
   }
 
 }
-/*object testSMS extends App {
+object testSMS extends App {
+  implicit val system = ActorSystem("demo")
   val it = new SMSTrait {
     override val from: String = "Karedo"
     override val serverEndpoint: String = "https://rest.messagebird.com/messages"
     override val accessKey: String = "live_RmtS0fUQafb7ae0XK21PVmIpt"
+    override implicit val system = ActorSystem("testSMS")
+    override val materializer = ActorMaterializer()
   }
-  import akka.actor.ActorSystem
 
-  implicit val system = ActorSystem("demo")
-  it.sendSMS("00393319345235","text of message")
-}*/
+  it.sendSMS("00393319345235","text of message 2")
+}
 
 class SMSActor
   extends Configurable
@@ -111,6 +112,9 @@ class SMSActor
   override val accessKey = conf.getString("notification.sms.auth.accesskey")
   override val serverEndpoint = conf.getString("notification.sms.server.endpoint")
   override val from = conf.getString("notification.sms.sender")
+  // needed for compatibility
+  override val system = context.system
+  override val materializer = ActorMaterializer()
 
 
   log.info(s"[SMS] [T:${Thread.currentThread().getId}]  instantiating SMS with '$serverEndpoint' and accessKey '${accessKey}'")
