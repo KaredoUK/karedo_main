@@ -30,14 +30,14 @@ class DbMongoDAO[K, T <: AnyRef]
 
   val dao = new SalatDAO[T, K](collection = db(s"X$simpleName")) {}
 
-  override def insertNew(id: K, r: T): Result[String,Unit] = {
+  override def insertNew(id: K, r: T): Result[String,T] = {
     logger.info(s"insertNew $r")
     Try(
       dao.insert(
         r
       )
     ) match {
-      case Success(x) => OK(Unit)
+      case Success(x) => OK(r)
       case Failure(error) => KO(error.toString)
 
     }
@@ -58,22 +58,22 @@ class DbMongoDAO[K, T <: AnyRef]
 
   }
 
-  override def update(id: K, r: T): Result[String,Unit] = {
+  override def update(id: K, r: T): Result[String,T] = {
     logger.info(s"updating $r")
     Try {
       dao.update(byId(id), grater[T].asDBObject(r))
     } match {
-      case Success(x) => OK(Unit)
+      case Success(x) => OK(r)
       case Failure(error) => KO(error.toString)
     }
   }
 
-  override def delete(id: K, r: T): Result[String,Unit] = {
+  override def delete(id: K, r: T): Result[String,T] = {
     logger.info(s"deleting id: $id}")
     Try {
       dao.removeById(id)
     } match {
-      case Success(x) => OK(Unit)
+      case Success(x) => OK(r)
       case Failure(error) => KO(error.toString)
     }
   }
