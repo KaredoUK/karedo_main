@@ -17,6 +17,7 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-actor" % akkaV,
     "com.typesafe.akka" %% "akka-http-experimental" % akkaV,
     "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaV,
+    "com.typesafe.akka" %% "akka-testkit" % akkaV % "test",
 
 
     "org.slf4j" % "slf4j-api" % "1.7.5",
@@ -25,7 +26,8 @@ libraryDependencies ++= {
     "com.typesafe.scala-logging" % "scala-logging-slf4j_2.11" % "2.1.2",
     "com.typesafe.akka" %% "akka-slf4j" % akkaV,
 
-
+    "org.scalactic" %% "scalactic" % "3.0.0",
+    "org.scalatest" %% "scalatest" % "3.0.0" % "test",
     "org.specs2" %% "specs2-core" % "3.8.5" % "test"
   )
 }
