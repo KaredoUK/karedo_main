@@ -6,13 +6,12 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import karedo.entity.dao.{KO, OK, Result}
 import karedo.entity.{DbUserAccount, DbUserApp, UserAccount, UserApp}
-
 import org.slf4j.LoggerFactory
 
 /**
   * Created by pakkio on 10/3/16.
   */
-trait Kar134 {
+trait Kar134 extends KaredoRoute {
   def nl2br(s: String) = s.replace("\n", "<br>")
 
   val logger = LoggerFactory.getLogger(classOf[Kar134])
@@ -96,9 +95,6 @@ trait Kar134 {
   }
 
 
-  case class Error(err: String)
-
-  case class APIResponse(msg: String, code: Int = 200)
 
 
   def anonymousCall(applicationId: String): Result[Error, APIResponse] = {
@@ -135,7 +131,7 @@ trait Kar134 {
 
 
   def kar134 = {
-    Route(
+    Route {
 
       // GET /account/{{account_id}}/ads?p={{application_id}}&s={{session_id}}&c={{ad_count}}
 
@@ -145,16 +141,18 @@ trait Kar134 {
           optionalHeaderValueByName("X_Identification") { deviceId =>
             get {
               parameters('p, 's ?, 'c ?) {
-                (applicationId, sessionId, adCount) => complete(
-                  // exec(accountId, deviceId, applicationId, sessionId, adCount) match {
-                  "OK"
-
-                )
-
+                (applicationId, sessionId, adCount) =>
+                  doCall(
+                    {
+                      exec(accountId, deviceId, applicationId, sessionId, adCount)
+                    }
+                  )
               }
             }
           }
       }
-    )
+
+    }
+
   }
 }
