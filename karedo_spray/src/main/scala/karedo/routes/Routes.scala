@@ -1,9 +1,9 @@
-package karedo.sample
+package karedo.routes
 
 import akka.http.scaladsl.server.Route
-import com.typesafe.config.Config
+import karedo.sample.Entities
+import karedo.util.RouteDebug
 import org.slf4j.LoggerFactory
-import sun.rmi.runtime.Log.LogFactory
 
 trait Routes
   extends Entities

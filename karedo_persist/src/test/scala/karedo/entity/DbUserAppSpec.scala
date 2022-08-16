@@ -2,6 +2,7 @@ package karedo.entity
 
 import java.util.UUID
 
+import karedo.entity.dao.{KO, OK}
 import org.specs2.matcher.EitherMatchers
 import org.specs2.mutable.Specification
 import utils.MongoTestUtils
@@ -20,12 +21,12 @@ class DbUserAppSpec
       val acctId = UUID.randomUUID()
       val appId = "app1"
       val r = UserApp(appId, acctId, map_confirmed = false)
-      test.insertNew(appId,r) must beRight
+      test.insertNew(appId,r) must beOK
       val updated = r.copy(map_confirmed = true)
       test.update(appId,updated)
       test.getById(appId) match {
-        case Right(x) => x.map_confirmed must beTrue
-        case Left(error) => ko("update didn't work")
+        case OK(x) => x.map_confirmed must beTrue
+        case KO(error) => ko("update didn't work")
       }
 
     }

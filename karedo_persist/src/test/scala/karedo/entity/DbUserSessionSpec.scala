@@ -2,6 +2,7 @@ package karedo.entity
 
 import java.util.UUID
 
+import karedo.entity.dao.{KO, OK}
 import org.specs2.matcher.{EitherMatchers, TryMatchers}
 import org.specs2.mutable.Specification
 import utils.MongoTestUtils
@@ -20,12 +21,12 @@ class DbUserSessionSpec
       val acctId = UUID.randomUUID()
       val sessionId = UUID.randomUUID()
       val r = UserSession(sessionId, acctId)
-      test.insertNew(sessionId,r) must beRight
+      test.insertNew(sessionId,r) must beOK
       val updated = r.copy(info = Some("extended"), ts_expire = r.ts_created.plusMinutes(20))
       test.update(sessionId,updated)
       test.getById(sessionId) match {
-        case Right(x) => x.info must beSome("extended")
-        case Left(x) => ko(x)
+        case OK(x) => x.info must beSome("extended")
+        case KO(x) => ko(x)
       }
 
     }

@@ -38,5 +38,5 @@ class DbPrefSpec
     }
   }
 
-  def fail(): MatchResult[Any] = 1 === 0
+
 }

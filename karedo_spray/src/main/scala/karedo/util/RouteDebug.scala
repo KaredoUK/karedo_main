@@ -1,4 +1,4 @@
-package karedo.sample
+package karedo.util
 
 import akka.event.Logging._
 import akka.http.scaladsl.model.ws.{Message, TextMessage}

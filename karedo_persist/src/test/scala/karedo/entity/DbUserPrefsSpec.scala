@@ -2,6 +2,7 @@ package karedo.entity
 
 import java.util.UUID
 
+import karedo.entity.dao.{KO, OK}
 import org.specs2.matcher.{EitherMatchers, TryMatchers}
 import org.specs2.mutable.Specification
 import utils.MongoTestUtils
@@ -21,12 +22,12 @@ class DbUserPrefsSpec
       val list2 = List(UserPref("IAB1",4), UserPref("IAB2",7))
       val acctId = UUID.randomUUID()
       val r = UserPrefs(acctId, list)
-      test.insertNew(acctId,r) must beRight
+      test.insertNew(acctId,r) must beOK
       val updated = r.copy(prefs = list2)
       test.update(acctId,updated)
       test.getById(acctId) match {
-        case Right(x) => x.prefs.head.value must beEqualTo(4)
-        case Left(x) => ko(x)
+        case OK(x) => x.prefs.head.value must beEqualTo(4)
+        case KO(x) => ko(x)
       }
 
     }

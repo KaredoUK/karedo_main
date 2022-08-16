@@ -4,7 +4,8 @@ import akka.http.scaladsl.{ConnectionContext, Http}
 import com.typesafe.config.{Config, ConfigFactory}
 import karedo.entity.DbPrefs
 import karedo.entity.dao.MongoConnection
-import karedo.sample.{DefaultActorSystem, Routes, Ssl}
+import karedo.routes.Routes
+import karedo.util.{DefaultActorSystem, Ssl}
 
 
 object Api

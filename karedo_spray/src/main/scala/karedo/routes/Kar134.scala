@@ -1,17 +1,13 @@
-package karedo.sample
+package karedo.routes
 
 import java.util.UUID
 
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import com.typesafe.config.Config
 import karedo.entity.{DbUserAccount, DbUserApp, UserAccount, UserApp}
+import karedo.util.objAPI.{APIError, APIOK, InternalError}
+import karedo.util.{FailureResponse, ResponseWithFailure, SuccessResponse}
 import org.slf4j.LoggerFactory
-
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.{Failure, Success}
 
 /**
   * Created by pakkio on 10/3/16.
@@ -24,6 +20,8 @@ trait Kar134 {
   val dbUserApp = new DbUserApp {}
   val dbUserAccount = new DbUserAccount {}
 
+
+
   def getAdsFor(accountId: UUID): Either[String, List[String]] = {
     Right(List("a", "b"))
   }
@@ -34,41 +32,17 @@ trait Kar134 {
            deviceId: Option[String],
            applicationId: String,
            sessionId: Option[String],
-           adCount: Option[String]): Either[String, (Int, String)] = {
+           adCount: Option[String]): ResponseWithFailure[APIError,APIOK] = {
 
     logger.info(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\napplicationId: $applicationId\nsessionId: $sessionId\nadCount: $adCount")
 
 
     if (accountId == "0") {
-      val uapp = dbUserApp.getById(applicationId)
-      (dbUserApp.getById(applicationId) match {
-        case ret @ Right(app) => ret
-
-        case Left(x) =>
-          // Create a new userAccount and connect it to applicationId
-          val emptyAccount = UserAccount()
-          dbUserAccount.insertNew(emptyAccount.id, emptyAccount) match {
-            case Right(_) =>
-              val app = UserApp(id = "appId2", account_id = emptyAccount.id)
-              dbUserApp.insertNew(app.id, app) match {
-                case Right(_) => Right(app)
-                case Left(error) => Left(s"Cant insert $app because of $error")
-              }
-            case Left(x) => Left(s"Error $x while inserting new account")
-          }
-      }) match {
-
-        case Right(app) =>
-          getAdsFor(app.account_id) match {
-            case Right(x: List[String]) => Right((201, x.toString()))
-            case Left(error) => Left(error)
-          }
-        case Left(error) => Left(error)
-      }
+      anonymousCall(applicationId)
     }
 
 
-      else Left("Not yet implemented")
+      else FailureResponse(InternalError(msg ="Not yet implemented"))
 
 
       //    } else {
@@ -122,7 +96,44 @@ trait Kar134 {
 
 
 
+
+
   }
+
+  def isOk[String,T](t: Either[String,T]) = t.isRight
+  def get[String,T](t: Either[String,T]) = t.right
+  def err[String,T](t: Either[String,T]) = t.left
+
+
+  def anonymousCall(applicationId:String): ResponseWithFailure[APIError,APIOK] = {
+    val uapp = dbUserApp.getById(applicationId)
+    if(isOk(uapp))
+    (dbUserApp.getById(applicationId) match {
+      case ret@ok(app) => ret
+
+      case Left(x) =>
+        // Create a new userAccount and connect it to applicationId
+        val emptyAccount = UserAccount()
+        dbUserAccount.insertNew(emptyAccount.id, emptyAccount) match {
+          case Right(_) =>
+            val app = UserApp(id = "appId2", account_id = emptyAccount.id)
+            dbUserApp.insertNew(app.id, app) match {
+              case Right(_) => Right(app)
+              case Left(error) => Left(s"Cant insert $app because of $error")
+            }
+          case Left(x) => Left(s"Error $x while inserting new account")
+        }
+    }) match {
+
+      case Right(app:UserApp) =>
+        getAdsFor(app.account_id) match {
+          case Right(x: List[String]) => SuccessResponse(APIOK(x.toString(),201))
+          case Left(error) => FailureResponse(InternalError(new Exception(error)))
+        }
+      case Left(error) => FailureResponse(InternalError(msg = error))
+    }
+  }
+
 
   def kar134 = {
     Route(
@@ -135,9 +146,11 @@ trait Kar134 {
           optionalHeaderValueByName("X_Identification") { deviceId =>
             get {
               parameters('p, 's ?, 'c ?) {
-                (applicationId, sessionId, adCount) => complete(Future {
-                  exec(accountId, deviceId, applicationId, sessionId, adCount)
-                })
+                (applicationId, sessionId, adCount) => complete(
+                  // exec(accountId, deviceId, applicationId, sessionId, adCount) match {
+                  "OK"
+
+                )
 
               }
             }

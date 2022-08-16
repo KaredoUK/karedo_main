@@ -2,6 +2,7 @@ package karedo.entity
 
 import java.util.UUID
 
+import karedo.entity.dao.{KO, OK}
 import org.specs2.matcher.{EitherMatchers, TryMatchers}
 import org.specs2.mutable.Specification
 import utils.MongoTestUtils
@@ -20,12 +21,12 @@ class DbUserEmailSpec
       val emailId = "pakkio@gmail.com"
       val acctId = UUID.randomUUID()
       val r = UserEmail(emailId, acctId, active = false)
-      test.insertNew(emailId,r) must beRight
+      test.insertNew(emailId,r) must beOK
       val updated = r.copy(active = true)
       test.update(emailId,updated)
       test.getById(emailId) match {
-        case Right(x) => x.active must beTrue
-        case Left(x) => ko(x)
+        case OK(x) => x.active must beTrue
+        case KO(x) => ko(x)
       }
 
     }

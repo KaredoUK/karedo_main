@@ -1,4 +1,4 @@
-package karedo.sample
+package karedo.util
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
