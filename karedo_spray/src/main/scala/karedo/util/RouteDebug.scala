@@ -25,7 +25,7 @@ trait RouteDebug {
 
   // logs just the request method and response status at info level
   def createLogEntry(request: HttpRequest, text: String): Some[LogEntry] = {
-    val logString: String = "#### Request " + request + "\n => \n Response: s" + text
+    val logString: String = "#### Request " + request + "\n => \n Response: " + text
     logger.info(logString)
     Some(LogEntry(logString, InfoLevel))
   }

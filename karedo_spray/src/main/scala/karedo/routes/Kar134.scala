@@ -103,7 +103,7 @@ trait Kar134 extends KaredoRoute {
   def anonymousCall(applicationId: String): Result[Error, APIResponse] = {
     val uapp = dbUserApp.getById(applicationId)
     if (uapp.isOK) {
-      getAds(uapp, 201)
+      getAds(uapp, 200) // app already mapped to a valid account id
     }
     else {
       // Create a new userAccount and connect it to applicationId
@@ -111,9 +111,9 @@ trait Kar134 extends KaredoRoute {
       val uacct = dbUserAccount.insertNew(emptyAccount.id, emptyAccount)
       if (uacct.isOK) {
 
-        val app = UserApp(id = "appId2", account_id = emptyAccount.id)
+        val app = UserApp(id = applicationId, account_id = emptyAccount.id)
         val uNewApp = dbUserApp.insertNew(app.id, app)
-        getAds(uNewApp, 200)
+        getAds(uNewApp, 201) // creating a new mapping
 
       }
       else KO(Error(s"Error ${uacct.err} while inserting new account"))
