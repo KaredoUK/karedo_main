@@ -28,6 +28,8 @@ libraryDependencies ++= {
 
     "org.scalactic" %% "scalactic" % "3.0.0",
     "org.scalatest" %% "scalatest" % "3.0.0" % "test",
+    "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test",
+
     "org.specs2" %% "specs2-core" % "3.8.5" % "test"
   )
 }

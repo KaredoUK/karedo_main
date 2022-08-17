@@ -23,8 +23,10 @@ libraryDependencies ++= {
     "ch.qos.logback" % "logback-classic" % "1.1.3",
     "com.typesafe.scala-logging" % "scala-logging-slf4j_2.11" % "2.1.2",
     "com.typesafe.akka" %% "akka-slf4j" % akkaV,
+    "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test",
 
 
+    "org.scalatest" %% "scalatest" % "3.0.0" % "test",
     "org.specs2" %% "specs2-core" % "3.8.5" % "test"
   )
 }

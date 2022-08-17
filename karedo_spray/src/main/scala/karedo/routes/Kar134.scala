@@ -7,6 +7,8 @@ import akka.http.scaladsl.server.Route
 import karedo.entity.dao.{KO, OK, Result}
 import karedo.entity.{DbUserAccount, DbUserApp, UserAccount, UserApp}
 import org.slf4j.LoggerFactory
+import spray.json._
+import DefaultJsonProtocol._
 
 /**
   * Created by pakkio on 10/3/16.
@@ -18,10 +20,11 @@ trait Kar134 extends KaredoRoute {
 
   val dbUserApp = new DbUserApp {}
   val dbUserAccount = new DbUserAccount {}
+  //case class Ad(url:String)
+  //case class AdsReturned(List[Ad]=List())
 
-
-  def getAdsFor(accountId: UUID): Result[String, List[String]] = {
-    OK(List("a", "b"))
+  def getAdsFor(accountId: UUID): Result[String, String] = {
+    OK(List("a", "b").toJson.toString)
   }
 
 
