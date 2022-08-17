@@ -1,0 +1,19 @@
+Architecture
+
+AkkaHttp (The actual Akka HTTP framework)
+     |
+     v
+karedo_spray (Contains the Spray Routes to teh actual API calls)
+     |
+     v
+karedo_api (Contains intermediary Akka Actors to offload work. @TODO: Rename to karedo_actor.)
+     |
+     v
+karedo_persist (Access to MongoDB. Contains the DAO)
+
+Sequence
+--------
+AkkaHttp adds routes from karedo_spray.
+When route us activated, it hits karedo_spray .exec(). 
+karedo_spray offloads it to the actor layer karedo_apt (@TODO: rename to karedo_actor)
+karedo_actor interfaces with the databse using karedo_persist DAO objects.
