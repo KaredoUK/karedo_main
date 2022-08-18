@@ -1,13 +1,9 @@
 package karedo.entity.dao
 
-import java.util.UUID
-
-import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.commons.MongoDBObject
-import com.typesafe.config.Config
 import org.slf4j.LoggerFactory
-import salat.dao.SalatDAO
 import salat._
+import salat.dao.SalatDAO
 import salat.global._
 
 import scala.util.{Failure, Success, Try}

@@ -1,9 +1,7 @@
 package karedo.entity
 
-import java.util.UUID
-
-import karedo.entity.dao.{DbMongoDAO, Keyable}
-import org.joda.time.{DateTime, DateTimeZone}
+import karedo.entity.dao.{DbDao, DbMongoDAO, Keyable}
+import org.joda.time.DateTime
 import salat.annotations._
 
 
@@ -13,8 +11,8 @@ case class UserMobile
   @Key("_id") id: String
   , account_id: String
   , active: Boolean
-  , ts_created: DateTime = new DateTime(DateTimeZone.UTC)
-  , ts_updated: DateTime = new DateTime(DateTimeZone.UTC).plusMinutes(20)
+  , ts_created: DateTime = DbDao.now
+  , ts_updated: DateTime = DbDao.now
 )
 extends Keyable[String]
 

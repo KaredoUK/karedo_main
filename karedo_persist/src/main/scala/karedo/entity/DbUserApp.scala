@@ -1,7 +1,7 @@
 package karedo.entity
 
-import karedo.entity.dao.{DbMongoDAO, Keyable}
-import org.joda.time.{DateTime, DateTimeZone}
+import karedo.entity.dao.{DbDao, DbMongoDAO, Keyable}
+import org.joda.time.DateTime
 import salat.annotations._
 
 case class UserApp
@@ -10,7 +10,7 @@ case class UserApp
   @Key("_id") id: String
   , account_id: String
   , map_confirmed: Boolean = false
-  , ts: DateTime = new DateTime(DateTimeZone.UTC)
+  , ts: DateTime = DbDao.now
 
 ) extends Keyable[String]
 

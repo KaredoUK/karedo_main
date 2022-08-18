@@ -3,7 +3,7 @@ package karedo.entity
 import java.util.UUID
 
 import karedo.entity.dao._
-import org.joda.time.{DateTime, DateTimeZone}
+import org.joda.time.DateTime
 import salat.annotations._
 
 object UserSession {
