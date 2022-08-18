@@ -35,7 +35,7 @@ class DbUserAccountSpec
       checkInsert(userAccount)
 
       // must fail if using the same id twice
-      accountDAO.insertNew(userAccount.id,userAccount) must beKO
+      accountDAO.insertNew(userAccount) must beKO
 
     }
     "Save and retrieve a user account with data" in {
@@ -80,7 +80,7 @@ class DbUserAccountSpec
 
 
   def checkInsert(ua:UserAccount): MatchResult[Any] = {
-    accountDAO.insertNew(ua.id,ua) must beOK
+    accountDAO.insertNew(ua) must beOK
     accountDAO.getById(ua.id) must beOK
 
   }

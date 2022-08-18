@@ -1,11 +1,7 @@
 package karedo.entity
 
-import java.util.UUID
-
-import com.mongodb.DBObject
 import com.mongodb.casbah.commons.MongoDBObject
-import karedo.entity.dao.DbMongoDAO
-import org.joda.time.{DateTime, DateTimeZone}
+import karedo.entity.dao.{DbMongoDAO, Keyable}
 import salat.annotations._
 
 
@@ -15,10 +11,11 @@ case class Pref
   , sort: Int
   , description: String
   , value: Int
-)
+) extends Keyable[String]
 
 
 trait DbPrefs extends DbMongoDAO[String,Pref] {
+  def key(r:Pref) = r.id
   def load() = {
     dao.find(MongoDBObject()).sort(orderBy = MongoDBObject("sort"-> 1)).toList
   }

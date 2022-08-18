@@ -3,7 +3,7 @@ package karedo.entity
 import java.util.UUID
 
 import com.mongodb.casbah.commons.MongoDBObject
-import karedo.entity.dao.DbMongoDAO
+import karedo.entity.dao.{DbDao, DbMongoDAO, Keyable}
 import org.joda.time.{DateTime, DateTimeZone}
 import salat.annotations._
 
@@ -12,20 +12,20 @@ import salat.annotations._
   */
 case class KaredoChange
 (
-
-  @Key("_id") id: UUID = UUID.randomUUID()
-  , accountId: UUID
+  @Key("_id") id: String = UUID.randomUUID().toString
+  , accountId: String
   , karedos: Int
   , trans_type: String
   , trans_info: String
   , trans_currency: String
-  , ts: DateTime = new DateTime(DateTimeZone.UTC)
-)
+  , ts: DateTime = DbDao.now
 
-trait DbKaredoChange extends DbMongoDAO[UUID,KaredoChange] {
-  def byAccount(id:UUID) = MongoDBObject("accountId" -> id)
+) extends Keyable[String]
 
-  def getChanges(id:UUID) = {
+trait DbKaredoChange extends DbMongoDAO[String,KaredoChange] {
+  def byAccount(id:String) = MongoDBObject("accountId" -> id)
+
+  def getChanges(id:String) = {
     dao.find(byAccount(id)).sort(orderBy = MongoDBObject("ts" -> 1)).toList
   }
 }

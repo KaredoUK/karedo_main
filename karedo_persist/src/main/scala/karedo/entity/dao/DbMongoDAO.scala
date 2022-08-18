@@ -12,7 +12,11 @@ import salat.global._
 
 import scala.util.{Failure, Success, Try}
 
-class DbMongoDAO[K, T <: AnyRef]
+trait Keyable[K] {
+  def id: K
+}
+
+abstract class DbMongoDAO[K, T <: Keyable[K]]
 (implicit
    val manifestT: Manifest[T]
  , val manifestK: Manifest[K]
@@ -20,6 +24,7 @@ class DbMongoDAO[K, T <: AnyRef]
 
   extends DbDAO[K, T]
     with MongoConnection {
+
 
   def byId(userId: K) = MongoDBObject("_id" -> userId)
 
@@ -29,6 +34,10 @@ class DbMongoDAO[K, T <: AnyRef]
   logger.info(s"setting up $thisClass")
 
   val dao = new SalatDAO[T, K](collection = db(s"X$simpleName")) {}
+
+  override def insertNew(r:T): Result[String,T] = {
+    insertNew(r.id,r)
+  }
 
   override def insertNew(id: K, r: T): Result[String,T] = {
     logger.info(s"insertNew $r")

@@ -1,5 +1,7 @@
 package utils
 
+import java.util.UUID
+
 import com.typesafe.config.{Config, ConfigFactory}
 import karedo.entity.dao.{Configurable, KO, OK}
 import org.specs2.matcher.Matcher
@@ -13,4 +15,5 @@ trait MongoTestUtils extends Configurable {
   def beKO[T]: AnyRef with Matcher[AnyRef] = {
     beAnInstanceOf[KO[String, T]]
   }
+  implicit def stringWrapper(u: UUID) = u.toString
 }

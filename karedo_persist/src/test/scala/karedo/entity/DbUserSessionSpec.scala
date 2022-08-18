@@ -21,7 +21,7 @@ class DbUserSessionSpec
       val acctId = UUID.randomUUID()
       val sessionId = UUID.randomUUID()
       val r = UserSession(sessionId, acctId)
-      test.insertNew(sessionId,r) must beOK
+      test.insertNew(r) must beOK
       val updated = r.copy(info = Some("extended"), ts_expire = r.ts_created.plusMinutes(20))
       test.update(sessionId,updated)
       test.getById(sessionId) match {

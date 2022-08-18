@@ -2,7 +2,7 @@ package karedo.entity
 
 import java.util.UUID
 
-import karedo.entity.dao.DbMongoDAO
+import karedo.entity.dao.{DbMongoDAO, Keyable}
 import org.joda.time.{DateTime, DateTimeZone}
 import salat.annotations._
 
@@ -12,7 +12,7 @@ import salat.annotations._
 case class UserProfile
 (
   // id is the same as AccountId
-  @Key("_id") id: UUID = UUID.randomUUID()
+  @Key("_id") id: String = UUID.randomUUID().toString
   , gender: String
   , first_name: String
   , last_name: String
@@ -25,6 +25,6 @@ case class UserProfile
   , ts_created: DateTime = new DateTime(DateTimeZone.UTC)
   , ts_updated: DateTime = new DateTime(DateTimeZone.UTC)
 
-)
+) extends Keyable[String]
 
-trait DbUserProfile extends DbMongoDAO[UUID,UserProfile]
+trait DbUserProfile extends DbMongoDAO[String,UserProfile]
