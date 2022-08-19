@@ -20,9 +20,9 @@ class DbUserKaredosSpec
     "userKaredos should insert " in {
       val acctId = UUID.randomUUID()
       val r = UserKaredos(acctId, 5000)
-      test.insertNew(acctId,r) must beOK
+      test.insertNew(r) must beOK
       val updated = r.copy(karedos = 2000)
-      test.update(acctId,updated)
+      test.update(updated)
       test.getById(acctId) match {
         case OK(x) => x.karedos must beEqualTo(2000)
         case KO(x) => ko(x)

@@ -23,7 +23,7 @@ class DbUserSessionSpec
       val r = UserSession(sessionId, acctId)
       test.insertNew(r) must beOK
       val updated = r.copy(info = Some("extended"), ts_expire = r.ts_created.plusMinutes(20))
-      test.update(sessionId,updated)
+      test.update(updated)
       test.getById(sessionId) match {
         case OK(x) => x.info must beSome("extended")
         case KO(x) => ko(x)

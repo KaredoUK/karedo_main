@@ -22,7 +22,7 @@ trait DbPrefs extends DbMongoDAO[String,Pref] {
   def preload() = {
     var index = 10
     def add(code:String, desc:String) =
-      insertNew(code,Pref(code,index,desc,0))
+      insertNew(Pref(code,index,desc,0))
       index=index+10
 
     deleteAll()

@@ -1,8 +1,9 @@
 package karedo.entity
 
-import karedo.entity.dao.{DbDao, DbMongoDAO, Keyable}
+import karedo.entity.dao.{DbMongoDAO, Keyable}
 import org.joda.time.DateTime
 import salat.annotations._
+import karedo.entity.dao.Util.now
 
 
 case class UserEmail
@@ -11,8 +12,8 @@ case class UserEmail
   @Key("_id") id: String
   , account_id: String
   , active: Boolean
-  , ts_created: DateTime = DbDao.now
-  , ts_updated: DateTime = DbDao.now.plusMinutes(20)
+  , ts_created: DateTime = now
+  , ts_updated: DateTime = now.plusMinutes(20)
 ) extends Keyable[String]
 
 trait DbUserEmail extends DbMongoDAO[String,UserEmail]

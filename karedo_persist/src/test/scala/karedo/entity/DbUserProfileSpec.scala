@@ -21,9 +21,9 @@ class DbUserProfileSpec
       val acctId = UUID.randomUUID()
       val appId = UUID.randomUUID()
       val r = UserProfile(appId, "M", "Claudio", "Pacchiega")
-      test.insertNew(appId,r) must beOK
+      test.insertNew(r) must beOK
       val updated = r.copy(yob = Some(1962))
-      test.update(appId,updated)
+      test.update(updated)
       test.getById(appId) match {
         case OK(x) => x.yob must beEqualTo(Some(1962))
         case KO(x) => ko(x)

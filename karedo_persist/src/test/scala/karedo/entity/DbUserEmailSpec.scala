@@ -21,9 +21,9 @@ class DbUserEmailSpec
       val emailId = "pakkio@gmail.com"
       val acctId = UUID.randomUUID()
       val r = UserEmail(emailId, acctId, active = false)
-      test.insertNew(emailId,r) must beOK
+      test.insertNew(r) must beOK
       val updated = r.copy(active = true)
-      test.update(emailId,updated)
+      test.update(updated)
       test.getById(emailId) match {
         case OK(x) => x.active must beTrue
         case KO(x) => ko(x)

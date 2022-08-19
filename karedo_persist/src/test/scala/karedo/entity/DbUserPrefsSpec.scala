@@ -22,9 +22,9 @@ class DbUserPrefsSpec
       val list2 = List(UserPref("IAB1",4), UserPref("IAB2",7))
       val acctId = UUID.randomUUID()
       val r = UserPrefs(acctId, list)
-      test.insertNew(acctId,r) must beOK
+      test.insertNew(r) must beOK
       val updated = r.copy(prefs = list2)
-      test.update(acctId,updated)
+      test.update(updated)
       test.getById(acctId) match {
         case OK(x) => x.prefs.head.value must beEqualTo(4)
         case KO(x) => ko(x)

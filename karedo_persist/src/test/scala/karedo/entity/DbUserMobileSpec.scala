@@ -21,9 +21,9 @@ class DbUserMobileSpec
       val mobile = "12345678"
       val acctId = UUID.randomUUID()
       val r = UserMobile(mobile, acctId, active = false)
-      test.insertNew(mobile,r) must beOK
+      test.insertNew(r) must beOK
       val updated = r.copy(active = true)
-      test.update(mobile,updated)
+      test.update(updated)
       test.getById(mobile) match {
         case OK(x) => x.active must beTrue
         case KO(x) => ko(x)

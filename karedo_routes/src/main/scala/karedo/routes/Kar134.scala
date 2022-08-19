@@ -17,7 +17,7 @@ import org.joda.time.format.{DateTimeFormat, ISODateTimeFormat}
   * Created by pakkio on 10/3/16.
   */
 trait Kar134 extends KaredoRoute {
-  def nl2br(s: String) = s.replace("\n", "<br>")
+  //def nl2br(s: String) = s.replace("\n", "<br>")
 
   val logger = LoggerFactory.getLogger(classOf[Kar134])
 
@@ -66,11 +66,11 @@ trait Kar134 extends KaredoRoute {
     else {
       // Create a new userAccount and connect it to applicationId
       val emptyAccount = UserAccount()
-      val uacct = dbUserAccount.insertNew(emptyAccount.id, emptyAccount)
+      val uacct = dbUserAccount.insertNew(emptyAccount)
       if (uacct.isOK) {
 
         val app = UserApp(id = applicationId, account_id = emptyAccount.id)
-        val uNewApp = dbUserApp.insertNew(app.id, app)
+        val uNewApp = dbUserApp.insertNew(app)
         getAds(uNewApp, 201) // creating a new mapping
 
       }

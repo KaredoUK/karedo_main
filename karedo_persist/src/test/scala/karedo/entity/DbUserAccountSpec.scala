@@ -53,7 +53,7 @@ class DbUserAccountSpec
             password=Some("Hash2")
             )
 
-          accountDAO.update(updated.id,updated) must beOK
+          accountDAO.update(updated) must beOK
           accountDAO.getById(account.id) match {
             case OK(x) =>
               x.id must beEqualTo(userAccount.id)
@@ -71,7 +71,7 @@ class DbUserAccountSpec
       checkInsert(tobedeleted)
       accountDAO.getById(tobedeleted.id) match {
         case OK(account) =>
-          accountDAO.delete(account.id,account) must beOK
+          accountDAO.delete(account) must beOK
           accountDAO.getById(account.id) must beKO
         case KO(err) => ko(err)
       }

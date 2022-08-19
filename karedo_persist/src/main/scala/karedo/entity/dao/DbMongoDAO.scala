@@ -9,6 +9,7 @@ import salat.global._
 import scala.util.{Failure, Success, Try}
 
 trait Keyable[K] {
+
   def id: K
 }
 
@@ -32,10 +33,7 @@ abstract class DbMongoDAO[K, T <: Keyable[K]]
   val dao = new SalatDAO[T, K](collection = db(s"X$simpleName")) {}
 
   override def insertNew(r:T): Result[String,T] = {
-    insertNew(r.id,r)
-  }
-
-  override def insertNew(id: K, r: T): Result[String,T] = {
+    val id = r.id
     logger.info(s"insertNew $r")
     Try(
       dao.insert(
@@ -63,7 +61,8 @@ abstract class DbMongoDAO[K, T <: Keyable[K]]
 
   }
 
-  override def update(id: K, r: T): Result[String,T] = {
+  override def update(r: T): Result[String,T] = {
+    val id = r.id
     logger.info(s"updating $r")
     Try {
       dao.update(byId(id), grater[T].asDBObject(r))
@@ -73,7 +72,8 @@ abstract class DbMongoDAO[K, T <: Keyable[K]]
     }
   }
 
-  override def delete(id: K, r: T): Result[String,T] = {
+  override def delete(r: T): Result[String,T] = {
+    val id = r.id
     logger.info(s"deleting id: $id}")
     Try {
       dao.removeById(id)

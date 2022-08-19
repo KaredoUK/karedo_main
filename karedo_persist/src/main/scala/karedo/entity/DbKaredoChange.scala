@@ -3,8 +3,9 @@ package karedo.entity
 import java.util.UUID
 
 import com.mongodb.casbah.commons.MongoDBObject
-import karedo.entity.dao.{DbDao, DbMongoDAO, Keyable}
-import org.joda.time.{DateTime, DateTimeZone}
+import karedo.entity.dao.{DbMongoDAO, Keyable}
+import karedo.entity.dao.Util.now
+import org.joda.time.DateTime
 import salat.annotations._
 
 /**
@@ -18,7 +19,7 @@ case class KaredoChange
   , trans_type: String
   , trans_info: String
   , trans_currency: String
-  , ts: DateTime = DbDao.now
+  , ts: DateTime = now
 
 ) extends Keyable[String]
 
