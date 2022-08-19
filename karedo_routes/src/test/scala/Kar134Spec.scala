@@ -1,6 +1,6 @@
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, MediaTypes}
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
-import karedo.entity.UserAd
+import karedo.entity.{DbUserAd, UserAd}
 import karedo.entity.dao.MongoConnection
 import karedo.routes.{Kar134, Routes}
 import org.scalatest.{Matchers, WordSpec}
@@ -19,6 +19,10 @@ class Kar134Spec extends WordSpec
     with Matchers {
 
     implicit val timeout = RouteTestTimeout(1000.second(span))
+
+    val dbUserAds = new DbUserAd {}
+    dbUserAds.deleteAll()
+    dbUserAds.preload()
 
 
     "The webservice" should {
