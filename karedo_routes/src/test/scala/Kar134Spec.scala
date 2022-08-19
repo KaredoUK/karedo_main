@@ -25,14 +25,14 @@ class Kar134Spec extends WordSpec
     dbUserAds.preload()
 
 
-    "The webservice" should {
+    "The Rest service must implement following API" should {
 
 
 
       val routes = kar134
 
 
-      "* implements /account/0/applicationId" in {
+      "* kar134 /account/0/applicationId" in {
         Get("/account/0/ads?p=app1") ~> routesWithLogging ~> check {
           responseAs[List[UserAd]] should have size(100)
         }
