@@ -1,5 +1,6 @@
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, MediaTypes}
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
+import karedo.entity.UserAd
 import karedo.entity.dao.MongoConnection
 import karedo.routes.{Kar134, Routes}
 import org.scalatest.{Matchers, WordSpec}
@@ -14,6 +15,7 @@ class Kar134Spec extends WordSpec
   with MongoConnection
   with Routes
     with ScalatestRouteTest
+
     with Matchers {
 
     implicit val timeout = RouteTestTimeout(1000.second(span))
@@ -28,7 +30,7 @@ class Kar134Spec extends WordSpec
 
       "* implements /account/0/applicationId" in {
         Get("/account/0/ads?p=app1") ~> routesWithLogging ~> check {
-          responseAs[List[String]] shouldEqual List("a","b")
+          responseAs[List[UserAd]] should have size(100)
         }
 
       }

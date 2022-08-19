@@ -2,7 +2,7 @@ package karedo
 
 import akka.http.scaladsl.{ConnectionContext, Http}
 import com.typesafe.config.{Config, ConfigFactory}
-import karedo.entity.DbPrefs
+import karedo.entity.{DbPrefs, DbUserAd}
 import karedo.entity.dao.MongoConnection
 import karedo.routes.Routes
 import karedo.util.{DefaultActorSystem, Ssl}
@@ -14,9 +14,13 @@ object Api
   with Routes
   with DefaultActorSystem {
 
-  val test = new DbPrefs {}
-  val rows = test.preload()
-  println(s"done loading $rows")
+  val prefs = new DbPrefs {}
+  val rows = prefs.preload()
+  println(s"DbPrefs done loading $rows")
+
+  val ads = new DbUserAd {}
+  val rows2 = ads.preload()
+  println(s"DbUserAd done loading $rows")
 
 
 

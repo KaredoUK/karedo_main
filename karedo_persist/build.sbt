@@ -6,13 +6,18 @@ scalaVersion := "2.11.8"
 
 resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases/"
 
-libraryDependencies ++= Seq(
-	
-	"com.github.salat" %% "salat" % "1.10.0"
-  ,"com.typesafe" % "config" % "1.3.1"
+libraryDependencies ++= {
+  val akkaV = "2.4.11"
+  Seq(
 
-  ,"org.specs2" %% "specs2-core" % "3.8.5" % "test"
-)
+    "com.github.salat" %% "salat" % "1.10.0"
+    , "com.typesafe" % "config" % "1.3.1"
+
+    //, "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaV
+    , "org.specs2" %% "specs2-core" % "3.8.5" % "test"
+  )
+}
+
 
 scalacOptions ++= Seq(
   "-unchecked",

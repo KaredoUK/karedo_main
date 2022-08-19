@@ -7,8 +7,11 @@ import akka.http.scaladsl.server.Route
 import karedo.entity.dao.{KO, OK, Result}
 import karedo.entity._
 import org.slf4j.LoggerFactory
-import spray.json._
+import spray.json.{JsString, _}
 import DefaultJsonProtocol._
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+import org.joda.time.DateTime
+import org.joda.time.format.{DateTimeFormat, ISODateTimeFormat}
 
 /**
   * Created by pakkio on 10/3/16.
@@ -17,13 +20,6 @@ trait Kar134 extends KaredoRoute {
   def nl2br(s: String) = s.replace("\n", "<br>")
 
   val logger = LoggerFactory.getLogger(classOf[Kar134])
-
-  val dbUserApp = new DbUserApp {}
-  val dbUserAccount = new DbUserAccount {}
-  val dbUserSession = new DbUserSession {}
-  //case class Ad(url:String)
-  //case class AdsReturned(List[Ad]=List())
-
 
   // exec will be moved to proper actor (or stream in business logic layer)
   def exec(accountId: String,
@@ -54,7 +50,11 @@ trait Kar134 extends KaredoRoute {
   }
 
   def getAdsFor(accountId: String): Result[String, String] = {
-    OK(List("a", "b").toJson.toString)
+
+    OK {
+      val list = dbUserAd.getAdsForUser("acctId")
+      list.toJson.toString
+    }
   }
 
 
