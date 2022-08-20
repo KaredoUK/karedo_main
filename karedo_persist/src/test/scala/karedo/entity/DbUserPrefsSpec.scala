@@ -25,7 +25,7 @@ class DbUserPrefsSpec
       test.insertNew(r) must beOK
       val updated = r.copy(prefs = list2)
       test.update(updated)
-      test.getById(acctId) match {
+      test.find(acctId) match {
         case OK(x) => x.prefs.head.value must beEqualTo(4)
         case KO(x) => ko(x)
       }

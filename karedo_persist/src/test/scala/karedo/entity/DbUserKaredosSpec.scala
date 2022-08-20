@@ -23,8 +23,13 @@ class DbUserKaredosSpec
       test.insertNew(r) must beOK
       val updated = r.copy(karedos = 2000)
       test.update(updated)
-      test.getById(acctId) match {
+      test.find(acctId) match {
         case OK(x) => x.karedos must beEqualTo(2000)
+        case KO(x) => ko(x)
+      }
+      test.addKaredos(acctId,111) must beOK
+      test.find(acctId) match {
+        case OK(x) => x.karedos must beEqualTo(2111)
         case KO(x) => ko(x)
       }
 

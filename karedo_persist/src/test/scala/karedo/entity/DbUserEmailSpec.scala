@@ -24,7 +24,7 @@ class DbUserEmailSpec
       test.insertNew(r) must beOK
       val updated = r.copy(active = true)
       test.update(updated)
-      test.getById(emailId) match {
+      test.find(emailId) match {
         case OK(x) => x.active must beTrue
         case KO(x) => ko(x)
       }

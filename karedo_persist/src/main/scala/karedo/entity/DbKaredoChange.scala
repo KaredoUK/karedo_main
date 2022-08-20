@@ -2,11 +2,14 @@ package karedo.entity
 
 import java.util.UUID
 
+import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.commons.MongoDBObject
-import karedo.entity.dao.{DbMongoDAO, Keyable}
+import karedo.entity.dao._
 import karedo.entity.dao.Util.now
 import org.joda.time.DateTime
 import salat.annotations._
+
+import scala.util.{Failure, Success, Try}
 
 /**
   * Created by pakkio on 10/1/16.

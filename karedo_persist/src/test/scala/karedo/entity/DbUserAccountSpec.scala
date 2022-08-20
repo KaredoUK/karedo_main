@@ -42,10 +42,10 @@ class DbUserAccountSpec
       checkInsert(filledUserAccount)
     }
     "should give error with invalid UUID" in {
-      accountDAO.getById(UUID.randomUUID()) must beKO
+      accountDAO.find(UUID.randomUUID()) must beKO
     }
     "should update the data for this user" in {
-      accountDAO.getById(userAccount.id) match {
+      accountDAO.find(userAccount.id) match {
         case OK(account) =>
           val updated = account.copy(
             mobile=List(Mobile(msisdn = "12345678")),
@@ -54,7 +54,7 @@ class DbUserAccountSpec
             )
 
           accountDAO.update(updated) must beOK
-          accountDAO.getById(account.id) match {
+          accountDAO.find(account.id) match {
             case OK(x) =>
               x.id must beEqualTo(userAccount.id)
               x.email(0).address must beEqualTo(updated.email(0).address)
@@ -69,10 +69,10 @@ class DbUserAccountSpec
     "should be able to delete the user if needed" in {
       val tobedeleted = UserAccount()
       checkInsert(tobedeleted)
-      accountDAO.getById(tobedeleted.id) match {
+      accountDAO.find(tobedeleted.id) match {
         case OK(account) =>
           accountDAO.delete(account) must beOK
-          accountDAO.getById(account.id) must beKO
+          accountDAO.find(account.id) must beKO
         case KO(err) => ko(err)
       }
     }
@@ -81,7 +81,7 @@ class DbUserAccountSpec
 
   def checkInsert(ua:UserAccount): MatchResult[Any] = {
     accountDAO.insertNew(ua) must beOK
-    accountDAO.getById(ua.id) must beOK
+    accountDAO.find(ua.id) must beOK
 
   }
 }

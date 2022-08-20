@@ -24,8 +24,8 @@ case class UserSession
   extends Keyable[String]
 
 trait DbUserSession extends DbMongoDAO[String, UserSession] {
-  override def getById(id: String): Result[String, UserSession] = {
-    val usess = super.getById(id)
+  override def find(id: String): Result[String, UserSession] = {
+    val usess = super.find(id)
     // if not found not further action
     if (usess.isKO) usess
     else {

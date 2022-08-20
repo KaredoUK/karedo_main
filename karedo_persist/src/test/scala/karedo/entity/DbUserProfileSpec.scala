@@ -24,7 +24,7 @@ class DbUserProfileSpec
       test.insertNew(r) must beOK
       val updated = r.copy(yob = Some(1962))
       test.update(updated)
-      test.getById(appId) match {
+      test.find(appId) match {
         case OK(x) => x.yob must beEqualTo(Some(1962))
         case KO(x) => ko(x)
       }

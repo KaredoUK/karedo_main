@@ -24,7 +24,7 @@ class DbUserAppSpec
       test.insertNew(r) must beOK
       val updated = r.copy(map_confirmed = true)
       test.update(updated)
-      test.getById(appId) match {
+      test.find(appId) match {
         case OK(x) => x.map_confirmed must beTrue
         case KO(error) => ko("update didn't work")
       }
