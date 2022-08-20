@@ -1,6 +1,6 @@
 package karedo.actors
 
-import karedo.entity.{DbUserAccount, DbUserAd, DbUserApp, DbUserSession}
+import karedo.entity._
 
 /**
   * Created by pakkio on 10/8/16.
@@ -10,4 +10,6 @@ trait KaredoCollections {
   val dbUserAccount = new DbUserAccount {}
   val dbUserSession = new DbUserSession {}
   val dbUserAd = new DbUserAd {}
+  val dbKaredoChange = new DbKaredoChange {}
+  val dbUserKaredos = new DbUserKaredos {}
 }

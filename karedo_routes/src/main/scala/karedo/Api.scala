@@ -19,7 +19,6 @@ object Api
   println(s"DbPrefs done loading $rows")
 
   val ads = new DbUserAd {}
-  val rows2 = ads.preload()
   println(s"DbUserAd done loading $rows")
 
 
