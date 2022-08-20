@@ -46,8 +46,8 @@ abstract class DbMongoDAO[K, T <: Keyable[K]]
     }
   }
 
-  override def getById(id: K) : Result[String,T] = {
-    logger.info(s"getById $id")
+  override def find(id: K) : Result[String,T] = {
+    logger.info(s"find $id")
     val ret = Try {
       dao.findOneById(id)
     } match {
