@@ -6,7 +6,7 @@ import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, RootJsonFormat, _}
 
-case class Error(err: String)
+case class Error(err: String, code: Int = 500)
 case class APIResponse(msg: String, code: Int = 200)
 
 
