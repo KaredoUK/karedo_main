@@ -4,6 +4,7 @@ import karedo.entity.dao.MongoConnection
 import karedo.entity.{DbUserAd, DbUserApp, UserAd}
 import karedo.routes.Routes
 import org.scalatest.{Matchers, WordSpec}
+import spray.json.JsObject
 
 import scala.concurrent.duration.{span, _}
 
@@ -51,9 +52,11 @@ class Specs2a1_AdLaunch extends WordSpec
     }
     s"* kar135 /account/${currentAccountId}/points" in {
       //GET /account/{account_id}/points
-      if(currentAccountId.isEmpty) fail("can't test without a valid current account")
+      if(currentAccountId.isEmpty)
+        fail("can't test without a valid current account")
       Get(s"/account/${currentAccountId.get}/points?p=$currentApplicationId") ~> routesWithLogging ~> check {
         status.intValue() shouldEqual(206) // ?????
+        responseAs[String] should be("""{"app_karedos":"10"}""")
       }
 
     }

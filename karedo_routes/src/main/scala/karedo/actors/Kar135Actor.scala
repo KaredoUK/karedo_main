@@ -1,7 +1,7 @@
 package karedo.actors
 
-import karedo.entity.{UserAccount, UserApp}
 import karedo.entity.dao.{KO, OK, Result}
+import karedo.entity.{UserAccount, UserApp}
 import karedo.util.KaredoJsonHelpers
 import org.slf4j.LoggerFactory
 import spray.json.{JsNumber, JsObject, JsString}
@@ -24,22 +24,21 @@ trait Kar135Actor extends KaredoCollections
 
     logger.info(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\napplicationId: $applicationId\nsessionId: $sessionId")
 
-    authenticate(accountId, deviceId, applicationId, sessionId, f = getPoints, allowCreation = false)
-  }
+    authenticate(accountId, deviceId, applicationId, sessionId, allowCreation = false)(
+      (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
+        if (uAccount.isKO) KO(Error(s"internal error ${uAccount.err}"))
+        else {
+          val acc = uAccount.get
+          val upoints = dbUserKaredos.find(acc.id)
+          if (upoints.isKO) KO(Error(s"internal error ${upoints.err}"))
 
-  def getPoints(uapp: Result[String, UserApp], uAcc: Result[String, UserAccount], code: Int): Result[Error, APIResponse] = {
-    if (uAcc.isKO) KO(Error(s"internal error ${uAcc.err}"))
-    else {
-      val acc = uAcc.get
-      val upoints = dbUserKaredos.find(acc.id)
-      if (upoints.isKO) KO(Error(s"internal error ${upoints.err}"))
-      val prefix = if (!acc.temp)
-        JsObject("accountId" -> JsString(acc.id)).toString + ", "
-      else ""
+          val ret = JsonAccountIfNotTemp(acc) +  jsonPair("app_karedos",upoints.get.karedos.toString)
+          OK(APIResponse(ret, code))
+        }
 
-      val ret = prefix + JsObject("app_karedos" -> JsNumber(upoints.get.karedos)).toString
-      OK(APIResponse(ret, code))
-    }
+
+      }
+    )
   }
 
 }

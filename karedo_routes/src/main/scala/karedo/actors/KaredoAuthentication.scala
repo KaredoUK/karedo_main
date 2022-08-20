@@ -3,17 +3,26 @@ package karedo.actors
 import karedo.entity.{UserAccount, UserApp}
 import karedo.entity.dao.{KO, OK, Result}
 import org.slf4j.LoggerFactory
+import spray.json.{JsObject, JsString}
 
 /**
   * Created by pakkio on 10/9/16.
   */
 trait KaredoAuthentication {
-  self : KaredoCollections =>
+  self: KaredoCollections =>
   val logger = LoggerFactory.getLogger(classOf[KaredoAuthentication])
 
-  def authenticate(accountId: String, deviceId: Option[String], applicationId: String, sessionId: Option[String],
-                   f: (Result[String, UserApp], Result[String,UserAccount], Int) => Result[Error, APIResponse],
-                   allowCreation: Boolean = true) = {
+  def authenticate
+  (
+    accountId: String,
+    deviceId: Option[String],
+    applicationId: String,
+    sessionId: Option[String],
+    allowCreation: Boolean = true
+  )
+  (
+    f: (Result[String, UserApp], Result[String, UserAccount], Int) => Result[Error, APIResponse]
+  ) = {
 
     def anonymousCall(): Result[Error, APIResponse] = {
       val uapp = dbUserApp.find(applicationId)
@@ -22,7 +31,7 @@ trait KaredoAuthentication {
         f(uapp, uAcct, 200) // app already mapped to a valid account id
       }
       else {
-        if(allowCreation) {
+        if (allowCreation) {
           // Create a new userAccount and connect it to applicationId
           val emptyAccount = UserAccount()
           val uacct = dbUserAccount.insertNew(emptyAccount)
@@ -35,7 +44,7 @@ trait KaredoAuthentication {
           }
           else KO(Error(s"Error ${uacct.err} while inserting new account"))
         }
-        else OK(APIResponse("Application not found",404))
+        else OK(APIResponse("Application not found", 404))
       }
 
 
@@ -49,7 +58,7 @@ trait KaredoAuthentication {
         val uacc = dbUserAccount.find(storedAccountId)
 
         if (accountId != storedAccountId) {
-          f(uapp, uacc,205)
+          f(uapp, uacc, 205)
         } else {
           //val uacc = dbUserAccount.getById(accountId)
           if (sessionId.isDefined) {
@@ -73,6 +82,7 @@ trait KaredoAuthentication {
         f(uapp, uacc, 201)
       }
     }
+
     val ret = if (accountId == "0") {
       anonymousCall()
     }
@@ -82,6 +92,15 @@ trait KaredoAuthentication {
 
     ret
 
+  }
+  def jsonPair(name:String, value:String): String = {
+    JsObject(name -> JsString(value)).toString
+  }
+
+  def JsonAccountIfNotTemp(uAcc: UserAccount): String = {
+    if (!uAcc.temp)
+      jsonPair("accountId",uAcc.id) + ", "
+    else ""
   }
 
 }
