@@ -1,7 +1,7 @@
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import karedo.entity.dao.MongoConnection
-import karedo.entity.{DbUserAd, DbUserApp, UserAd}
+import karedo.entity._
 import karedo.routes.Routes
 import org.scalatest.{Matchers, WordSpec}
 import spray.json.JsObject
@@ -31,7 +31,7 @@ class Specs2a1_AdLaunch extends WordSpec
 
   var currentAccountId: Option[String] = None
   val currentApplicationId = "app1"
-  dbUserAds.preload(currentApplicationId,10)
+  dbAds.preload(currentApplicationId,10)
 
   "The Rest service must implement following API" should {
 
@@ -42,7 +42,7 @@ class Specs2a1_AdLaunch extends WordSpec
         routesWithLogging ~>
         check
       {
-        responseAs[List[UserAd]] should have size (10)
+        responseAs[List[Ad]] should have size (10)
         status.intValue() shouldEqual(201)
         val uapp = dbUserApp.find(currentApplicationId)
         uapp.isOK should be(true)
@@ -56,7 +56,7 @@ class Specs2a1_AdLaunch extends WordSpec
         fail("can't test without a valid current account")
       Get(s"/account/${currentAccountId.get}/points?p=$currentApplicationId") ~> routesWithLogging ~> check {
         status.intValue() shouldEqual(206) // ?????
-        responseAs[String] should be("""{"app_karedos":"10"}""")
+        responseAs[String] should be("""{"app_karedos":"31"}""")
       }
 
     }

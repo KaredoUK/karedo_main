@@ -2,7 +2,7 @@ package karedo.util
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import karedo.entity
-import karedo.entity.{Channel, ImageAd, UserAd, VideoAd}
+import karedo.entity._
 import spray.json.DefaultJsonProtocol
 
 /**
@@ -16,5 +16,6 @@ with SprayJsonSupport  {
   implicit val jsonBacon = jsonFormat1(entity.Beacon)
   implicit val jsonImage = jsonFormat5(ImageAd)
   implicit val jsonVideo = jsonFormat6(VideoAd)
-  implicit val jsonUserAd = jsonFormat17(UserAd)
+  implicit val jsonAd = jsonFormat13(Ad)
+  implicit val jsonAds = jsonFormat2(Ads)
 }

@@ -23,6 +23,10 @@ trait Kar134Actor
 
   override val logger = LoggerFactory.getLogger(classOf[Kar134Actor])
 
+  val KAREDO_REVENUE_PERCENT = 0.80
+
+  val USER_PERCENT =   .40
+
   // exec will be moved to proper actor (or stream in business logic layer)
   def exec(accountId: String,
            deviceId: Option[String],
@@ -36,25 +40,30 @@ trait Kar134Actor
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
 
         // 1 karedo for each ad returned :)
-        def computePoints(ad: UserAd): Int = {
-          1
+        def computePoints(ad: Ad): Double = {
+          ad.price * KAREDO_REVENUE_PERCENT * USER_PERCENT
         }
 
         def getAdsFor(application: UserApp, uAcc: UserAccount): Result[Error, String] = {
-          OK {
-            val list = dbUserAd.getAdsForApplication(application.id)
-            val pointsGained = list.map(
-              ad => computePoints(ad)
-            ).sum
-            val uUserKaredos = dbUserKaredos.addKaredos(uAcc.id, pointsGained)
-            if (uUserKaredos.isKO) KO(s"Cant add karedos to user because of ${uUserKaredos.err}")
-            val uKaredoChange = dbKaredoChange.insertNew(
-              KaredoChange(accountId = uAcc.id, trans_type = "/ads", trans_info = "receiving ads", trans_currency = "karedos", karedos = pointsGained))
-            if (uKaredoChange.isKO) KO(s"Cant track karedo history in karedochange because of ${uKaredoChange.err}")
-            JsonAccountIfNotTemp(uAcc) + list.toJson.toString
-          }
+
+            val rAds = dbAds.find(application.id)
+            if (rAds.isKO) KO(Error("cant find application id in dbads"))
+            else {
+              val list = rAds.get.ads
+              val pointsGained = list.map(
+                ad => computePoints(ad)
+              ).sum.toInt
+              val uUserKaredos = dbUserKaredos.addKaredos(uAcc.id, pointsGained)
+              if (uUserKaredos.isKO) KO(s"Cant add karedos to user because of ${uUserKaredos.err}")
+              val uKaredoChange = dbKaredoChange.insertNew(
+                KaredoChange(accountId = uAcc.id, trans_type = "/ads", trans_info = "receiving ads", trans_currency = "karedos", karedos = pointsGained))
+              if (uKaredoChange.isKO) KO(s"Cant track karedo history in karedochange because of ${uKaredoChange.err}")
+              OK(JsonAccountIfNotTemp(uAcc) + list.toJson.toString)
+            }
+
         }
 
+        // STARTS HERE
         if (uapp.isOK) {
           val app = uapp.get
           //val uAccount = dbUserAccount.getById(app.account_id)
