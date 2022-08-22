@@ -1,16 +1,17 @@
-organization := "co.uk.karedo"
-name := "karedo_api"
-version := "0.0.1-SNAPSHOT"
+organization := "karedo"
+name := "actors"
+version := "0.0.1"
 
 scalaVersion := "2.11.8"
 
 resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases/"
+resolvers += Resolver.mavenLocal
 
 libraryDependencies ++= {
   val akkaV = "2.4.11"
-  val karedoV = "0.0.1-SNAPSHOT"
+  val karedoV = "0.0.1"
   Seq(
-    "co.uk.karedo" %% "persist" % karedoV,
+    "karedo" %% "persist" % karedoV,
 
     "com.typesafe" % "config" % "1.3.1",
     "com.typesafe.akka" %% "akka-stream" % akkaV,

@@ -1,10 +1,11 @@
-organization := "co.uk.karedo"
+organization := "karedo"
 name := "persist"
-version := "0.0.1-SNAPSHOT"
+version := "0.0.1"
 
 scalaVersion := "2.11.8"
 
 resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases/"
+resolvers += Resolver.mavenLocal
 
 libraryDependencies ++= {
   val akkaV = "2.4.11"
