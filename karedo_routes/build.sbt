@@ -12,6 +12,7 @@ libraryDependencies ++= {
   val karedoV = "0.0.1"
   Seq(
     "karedo" %% "persist" % karedoV,
+    "karedo" %% "rtb" % karedoV,
 
     "com.typesafe" % "config" % "1.3.1",
     "com.typesafe.akka" %% "akka-stream" % akkaV,
