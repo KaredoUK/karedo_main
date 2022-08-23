@@ -4,11 +4,22 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import karedo.entity
 import karedo.entity._
 import karedo.entity.dao.{KO, OK, Result}
-import karedo.util.KaredoJsonHelpers
+import karedo.util.{DefaultActorSystem, KaredoJsonHelpers}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.slf4j.LoggerFactory
 import spray.json._
+import akka.actor.{ActorSystem, Props}
+import karedo.rtb.actor._
+import karedo.rtb.model.AdModel._
+import akka.pattern.ask
+import akka.util.Timeout
+
+import scala.concurrent.duration._
+import scala.util.{Failure, Success, Try}
+import scala.concurrent.ExecutionContext.Implicits.global
+
+import scala.concurrent.{Await, Future}
 
 /**
   * Created by pakkio on 10/8/16.
@@ -18,7 +29,8 @@ import spray.json._
 trait Kar134Actor
   extends KaredoCollections
     with KaredoAuthentication
-    with KaredoJsonHelpers {
+    with KaredoJsonHelpers
+    with DefaultActorSystem {
 
 
   override val logger = LoggerFactory.getLogger(classOf[Kar134Actor])
@@ -26,6 +38,8 @@ trait Kar134Actor
   val KAREDO_REVENUE_PERCENT = 0.80
 
   val USER_PERCENT =   .40
+
+  val adActor = system.actorOf(Props[AdActor])
 
   // exec will be moved to proper actor (or stream in business logic layer)
   def exec(accountId: String,
@@ -40,13 +54,25 @@ trait Kar134Actor
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
 
         // 1 karedo for each ad returned :)
-        def computePoints(ad: Ad): Double = {
+        def computePoints(ad: AdUnit): Double = {
           ad.price * KAREDO_REVENUE_PERCENT * USER_PERCENT
         }
 
         def getAdsFor(application: UserApp, uAcc: UserAccount): Result[Error, String] = {
 
-            val rAds = dbAds.find(application.id)
+            // @TODO: Change this to call the karedo_rtb AdActor.
+            // @TODO: Remember to return Result object form AdActor
+            // val rAds = dbAds.find(application.id)
+
+          val count = adCount.getOrElse("10").toInt
+
+
+          try {
+            implicit val duration: Timeout = 1 second
+            val adBack = (adActor ? AdRequest(uAcc.id, count)).mapTo[Result[Error, AdResponse]]
+
+            val rAds = Await.result(adBack, 1 second)
+
             if (rAds.isKO) KO(Error("cant find application id in dbads"))
             else {
               val list = rAds.get.ads
@@ -60,6 +86,9 @@ trait Kar134Actor
               if (uKaredoChange.isKO) KO(s"Cant track karedo history in karedochange because of ${uKaredoChange.err}")
               OK(JsonAccountIfNotTemp(uAcc) + list.toJson.toString)
             }
+          } catch {
+            case e: Exception => KO(Error(e.toString))
+          }
 
         }
 
