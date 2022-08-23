@@ -12,5 +12,6 @@ trait KaredoCollections {
   val dbUserAd = new DbUserAd {}
   val dbKaredoChange = new DbKaredoChange {}
   val dbUserKaredos = new DbUserKaredos {}
+  val dbUserMessages = new DbUserMessages {}
   val dbAds = new DbAds {}
 }

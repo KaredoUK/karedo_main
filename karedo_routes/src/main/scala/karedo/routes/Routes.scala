@@ -8,13 +8,12 @@ import org.slf4j.LoggerFactory
 
 trait Routes
   extends Entities
-    with Kar134
-    with Kar135
+
     with RouteDebug {
 
   override val logger = LoggerFactory.getLogger(classOf[Routes])
 
-  override val routes: Route = kar134 ~ kar135
+  override val routes: Route = Kar134.route ~ Kar135.route ~ Kar136.route
 
 
 }

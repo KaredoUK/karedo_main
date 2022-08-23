@@ -7,10 +7,10 @@ import karedo.actors.Kar134Actor
 /**
   * Created by pakkio on 10/3/16.
   */
-trait Kar134 extends KaredoRoute
+object Kar134 extends KaredoRoute
   with Kar134Actor {
 
-  def kar134 = {
+  def route = {
     Route {
       // GET /account/{{account_id}}/ads?p={{application_id}}&s={{session_id}}&c={{ad_count}}
       path("account" / Segment / "ads") {

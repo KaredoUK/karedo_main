@@ -3,6 +3,7 @@ import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import karedo.entity.dao.MongoConnection
 import karedo.entity._
 import karedo.routes.Routes
+import karedo.util.KaredoJsonHelpers
 import org.scalatest.{Matchers, WordSpec}
 import spray.json.JsObject
 
@@ -15,6 +16,8 @@ class Specs2a1_AdLaunch extends WordSpec
   with MongoConnection
   with Routes
   with ScalatestRouteTest
+  with DbCollections
+  with KaredoJsonHelpers
 
   with Matchers {
 
@@ -96,6 +99,14 @@ class Specs2a1_AdLaunch extends WordSpec
       }
     }
 
+  }
+  "Kar136" should {
+    "* get messages even if empty" in {
+      Get(s"/account/${currentAccountId.get}/messages?p=$currentApplicationId") ~> routesWithLogging ~> check {
+        status.intValue() shouldEqual (206)
+        responseAs[List[UserMessages]] should be(List())
+      }
+    }
   }
 
 }
