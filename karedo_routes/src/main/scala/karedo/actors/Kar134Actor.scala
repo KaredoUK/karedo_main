@@ -39,7 +39,6 @@ trait Kar134Actor
     val ret = authenticate(accountId, deviceId, applicationId, sessionId) {
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
 
-        // 1 karedo for each ad returned :)
         def computePoints(ad: Ad): Double = {
           ad.price * KAREDO_REVENUE_PERCENT * USER_PERCENT
         }
@@ -47,7 +46,7 @@ trait Kar134Actor
         def getAdsFor(application: UserApp, uAcc: UserAccount): Result[Error, String] = {
 
             val rAds = dbAds.find(application.id)
-            if (rAds.isKO) KO(Error("cant find application id in dbads"))
+            if (rAds.isKO) KO(Error(s"cant find application id in dbads ${rAds.err}"))
             else {
               val list = rAds.get.ads
               val pointsGained = list.map(

@@ -31,9 +31,10 @@ trait Kar135Actor extends KaredoCollections
           val acc = uAccount.get
           val upoints = dbUserKaredos.find(acc.id)
           if (upoints.isKO) KO(Error(s"internal error ${upoints.err}"))
-
-          val ret = JsonAccountIfNotTemp(acc) +  jsonPair("app_karedos",upoints.get.karedos.toString)
-          OK(APIResponse(ret, code))
+          else {
+            val ret = JsonAccountIfNotTemp(acc) + jsonPair("app_karedos", upoints.get.karedos.toString)
+            OK(APIResponse(ret, code))
+          }
         }
 
 

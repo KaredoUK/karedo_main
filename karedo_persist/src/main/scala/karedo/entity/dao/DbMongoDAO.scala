@@ -52,8 +52,10 @@ abstract class DbMongoDAO[K, T <: Keyable[K]]
       dao.findOneById(id)
     } match {
       case Success(Some(x)) => OK(x)
-      case Success(None) => KO("No record found")
-      case Failure(x) => KO(x.toString)
+      case Success(None) =>
+        KO(s"No record found in table ${dao.collection.name} for id = $id")
+      case Failure(x) =>
+        KO(x.toString)
 
     }
     logger.info(s"getById returning $ret")
