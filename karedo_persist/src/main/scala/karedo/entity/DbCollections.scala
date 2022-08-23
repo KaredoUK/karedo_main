@@ -1,7 +1,5 @@
 package karedo.entity
 
-import karedo.entity._
-
 /**
   * Created by crajah on 11/10/2016.
   */
