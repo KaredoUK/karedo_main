@@ -84,7 +84,7 @@ trait Kar134Actor
               if (uUserKaredos.isKO) KO(s"Cant add karedos to user because of ${uUserKaredos.err}")
 
               val uKaredoChange = dbKaredoChange.insertNew(
-                KaredoChange(accountId = uAcc.id, trans_type = "/ads", trans_info = "receiving ads", trans_currency = "karedos", karedos = pointsGained))
+                KaredoChange(accountId = uAcc.id, trans_type = "CREATED", trans_info = "Sum of Karedos from Ads", trans_currency = "KAR", karedos = pointsGained))
 
               if (uKaredoChange.isKO) KO(s"Cant track karedo history in karedochange because of ${uKaredoChange.err}")
 
