@@ -68,10 +68,10 @@ trait Kar134Actor
 
 
           try {
-            implicit val duration: Timeout = 1 second
+            implicit val duration: Timeout = 5 second
             val adBack = (adActor ? AdRequest(uAcc.id, count)).mapTo[Result[Error, AdResponse]]
 
-            val rAds = Await.result(adBack, 1 second)
+            val rAds = Await.result(adBack, 10 second)
 
             if (rAds.isKO) KO(Error(s"cant find application id in dbads ${rAds.err}"))
             else {
@@ -80,11 +80,15 @@ trait Kar134Actor
                 ad => computePoints(ad)
               ).sum.toInt
               val uUserKaredos = dbUserKaredos.addKaredos(uAcc.id, pointsGained)
+
               if (uUserKaredos.isKO) KO(s"Cant add karedos to user because of ${uUserKaredos.err}")
+
               val uKaredoChange = dbKaredoChange.insertNew(
                 KaredoChange(accountId = uAcc.id, trans_type = "/ads", trans_info = "receiving ads", trans_currency = "karedos", karedos = pointsGained))
+
               if (uKaredoChange.isKO) KO(s"Cant track karedo history in karedochange because of ${uKaredoChange.err}")
-              OK(JsonAccountIfNotTemp(uAcc) + list.toJson.toString)
+
+              OK(JsonAccountIfNotTemp(uAcc) + rAds.get.toJson.toString)
             }
           } catch {
             case e: Exception => KO(Error(e.toString))
