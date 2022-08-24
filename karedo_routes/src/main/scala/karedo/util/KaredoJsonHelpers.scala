@@ -18,4 +18,7 @@ with SprayJsonSupport  {
   implicit val jsonVideo = jsonFormat6(VideoAd)
   implicit val jsonAd = jsonFormat13(Ad)
   implicit val jsonAds = jsonFormat2(Ads)
+
+  implicit val jsonAction = jsonFormat2(Action)
+  implicit val jsonMessage = jsonFormat6(UserMessages)
 }

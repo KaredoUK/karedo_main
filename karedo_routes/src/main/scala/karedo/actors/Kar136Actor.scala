@@ -1,20 +1,20 @@
 package karedo.actors
 
 import karedo.entity.dao.{KO, OK, Result}
-import karedo.entity.{UserAccount, UserApp}
+import karedo.entity.{UserAccount, UserApp, UserMessages}
 import karedo.util.KaredoJsonHelpers
 import org.slf4j.LoggerFactory
-import spray.json.{JsNumber, JsObject, JsString}
+import spray.json._
 
 /**
   * Created by pakkio on 10/8/16.
   */
 
 
-trait Kar135Actor extends KaredoCollections
+trait Kar136Actor extends KaredoCollections
   with KaredoAuthentication
   with KaredoJsonHelpers {
-  override val logger = LoggerFactory.getLogger(classOf[Kar135Actor])
+  override val logger = LoggerFactory.getLogger(classOf[Kar136Actor])
 
   // exec will be moved to proper actor (or stream in business logic layer)
   def exec(accountId: String,
@@ -29,12 +29,11 @@ trait Kar135Actor extends KaredoCollections
         if (uAccount.isKO) KO(Error(s"internal error ${uAccount.err}"))
         else {
           val acc = uAccount.get
-          val upoints = dbUserKaredos.find(acc.id)
-          if (upoints.isKO) KO(Error(s"internal error ${upoints.err}"))
-          else {
-            val ret = JsonAccountIfNotTemp(acc) + jsonPair("app_karedos", upoints.get.karedos.toString)
-            OK(APIResponse(ret, code))
-          }
+          val list = dbUserMessages.getMessages(acc.id)
+
+          val ret = JsonAccountIfNotTemp(acc) + list.toJson.toString
+          OK(APIResponse(ret, code))
+
         }
 
 

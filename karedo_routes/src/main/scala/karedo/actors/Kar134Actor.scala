@@ -73,7 +73,7 @@ trait Kar134Actor
 
             val rAds = Await.result(adBack, 1 second)
 
-            if (rAds.isKO) KO(Error("cant find application id in dbads"))
+            if (rAds.isKO) KO(Error(s"cant find application id in dbads ${rAds.err}"))
             else {
               val list = rAds.get.ads
               val pointsGained = list.map(
