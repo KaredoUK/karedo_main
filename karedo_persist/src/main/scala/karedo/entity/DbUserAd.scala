@@ -16,7 +16,7 @@ case class UserAd
 (
   // this is the univoque AdId
   @Key("_id") id: String
-  , account_id: String
+  , application_id: String
   , adType: String = ""
   , imp_url: String
   , click_url: String
@@ -35,8 +35,7 @@ trait DbUserAd extends DbMongoDAO[String, UserAd] {
 
     def add(index: Int) = {
       val applId = "applId"
-      val accountId = "acctId"
-      val inserted = insertNew(UserAd(id = index.toString, accountId, applId, imp_url = s"http://www.ad.com/?id=$index",
+      val inserted = insertNew(UserAd(id = index.toString, applId, imp_url = s"http://www.ad.com/?id=$index",
         addomain = "domain.com", click_url = "http://www.ad.com/click/?c=45", cid = "cid", crid = "crid"
         ,channels = List(Channel("channel","CH01"), Channel("channel2","CH02"))
       ))

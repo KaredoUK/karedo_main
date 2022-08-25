@@ -11,7 +11,7 @@ import spray.json.DefaultJsonProtocol
 import karedo.util.DateTimeJsonHelper._
 
 trait KaredoJsonHelpers extends DefaultJsonProtocol
-with SprayJsonSupport  {
+with SprayJsonSupport {
   implicit val jsonChannel = jsonFormat2(Channel)
   implicit val jsonBacon = jsonFormat1(entity.Beacon)
   implicit val jsonImage = jsonFormat5(ImageAd)
@@ -21,4 +21,9 @@ with SprayJsonSupport  {
 
   implicit val jsonAction = jsonFormat2(Action)
   implicit val jsonMessage = jsonFormat6(UserMessages)
+
+
+  case class Kar166Request(entries: List[UserAd] = List())
+  implicit val jsonUserAd = jsonFormat10(UserAd)
+  implicit val jsonKar166Request = jsonFormat1(Kar166Request)
 }

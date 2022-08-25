@@ -1,3 +1,4 @@
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import karedo.entity.dao.MongoConnection
@@ -110,6 +111,15 @@ class Specs2a1_AdLaunch extends WordSpec
       Get(s"/account/${currentAccountId.get}/messages?p=$currentApplicationId") ~> routesWithLogging ~> check {
         status.intValue() shouldEqual (206)
         responseAs[List[UserMessages]] should be(List())
+      }
+    }
+  }
+  "Kar166" should {
+    "* post user interactions" in {
+      val request = Kar166Request(List()).toJson.toString
+      Post(s"/account/${currentAccountId.get}/ad/interaction",
+        HttpEntity(ContentTypes.`application/json`, request)) ~> routesWithLogging ~> check {
+        status.intValue() shouldEqual (201)
       }
     }
   }
