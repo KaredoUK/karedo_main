@@ -13,7 +13,6 @@ object Util extends Configurable {
 
   def now = new DateTime(DateTimeZone.UTC)
   def serverListening(host: String, port: Int, reason: String) = {
-    println(s"Checking $host:$port $reason")
     Try {
       new Socket(host, port)
     } match {
