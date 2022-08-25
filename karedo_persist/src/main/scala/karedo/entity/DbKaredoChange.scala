@@ -5,7 +5,7 @@ import java.util.UUID
 import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.commons.MongoDBObject
 import karedo.entity.dao._
-import karedo.entity.dao.Util.now
+import karedo.util.Util.now
 import org.joda.time.DateTime
 import salat.annotations._
 

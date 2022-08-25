@@ -7,7 +7,7 @@ import com.mongodb.casbah.commons.MongoDBObject
 import karedo.entity.dao._
 import org.joda.time.DateTime
 import salat.annotations._
-import karedo.entity.dao.Util.now
+import karedo.util.Util.now
 
 import scala.util.{Failure, Success, Try}
 

@@ -3,9 +3,10 @@ package karedo.entity
 import java.util.UUID
 
 import karedo.entity.dao._
+import karedo.util.{KO, Result}
 import org.joda.time.DateTime
 import salat.annotations._
-import karedo.entity.dao.Util.now
+import karedo.util.Util.now
 
 object UserSession {
   val EXPIRY_MINUTES = 20

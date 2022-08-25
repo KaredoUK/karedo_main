@@ -2,8 +2,8 @@ package karedo.entity
 
 import java.util.UUID
 
-import karedo.entity.dao.{KO, OK}
-import org.specs2.matcher.{EitherMatchers, MatchResult, TryMatchers}
+import karedo.util.{KO, OK}
+import org.specs2.matcher.{EitherMatchers, MatchResult}
 import org.specs2.mutable.Specification
 import utils.MongoTestUtils
 

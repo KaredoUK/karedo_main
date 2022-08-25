@@ -3,7 +3,7 @@ package karedo.entity
 import karedo.entity.dao.{DbMongoDAO, Keyable}
 import org.joda.time.DateTime
 import salat.annotations._
-import karedo.entity.dao.Util.now
+import karedo.util.Util.now
 
 
 case class UserPref

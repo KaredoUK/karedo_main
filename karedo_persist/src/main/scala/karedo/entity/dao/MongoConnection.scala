@@ -5,12 +5,13 @@ import com.mongodb.ServerAddress
 import com.mongodb.casbah.MongoClientOptions
 import com.mongodb.casbah.commons.conversions.scala.{RegisterConversionHelpers, RegisterJodaTimeConversionHelpers}
 import com.typesafe.config.Config
-
+import karedo.util.{Configurable, Util}
 import org.joda.time.{DateTime, DateTimeZone}
 
 trait MongoConnection extends Configurable {
 
 
+  Util.isMongoActive
 
   lazy val mongoHost = conf.getString("mongo.server.host")
   lazy val mongoPort = conf.getInt("mongo.server.port")

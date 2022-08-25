@@ -2,8 +2,7 @@ package utils
 
 import java.util.UUID
 
-import com.typesafe.config.{Config, ConfigFactory}
-import karedo.entity.dao.{Configurable, KO, OK}
+import karedo.util.{Configurable, KO, OK}
 import org.specs2.matcher.Matcher
 import org.specs2.mutable.Specification
 

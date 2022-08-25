@@ -1,6 +1,7 @@
 package karedo.entity.dao
 
 import com.mongodb.casbah.commons.MongoDBObject
+import karedo.util.{KO, OK, Result}
 import org.slf4j.LoggerFactory
 import salat._
 import salat.dao.SalatDAO

@@ -1,5 +1,7 @@
 package karedo.entity.dao
 
+import karedo.util.Result
+
 trait DbDAO[K, T <: Keyable[K]] {
 
   def insertNew(r:T): Result[String,T]

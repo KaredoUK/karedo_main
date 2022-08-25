@@ -1,4 +1,4 @@
-package karedo.entity.dao
+package karedo.util
 
 import com.typesafe.config.ConfigFactory
 

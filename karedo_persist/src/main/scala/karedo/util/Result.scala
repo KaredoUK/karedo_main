@@ -1,4 +1,4 @@
-package karedo.entity.dao
+package karedo.util
 
 sealed trait Result[+KOT,+OKT] {
   def map[T] (f: OKT => T): Result[KOT, T]
