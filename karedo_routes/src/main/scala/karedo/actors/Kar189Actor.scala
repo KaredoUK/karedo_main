@@ -1,9 +1,9 @@
 package karedo.actors
 
 import karedo.entity.{DbCollections, UserAccount, UserApp, UserProfile}
+import karedo.util.Util.now
 import karedo.util._
 import org.slf4j.LoggerFactory
-import karedo.util.Util.now
 import spray.json._
 
 /**
@@ -11,18 +11,20 @@ import spray.json._
   */
 
 
-trait Kar188Actor
+trait Kar189Actor
   extends DbCollections
   with KaredoAuthentication
   with KaredoJsonHelpers
   with KaredoConstants {
-  override val logger = LoggerFactory.getLogger(classOf[Kar188Actor])
+  override val logger = LoggerFactory.getLogger(classOf[Kar189Actor])
 
   // exec will be moved to proper actor (or stream in business logic layer)
   def exec(accountId: String,
            deviceId: Option[String],
-           applicationId: String,
-           sessionId: Option[String]): Result[Error, APIResponse] = {
+           request: Kar189Req): Result[Error, APIResponse] = {
+
+    val applicationId = request.application_id
+    val sessionId = Some(request.session_id)
 
     logger.info(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\napplicationId: $applicationId\nsessionId: $sessionId")
 
@@ -36,18 +38,29 @@ trait Kar188Actor
 
           if( profileResult.isKO) {
             // Create a new profile.
-            val profile = UserProfile(acc.id, Some(GENDER_FEMALE), None, None, None, None, None, Some(true), Some(true), Some(true), Some(now), now)
+            val profile = UserProfile(acc.id, request.profile.gender, request.profile.first_name,
+              request.profile.last_name, request.profile.yob, request.profile.kids, request.profile.income,
+              request.profile.location, request.profile.opt_in, request.profile.third_party, Some(now), now)
+
             val res = dbUserProfile.insertNew(profile)
+
             if( res.isOK) {
-              val ret = JsonAccountIfNotTemp(acc) + profile.toJson.toString
-              OK(APIResponse(ret, code))
+              OK(APIResponse("", code))
             } else {
               KO(Error(s"Internal Error ${res.err}"))
             }
           } else {
-            // Send the profile we have
-            val ret = JsonAccountIfNotTemp(acc) + profileResult.get.toJson.toString
-            OK(APIResponse(ret, code))
+            val profile = UserProfile(acc.id, request.profile.gender, request.profile.first_name,
+              request.profile.last_name, request.profile.yob, request.profile.kids, request.profile.income,
+              request.profile.location, request.profile.opt_in, request.profile.third_party, profileResult.get.ts_created , now)
+
+            val res = dbUserProfile.update(profile)
+
+            if( res.isOK) {
+              OK(APIResponse("", code))
+            } else {
+              KO(Error(s"Internal Error ${res.err}"))
+            }
           }
         }
       }
