@@ -5,7 +5,7 @@ import akka.http.scaladsl.model.{HttpEntity, _}
 import akka.http.scaladsl.server.Directives._
 import karedo.actors.{APIResponse, Error}
 import karedo.entity._
-import karedo.entity.dao.{KO, OK, Result}
+import karedo.util.{KO, OK, Result}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import spray.json._
