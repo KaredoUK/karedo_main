@@ -1,7 +1,7 @@
 package karedo.actors
 
 import karedo.entity.{UserAccount, UserApp}
-import karedo.entity.dao.{KO, OK, Result}
+import karedo.util.{KO, OK, Result}
 import org.slf4j.LoggerFactory
 import spray.json.{JsObject, JsString}
 

@@ -1,6 +1,6 @@
 package karedo.actors
 
-import karedo.entity.dao.{KO, OK, Result}
+import karedo.util.{KO, OK, Result}
 import karedo.entity.{UserAccount, UserApp}
 import karedo.util.KaredoJsonHelpers
 import org.slf4j.LoggerFactory

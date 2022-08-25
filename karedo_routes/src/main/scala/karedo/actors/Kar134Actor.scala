@@ -3,7 +3,7 @@ package karedo.actors
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import karedo.entity
 import karedo.entity._
-import karedo.entity.dao.{KO, OK, Result}
+import karedo.util.{KO, OK, Result}
 import karedo.util.{DefaultActorSystem, KaredoJsonHelpers}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
