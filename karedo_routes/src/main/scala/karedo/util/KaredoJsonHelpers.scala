@@ -31,27 +31,14 @@ trait KaredoJsonHelpers
 
   implicit val jsonUserProfile = jsonFormat12(UserProfile)
 
-  /*
-  {
-    "application_id": "{{application_id}}",
-    "session_id": "{{session_id}}",
-    "profile": {
-        "gender":"",
-        "first_name":"",
-        "last_name": "",
-        "yob": "",
-        "kids": "",
-        "income": "",
-        "location": "",
-        "opt-in": "",
-        "third-party": ""
-    }
-}
-   */
   case class Kar189ReqProfile(gender:Option[String], first_name:Option[String], last_name: Option[String],
                               yob: Option[Int], kids: Option[Int], income: Option[Int], location: Option[Boolean],
                               opt_in: Option[Boolean], third_party: Option[Boolean])
   case class Kar189Req(application_id: String, session_id: String, profile: Kar189ReqProfile )
   implicit val jsonKar189ReqProfile = jsonFormat9(Kar189ReqProfile)
   implicit val jsonKar189Req:RootJsonFormat[Kar189Req] = jsonFormat3(Kar189Req)
+
+  implicit val jsonUserPref = jsonFormat2(UserPref)
+  implicit val jsonUserPrefs:RootJsonFormat[UserPrefs] = jsonFormat4(UserPrefs)
+
 }
