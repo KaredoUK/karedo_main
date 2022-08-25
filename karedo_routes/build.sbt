@@ -1,6 +1,6 @@
 organization := "karedo"
 name := "routes"
-version := "0.0.1"
+version := "0.0.2-SNAPSHOT"
 
 scalaVersion := "2.11.8"
 
@@ -9,7 +9,7 @@ resolvers += Resolver.mavenLocal
 
 libraryDependencies ++= {
   val akkaV = "2.4.11"
-  val karedoV = "0.0.1"
+  val karedoV = "0.0.2-SNAPSHOT"
   Seq(
     "karedo" %% "persist" % karedoV,
     "karedo" %% "rtb" % karedoV,
