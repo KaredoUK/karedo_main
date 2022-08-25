@@ -64,6 +64,23 @@ abstract class DbMongoDAO[K, T <: Keyable[K]]
 
   }
 
+  override def ids : Result[String,List[K]] = {
+    logger.info(s"findAll")
+    val ret = Try {
+      dao.ids(MongoDBObject("_id" -> MongoDBObject("$exists" -> true)))
+    } match {
+      case Success(x) => OK(x)
+      case Success(Nil) =>
+        KO(s"No record found in table ${dao.collection.name} for ")
+      case Failure(x) =>
+        KO(x.toString)
+
+    }
+    logger.info(s"ids returning $ret")
+    ret
+
+  }
+
   override def update(r: T): Result[String,T] = {
     val id = r.id
     logger.info(s"updating $r")
