@@ -1,6 +1,6 @@
 package karedo.actors
 
-import karedo.entity.{UserAccount, UserApp}
+import karedo.entity.{DbCollections, UserAccount, UserApp}
 import karedo.util.{KO, OK, Result}
 import org.slf4j.LoggerFactory
 import spray.json.{JsObject, JsString}
@@ -9,7 +9,7 @@ import spray.json.{JsObject, JsString}
   * Created by pakkio on 10/9/16.
   */
 trait KaredoAuthentication {
-  self: KaredoCollections =>
+  self: DbCollections =>
   val logger = LoggerFactory.getLogger(classOf[KaredoAuthentication])
 
   def authenticate

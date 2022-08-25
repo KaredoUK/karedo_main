@@ -27,6 +27,8 @@ trait KaredoRoute  {
           result match {
             case OK(response) =>
               HttpResponse(response.code,entity=HttpEntity(ContentTypes.`application/json`,response.msg))
+
+            // @TODO: Response has to be as JSON as well. Format: { "error_code": "", "error_text": "" }
             case KO(Error(err,code)) =>
               HttpResponse(code,entity=HttpEntity(ContentTypes.`text/plain(UTF-8)`,err))
 

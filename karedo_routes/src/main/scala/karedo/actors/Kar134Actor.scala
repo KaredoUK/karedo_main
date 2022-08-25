@@ -3,8 +3,7 @@ package karedo.actors
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import karedo.entity
 import karedo.entity._
-import karedo.util.{KO, OK, Result}
-import karedo.util.{DefaultActorSystem, KaredoJsonHelpers}
+import karedo.util._
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.slf4j.LoggerFactory
@@ -18,7 +17,6 @@ import akka.util.Timeout
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 import scala.concurrent.ExecutionContext.Implicits.global
-
 import scala.concurrent.{Await, Future}
 
 /**
@@ -27,17 +25,14 @@ import scala.concurrent.{Await, Future}
 
 
 trait Kar134Actor
-  extends KaredoCollections
+  extends DbCollections
     with KaredoAuthentication
     with KaredoJsonHelpers
+    with KaredoConstants
     with DefaultActorSystem {
 
 
   override val logger = LoggerFactory.getLogger(classOf[Kar134Actor])
-
-  val KAREDO_REVENUE_PERCENT = 0.80
-
-  val USER_PERCENT =   .40
 
   val adActor = system.actorOf(Props[AdActor])
 

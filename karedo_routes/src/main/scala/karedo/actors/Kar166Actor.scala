@@ -1,6 +1,6 @@
 package karedo.actors
 
-import karedo.entity.{UserAccount, UserApp}
+import karedo.entity.{DbCollections, UserAccount, UserApp}
 import karedo.util.{KO, KaredoJsonHelpers, OK, Result}
 import org.slf4j.LoggerFactory
 import spray.json._
@@ -10,7 +10,7 @@ import spray.json._
   */
 
 
-trait Kar166Actor extends KaredoCollections
+trait Kar166Actor extends DbCollections
   with KaredoAuthentication
   with KaredoJsonHelpers {
   override val logger = LoggerFactory.getLogger(classOf[Kar166Actor])

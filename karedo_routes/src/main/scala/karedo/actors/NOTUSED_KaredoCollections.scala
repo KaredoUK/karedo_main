@@ -5,7 +5,10 @@ import karedo.entity._
 /**
   * Created by pakkio on 10/8/16.
   */
-trait KaredoCollections {
+// Chandan : Created karedo.entity.DbCollections in karedo_persist. Better to put in a central place.
+
+/*
+trait NOTUSED_KaredoCollections {
   val dbUserApp = new DbUserApp {}
   val dbUserAccount = new DbUserAccount {}
   val dbUserSession = new DbUserSession {}
@@ -15,3 +18,4 @@ trait KaredoCollections {
   val dbUserMessages = new DbUserMessages {}
   val dbAds = new DbAds {}
 }
+*/

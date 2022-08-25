@@ -1,20 +1,22 @@
 package karedo.actors
 
+import karedo.entity.{DbCollections, UserAccount, UserApp, UserProfile}
 import karedo.util._
-import karedo.entity.{DbCollections, UserAccount, UserApp}
 import org.slf4j.LoggerFactory
-import spray.json.{JsNumber, JsObject, JsString}
+import karedo.util.Util.now
+import spray.json._
 
 /**
   * Created by pakkio on 10/8/16.
   */
 
 
-trait Kar135Actor extends DbCollections
+trait Kar188Actor
+  extends DbCollections
   with KaredoAuthentication
   with KaredoJsonHelpers
   with KaredoConstants {
-  override val logger = LoggerFactory.getLogger(classOf[Kar135Actor])
+  override val logger = LoggerFactory.getLogger(classOf[Kar188Actor])
 
   // exec will be moved to proper actor (or stream in business logic layer)
   def exec(accountId: String,
@@ -29,20 +31,26 @@ trait Kar135Actor extends DbCollections
         if (uAccount.isKO) KO(Error(s"internal error ${uAccount.err}"))
         else {
           val acc = uAccount.get
-          val upoints = dbUserKaredos.find(acc.id)
-          // @TODO: Add capability of converting karedos to app_karedos
 
-          if (upoints.isKO) KO(Error(s"internal error ${upoints.err}"))
-          else {
-            val app_karedos:Int = upoints.get.karedos / APP_KAREDO_CONV
-            val ret = JsonAccountIfNotTemp(acc) + jsonPair("app_karedos", app_karedos.toString)
+          val profileResult = dbUserProfile.find(acc.id)
+
+          if( profileResult.isKO) {
+            // Create a new profile.
+            val profile = UserProfile(acc.id, GENDER_FEMALE, "", "", None, None, None, true, true, true, now, now)
+            val res = dbUserProfile.insertNew(profile)
+            if( res.isOK) {
+              val ret = JsonAccountIfNotTemp(acc) + profile.toJson.toString
+              OK(APIResponse(ret, code))
+            } else {
+              KO(Error(s"Internal Error ${res.err}"))
+            }
+          } else {
+            // Send the profile we have
+            val ret = JsonAccountIfNotTemp(acc) + profileResult.get.toJson.toString
             OK(APIResponse(ret, code))
           }
         }
-
-
       }
     )
   }
-
 }
