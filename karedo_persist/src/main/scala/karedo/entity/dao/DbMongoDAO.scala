@@ -70,8 +70,6 @@ abstract class DbMongoDAO[K, T <: Keyable[K]]
       dao.ids(MongoDBObject("_id" -> MongoDBObject("$exists" -> true)))
     } match {
       case Success(x) => OK(x)
-      case Success(Nil) =>
-        KO(s"No record found in table ${dao.collection.name} for ")
       case Failure(x) =>
         KO(x.toString)
 
