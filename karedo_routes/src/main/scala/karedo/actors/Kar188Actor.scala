@@ -39,14 +39,14 @@ trait Kar188Actor
             val profile = UserProfile(acc.id, Some(GENDER_FEMALE), None, None, None, None, None, Some(true), Some(true), Some(true), Some(now), now)
             val res = dbUserProfile.insertNew(profile)
             if( res.isOK) {
-              val ret = JsonAccountIfNotTemp(acc) + profile.toJson.toString
+              val ret = profile.toJson.toString
               OK(APIResponse(ret, code))
             } else {
               KO(Error(s"Internal Error ${res.err}"))
             }
           } else {
             // Send the profile we have
-            val ret = JsonAccountIfNotTemp(acc) + profileResult.get.toJson.toString
+            val ret = profileResult.get.toJson.toString
             OK(APIResponse(ret, code))
           }
         }

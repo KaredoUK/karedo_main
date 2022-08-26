@@ -38,7 +38,9 @@ trait KaredoJsonHelpers
   implicit val jsonKar189ReqProfile = jsonFormat9(Kar189ReqProfile)
   implicit val jsonKar189Req:RootJsonFormat[Kar189Req] = jsonFormat3(Kar189Req)
 
-  implicit val jsonUserPref = jsonFormat2(UserPref)
-  implicit val jsonUserPrefs:RootJsonFormat[UserPrefs] = jsonFormat4(UserPrefs)
+  implicit val jsonUserPrefs = jsonFormat4(UserPrefs)
+
+  case class Kar195Req(application_id: String, session_id: String, prefs: Map[String, Double] )
+  implicit val jsonKar195Req = jsonFormat3(Kar195Req)
 
 }

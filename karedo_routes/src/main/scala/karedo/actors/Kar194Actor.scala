@@ -1,6 +1,6 @@
 package karedo.actors
 
-import karedo.entity.{DbCollections, UserAccount, UserApp, UserPrefs, UserPref}
+import karedo.entity.{DbCollections, UserAccount, UserApp, UserPrefs}
 import karedo.util.Util.now
 import karedo.util._
 import org.slf4j.LoggerFactory
@@ -40,13 +40,15 @@ trait Kar194Actor
 
             if( prefListRes.isOK ) {
               val prefList = prefListRes.get
+              val prefMap = prefList.map (x => x -> 0.5) (collection.breakOut): Map[String, Double]
 
               val prefs = UserPrefs(acc.id,
-                prefList.map( UserPref(_, 0.5) ), Some(now), now )
+                prefMap, Some(now), now )
 
               val res = dbUserPrefs.insertNew(prefs)
+
               if( res.isOK) {
-                val ret = JsonAccountIfNotTemp(acc) + prefs.toJson.toString
+                val ret = prefs.toJson.toString
                 OK(APIResponse(ret, code))
               } else {
                 KO(Error(s"Internal Error ${res.err}"))
@@ -56,7 +58,7 @@ trait Kar194Actor
             }
           } else {
             // Send the profile we have
-            val ret = JsonAccountIfNotTemp(acc) + prefsRes.get.toJson.toString
+            val ret = prefsRes.get.toJson.toString
             OK(APIResponse(ret, code))
           }
         }
