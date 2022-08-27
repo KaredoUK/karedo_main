@@ -27,7 +27,7 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-slf4j" % akkaV,
     "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test",
 
-
+    "org.clapper" %% "classutil" % "1.0.11",
     "org.scalatest" %% "scalatest" % "3.0.0" % "test",
     "org.specs2" %% "specs2-core" % "3.8.5" % "test"
   )
@@ -46,6 +46,6 @@ scalacOptions ++= Seq(
 
 parallelExecution in Test := false
 
-test in assembly := {}
+//test in assembly := {}
 
 

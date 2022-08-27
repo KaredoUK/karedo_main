@@ -3,6 +3,7 @@ package karedo.routes
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.{HttpEntity, _}
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 import karedo.actors.{APIResponse, Error}
 import karedo.entity._
 import karedo.util.{KO, OK, Result}
@@ -19,6 +20,8 @@ import scala.concurrent.Future
   * Created by pakkio on 05/10/16.
   */
 trait KaredoRoute  {
+
+  def route: Route
 
   def doCall(f: => Result[Error, APIResponse]) =
       complete(
