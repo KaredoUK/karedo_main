@@ -17,4 +17,5 @@ trait DbCollections {
   val dbUserProfile = new DbUserProfile {}
   val dbUserSession = new DbUserSession {}
   val dbUserMessages = new DbUserMessages {}
+  val dbUserIntent = new DbUserIntent {}
 }
