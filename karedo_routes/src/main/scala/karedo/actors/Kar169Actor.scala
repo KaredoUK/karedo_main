@@ -35,23 +35,26 @@ trait Kar169Actor
         else {
           val acc = uAccount.get
 
-          val intentRes = dbUserIntent.find(acc.id)
+          dbUserIntent.find(acc.id) match {
+            case OK(intent) => {
+              intentId match {
+                case None => OK(APIResponse(intent.toJson.toString))
+                case Some(intent_id) => {
+                  val found_intent = intent.intents.filter(i => i.intent_id.equals(intent_id))
 
-          if( intentRes.isKO ) {
-            // create a new one
-            val userIntent = UserIntent(acc.id, List() )
-
-            val uIsertRes = dbUserIntent.insertNew(userIntent)
-
-            if( uIsertRes.isOK) {
-              // Send the new stuff
-              OK(APIResponse(userIntent.toJson.toString))
-            } else {
-              KO(Error(s"Internal error ${uIsertRes.err}"))
+                  val new_intent = intent.copy(intents = found_intent)
+                  OK(APIResponse(new_intent.toJson.toString, code))
+                }
+              }
             }
-          } else {
-            // get what's there
-            OK(APIResponse(intentRes.get.toJson.toString))
+            case KO(_) => {
+              val userIntent = UserIntent(acc.id, List() )
+
+              dbUserIntent.insertNew(userIntent) match {
+                case OK(x) => OK(APIResponse(userIntent.toJson.toString, code))
+                case KO(error) => KO(Error(s"Internal error ${error}"))
+              }
+            }
           }
         }
       }

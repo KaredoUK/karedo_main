@@ -26,8 +26,7 @@ object Kar169 extends KaredoRoute
                     (applicationId, sessionId) =>
                       doCall({
                         exec(accountId, deviceId, applicationId, sessionId,
-//                          (if (intentId != null && ! intentId.isEmpty) Some(intentId) else None ) )
-                            Some(intentId) )
+                          (if (intentId != null && ! intentId.isEmpty && ! intentId.equals("0")) Some(intentId) else None ) )
                       }
                     )
                 }
