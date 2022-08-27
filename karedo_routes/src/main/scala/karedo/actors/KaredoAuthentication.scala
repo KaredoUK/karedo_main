@@ -28,6 +28,7 @@ trait KaredoAuthentication {
       val uapp = dbUserApp.find(applicationId)
       if (uapp.isOK) {
         val uAcct = dbUserAccount.find(uapp.get.account_id)
+        // @TODO: Can;t be 200 OK here. @Chandan checking to see which is the right code.
         f(uapp, uAcct, 200) // app already mapped to a valid account id
       }
       else {
