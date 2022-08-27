@@ -46,4 +46,13 @@ trait KaredoJsonHelpers
   implicit val jsonIntent = jsonFormat6(IntentUnit)
   implicit val jsonUserIntent:RootJsonFormat[UserIntent] = jsonFormat2(UserIntent)
 
+  case class Kar170ReqIntentUnit(why: String, what: String, when: String, where: String)
+  case class Kar170Req(application_id: String, session_id: String, intent: Kar170ReqIntentUnit )
+
+  implicit val jsonKar170ReqIntentUnit = jsonFormat4(Kar170ReqIntentUnit)
+  implicit val jsonKar170Req:RootJsonFormat[Kar170Req] = jsonFormat3(Kar170Req)
+
+  case class Kar172Req(application_id: String, session_id: String )
+  implicit val jsonKar172Req = jsonFormat2(Kar172Req)
+
 }
