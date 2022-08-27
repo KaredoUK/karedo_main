@@ -18,8 +18,8 @@ trait Routes
       Class.forName(name).getField("MODULE$").get(null).asInstanceOf[T]
 
     import org.clapper.classutil.ClassFinder
-    val rootRoute: Route = path("/") {
-      get(complete("OK"))
+    val rootRoute: Route = path("") {
+      get(complete("Karedo API version 0.0.2-SNAPSHOT"))
     }
     val classes = ClassFinder().getClasses()
     val classesInfos = ClassFinder.concreteSubclasses("karedo.routes.KaredoRoute",classes)
