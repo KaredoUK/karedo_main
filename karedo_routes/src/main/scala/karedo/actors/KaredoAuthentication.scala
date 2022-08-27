@@ -1,9 +1,10 @@
 package karedo.actors
 
-import karedo.entity.{DbCollections, UserAccount, UserApp}
+import karedo.entity.{UserAccount, UserApp}
 import karedo.util.{KO, OK, Result}
 import org.slf4j.LoggerFactory
 import spray.json.{JsObject, JsString}
+import karedo.util.DbCollections
 
 /**
   * Created by pakkio on 10/9/16.

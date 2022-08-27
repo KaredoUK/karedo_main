@@ -26,7 +26,7 @@ class DbUserPrefsSpec
       val updated = r.copy(prefs = list2)
       test.update(updated)
       test.find(acctId) match {
-        case OK(x) => x.prefs.head must beEqualTo(("IAB1",4.0))
+        case OK(x) => x.prefs must contain(("IAB1",4.0))
         case KO(x) => ko(x)
       }
 

@@ -3,7 +3,6 @@ package karedo.actors
 import java.util.UUID
 
 import karedo.entity._
-import karedo.util.Util.now
 import karedo.util._
 import org.slf4j.LoggerFactory
 import spray.json._

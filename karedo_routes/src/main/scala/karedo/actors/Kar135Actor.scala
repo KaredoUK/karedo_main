@@ -1,7 +1,7 @@
 package karedo.actors
 
 import karedo.util._
-import karedo.entity.{DbCollections, UserAccount, UserApp}
+import karedo.entity.{ UserAccount, UserApp}
 import org.slf4j.LoggerFactory
 import spray.json.{JsNumber, JsObject, JsString}
 

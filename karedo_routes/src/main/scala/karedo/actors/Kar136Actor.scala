@@ -1,8 +1,8 @@
 package karedo.actors
 
 import karedo.util.{KO, OK, Result}
-import karedo.entity.{DbCollections, UserAccount, UserApp, UserMessages}
-import karedo.util.KaredoJsonHelpers
+import karedo.entity.{UserAccount, UserApp, UserMessages}
+import karedo.util._
 import org.slf4j.LoggerFactory
 import spray.json._
 

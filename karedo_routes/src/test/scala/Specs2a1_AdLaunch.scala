@@ -8,6 +8,7 @@ import karedo.rtb.model.AdModel.AdResponse
 import karedo.util.KaredoJsonHelpers
 import org.scalatest.{Matchers, WordSpec}
 import spray.json.JsObject
+import karedo.util._
 
 import scala.concurrent.duration.{span, _}
 

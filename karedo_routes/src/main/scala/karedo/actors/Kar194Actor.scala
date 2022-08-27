@@ -1,6 +1,6 @@
 package karedo.actors
 
-import karedo.entity.{DbCollections, UserAccount, UserApp, UserPrefs}
+import karedo.entity.{UserAccount, UserApp, UserPrefs}
 import karedo.util.Util.now
 import karedo.util._
 import org.slf4j.LoggerFactory

@@ -12,10 +12,10 @@ import karedo.util.Util.now
   */
 case class UserIntent (
                         @Key("_id") id:String
-                      , intents: List[Intent]
+                      , intents: List[IntentUnit]
                       ) extends Keyable[String]
 
-case class Intent (
+case class IntentUnit (
                   intent_id: String = UUID.randomUUID().toString
                   , why: String
                   , what: String

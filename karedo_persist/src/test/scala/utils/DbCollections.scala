@@ -1,4 +1,6 @@
-package karedo.entity
+package utils
+
+import karedo.entity._
 
 /**
   * Created by crajah on 11/10/2016.
