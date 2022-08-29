@@ -12,8 +12,8 @@ case class UserEmail
   @Key("_id") id: String
   , account_id: String
   , active: Boolean
-  , ts_created: DateTime = now
-  , ts_updated: DateTime = now.plusMinutes(20)
+  , ts_created: Option[DateTime] = Some(now)
+  , ts_updated: DateTime = now
 ) extends Keyable[String]
 
 trait DbUserEmail extends DbMongoDAO[String,UserEmail]

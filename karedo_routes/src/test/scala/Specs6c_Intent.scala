@@ -22,18 +22,19 @@ class Specs6c_Intent extends WordSpec
   with ScalatestRouteTest
   with DbCollections
   with KaredoJsonHelpers
-  with Matchers {
+  with Matchers
+  with KaredoConstants {
 
   implicit val timeout = RouteTestTimeout(1000.second(span))
 
   // clear everything for tests to be understandable
   mongoClient.dropDatabase(mongoDbName)
   dbUserIntent.deleteAll()
-  val uuids:Array[String] = Array(UUID.randomUUID().toString, UUID.randomUUID().toString, UUID.randomUUID().toString)
+  val uuids:Array[String] = Array(getNewRandomID, getNewRandomID, getNewRandomID)
 
-  val account_id = UUID.randomUUID().toString
-  val application_id = UUID.randomUUID().toString
-  val session_id = UUID.randomUUID().toString
+  val account_id = getNewRandomID
+  val application_id = getNewRandomID
+  val session_id = getNewRandomID
 
   "Kar169 No Intent ID" should {
     "GET /account/{{account_id}}/intent/{{intent_id}}" in {

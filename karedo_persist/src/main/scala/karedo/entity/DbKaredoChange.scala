@@ -14,11 +14,16 @@ import scala.util.{Failure, Success, Try}
 /**
   * Created by pakkio on 10/1/16.
   */
+
+/*
+CREATED, SEND_RECEIVE, SALE_APP, REDEEM_PAYPAL, REDEEM_BANK, REDEEM_CARD
+ */
+
 case class KaredoChange
 (
   @Key("_id") id: String = UUID.randomUUID().toString
   , accountId: String
-  , karedos: Int
+  , karedos: Double
   , trans_type: String
   , trans_info: String
   , trans_currency: String
@@ -27,6 +32,7 @@ case class KaredoChange
 ) extends Keyable[String]
 
 trait DbKaredoChange extends DbMongoDAO[String,KaredoChange] {
+
   def byAccount(id:String) = MongoDBObject("accountId" -> id)
 
   def getChanges(id:String) = {

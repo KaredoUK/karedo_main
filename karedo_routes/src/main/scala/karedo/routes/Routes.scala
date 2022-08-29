@@ -4,7 +4,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import karedo.sample.Entities
 import karedo.util.RouteDebug
-import org.clapper.classutil.ClassInfo
+//import org.clapper.classutil.ClassInfo
 import org.slf4j.LoggerFactory
 
 trait Routes
@@ -14,7 +14,7 @@ trait Routes
 
   override val routes = Kar134.route ~ Kar135.route ~ Kar136.route ~ Kar166.route ~
     Kar169.route ~ Kar170.route ~ Kar171.route ~ Kar172.route ~ Kar188.route ~ Kar189.route ~
-    Kar194.route ~ Kar195.route 
+    Kar194.route ~ Kar195.route ~ Kar141_SendCode.route ~ Kar143.route ~ Kar145.route
 
 //  override val routes = {
 //    println("findAllRoutesExtendingKaredoRoute")

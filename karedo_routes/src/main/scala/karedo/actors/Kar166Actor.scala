@@ -4,6 +4,7 @@ import karedo.entity.{UserAccount, UserApp}
 import karedo.util._
 import org.slf4j.LoggerFactory
 import spray.json._
+import karedo.util.Util.now
 
 /**
   * Created by pakkio on 10/8/16.
@@ -25,10 +26,9 @@ trait Kar166Actor extends DbCollections
         if (uAccount.isKO) KO(Error(s"internal error ${uAccount.err}"))
         else {
           val acc = uAccount.get
-          val results = request.entries.foreach(ad => dbUserAd.insertNew(ad))
+          val results = request.entries.foreach(ad => dbUserAd.insertNew(ad.copy(ts = Some(now) ) ))
 
-          val ret = JsonAccountIfNotTemp(acc)
-          OK(APIResponse(ret, code))
+          OK(APIResponse("", code))
 
         }
 

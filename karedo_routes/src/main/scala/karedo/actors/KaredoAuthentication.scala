@@ -99,10 +99,9 @@ trait KaredoAuthentication {
     JsObject(name -> JsString(value)).toString
   }
 
-  def JsonAccountIfNotTemp(uAcc: UserAccount): String = {
-    if (!uAcc.temp)
-      jsonPair("accountId",uAcc.id) + ", "
-    else ""
+  def JsonAccountIfNotTemp(uAcc: UserAccount): Option[String] = {
+    if (!uAcc.temp) Some(uAcc.id)
+    else None
   }
 
 }

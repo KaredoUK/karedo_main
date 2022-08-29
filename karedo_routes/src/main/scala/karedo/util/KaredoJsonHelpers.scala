@@ -3,6 +3,7 @@ package karedo.util
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import karedo.entity
 import karedo.entity._
+import karedo.rtb.model.AdModel.AdUnit
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
 /**
@@ -13,6 +14,9 @@ import karedo.util.DateTimeJsonHelper._
 trait KaredoJsonHelpers
   extends DefaultJsonProtocol
   with SprayJsonSupport {
+
+  case class ErrorRes(error_code: Int, error_type: Option[String], error_text: String)
+  implicit val jsonErrorRes = jsonFormat3(ErrorRes)
 
   implicit val jsonChannel = jsonFormat2(Channel)
   implicit val jsonBacon = jsonFormat1(entity.Beacon)
@@ -55,4 +59,25 @@ trait KaredoJsonHelpers
   case class Kar172Req(application_id: String, session_id: String )
   implicit val jsonKar172Req = jsonFormat2(Kar172Req)
 
+  case class Kar141_SendCode_Req(application_id: String, first_name: String, last_name: String,
+                                 msisdn: String, user_type: String, email: String)
+  implicit val jsonKar141_SendCode_Req = jsonFormat6(Kar141_SendCode_Req)
+
+  case class Kar141_SendCode_Res(returning_user: Boolean, account_id: Option[String])
+  implicit val jsonKar141_SendCode_Res = jsonFormat2(Kar141_SendCode_Res)
+
+  case class SMSRequest(recipients: String, originator: String, body: String)
+  implicit val jsonSMSRequest = jsonFormat3(SMSRequest)
+
+  case class Kar145Req(application_id:String, msisdn:String, sms_code:String, password:String)
+  implicit val jsonKar145Req = jsonFormat4(Kar145Req)
+
+  case class Kar145Res(account_id:String)
+  implicit val jsonKar145Res = jsonFormat1(Kar145Res)
+
+  case class Kar135Res(account_id:Option[String], app_karedos:Int)
+  implicit val jsonKar135Res = jsonFormat2(Kar135Res)
+
+  case class Kar134Res(account_id:Option[String], ad_count:Int, ads:List[AdUnit] )
+  implicit val jsonKar134Res = jsonFormat3(Kar134Res)
 }

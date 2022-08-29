@@ -40,7 +40,7 @@ trait Kar171Actor
           case OK(acc) => {
             dbUserIntent.find(acc.id) match {
               case OK(intent) => {
-                val newIntent = IntentUnit(UUID.randomUUID().toString,
+                val newIntent = IntentUnit(getNewRandomID,
                   request.intent.why, request.intent.what, request.intent.when, request.intent.where, now)
 
                 val newUserIntent = intent.copy(intents = intent.intents ++ List(newIntent))
@@ -51,7 +51,7 @@ trait Kar171Actor
                 }
               }
               case KO(error) => {
-                val newIntent = IntentUnit(UUID.randomUUID().toString,
+                val newIntent = IntentUnit(getNewRandomID,
                   request.intent.why, request.intent.what, request.intent.when, request.intent.where, now)
                 val userIntent = UserIntent(acc.id, List(newIntent) )
 

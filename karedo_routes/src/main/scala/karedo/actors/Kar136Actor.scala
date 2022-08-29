@@ -31,7 +31,7 @@ trait Kar136Actor extends DbCollections
           val acc = uAccount.get
           val list = dbUserMessages.getMessages(acc.id)
 
-          val ret = JsonAccountIfNotTemp(acc) + list.toJson.toString
+          val ret = list.toJson.toString
           OK(APIResponse(ret, code))
 
         }

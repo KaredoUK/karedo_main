@@ -7,6 +7,7 @@ scalaVersion := "2.11.8"
 resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases/"
 resolvers += Resolver.mavenLocal
 
+
 libraryDependencies ++= {
   val akkaV = "2.4.11"
   val karedoV = "0.0.2-SNAPSHOT"

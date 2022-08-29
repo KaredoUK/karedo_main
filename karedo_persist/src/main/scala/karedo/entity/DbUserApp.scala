@@ -10,6 +10,7 @@ case class UserApp
   // this is the application id which must be univoque
   @Key("_id") id: String
   , account_id: String
+  // Only true is Mobile mapped to Application
   , map_confirmed: Boolean = false
   , ts: DateTime = now
 

@@ -17,14 +17,14 @@ case class UserAd
   // this is the univoque AdId
   @Key("_id") id: String
   , application_id: String
-  , adType: String = ""
+  , ad_type: String = ""
   , imp_url: String
   , click_url: String
   , addomain: String
   , cid: String
   , crid: String
   , channels: List[Channel] = List()
-  , ts: DateTime = now
+  , ts: Option[DateTime] = Some(now)
 
 ) extends Keyable[String]
 
