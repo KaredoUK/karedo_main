@@ -5,18 +5,18 @@ package karedo.routes
   */
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import karedo.actors.Kar145Actor
+import karedo.actors.Kar145Actor_EnterCode
 
 /**
   * Created by pakkio on 10/3/16.
   */
-object Kar145 extends KaredoRoute
-  with Kar145Actor {
+object Kar145_EnterCode extends KaredoRoute
+  with Kar145Actor_EnterCode {
 
   def route = {
     Route {
 
-      // GET /verify?e={email}&c={email_code}&a={account_id}
+      // POST /verify?e={email}&c={email_code}&a={account_id}
       path("verify" ) {
         post {
           entity(as[Kar145Req]) {

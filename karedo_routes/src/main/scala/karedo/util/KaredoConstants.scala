@@ -26,6 +26,13 @@ trait KaredoConstants extends Configurable {
   val TRANS_TYPE_REDEEM_BANK = "REDEEM_BANK"
   val TRANS_TYPE_REDEEM_CARD = "REDEEM_CARD"
 
+  val HTTP_OK = 200
+  val HTTP_PARTIAL = 205
+  val HTTP_UNAUTHORISED = 401
+  val HTTP_NOT_FOUND = 404
+  val HTTP_CONFLICT = 409
+  val HTTP_SERVER_ERROR = 500
+
   val DEFAULT_CUSTOMER_TYPE = "CUSTOMER"
 
   def getNewRandomID = UUID.randomUUID().toString

@@ -10,12 +10,12 @@ import org.slf4j.LoggerFactory
   */
 
 
-trait Kar145Actor
+trait Kar145Actor_EnterCode
   extends DbCollections
   with KaredoAuthentication
   with KaredoJsonHelpers
   with KaredoConstants {
-  override val logger = LoggerFactory.getLogger(classOf[Kar145Actor])
+  override val logger = LoggerFactory.getLogger(classOf[Kar145Actor_EnterCode])
 
   // exec will be moved to proper actor (or stream in business logic layer)
   def exec(request:Kar145Req): Result[Error, APIResponse] = {

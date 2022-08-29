@@ -94,7 +94,7 @@ class Specs2a1_AdLaunch extends WordSpec
 
         case class AppKaredos(app_karedos: String)
         implicit val json = jsonFormat1(AppKaredos)
-        responseAs[AppKaredos].app_karedos.toInt should be > 35
+        responseAs[Kar135Res].app_karedos.toInt should be > 35
 
       }
 

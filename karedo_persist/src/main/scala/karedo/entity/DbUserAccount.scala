@@ -41,3 +41,9 @@ case class Email
 )
 
 trait DbUserAccount extends DbMongoDAO[String,UserAccount]
+//{
+//  def findMobile(account_id:String, msisdn: String): Mobile = {
+//    val userAccount = dao.findOne()
+//    ()
+//  }
+//}

@@ -80,4 +80,10 @@ trait KaredoJsonHelpers
 
   case class Kar134Res(account_id:Option[String], ad_count:Int, ads:List[AdUnit] )
   implicit val jsonKar134Res = jsonFormat3(Kar134Res)
+
+  case class Kar138Req(password: String)
+  implicit val jsonKar138Req = jsonFormat1(Kar138Req)
+
+  case class Kar138Res(session_id: String)
+  implicit val jsonKar138Res = jsonFormat1(Kar138Res)
 }

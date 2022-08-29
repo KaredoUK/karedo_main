@@ -16,7 +16,7 @@ object Kar194 extends KaredoRoute
   def route = {
     Route {
 
-      // GET /account/{{account_id}}/profile?p={{application_id}}&s={{session_id}}
+      // GET /account/{{account_id}}/prefs?p={{application_id}}&s={{session_id}}
       path("account" / Segment / "prefs") {
         accountId =>
           optionalHeaderValueByName("X_Identification") {

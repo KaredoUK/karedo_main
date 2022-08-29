@@ -3,6 +3,7 @@ package karedo.entity
 import java.util.UUID
 
 import karedo.entity.dao.{DbMongoDAO, Keyable}
+import karedo.util.Result
 import org.joda.time.DateTime
 import salat.annotations._
 import karedo.util.Util.now
