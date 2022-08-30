@@ -21,7 +21,6 @@ trait Kar171Actor
 
   override val logger = LoggerFactory.getLogger(classOf[Kar171Actor])
 
-  // exec will be moved to proper actor (or stream in business logic layer)
   def exec(accountId: String,
            deviceId: Option[String],
            request: Kar170Req

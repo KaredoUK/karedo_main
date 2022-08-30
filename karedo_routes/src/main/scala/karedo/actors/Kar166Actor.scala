@@ -16,7 +16,6 @@ trait Kar166Actor extends DbCollections
   with KaredoJsonHelpers {
   override val logger = LoggerFactory.getLogger(classOf[Kar166Actor])
 
-  // exec will be moved to proper actor (or stream in business logic layer)
   def exec(accountId: String, sessionId: Option[String], deviceId: Option[String], request: Kar166Request): Result[Error, APIResponse] = {
 
     logger.info(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\nsessionId: $sessionId")

@@ -18,7 +18,6 @@ trait Kar189Actor
   with KaredoConstants {
   override val logger = LoggerFactory.getLogger(classOf[Kar189Actor])
 
-  // exec will be moved to proper actor (or stream in business logic layer)
   def exec(accountId: String,
            deviceId: Option[String],
            request: Kar189Req): Result[Error, APIResponse] = {
