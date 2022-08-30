@@ -440,7 +440,7 @@ trait Kar141Actor_SendCode
 
         val emails = userAccount.email
 
-        val email_verify_url = s"${notification_base_url}/account/email/verify?e=${email}&c=${email_code}&a=${account_id}"
+        val email_verify_url = s"${notification_base_url}/verify?e=${email}&c=${email_code}&a=${account_id}"
 
         val email_subject = "Welcome to Karedo"
         val email_body = s"Welcome to Karedo. \nYou're on your way to gaining from your attention. Click on [$email_verify_url] to verify your email"
