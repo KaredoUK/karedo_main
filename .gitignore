@@ -17,4 +17,4 @@ dist
 **/.settings
 **/.project
 **/.cache-main
-    
+**/log
