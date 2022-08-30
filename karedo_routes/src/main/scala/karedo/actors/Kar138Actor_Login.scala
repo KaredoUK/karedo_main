@@ -1,6 +1,5 @@
 package karedo.actors
 
-import com.apple.eawt.AppEvent.UserSessionEvent
 import karedo.entity.{UserMobile, UserSession}
 import karedo.util.Util.now
 import karedo.util._
