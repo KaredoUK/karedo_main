@@ -6,23 +6,36 @@ import com.typesafe.config.{Config, ConfigFactory}
 import karedo.entity.{DbPrefs, DbUserAd}
 import karedo.entity.dao.MongoConnection
 import karedo.routes.Routes
-import karedo.util.{DefaultActorSystem, Ssl}
+import karedo.util.{DefaultActorSystem, SSLSupport, Ssl}
 
 
 object Api
   extends MongoConnection
   with Routes
-  with DefaultActorSystem {
+  with DefaultActorSystem
+  with SSLSupport {
 
   //Util.
 
-  val doSsl=false
-  val connContext = if(doSsl) Ssl.sslContext else ConnectionContext.noEncryption()
+  private val doSsl = conf.getBoolean("web.ssl")
   private val server = conf.getString("web.host")
   private val port = conf.getInt("web.port")
-  println(s"Binding on server $server and port $port")
-  Http().bindAndHandle(routesWithLogging,server,port,connContext)
+
+  private val bindRoutes = routesWithLogging
+
+
+  if( doSsl ) {
+    println(s"SSL Binding on server $server and port $port")
+    val https = getHttps
+    Http().setDefaultServerHttpContext(https)
+    Http().bindAndHandle(bindRoutes, server, port, connectionContext = https)
+  } else {
+    println(s"Clear Binding on server $server and port $port")
+    Http().bindAndHandle(bindRoutes, server, port, ConnectionContext.noEncryption())
+  }
+
 }
+
 object Main extends App {
   Preload
   Api

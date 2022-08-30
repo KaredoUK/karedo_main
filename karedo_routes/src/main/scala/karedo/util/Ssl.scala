@@ -4,7 +4,16 @@ import java.security.{KeyStore, SecureRandom}
 import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
 
 import akka.http.scaladsl.ConnectionContext
+import com.typesafe.sslconfig.akka.AkkaSSLConfig
+import java.io.InputStream
+import java.security.{ SecureRandom, KeyStore }
+import javax.net.ssl.{ SSLContext, TrustManagerFactory, KeyManagerFactory }
 
+import akka.actor.ActorSystem
+import akka.http.scaladsl.server.{ RouteResult, Route, Directives }
+import akka.http.scaladsl.{ ConnectionContext, HttpsConnectionContext, Http }
+import akka.stream.ActorMaterializer
+import com.typesafe.sslconfig.akka.AkkaSSLConfig
 
 object Ssl {
 
@@ -29,5 +38,34 @@ object Ssl {
 
 
 
-
 }
+
+trait SSLSupport extends DefaultActorSystem with Configurable{
+  val sslConfig = AkkaSSLConfig()
+
+  def getHttps: HttpsConnectionContext = {
+    val password: Array[Char] = Array() // do not store passwords in code, read them from somewhere safe!
+
+    val keyStoreName = conf.getString("web.keystore.name")
+    val keyStoreType = conf.getString("web.keystore.type")
+
+    val ks: KeyStore = KeyStore.getInstance(keyStoreType)
+    val keystore: InputStream = getClass.getClassLoader.getResourceAsStream(keyStoreName)
+
+    require(keystore != null, "Keystore required!")
+    ks.load(keystore, password)
+
+    val keyManagerFactory: KeyManagerFactory = KeyManagerFactory.getInstance("SunX509")
+    keyManagerFactory.init(ks, password)
+
+    val tmf: TrustManagerFactory = TrustManagerFactory.getInstance("SunX509")
+    tmf.init(ks)
+
+    val sslContext: SSLContext = SSLContext.getInstance("TLS")
+    sslContext.init(keyManagerFactory.getKeyManagers, tmf.getTrustManagers, new SecureRandom)
+    val https: HttpsConnectionContext = ConnectionContext.https(sslContext)
+
+    https
+  }
+}
+
