@@ -21,9 +21,9 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaV,
 
 
-    "org.slf4j" % "slf4j-api" % "1.7.5",
-    "org.slf4j" % "slf4j-simple" % "1.7.5",
-    "ch.qos.logback" % "logback-classic" % "1.1.3",
+//    "org.slf4j" % "slf4j-api" % "1.7.5",
+//    "org.slf4j" % "slf4j-simple" % "1.7.5",
+//    "ch.qos.logback" % "logback-classic" % "1.1.3",
     "com.typesafe.scala-logging" % "scala-logging-slf4j_2.11" % "2.1.2",
     "com.typesafe.akka" %% "akka-slf4j" % akkaV,
     "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test",
