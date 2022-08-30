@@ -2,19 +2,19 @@ package karedo.routes
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import karedo.actors.{Kar134Actor, Kar135Actor}
+import karedo.actors.{Kar135_pointsActor, Kar136_messagesActor}
 
 /**
   * Created by pakkio on 10/3/16.
   */
-object Kar135 extends KaredoRoute
-  with Kar135Actor {
+object Kar136_messages extends KaredoRoute
+  with Kar136_messagesActor {
 
   def route = {
     Route {
 
-      // GET /account/{{account_id}}/points?p={{application_id}}&s={{session_id}}
-      path("account" / Segment / "points") {
+      // GET /account/{{account_id}}/messages?p={{application_id}}&s={{session_id}}
+      path("account" / Segment / "messages") {
         accountId =>
           optionalHeaderValueByName("X_Identification") {
             deviceId =>

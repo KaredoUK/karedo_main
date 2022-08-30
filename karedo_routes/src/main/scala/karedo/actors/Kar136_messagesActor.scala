@@ -11,12 +11,11 @@ import spray.json._
   */
 
 
-trait Kar136Actor extends DbCollections
+trait Kar136_messagesActor extends DbCollections
   with KaredoAuthentication
   with KaredoJsonHelpers {
-  override val logger = LoggerFactory.getLogger(classOf[Kar136Actor])
+  override val logger = LoggerFactory.getLogger(classOf[Kar136_messagesActor])
 
-  // exec will be moved to proper actor (or stream in business logic layer)
   def exec(accountId: String,
            deviceId: Option[String],
            applicationId: String,

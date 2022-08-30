@@ -28,12 +28,6 @@ class Specs2a1_AdLaunch extends WordSpec
 
   // clear everything for tests to be understandable
   mongoClient.dropDatabase(mongoDbName)
-  val dbUserAds = new DbUserAd {}
-  dbUserAds.deleteAll()
-
-
-  override val dbUserApp = new DbUserApp {}
-  dbUserApp.deleteAll()
 
   var currentAccountId: Option[String] = None
   var points=0
@@ -41,7 +35,7 @@ class Specs2a1_AdLaunch extends WordSpec
   val currentApplicationId = "app1"
   dbAds.preload(currentApplicationId,10)
 
-  "Kar134" should {
+  "Kar134_ads" should {
 
 
     "* create a new account with anonymous access first time /account/0/ads" in {
@@ -84,7 +78,7 @@ class Specs2a1_AdLaunch extends WordSpec
       }
     }
   }
-  "Kar135" should {
+  "Kar135_points" should {
     s"* get points as anonymous /account/${currentAccountId}/points" in {
       //GET /account/{account_id}/points
       if(currentAccountId.isEmpty)
@@ -107,7 +101,7 @@ class Specs2a1_AdLaunch extends WordSpec
     }
 
   }
-  "Kar136" should {
+  "Kar136_messages" should {
     "* get messages even if empty" in {
       Get(s"/account/${currentAccountId.get}/messages?p=$currentApplicationId") ~> routesWithLogging ~> check {
         status.intValue() shouldEqual (206)
