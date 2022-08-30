@@ -29,7 +29,7 @@ class Specs6c_Intent extends WordSpec
 
   // clear everything for tests to be understandable
   mongoClient.dropDatabase(mongoDbName)
-  dbUserIntent.deleteAll()
+
   val uuids:Array[String] = Array(getNewRandomID, getNewRandomID, getNewRandomID)
 
   val account_id = getNewRandomID
@@ -42,7 +42,8 @@ class Specs6c_Intent extends WordSpec
         routesWithLogging ~>
         check {
           val userIntent = responseAs[UserIntent]
-          userIntent.intents shouldEqual Nil
+          status.intValue() shouldEqual (201)
+          userIntent.intents shouldEqual List()
         }
     }
   }
@@ -54,7 +55,9 @@ class Specs6c_Intent extends WordSpec
       Put(s"/account/$account_id/intent",
         HttpEntity(ContentTypes.`application/json`, request)) ~> routesWithLogging ~> check {
         // @TODO: Check this more.
-        status.intValue() shouldEqual (205)
+        val st = status.intValue()
+        val res = response
+        st shouldEqual (205)
       }
     }
   }
@@ -66,6 +69,8 @@ class Specs6c_Intent extends WordSpec
         check {
           val userIntent = responseAs[UserIntent]
           userIntent.intents should have size(1)
+          val intent = userIntent.intents(0)
+          intent.what shouldEqual("what_00")
         }
     }
   }
