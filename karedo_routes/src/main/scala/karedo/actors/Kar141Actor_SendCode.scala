@@ -28,7 +28,6 @@ trait Kar141Actor_SendCode
   override val logger = LoggerFactory.getLogger(classOf[Kar141Actor_SendCode])
 
 
-  // exec will be moved to proper actor (or stream in business logic layer)
   def exec(
            request: Kar141_SendCode_Req
           ): Result[Error, APIResponse] = {
