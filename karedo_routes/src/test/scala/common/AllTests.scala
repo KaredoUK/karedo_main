@@ -24,8 +24,8 @@ trait AllTests extends WordSpec
 
   implicit val timeout: RouteTestTimeout = RouteTestTimeout(1000.second(span))
 
-  // clear everything for tests to be understandable
-  mongoClient.dropDatabase(mongoDbName)
+  // can't clear everything otherwise tests cannot go in parallel (!)
+  // mongoClient.dropDatabase(mongoDbName)
 
 
 }

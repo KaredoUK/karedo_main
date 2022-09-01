@@ -11,7 +11,6 @@ class Specs4_LoginSequence extends AllTests
   with Kar138_login_test
   with Kar141_SendCode_Test {
 
-
   val acctId = getNewRandomID
   val appId = getNewRandomID
 
