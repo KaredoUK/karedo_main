@@ -27,7 +27,8 @@ trait Kar169_getIntent_test {
       Put(s"/account/$account_id/intent",
         HttpEntity(ContentTypes.`application/json`, request)) ~> routesWithLogging ~>
       check {
-        val response = Kar170
+        val res = response
+        status.intValue() shouldEqual(200)
       }
 
       Get(s"/account/$account_id/intent/0?p=$application_id") ~>

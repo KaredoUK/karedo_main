@@ -2,6 +2,11 @@ package karedo.routes
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import karedo.routes.ads.{Kar134_ads, Kar135_points, Kar136_messages, Kar166_interaction}
+import karedo.routes.intent.{Kar169_getIntent, Kar170_postIntent, Kar171_putIntent, Kar172_deleteIntent}
+import karedo.routes.login.{Kar138_Login, Kar141_SendCode, Kar143_verify, Kar145_EnterCode}
+import karedo.routes.prefs.{Kar194_getPrefs, Kar195_postPrefs}
+import karedo.routes.profile.{Kar188_getProfile, Kar189_postProfile}
 import karedo.sample.Entities
 import karedo.util.RouteDebug
 //import org.clapper.classutil.ClassInfo
@@ -28,9 +33,9 @@ trait Routes
   with CorsSupport {
 
   override val routes = cors {
-    Kar134_ads.route ~ Kar135_points.route ~ Kar136_messages.route ~ Kar166.route ~
-      Kar169.route ~ Kar170.route ~ Kar171.route ~ Kar172.route ~ Kar188.route ~ Kar189.route ~
-      Kar194.route ~ Kar195.route ~ Kar141_SendCode.route ~ Kar143.route ~ Kar145_EnterCode.route ~
+    Kar134_ads.route ~ Kar135_points.route ~ Kar136_messages.route ~ Kar166_interaction.route ~
+      Kar169_getIntent.route ~ Kar170_postIntent.route ~ Kar171_putIntent.route ~ Kar172_deleteIntent.route ~ Kar188_getProfile.route ~ Kar189_postProfile.route ~
+      Kar194_getPrefs.route ~ Kar195_postPrefs.route ~ Kar141_SendCode.route ~ Kar143_verify.route ~ Kar145_EnterCode.route ~
       Kar138_Login.route
   }
 
