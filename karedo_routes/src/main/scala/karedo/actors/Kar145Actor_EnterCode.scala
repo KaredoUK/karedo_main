@@ -17,7 +17,6 @@ trait Kar145Actor_EnterCode
   with KaredoConstants {
   override val logger = LoggerFactory.getLogger(classOf[Kar145Actor_EnterCode])
 
-  // exec will be moved to proper actor (or stream in business logic layer)
   def exec(request:Kar145Req): Result[Error, APIResponse] = {
 
     logger.info(s"Mobile Verify\nmsisdn: ${request.msisdn}\nsms_code: ${request.sms_code}\nApplicationID: ${request.application_id}")

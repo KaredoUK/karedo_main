@@ -23,7 +23,7 @@ import scala.concurrent.{Await, Future}
   */
 
 
-trait Kar134Actor
+trait Kar134_adsActor
   extends DbCollections
     with KaredoAuthentication
     with KaredoJsonHelpers
@@ -31,11 +31,10 @@ trait Kar134Actor
     with DefaultActorSystem {
 
 
-  override val logger = LoggerFactory.getLogger(classOf[Kar134Actor])
+  override val logger = LoggerFactory.getLogger(classOf[Kar134_adsActor])
 
   val adActor = system.actorOf(Props[AdActor])
 
-  // exec will be moved to proper actor (or stream in business logic layer)
   def exec(accountId: String,
            deviceId: Option[String],
            applicationId: String,

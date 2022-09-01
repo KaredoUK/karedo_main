@@ -28,7 +28,7 @@ trait Routes
   with CorsSupport {
 
   override val routes = cors {
-    Kar134.route ~ Kar135.route ~ Kar136.route ~ Kar166.route ~
+    Kar134_ads.route ~ Kar135_points.route ~ Kar136_messages.route ~ Kar166.route ~
       Kar169.route ~ Kar170.route ~ Kar171.route ~ Kar172.route ~ Kar188.route ~ Kar189.route ~
       Kar194.route ~ Kar195.route ~ Kar141_SendCode.route ~ Kar143.route ~ Kar145_EnterCode.route ~
       Kar138_Login.route
