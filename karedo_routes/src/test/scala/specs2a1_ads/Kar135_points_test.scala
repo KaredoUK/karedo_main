@@ -23,7 +23,7 @@ trait Kar135_points_test {
     "* get points as an invalid applicationId should fail with explanation " in {
       Get(s"/account/unknown/points?p=unknown") ~> routesWithLogging ~> check {
         status.intValue() shouldEqual (500) // ?????
-        responseAs[String] should include("No record found in table XUserKaredos")
+        responseAs[String] should include("No record found in table XUserAccount")
       }
     }
 

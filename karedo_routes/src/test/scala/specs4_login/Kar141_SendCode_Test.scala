@@ -16,9 +16,9 @@ trait Kar141_SendCode_Test {
         application_id = appId,
         first_name = "John",
         last_name = "Doe",
-        msisdn = "0123456",
+        msisdn = "00393319345235",
         user_type = "",
-        email = "john@doe.com"
+        email = "pakkio@gmail.com"
 
       ).toJson.toString
       Post(s"/account",

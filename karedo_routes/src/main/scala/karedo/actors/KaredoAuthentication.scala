@@ -1,16 +1,16 @@
 package karedo.actors
 
 import karedo.entity.{UserAccount, UserApp}
-import karedo.util.{KO, OK, Result}
+import karedo.util._
 import org.slf4j.LoggerFactory
 import spray.json.{JsObject, JsString}
-import karedo.util.DbCollections
 
 /**
   * Created by pakkio on 10/9/16.
   */
-trait KaredoAuthentication {
-  self: DbCollections =>
+
+trait KaredoAuthentication extends KaredoConstants {
+  self: DbCollections  =>
   val logger = LoggerFactory.getLogger(classOf[KaredoAuthentication])
 
   def authenticate
@@ -30,7 +30,7 @@ trait KaredoAuthentication {
       if (uapp.isOK) {
         val uAcct = dbUserAccount.find(uapp.get.account_id)
         // @TODO: Can;t be 200 OK here. @Chandan checking to see which is the right code.
-        f(uapp, uAcct, 200) // app already mapped to a valid account id
+        f(uapp, uAcct, HTTP_OK_200) // app already mapped to a valid account id
       }
       else {
         if (allowCreation) {
@@ -41,12 +41,12 @@ trait KaredoAuthentication {
 
             val app = UserApp(id = applicationId, account_id = emptyAccount.id)
             val uNewApp = dbUserApp.insertNew(app)
-            f(uNewApp, uacct, 201) // creating a new mapping
+            f(uNewApp, uacct, HTTP_OK_CREATED_201) // creating a new mapping
 
           }
           else KO(Error(s"Error ${uacct.err} while inserting new account"))
         }
-        else OK(APIResponse("Application not found", 404))
+        else OK(APIResponse("Application not found", HTTP_NOTFOUND_404))
       }
 
 
@@ -54,37 +54,43 @@ trait KaredoAuthentication {
 
     def accountProvided():
     Result[Error, APIResponse] = {
+      val uacc = dbUserAccount.find(accountId)
       val uapp = dbUserApp.find(applicationId)
-      if (uapp.isOK) {
-        val storedAccountId = uapp.get.account_id
-        val uacc = dbUserAccount.find(storedAccountId)
-
-        if (accountId != storedAccountId) {
-          f(uapp, uacc, 205)
-        } else {
-          //val uacc = dbUserAccount.getById(accountId)
-          if (sessionId.isDefined) {
-            if (dbUserSession.find(sessionId.get).isOK) {
-              f(uapp, uacc, 200)
-            } else {
-              /* Mobile App: 206 indicates user login has expired. Mark for 4a. Login screen */
-              f(uapp, uacc, 206)
-            }
-          } else {
-            // not in a session
-            f(uapp, uacc, 206)
-          }
-        }
+      if (uacc.isKO) {
+        f(uapp,uacc,HTTP_NOTFOUND_404)
       } else {
-        val uacc = dbUserAccount.insertNew(UserAccount())
-        val uapp = dbUserApp.insertNew(UserApp(applicationId, uacc.get.id))
-        if (uapp.isKO) {
-          logger.error(s"can't insert mapping")
+
+        if (uapp.isOK) {
+          val storedAccountId = uapp.get.account_id
+          val uacc = dbUserAccount.find(storedAccountId)
+
+          if (accountId != storedAccountId) {
+            f(uapp, uacc, HTTP_OK_RESETCONTENT_205)
+          } else {
+            //val uacc = dbUserAccount.getById(accountId)
+            if (sessionId.isDefined) {
+              if (dbUserSession.find(sessionId.get).isOK) {
+                f(uapp, uacc, HTTP_OK_200)
+              } else {
+                /* Mobile App: 206 indicates user login has expired. Mark for 4a. Login screen */
+                f(uapp, uacc, HTTP_OK_PARTIALCONTENT_206)
+              }
+            } else {
+              // not in a session
+              f(uapp, uacc, HTTP_OK_PARTIALCONTENT_206)
+            }
+          }
+        } else {
+          val uacc = dbUserAccount.insertNew(UserAccount())
+          val uapp = dbUserApp.insertNew(UserApp(applicationId, uacc.get.id))
+          if (uapp.isKO) {
+            logger.error(s"can't insert mapping")
+          }
+          f(uapp, uacc, HTTP_OK_CREATED_201)
         }
-        f(uapp, uacc, 201)
       }
     }
-
+    // this is where authentication starts
     val ret = if (accountId == "0") {
       anonymousCall()
     }

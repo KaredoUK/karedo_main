@@ -18,10 +18,11 @@ trait Kar134_ads_test {
           points+=POINTS
           implicit val json = jsonFormat2(AdResponse)
           responseAs[AdResponse].ads should have size (10)
-          status.intValue() shouldEqual (201)
+          status.intValue() shouldEqual (HTTP_OK_CREATED_201)
           val uapp = dbUserApp.find(currentApplicationId)
           uapp.isOK should be(true)
           currentAccountId = Some(uapp.get.account_id)
+          1===1
         }
 
     }
@@ -29,23 +30,22 @@ trait Kar134_ads_test {
       Get(s"/account/0/ads?p=$currentApplicationId") ~>
         routesWithLogging ~> check {
         points+=POINTS
-        status.intValue() shouldEqual (200)
+        status.intValue() shouldEqual (HTTP_OK_200)
       }
     }
-    "* gets an identifiable error when asking for a non existent account" in {
+    "* gets a descriptive error when asking for a non existent account" in {
       Get(s"/account/unknown/ads?p=$currentApplicationId)") ~>
         routesWithLogging ~> check {
-        status.intValue() shouldEqual (201) // FIXME? is just for prototype?
-        responseAs[AdResponse].ads should have size (10)
-        //responseAs[String] should include("Can't get ads because of")
+        status.intValue() shouldEqual (HTTP_NOTFOUND_404)
+        responseAs[ErrorRes].error_text should include ("No record found in table XUserAccount")
       }
     }
     "* gets OK is using existent account" in {
-      Get(s"/account/$currentAccountId/ads?p=$currentApplicationId") ~>
+      Get(s"/account/${currentAccountId.get}/ads?p=$currentApplicationId") ~>
         routesWithLogging ~> check {
         points+=POINTS
 
-        status.intValue() shouldEqual (205)
+        status.intValue() shouldEqual (HTTP_OK_PARTIALCONTENT_206)
         responseAs[AdResponse].ads should have size (10)
       }
     }

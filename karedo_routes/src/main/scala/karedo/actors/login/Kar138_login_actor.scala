@@ -38,28 +38,28 @@ trait Kar138_login_actor
                     val session_id = getNewRandomID
                     val userSession = UserSession(id = session_id, account_id = account_id )
                     dbUserSession.insertNew(userSession) match {
-                      case OK(_) => OK(APIResponse(Kar138Res(session_id).toJson.toString , HTTP_OK))
+                      case OK(_) => OK(APIResponse(Kar138Res(session_id).toJson.toString , HTTP_OK_200))
                       case KO(error) => MAKE_ERROR(error, "Unable to create a UserSession object")
                     }
                   } else {
-                    OK(APIResponse(ErrorRes(HTTP_UNAUTHORISED, Some("Unauthorised"), "Unauthorised").toJson.toString , HTTP_UNAUTHORISED))
+                    OK(APIResponse(ErrorRes(HTTP_UNAUTHORISED_401, Some("Unauthorised"), "Unauthorised").toJson.toString , HTTP_UNAUTHORISED_401))
                   }
                 }
                 case None => MAKE_ERROR("Password not registered. Could be a temporary account.")
               }
             } else {
-              OK(APIResponse(ErrorRes(HTTP_CONFLICT, Some("Conflict"), "Account doesn't match records").toJson.toString , HTTP_CONFLICT))
+              OK(APIResponse(ErrorRes(HTTP_CONFLICT_409, Some("Conflict"), "Account doesn't match records").toJson.toString , HTTP_CONFLICT_409))
             }
           }
           case KO(error) => {
             logger.error(error)
-            OK(APIResponse(ErrorRes(HTTP_NOT_FOUND, Some("Not Found"), "Account not found").toJson.toString , HTTP_NOT_FOUND))
+            OK(APIResponse(ErrorRes(HTTP_NOTFOUND_404, Some("Not Found"), "Account not found").toJson.toString , HTTP_NOTFOUND_404))
           }
         }
       }
       case KO(error) => {
         logger.error(error)
-        OK(APIResponse(ErrorRes(HTTP_NOT_FOUND, Some("Not Found"), "Application not found").toJson.toString , HTTP_NOT_FOUND))
+        OK(APIResponse(ErrorRes(HTTP_NOTFOUND_404, Some("Not Found"), "Application not found").toJson.toString , HTTP_NOTFOUND_404))
       }
     }
   }

@@ -11,7 +11,7 @@ trait Kar136_messages_test {
   "Kar136_messages" should {
     "* get messages even if empty" in {
       Get(s"/account/${currentAccountId.get}/messages?p=$currentApplicationId") ~> routesWithLogging ~> check {
-        status.intValue() shouldEqual (206)
+        status.intValue() shouldEqual (HTTP_OK_PARTIALCONTENT_206)
         responseAs[List[UserMessages]] should be(List())
       }
     }

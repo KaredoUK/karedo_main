@@ -49,9 +49,9 @@ trait Kar134_adsActor
 
         def getAdsFor(application: UserApp, uAcc: UserAccount): Result[Error, String] = {
 
-            // @TODO: Change this to call the karedo_rtb AdActor.
-            // @TODO: Remember to return Result object form AdActor
-            // val rAds = dbAds.find(application.id)
+          // @TODO: Change this to call the karedo_rtb AdActor.
+          // @TODO: Remember to return Result object form AdActor
+          // val rAds = dbAds.find(application.id)
 
           val count = adCount.getOrElse("10").toInt
 
@@ -80,7 +80,7 @@ trait Kar134_adsActor
 
               OK(Kar134Res(JsonAccountIfNotTemp(uAcc), rAds.get.ad_count, rAds.get.ads).toJson.toString)
 
-//              OK( JsonAccountIfNotTemp(uAcc) + rAds.get.toJson.toString)
+              //              OK( JsonAccountIfNotTemp(uAcc) + rAds.get.toJson.toString)
             }
           } catch {
             case e: Exception => KO(Error(e.toString))
@@ -89,20 +89,24 @@ trait Kar134_adsActor
         }
 
         // STARTS HERE
-        if (uapp.isOK) {
-          val app = uapp.get
-          //val uAccount = dbUserAccount.getById(app.account_id)
-          if (uAccount.isKO) KO(Error(s"Application maps to an invalid account ${app.account_id}"))
-          else {
-            val acct = uAccount.get
-            val uAds = getAdsFor(app, acct)
-            if (uAds.isOK) {
-              val ads = uAds.get
-              OK(APIResponse(ads.toString, code))
-            } else KO(Error(s"Can't get ads because of ${uAds.err}"))
-          }
-        } else KO(Error(s"application cant be found because of ${uapp.err}"))
+        if (uAccount.isKO) {
+          KO(Error(s"Internal error ${uAccount.err}",code))
+        } else {
+          if (uapp.isOK) {
+            val app = uapp.get
+            //val uAccount = dbUserAccount.getById(app.account_id)
+            if (uAccount.isKO) KO(Error(s"Application maps to an invalid account ${app.account_id}"))
+            else {
+              val acct = uAccount.get
+              val uAds = getAdsFor(app, acct)
+              if (uAds.isOK) {
+                val ads = uAds.get
+                OK(APIResponse(ads.toString, code))
+              } else KO(Error(s"Can't get ads because of ${uAds.err}"))
+            }
+          } else KO(Error(s"application cant be found because of ${uapp.err}"))
 
+        }
       }
     }
 
