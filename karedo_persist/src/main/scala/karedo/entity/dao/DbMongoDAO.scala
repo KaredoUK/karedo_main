@@ -13,6 +13,9 @@ trait Keyable[K] {
 
   def id: K
 }
+object DbMongoDAO {
+  var tablePrefix = "X"
+}
 
 abstract class DbMongoDAO[K, T <: Keyable[K]]
 (implicit
@@ -31,7 +34,7 @@ abstract class DbMongoDAO[K, T <: Keyable[K]]
   val logger = LoggerFactory.getLogger(thisClass)
   logger.info(s"setting up $thisClass")
 
-  val dao = new SalatDAO[T, K](collection = db(s"X$simpleName")) {}
+  lazy val dao = new SalatDAO[T, K](collection = db(s"${DbMongoDAO.tablePrefix}$simpleName")) {}
 
   override def insertNew(r:T): Result[String,T] = {
     val id = r.id

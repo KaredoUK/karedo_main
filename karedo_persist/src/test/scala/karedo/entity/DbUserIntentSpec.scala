@@ -7,8 +7,10 @@ import java.util.UUID
 
 import org.joda.time.DateTime.now
 import karedo.util.{KO, OK}
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
 
-
+@RunWith(classOf[JUnitRunner])
 class DbUserIntentSpec
   extends Specification
     with TryMatchers

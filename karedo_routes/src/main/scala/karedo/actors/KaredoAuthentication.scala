@@ -73,11 +73,11 @@ trait KaredoAuthentication extends KaredoConstants {
                 f(uapp, uacc, HTTP_OK_200)
               } else {
                 /* Mobile App: 206 indicates user login has expired. Mark for 4a. Login screen */
-                f(uapp, uacc, HTTP_OK_PARTIALCONTENT_206)
+                f(uapp, uacc, HTTP_OK_PARTIALCONTENT_NOTINASESSION_206)
               }
             } else {
               // not in a session
-              f(uapp, uacc, HTTP_OK_PARTIALCONTENT_206)
+              f(uapp, uacc, HTTP_OK_PARTIALCONTENT_NOTINASESSION_206)
             }
           }
         } else {

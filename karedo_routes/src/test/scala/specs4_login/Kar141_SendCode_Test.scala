@@ -1,13 +1,24 @@
 package specs4_login
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
+import common.AllTests
+import karedo.entity.{UserAccount, UserApp}
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
 /**
   * Created by pakkio on 10/20/16.
   */
-trait Kar141_SendCode_Test {
-  self: Specs4_LoginSequence =>
+@RunWith(classOf[JUnitRunner])
+class Kar141_SendCode_Test extends AllTests {
 
+  val acctId = getNewRandomID
+  val appId = getNewRandomID
+
+  dbUserApp.insertNew(UserApp(appId,acctId))
+  dbUserAccount.insertNew(UserAccount(acctId,password=Some("pippo")))
+
+  var accountId: String = ""
   "Kar141_SendCode_test" should {
 
 
@@ -27,9 +38,10 @@ trait Kar141_SendCode_Test {
         check {
           val st=status
           val res=responseAs[Kar141_SendCode_Res]
-          status.intValue() shouldEqual (200)
+          accountId = res.account_id.getOrElse("Unknown")
+          status.intValue() shouldEqual (HTTP_OK_200)
         }
-
+      // now we can check if it was created
     }
   }
 

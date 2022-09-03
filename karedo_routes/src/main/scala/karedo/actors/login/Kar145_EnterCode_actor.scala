@@ -59,7 +59,7 @@ trait Kar145_EnterCode_actor
                           }
                         }
                         case KO(_) => {
-                          dbUserMobile.insertNew(UserMobile(msisdn, account_id, true, Some(now), now)) match {
+                          dbUserMobile.insertNew(UserMobile(msisdn, account_id, true, now, now)) match {
                             case KO(error) => MAKE_ERROR(error)
                             case OK(_) => {
                               // @TODO: All the Sale & Transfer Stuff

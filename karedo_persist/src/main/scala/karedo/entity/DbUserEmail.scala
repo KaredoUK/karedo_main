@@ -12,7 +12,7 @@ case class UserEmail
   @Key("_id") id: String
   , account_id: String
   , active: Boolean
-  , ts_created: Option[DateTime] = Some(now)
+  , ts_created: DateTime = now
   , ts_updated: DateTime = now
 ) extends Keyable[String]
 

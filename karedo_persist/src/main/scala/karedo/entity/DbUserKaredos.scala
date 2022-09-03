@@ -24,7 +24,7 @@ case class UserKaredos
 extends Keyable[String]
 
 trait DbUserKaredos extends DbMongoDAO[String,UserKaredos] {
-  def addKaredos(accountId: String, points: Int): Result[String,UserKaredos] = {
+  def addKaredos(accountId: String, points: Double): Result[String,UserKaredos] = {
     Try {
       dao.findOneById(accountId) match {
         case None => insertNew(UserKaredos(accountId, points))

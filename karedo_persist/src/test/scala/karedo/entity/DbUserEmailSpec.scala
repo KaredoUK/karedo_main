@@ -6,7 +6,11 @@ import karedo.util.{KO, OK}
 import org.specs2.matcher.{EitherMatchers, TryMatchers}
 import org.specs2.mutable.Specification
 import utils.MongoTestUtils
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
+import org.specs2.runner.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class DbUserEmailSpec
   extends Specification
       with EitherMatchers

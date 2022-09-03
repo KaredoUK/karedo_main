@@ -5,7 +5,10 @@ import java.util.UUID
 import org.specs2.matcher.EitherMatchers
 import org.specs2.mutable.Specification
 import utils.MongoTestUtils
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class DbKaredoChangeSpec
   extends Specification
     with EitherMatchers

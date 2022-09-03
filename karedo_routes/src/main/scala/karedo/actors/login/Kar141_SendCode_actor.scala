@@ -17,16 +17,16 @@ import scala.util.{Failure, Success}
 
 trait Kar141_SendCode_actor
   extends DbCollections
-  with KaredoAuthentication
-  with KaredoJsonHelpers
-  with KaredoConstants
-  with DefaultActorSystem {
+    with KaredoAuthentication
+    with KaredoJsonHelpers
+    with KaredoConstants
+    with DefaultActorSystem {
 
   override val logger = LoggerFactory.getLogger(classOf[Kar141_SendCode_actor])
 
 
   def exec(
-           request: Kar141_SendCode_Req
+            request: Kar141_SendCode_Req
           ): Result[Error, APIResponse] = {
     val applicationId = request.application_id
     val firstName = request.first_name
@@ -37,14 +37,14 @@ trait Kar141_SendCode_actor
 
     logger.info(s"OK applicationId: $applicationId firstName: $firstName lastName: $lastName msisdn: $msisdn userType: $userType email: $email")
 
-    if(applicationId == null || applicationId.equals("")) KO(Error(s"application_id is null"))
-    if(firstName == null || firstName.equals("")) KO(Error(s"first_name is null"))
-    if(lastName == null || lastName.equals("")) KO(Error(s"last_name is null"))
-    if(msisdn == null || msisdn.equals("")) KO(Error(s"msisdn is null"))
+    if (applicationId == null || applicationId.equals("")) KO(Error(s"application_id is null"))
+    if (firstName == null || firstName.equals("")) KO(Error(s"first_name is null"))
+    if (lastName == null || lastName.equals("")) KO(Error(s"last_name is null"))
+    if (msisdn == null || msisdn.equals("")) KO(Error(s"msisdn is null"))
 
-    if(email == null || email.equals("")) KO(Error(s"email is null"))
-    if(userType == null || userType.equals("")) KO(Error(s"user_type is null"))
-    if(! userType.equals("CUSTOMER")) KO(Error(s"user_type value is not CUSTOMER. Only one value is supported"))
+    if (email == null || email.equals("")) KO(Error(s"email is null"))
+    if (userType == null || userType.equals("")) KO(Error(s"user_type is null"))
+    if (!userType.equals("CUSTOMER")) KO(Error(s"user_type value is not CUSTOMER. Only one value is supported"))
 
     dbUserApp.find(applicationId) match {
       case OK(userApp) => {
@@ -54,7 +54,7 @@ trait Kar141_SendCode_actor
             // UserMobile(msisdn) found. -> Mobile number was used before. It's got an entry created.
             // Check if it links to UserApp(applicationID)
 
-            if( userApp.account_id == userMobile.account_id) {
+            if (userApp.account_id == userMobile.account_id) {
               // Linked UserApp and UserMobile through account_id
               // It means the Mobile Number has been registerd to the account before.
               // Must be a returngin user.
@@ -63,13 +63,13 @@ trait Kar141_SendCode_actor
                 case OK(userEmail) => {
                   // Found UserEmail(email).
                   // Chek is the Email matches the same account_id
-                  if( userEmail.account_id == userMobile.account_id) {
+                  if (userEmail.account_id == userMobile.account_id) {
                     // Linked UserEmail to UserMobile through account_id
                     // The Email has alo been registered before.
                     // Everything is fine. It;s just a returning user. Send them to Login Screen.
                     dbUserAccount.find(userMobile.account_id) match {
                       case OK(userAcct) => {
-                        if( ! userAcct.temp ) {
+                        if (!userAcct.temp) {
                           OK(
                             APIResponse(
                               Kar141_SendCode_Res(true,
@@ -92,7 +92,7 @@ trait Kar141_SendCode_actor
                       case OK(resp) => {
                         dbUserAccount.find(userMobile.account_id) match {
                           case OK(userAccount) => {
-                            if( ! userAccount.temp ) {
+                            if (!userAccount.temp) {
                               OK(resp)
                             } else {
                               OK(APIResponse(Kar141_SendCode_Res(false, None).toJson.toString, 200))
@@ -108,15 +108,15 @@ trait Kar141_SendCode_actor
                 case KO(_) => {
                   // UserEmail not found. New email address seen for teh first time.
                   // Add the email to UserEmail. Also, add email to UserAccount.
-//                  dbUserEmail.insertNew(UserEmail(email, userMobile.account_id, false, Some(now), now)) match {
-//                    case KO(error) => MAKE_ERROR(error, s"Unable to create an entry in UserEmail for email: $email")
-//                    case OK(_) =>
-//                  }
-                  addEmailToAccount(userMobile.account_id, email)  match {
+                  //                  dbUserEmail.insertNew(UserEmail(email, userMobile.account_id, false, Some(now), now)) match {
+                  //                    case KO(error) => MAKE_ERROR(error, s"Unable to create an entry in UserEmail for email: $email")
+                  //                    case OK(_) =>
+                  //                  }
+                  addEmailToAccount(userMobile.account_id, email) match {
                     case OK(resp) => {
                       dbUserAccount.find(userMobile.account_id) match {
                         case OK(userAccount) => {
-                          if( ! userAccount.temp ) {
+                          if (!userAccount.temp) {
                             OK(resp)
                           } else {
                             OK(APIResponse(Kar141_SendCode_Res(false, None).toJson.toString, 200))
@@ -132,7 +132,7 @@ trait Kar141_SendCode_actor
             } else {
               // Not linked UserApp and UserMobile
               // -> Either ApplicationID is temporary or COULD BE AN ERROR.
-              if( ! userApp.map_confirmed ) {
+              if (!userApp.map_confirmed) {
                 // Temporary Account. Run with it.
                 // Copy the karedos from the temporary account to teh real account.
                 // Map the UserApp to the right account.
@@ -143,10 +143,10 @@ trait Kar141_SendCode_actor
                 val tempUserAccount = dbUserAccount.find(userApp.account_id).get
                 val realUserAccount = dbUserAccount.find(userMobile.account_id).get
 
-                if( realUserAccount.temp ) MAKE_ERROR(s"Real UserAccount is set to temp=true for accountId: ${userMobile.account_id}")
+                if (realUserAccount.temp) MAKE_ERROR(s"Real UserAccount is set to temp=true for accountId: ${userMobile.account_id}")
 
                 moveKaredosBetweenAccounts(userApp.account_id, userMobile.account_id, None,
-                  s"From TEMP account ${userApp.account_id} to REAL account ${userMobile.account_id}" )
+                  s"From TEMP account ${userApp.account_id} to REAL account ${userMobile.account_id}")
 
                 // Make the new link. Also set map_confirmed=true
                 val newUserApp = userApp.copy(account_id = userApp.account_id, map_confirmed = true, ts = now)
@@ -155,7 +155,7 @@ trait Kar141_SendCode_actor
                   case OK(_) => {
                     dbUserAccount.find(userMobile.account_id) match {
                       case OK(userAccount) => {
-                        if( ! userAccount.temp ) {
+                        if (!userAccount.temp) {
                           OK(APIResponse(Kar141_SendCode_Res(true, Some(userMobile.account_id)).toJson.toString, 200))
 
                         } else {
@@ -179,15 +179,15 @@ trait Kar141_SendCode_actor
           }
           case KO(_) => {
             // UserMobile not found. -> First time we are seeing this mobile number.
-//            dbUserMobile.insertNew(UserMobile(msisdn, userApp.account_id, false, Some(now), now))
-//            match { case KO(error) => MAKE_ERROR(error, s"Unbale to update UserMobile for accountID: ${userApp.account_id}")
-//            case _ => }
+            //            dbUserMobile.insertNew(UserMobile(msisdn, userApp.account_id, false, Some(now), now))
+            //            match { case KO(error) => MAKE_ERROR(error, s"Unbale to update UserMobile for accountID: ${userApp.account_id}")
+            //            case _ => }
 
             dbUserEmail.find(email) match {
               case OK(userEmail) => {
                 // UserEmail found -> user might have registerd with email beofre but using a new mobile.
                 // Check is the UserEmail and UserApp linked.
-                if( userApp.account_id == userEmail.account_id) {
+                if (userApp.account_id == userEmail.account_id) {
                   // Linked UserEMail and UserApp through account_id.
                   // OK so we have seen this user before but not the mobile number.
                   // Perhaps, the user wants to change the mobile number. ???
@@ -205,18 +205,18 @@ trait Kar141_SendCode_actor
                     case KO(_) => KO(Error(s"UserEmail has an entry for email: $email but UserAccount cannot be found for ${userEmail.account_id}"))
                   }
                 } else {
-                    // Different account mapped to applicationID and email
-                  if( ! userApp.map_confirmed ) {
+                  // Different account mapped to applicationID and email
+                  if (!userApp.map_confirmed) {
                     // Temporary UserApp(applicationID)
                     // Move details form UserEmail.acount_id to UserApp.account_id
                     // Leave map_confirmed as that is only for mobile.
                     val tempUserAccount = dbUserAccount.find(userApp.account_id).get
                     val realUserAccount = dbUserAccount.find(userEmail.account_id).get
 
-                    if( realUserAccount.temp ) MAKE_ERROR(s"Real UserAccount is set to temp=true for accountId: ${userEmail.account_id}")
+                    if (realUserAccount.temp) MAKE_ERROR(s"Real UserAccount is set to temp=true for accountId: ${userEmail.account_id}")
 
                     moveKaredosBetweenAccounts(userApp.account_id, userEmail.account_id, None,
-                      s"From TEMP account ${userApp.account_id} to REAL account ${userEmail.account_id}" )
+                      s"From TEMP account ${userApp.account_id} to REAL account ${userEmail.account_id}")
 
                     // Make the new link. Also set map_confirmed=true
                     val newUserApp = userApp.copy(account_id = userApp.account_id, ts = now)
@@ -254,9 +254,9 @@ trait Kar141_SendCode_actor
               case KO(_) => {
                 // UserEmail not found.
                 // Create new UserEmail entry
-//                dbUserEmail.insertNew(UserEmail(email, userApp.account_id, false, Some(now), now))
-//                match { case KO(error) => MAKE_ERROR(error, s"Unbale to update UserEmail for accountID: ${userApp.account_id}")
-//                case _ => }
+                //                dbUserEmail.insertNew(UserEmail(email, userApp.account_id, false, Some(now), now))
+                //                match { case KO(error) => MAKE_ERROR(error, s"Unbale to update UserEmail for accountID: ${userApp.account_id}")
+                //                case _ => }
 
                 addMobileToAccount(userApp.account_id, msisdn) match {
                   case OK(_) =>
@@ -287,20 +287,22 @@ trait Kar141_SendCode_actor
               case OK(userEmail) => {
                 // Both UserEMail and UserMobile found.
                 // Make sure they are the same
-                if( userMobile.account_id == userEmail.account_id) {
+                if (userMobile.account_id == userEmail.account_id) {
                   val account_id = userMobile.account_id
 
                   // Add the account to UserApp
                   dbUserApp.insertNew(UserApp(applicationId, account_id, true, now))
-                  match { case KO(error) => return MAKE_ERROR(error, s"Unbale to update UserApp for applictionIS: ${applicationId}")
-                  case _ => }
+                  match {
+                    case KO(error) => return MAKE_ERROR(error, s"Unbale to update UserApp for applictionIS: ${applicationId}")
+                    case _ =>
+                  }
 
                   dbUserAccount.find(account_id) match {
                     case OK(userAccount) => {
-                      if( ! userAccount.temp ) {
+                      if (!userAccount.temp) {
                         OK(APIResponse(Kar141_SendCode_Res(true, Some(account_id)).toJson.toString, 200))
                       } else {
-                        OK(APIResponse(Kar141_SendCode_Res(false, None).toJson.toString, 200 ))
+                        OK(APIResponse(Kar141_SendCode_Res(false, None).toJson.toString, 200))
                       }
                     }
                     case KO(error) => MAKE_ERROR(error, s"Unable to find UserAccount for $account_id")
@@ -319,11 +321,11 @@ trait Kar141_SendCode_actor
                 val account_id = userMobile.account_id
 
                 // Create new UserEmail entry
-//                dbUserEmail.insertNew(UserEmail(email, account_id, false, Some(now), now))
-//                match { case KO(error) => MAKE_ERROR(error, s"Unbale to update UserEmail for accountID: ${account_id}")
-//                case _ => }
+                //                dbUserEmail.insertNew(UserEmail(email, account_id, false, Some(now), now))
+                //                match { case KO(error) => MAKE_ERROR(error, s"Unbale to update UserEmail for accountID: ${account_id}")
+                //                case _ => }
 
-//                addMobileToAccount(account_id, msisdn)
+                //                addMobileToAccount(account_id, msisdn)
                 addEmailToAccount(account_id, email) match {
                   case OK(_) =>
                   case KO(error) => return KO(error)
@@ -331,8 +333,10 @@ trait Kar141_SendCode_actor
 
                 // Add the account to UserApp
                 dbUserApp.insertNew(UserApp(applicationId, account_id, true, now))
-                match { case KO(error) => return MAKE_ERROR(error, s"Unbale to update UserApp for applictionIS: ${applicationId}")
-                case _ => }
+                match {
+                  case KO(error) => return MAKE_ERROR(error, s"Unbale to update UserApp for applictionIS: ${applicationId}")
+                  case _ =>
+                }
 
                 OK(
                   APIResponse(
@@ -351,20 +355,22 @@ trait Kar141_SendCode_actor
                 val account_id = userEmail.account_id
 
                 // UserMobile not found. -> First time we are seeing this mobile number.
-//                dbUserMobile.insertNew(UserMobile(msisdn, account_id, false, Some(now), now))
-//                match { case KO(error) => MAKE_ERROR(error, s"Unbale to update UserMobile for accountID: ${account_id}")
-//                case _ => }
+                //                dbUserMobile.insertNew(UserMobile(msisdn, account_id, false, Some(now), now))
+                //                match { case KO(error) => MAKE_ERROR(error, s"Unbale to update UserMobile for accountID: ${account_id}")
+                //                case _ => }
 
                 addMobileToAccount(account_id, msisdn) match {
                   case OK(_) =>
                   case KO(error) => return KO(error)
                 }
-//                addEmailToAccount(account_id, email)
+                //                addEmailToAccount(account_id, email)
 
                 // Add the account to UserApp
                 dbUserApp.insertNew(UserApp(applicationId, account_id, true, now))
-                match { case KO(error) => return MAKE_ERROR(error, s"Unbale to update UserApp for applictionIS: ${applicationId}")
-                case _ => }
+                match {
+                  case KO(error) => return MAKE_ERROR(error, s"Unbale to update UserApp for applictionIS: ${applicationId}")
+                  case _ =>
+                }
 
                 OK(
                   APIResponse(
@@ -375,7 +381,7 @@ trait Kar141_SendCode_actor
               case KO(_) => {
                 // Create a new UserAccount
                 val account_id = getNewRandomID
-                val new_user_account = UserAccount( account_id
+                val new_user_account = UserAccount(account_id
                   , None
                   , None
                   , DEFAULT_CUSTOMER_TYPE
@@ -385,19 +391,21 @@ trait Kar141_SendCode_actor
                   , now
                   , now
                 )
-                dbUserAccount.insertNew( new_user_account)
-                match { case KO(error) => return MAKE_ERROR(error, s"Unable to create a new UserAccount")
-                case _ => }
+                dbUserAccount.insertNew(new_user_account)
+                match {
+                  case KO(error) => return MAKE_ERROR(error, s"Unable to create a new UserAccount")
+                  case _ =>
+                }
 
                 // UserMobile not found. -> First time we are seeing this mobile number.
-//                dbUserMobile.insertNew(UserMobile(msisdn, account_id, false, Some(now), now))
-//                match { case KO(error) => MAKE_ERROR(error, s"Unbale to update UserMobile for accountID: ${account_id}")
-//                case _ => }
+                //                dbUserMobile.insertNew(UserMobile(msisdn, account_id, false, Some(now), now))
+                //                match { case KO(error) => MAKE_ERROR(error, s"Unbale to update UserMobile for accountID: ${account_id}")
+                //                case _ => }
 
                 // Create new UserEmail entry
-//                dbUserEmail.insertNew(UserEmail(email, account_id, false, Some(now), now))
-//                match { case KO(error) => MAKE_ERROR(error, s"Unbale to update UserEmail for accountID: ${account_id}")
-//                case _ => }
+                //                dbUserEmail.insertNew(UserEmail(email, account_id, false, Some(now), now))
+                //                match { case KO(error) => MAKE_ERROR(error, s"Unbale to update UserEmail for accountID: ${account_id}")
+                //                case _ => }
 
                 addMobileToAccount(account_id, msisdn) match {
                   case OK(_) =>
@@ -410,8 +418,10 @@ trait Kar141_SendCode_actor
 
                 // Add the account to UserApp
                 dbUserApp.insertNew(UserApp(applicationId, account_id, true, now))
-                match { case KO(error) => return MAKE_ERROR(error, s"Unbale to update UserApp for applictionIS: ${applicationId}")
-                case _ => }
+                match {
+                  case KO(error) => return MAKE_ERROR(error, s"Unbale to update UserApp for applictionIS: ${applicationId}")
+                  case _ =>
+                }
 
                 OK(
                   APIResponse(
@@ -426,13 +436,13 @@ trait Kar141_SendCode_actor
     }
   }
 
-  def addEmailToAccount(account_id: String, email: String, email_code:String = getNewRandomID): Result[Error, APIResponse] = {
+  def addEmailToAccount(account_id: String, email: String, email_code: String = getNewRandomID): Result[Error, APIResponse] = {
     dbUserAccount.find(account_id) match {
       case OK(userAccount) => {
 
         // Add a new UserEmail entry
-//        dbUserEmail.insertNew(UserEmail(email, account_id, false, Some(now), now))
-//        match { case KO(error) => MAKE_ERROR(error, s"Unbale to update UserEmail for accountID: ${account_id}") }
+        //        dbUserEmail.insertNew(UserEmail(email, account_id, false, Some(now), now))
+        //        match { case KO(error) => MAKE_ERROR(error, s"Unbale to update UserEmail for accountID: ${account_id}") }
 
         val emails = userAccount.email
 
@@ -451,7 +461,7 @@ trait Kar141_SendCode_actor
             val newUserAccount = userAccount.copy(email = emails ++ List(Email(email, Some(email_code), false, now, None)))
 
             dbUserAccount.update(newUserAccount) match {
-              case OK(_) => OK( APIResponse( Kar141_SendCode_Res(true, Some(account_id)).toJson.toString, 200))
+              case OK(_) => OK(APIResponse(Kar141_SendCode_Res(true, Some(account_id)).toJson.toString, 200))
               case KO(error) => MAKE_ERROR(error, s"Unbale to update UserAccount for accountID: ${account_id}")
             }
           }
@@ -460,7 +470,7 @@ trait Kar141_SendCode_actor
             val newUserAccount = userAccount.copy(email = restEmails ++ List(Email(email, Some(email_code), false, now, None)))
 
             dbUserAccount.update(newUserAccount) match {
-              case OK(_) => OK( APIResponse( Kar141_SendCode_Res(true, Some(account_id)).toJson.toString, 200))
+              case OK(_) => OK(APIResponse(Kar141_SendCode_Res(true, Some(account_id)).toJson.toString, 200))
               case KO(error) => MAKE_ERROR(error, s"Unbale to update UserAccount for accountID: ${account_id}")
             }
           }
@@ -470,13 +480,13 @@ trait Kar141_SendCode_actor
     }
   }
 
-  def addMobileToAccount(account_id: String, msisdn: String, sms_code:String = getNewSMSCode): Result[Error, APIResponse] = {
+  def addMobileToAccount(account_id: String, msisdn: String, sms_code: String = getNewSMSCode): Result[Error, APIResponse] = {
     dbUserAccount.find(account_id) match {
       case OK(userAccount) => {
 
         // Add a new UserMobile entry
-//        dbUserMobile.insertNew(UserMobile(msisdn, account_id, false, Some(now), now))
-//        match { case KO(error) => MAKE_ERROR(error, s"Unbale to update UserMobile for accountID: ${account_id}") }
+        //        dbUserMobile.insertNew(UserMobile(msisdn, account_id, false, Some(now), now))
+        //        match { case KO(error) => MAKE_ERROR(error, s"Unbale to update UserMobile for accountID: ${account_id}") }
 
         val msisdns = userAccount.mobile
 
@@ -492,7 +502,7 @@ trait Kar141_SendCode_actor
             val newUserAccount = userAccount.copy(mobile = msisdns ++ List(Mobile(msisdn, Some(sms_code), false, now, None, true)))
 
             dbUserAccount.update(newUserAccount) match {
-              case OK(_) => OK( APIResponse( Kar141_SendCode_Res(true, Some(account_id)).toJson.toString, 200))
+              case OK(_) => OK(APIResponse(Kar141_SendCode_Res(true, Some(account_id)).toJson.toString, 200))
               case KO(error) => MAKE_ERROR(error, s"Unbale to update UserAccount for accountID: ${account_id}")
             }
           }
@@ -501,7 +511,7 @@ trait Kar141_SendCode_actor
             val newUserAccount = userAccount.copy(mobile = restMsisdns ++ List(Mobile(msisdn, Some(sms_code), false, now, None, true)))
 
             dbUserAccount.update(newUserAccount) match {
-              case OK(_) => OK( APIResponse( Kar141_SendCode_Res(true, Some(account_id)).toJson.toString, 200))
+              case OK(_) => OK(APIResponse(Kar141_SendCode_Res(true, Some(account_id)).toJson.toString, 200))
               case KO(error) => MAKE_ERROR(error, s"Unbale to update UserAccount for accountID: ${account_id}")
             }
           }
@@ -523,34 +533,46 @@ trait Kar141_SendCode_actor
       }
     }
 
-    if( fromUserKaredo.karedos < act_karedo) MAKE_ERROR(s"From UserKaredos doesn't have enough Karedos accountId: ${from}")
+    if (fromUserKaredo.karedos < act_karedo) {
+      MAKE_ERROR(s"From UserKaredos doesn't have enough Karedos accountId: ${from}")
+    } else {
 
-    val new_fromUserKaredo = fromUserKaredo.copy(karedos = fromUserKaredo.karedos - act_karedo, ts = now)
-    val new_toUserKaredo = toUserKaredo.copy(karedos = toUserKaredo.karedos + act_karedo, ts = now)
+      val diff1 = fromUserKaredo.karedos - act_karedo
+      val new_fromUserKaredo = fromUserKaredo.copy(karedos = diff1.toInt, ts = now)
 
-    dbUserKaredos.update(new_fromUserKaredo)
-    match { case KO(error) => return MAKE_ERROR(error, s"Unable to update Karedos. accountId: $from")
-    case _ => }
+      val diff2 = toUserKaredo.karedos + act_karedo
+      val new_toUserKaredo = toUserKaredo.copy(karedos = diff2.toInt, ts = now)
 
-    dbUserKaredos.update(new_toUserKaredo)
-    match { case KO(error) => return MAKE_ERROR(error, s"Unable to update Karedos. accountId: $to")
-    case _ => }
+      val updFromUserKaredo = dbUserKaredos.update(new_fromUserKaredo)
 
-    dbKaredoChange.insertNew(KaredoChange(from, to, -act_karedo,
-      TRANS_TYPE_TRANSFERED, s"Moved Karedos: $karedos from $from to $to -> $text", currency, now ))
-    match { case KO(error) => return MAKE_ERROR(error, "Unable to update KaredoChange")
-    case _ => }
+      if (updFromUserKaredo.isKO) MAKE_ERROR(updFromUserKaredo.err, s"Unable to update Karedos. accountId: $from")
+      else {
 
-    dbKaredoChange.insertNew(KaredoChange(to, from, act_karedo,
-      TRANS_TYPE_TRANSFERED, s"Moved Karedos: $karedos from $from to $to -> $text", currency, now ))
-    match { case KO(error) => return MAKE_ERROR(error, "Unable to update KaredoChange")
-    case _ => }
+        val updToUserKaredo = dbUserKaredos.update(new_toUserKaredo)
+        if (updToUserKaredo.isKO) MAKE_ERROR(updToUserKaredo.err, s"Unable to update Karedos. accountId: $to")
 
-    OK("Complete")
+        else {
+
+          val insChangeFrom = dbKaredoChange.insertNew(KaredoChange(from, to, (-act_karedo).toInt,
+            TRANS_TYPE_TRANSFERED, s"Moved Karedos: $karedos from $from to $to -> $text", currency, now))
+          if (insChangeFrom.isKO) MAKE_ERROR(insChangeFrom.err, "Unable to update KaredoChange")
+          else {
+
+            val insChangeTo = dbKaredoChange.insertNew(KaredoChange(to, from, act_karedo.toInt,
+              TRANS_TYPE_TRANSFERED, s"Moved Karedos: $karedos from $from to $to -> $text", currency, now))
+            if (insChangeTo.isKO) MAKE_ERROR(insChangeTo.err, "Unable to update KaredoChange")
+            else
+              OK("Complete")
+          }
+        }
+      }
+    }
+
 
   }
 
-  def sendSMS(msisdn: String, text: String): Future[Result[Error, String]] =  {
+
+  def sendSMS(msisdn: String, text: String): Future[Result[Error, String]] = {
     import spray.client.pipelining._
     import spray.http._
 
@@ -570,7 +592,7 @@ trait Kar141_SendCode_actor
     }
   }
 
-  def sendEmail(email: String, subject: String, body: String): Future[Result[Error, String]] =  {
+  def sendEmail(email: String, subject: String, body: String): Future[Result[Error, String]] = {
     import spray.client.pipelining._
     import spray.http.{BasicHttpCredentials, FormData, HttpResponse}
 

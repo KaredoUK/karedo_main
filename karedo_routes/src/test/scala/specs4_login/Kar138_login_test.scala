@@ -1,12 +1,23 @@
 package specs4_login
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
+import common.AllTests
+import karedo.entity.{UserAccount, UserApp}
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
 /**
   * Created by pakkio on 10/21/16.
   */
-trait Kar138_login_test {
-  self : Specs4_LoginSequence =>
+@RunWith(classOf[JUnitRunner])
+class Kar138_login_test extends AllTests {
+
+  val acctId = getNewRandomID
+  val appId = getNewRandomID
+
+  dbUserApp.insertNew(UserApp(appId,acctId))
+  dbUserAccount.insertNew(UserAccount(acctId,password=Some("pippo")))
+
 
   "Kar138_login" should {
 
@@ -19,7 +30,7 @@ trait Kar138_login_test {
         check {
           val st=status
           val res=responseAs[Kar138Res]
-          sessionId = res.session_id
+          val sessionId = res.session_id
           status.intValue() shouldEqual (200)
         }
 

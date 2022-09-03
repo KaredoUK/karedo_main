@@ -21,7 +21,7 @@ case class Action
 )
 case class UserMessages
 (
-  // accountId
+  // message id
   @Key("_id") id: String = UUID.randomUUID().toString
   , account_id: String
   , tweet_text: Option[String] = None

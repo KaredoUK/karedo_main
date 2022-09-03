@@ -16,6 +16,8 @@ libraryDependencies ++= {
 
     //, "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaV
     , "org.specs2" %% "specs2-core" % "3.8.5" % "test"
+    , "org.specs2" %% "specs2-junit" % "3.8.5.1" % "test"
+    , "junit" % "junit" % "4.8.1" % "test"
   )
 }
 

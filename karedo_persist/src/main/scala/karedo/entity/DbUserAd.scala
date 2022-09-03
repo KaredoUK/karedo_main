@@ -4,7 +4,7 @@ import com.mongodb.casbah.commons.MongoDBObject
 import karedo.entity.dao.{DbMongoDAO, Keyable}
 import org.joda.time.DateTime
 import salat.annotations._
-import karedo.util.Util.now
+import karedo.util.Util._
 
 case class Channel
 (
@@ -15,16 +15,16 @@ case class Channel
 case class UserAd
 (
   // this is the univoque AdId
-  @Key("_id") id: String
-  , application_id: String
+  @Key("_id") id: String = newUUID
+  , application_id: String = newMD5
   , ad_type: String = ""
-  , imp_url: String
-  , click_url: String
-  , addomain: String
-  , cid: String
-  , crid: String
+  , imp_url: String = ""
+  , click_url: String = ""
+  , addomain: String = ""
+  , cid: String = ""
+  , crid: String = ""
   , channels: List[Channel] = List()
-  , ts: Option[DateTime] = Some(now)
+  , ts: DateTime = now
 
 ) extends Keyable[String]
 

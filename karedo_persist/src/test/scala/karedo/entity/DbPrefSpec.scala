@@ -3,7 +3,10 @@ package karedo.entity
 import org.specs2.matcher.{MatchResult, TryMatchers}
 import org.specs2.mutable.Specification
 import utils.MongoTestUtils
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class DbPrefSpec
   extends Specification
     with TryMatchers

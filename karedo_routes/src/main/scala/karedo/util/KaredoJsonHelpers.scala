@@ -75,7 +75,7 @@ trait KaredoJsonHelpers
   case class Kar145Res(account_id:String)
   implicit val jsonKar145Res = jsonFormat1(Kar145Res)
 
-  case class Kar135Res(account_id:Option[String], app_karedos:Int)
+  case class Kar135Res(account_id:Option[String], app_karedos:Double)
   implicit val jsonKar135Res = jsonFormat2(Kar135Res)
 
   case class Kar134Res(account_id:Option[String], ad_count:Int, ads:List[AdUnit] )

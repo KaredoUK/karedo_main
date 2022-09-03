@@ -55,7 +55,7 @@ trait Kar143_verify_actor
                           }
                         }
                         case KO(_) => {
-                          dbUserEmail.insertNew(UserEmail(email, account_id, true, Some(now), now)) match {
+                          dbUserEmail.insertNew(UserEmail(email, account_id, true, now, now)) match {
                             case KO(error) => {
                               logger.error(error)
                               OK(APIResponse(s"Verification failed. System error.", 200))

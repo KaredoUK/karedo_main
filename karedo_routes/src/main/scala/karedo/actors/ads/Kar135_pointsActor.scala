@@ -33,7 +33,7 @@ trait Kar135_pointsActor extends DbCollections
 
           if (upoints.isKO) KO(Error(s"internal error ${upoints.err}"))
           else {
-            val app_karedos:Int = (upoints.get.karedos / APP_KAREDO_CONV).toInt
+            val app_karedos = upoints.get.karedos / APP_KAREDO_CONV
             val ret = Kar135Res(JsonAccountIfNotTemp(acc), app_karedos).toJson.toString
               OK(APIResponse(ret, code))
           }

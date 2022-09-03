@@ -30,7 +30,9 @@ libraryDependencies ++= {
 
     "org.clapper" %% "classutil" % "1.0.11",
     "org.scalatest" %% "scalatest" % "3.0.0" % "test",
-    "org.specs2" %% "specs2-core" % "3.8.5" % "test"
+    "org.specs2" %% "specs2-core" % "3.8.5" % "test",
+    "org.specs2" %% "specs2-junit" % "3.8.5.1" % "test",
+    "junit" % "junit" % "4.8.1" % "test"
   )
 }
 
