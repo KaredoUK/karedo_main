@@ -84,11 +84,12 @@ trait KaredoIds {
 
   def getNewSaleCode = {
     val random = new scala.util.Random
-    val first = random.alphanumeric take 4 mkString
-    val second = random.alphanumeric take 4 mkString
-    val third = random.alphanumeric take 4 mkString
+    val first = (random.alphanumeric take 4 mkString).toUpperCase
+    val second = (random.alphanumeric take 4 mkString).toUpperCase
+    val third = (random.alphanumeric take 4 mkString).toUpperCase
+    val fourth = (random.alphanumeric take 4 mkString).toUpperCase
 
-    s"${first}-${second}-${third}"
+    s"${first}-${second}-${third}-${fourth}"
   }
 }
 
