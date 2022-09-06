@@ -14,3 +14,11 @@ lazy val rtb = project.in(file("karedo_rtb")) dependsOn(db)
 
 lazy val routes = project.in(file("karedo_routes")) dependsOn(db, rtb)
 
+run := {
+ println("******************************")
+ println("sbt run is disabled at top level")
+ println("Please Use:")
+ println("   1. $ build_and_run.sh")
+ println("   2. $ cd karedo_routes; sbt run")
+ println("******************************")
+}
