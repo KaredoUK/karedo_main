@@ -1,13 +1,17 @@
 package karedo.entity
 
-import java.util.UUID
+import java.util.{Random, UUID}
 
-import karedo.util.{KO, OK}
+import karedo.util.{KO, OK, Result}
 import org.specs2.matcher.EitherMatchers
 import org.specs2.mutable.Specification
 import utils.MongoTestUtils
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
+
+import scala.concurrent.{Await, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 
 @RunWith(classOf[JUnitRunner])
 class DbUserKaredosSpec
@@ -37,12 +41,14 @@ class DbUserKaredosSpec
     }
 
   }
+  private val ACCT1START = 1000
+  private val ACCT2START = 500
   "can transfer funds from a user to another" in {
     val acct1 = UUID.randomUUID()
     val acct2 = UUID.randomUUID()
 
-    test.insertNew(UserKaredos(acct1,1000))
-    test.insertNew(UserKaredos(acct2,500))
+    test.insertNew(UserKaredos(acct1,ACCT1START))
+    test.insertNew(UserKaredos(acct2,ACCT2START))
     test.transferKaredo(acct1,acct2,100)
 
     test.find(acct1) match {
@@ -54,5 +60,36 @@ class DbUserKaredosSpec
       case KO(x) => ko(x)
     }
 
+  }
+  "can we transfer safely?" in {
+    val acct1 = UUID.randomUUID()
+    val acct2 = UUID.randomUUID()
+
+    test.insertNew(UserKaredos(acct1,ACCT1START))
+    test.insertNew(UserKaredos(acct2,ACCT2START))
+
+    // launch 1000 transfers which should not alter the initial amount
+    val futures = for{ i <- 1 to 5}
+      yield Future {
+        for (j <- 1 to 10000) {
+          var kar = new Random().nextInt
+          //println(s"$i/$j transferring 1")
+          test.transferKaredo(acct1, acct2, kar)
+          //println(s"$i/$j transferring 2")
+          test.transferKaredo(acct2, acct1, kar)
+        }
+      }
+
+    val future = Future.fold(futures.toList)(List[Unit]())((acc, e) => e :: acc)
+
+    Await.result(future, 100 seconds)
+    test.find(acct1) match {
+      case OK(x) => x.karedos must beEqualTo(ACCT1START)
+      case KO(x) => ko(x)
+    }
+    test.find(acct2) match {
+      case OK(x) => x.karedos must beEqualTo(ACCT2START)
+      case KO(x) => ko(x)
+    }
   }
 }

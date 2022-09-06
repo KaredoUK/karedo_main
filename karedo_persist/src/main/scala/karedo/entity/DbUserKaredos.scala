@@ -51,6 +51,7 @@ trait DbUserKaredos extends DbMongoDAO[String,UserKaredos] {
       acc2upd <- update(acc2.copy(karedos=acc2.karedos + amount, ts = now))
 
     } yield acc2upd
+    //println(s"changed account $result")
     result
   }
 }
