@@ -86,4 +86,9 @@ trait KaredoJsonHelpers
 
   case class Kar138Res(session_id: String)
   implicit val jsonKar138Res = jsonFormat1(Kar138Res)
+
+  case class Receiver(first_name: String, last_name: String, msisdn:String)
+  case class Kar183Req(account_id: String, application_id: String, session_id: String, app_karedos:Int, receiver:Receiver )
+  implicit val jsonReceiver = jsonFormat3(Receiver)
+  implicit val jaonKar183Req:RootJsonFormat[Kar183Req] = jsonFormat5(Kar183Req)
 }

@@ -20,7 +20,9 @@ trait Kar141_SendCode_actor
     with KaredoAuthentication
     with KaredoJsonHelpers
     with KaredoConstants
-    with DefaultActorSystem {
+    with KaredoUtils
+    with DefaultActorSystem
+{
 
   override val logger = LoggerFactory.getLogger(classOf[Kar141_SendCode_actor])
 
@@ -142,6 +144,8 @@ trait Kar141_SendCode_actor
 
                 val tempUserAccount = dbUserAccount.find(userApp.account_id).get
                 val realUserAccount = dbUserAccount.find(userMobile.account_id).get
+
+                // @TODO: Add a throw here.
 
                 if (realUserAccount.temp) MAKE_ERROR(s"Real UserAccount is set to temp=true for accountId: ${userMobile.account_id}")
 
@@ -381,17 +385,8 @@ trait Kar141_SendCode_actor
               case KO(_) => {
                 // Create a new UserAccount
                 val account_id = getNewRandomID
-                val new_user_account = UserAccount(account_id
-                  , None
-                  , None
-                  , DEFAULT_CUSTOMER_TYPE
-                  , List()
-                  , List()
-                  , true
-                  , now
-                  , now
-                )
-                dbUserAccount.insertNew(new_user_account)
+
+                createAndInsertNewAccount(account_id)
                 match {
                   case KO(error) => return MAKE_ERROR(error, s"Unable to create a new UserAccount")
                   case _ =>
@@ -499,7 +494,8 @@ trait Kar141_SendCode_actor
         msisdns.filter(x => x.msisdn == msisdn) match {
           case Nil => {
             // Good email not already registered to account.
-            val newUserAccount = userAccount.copy(mobile = msisdns ++ List(Mobile(msisdn, Some(sms_code), false, now, None, true)))
+            val newUserAccount = userAccount.copy(mobile = msisdns ++ List(
+              Mobile(msisdn = msisdn, sms_code = Some(sms_code), valid = false, ts_created = now, ts_validated = None)))
 
             dbUserAccount.update(newUserAccount) match {
               case OK(_) => OK(APIResponse(Kar141_SendCode_Res(true, Some(account_id)).toJson.toString, 200))
@@ -508,7 +504,8 @@ trait Kar141_SendCode_actor
           }
           case _ => {
             val restMsisdns = msisdns.filter(x => x.msisdn != msisdn)
-            val newUserAccount = userAccount.copy(mobile = restMsisdns ++ List(Mobile(msisdn, Some(sms_code), false, now, None, true)))
+            val newUserAccount = userAccount.copy(mobile = restMsisdns ++ List(
+              Mobile(msisdn = msisdn, sms_code = Some(sms_code), valid = false, ts_created = now, ts_validated =None)))
 
             dbUserAccount.update(newUserAccount) match {
               case OK(_) => OK(APIResponse(Kar141_SendCode_Res(true, Some(account_id)).toJson.toString, 200))
@@ -521,102 +518,5 @@ trait Kar141_SendCode_actor
     }
   }
 
-  def moveKaredosBetweenAccounts(from: String, to: String, karedos: Option[Double], text: String = "", currency: String = "KAR"): Result[Error, String] = {
-    val fromUserKaredo = dbUserKaredos.find(from).get
-    val toUserKaredo = dbUserKaredos.find(to).get
-
-    val act_karedo = karedos match {
-      case Some(k) => k
-      case None => {
-        // All Karedos.
-        fromUserKaredo.karedos
-      }
-    }
-
-    if (fromUserKaredo.karedos < act_karedo) {
-      MAKE_ERROR(s"From UserKaredos doesn't have enough Karedos accountId: ${from}")
-    } else {
-
-      val diff1 = fromUserKaredo.karedos - act_karedo
-      val new_fromUserKaredo = fromUserKaredo.copy(karedos = diff1.toInt, ts = now)
-
-      val diff2 = toUserKaredo.karedos + act_karedo
-      val new_toUserKaredo = toUserKaredo.copy(karedos = diff2.toInt, ts = now)
-
-      val updFromUserKaredo = dbUserKaredos.update(new_fromUserKaredo)
-
-      if (updFromUserKaredo.isKO) MAKE_ERROR(updFromUserKaredo.err, s"Unable to update Karedos. accountId: $from")
-      else {
-
-        val updToUserKaredo = dbUserKaredos.update(new_toUserKaredo)
-        if (updToUserKaredo.isKO) MAKE_ERROR(updToUserKaredo.err, s"Unable to update Karedos. accountId: $to")
-
-        else {
-
-          val insChangeFrom = dbKaredoChange.insertNew(KaredoChange(from, to, (-act_karedo).toInt,
-            TRANS_TYPE_TRANSFERED, s"Moved Karedos: $karedos from $from to $to -> $text", currency, now))
-          if (insChangeFrom.isKO) MAKE_ERROR(insChangeFrom.err, "Unable to update KaredoChange")
-          else {
-
-            val insChangeTo = dbKaredoChange.insertNew(KaredoChange(to, from, act_karedo.toInt,
-              TRANS_TYPE_TRANSFERED, s"Moved Karedos: $karedos from $from to $to -> $text", currency, now))
-            if (insChangeTo.isKO) MAKE_ERROR(insChangeTo.err, "Unable to update KaredoChange")
-            else
-              OK("Complete")
-          }
-        }
-      }
-    }
-
-
-  }
-
-
-  def sendSMS(msisdn: String, text: String): Future[Result[Error, String]] = {
-    import spray.client.pipelining._
-    import spray.http._
-
-    val pipeline: HttpRequest => Future[HttpResponse] = {
-      addHeader("Authorization", s"AccessKey $notification_sms_auth_accesskey") ~> sendReceive //~> unmarshal[String]
-    }
-
-    pipeline {
-      Post(
-        Uri(notification_sms_server_endpoint), SMSRequest(msisdn, notification_sms_sender, text).toJson.toString)
-    } map { httpResponse: HttpResponse =>
-      if (httpResponse.status.isFailure) {
-        MAKE_ERROR(s"Request failed for reason ${httpResponse.status.value}:${httpResponse.status.defaultMessage}")
-      } else {
-        OK(s"[SMS] Sent a sms, response from service is $httpResponse")
-      }
-    }
-  }
-
-  def sendEmail(email: String, subject: String, body: String): Future[Result[Error, String]] = {
-    import spray.client.pipelining._
-    import spray.http.{BasicHttpCredentials, FormData, HttpResponse}
-
-    val requestPipeline = addCredentials(BasicHttpCredentials("api", s"$notification_email_auth_accesskey")) ~> sendReceive
-
-    requestPipeline {
-      Post(
-        notification_email_server_endpoint,
-        FormData(
-          Map(
-            "from" -> notification_email_sender,
-            "to" -> email,
-            "subject" -> subject,
-            "html" -> body
-          )
-        )
-      )
-    } map { httpResponse: HttpResponse =>
-      if (httpResponse.status.isFailure) {
-        MAKE_ERROR(s"[EMAIL] Got an error response is ${httpResponse.entity.asString}")
-      } else {
-        OK(s"[EMAIL] Email sent correctly answer is ${httpResponse.entity}")
-      }
-    }
-  }
 
 }

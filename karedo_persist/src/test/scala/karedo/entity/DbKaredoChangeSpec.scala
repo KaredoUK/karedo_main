@@ -22,15 +22,19 @@ class DbKaredoChangeSpec
   "karedochange should insert a change" in {
     val acctId = UUID.randomUUID()
     val r = KaredoChange(UUID.randomUUID(),acctId,50,"transaction","info","GBP")
+
     val r2 = KaredoChange(UUID.randomUUID(),acctId,52,"transaction2","info2","GBP")
 
 
     test.insertNew(r) must beOK
-    test.insertNew(r2) must beOK
     val changes: List[KaredoChange] = test.getChanges(acctId)
-    changes.size must beEqualTo(2)
+    changes.size must beEqualTo(1)
     changes(0).karedos must beEqualTo(50)
-    changes(1).karedos must beEqualTo(52)
+
+    test.insertNew(r2) must beOK
+    val change1: List[KaredoChange] = test.getChanges(acctId)
+    changes.size must beEqualTo(1)
+    changes(0).karedos must beEqualTo(52)
   }
 
 

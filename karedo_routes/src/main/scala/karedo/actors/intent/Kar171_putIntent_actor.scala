@@ -15,7 +15,9 @@ trait Kar171_putIntent_actor
   extends DbCollections
   with KaredoAuthentication
   with KaredoJsonHelpers
-  with KaredoConstants {
+  with KaredoConstants
+  with KaredoUtils
+{
 
   override val logger = LoggerFactory.getLogger(classOf[Kar171_putIntent_actor])
 

@@ -12,7 +12,7 @@ import karedo.util.Util.now
   */
 case class UserIntent (
                         @Key("_id") id:String
-                      , intents: List[IntentUnit]
+                      , intents: List[IntentUnit] = List()
                       ) extends Keyable[String]
 
 case class IntentUnit (

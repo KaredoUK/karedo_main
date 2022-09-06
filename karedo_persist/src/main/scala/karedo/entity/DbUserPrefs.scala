@@ -20,7 +20,7 @@ case class UserPrefs
 (
   // it is the AccountId
   @Key("_id") id: String = UUID.randomUUID().toString
-  , prefs: Map[String, Double]
+  , prefs: Map[String, Double] = Map()
   , ts_created: Option[DateTime] = Some(now)
   , ts_updated: DateTime = now
 )

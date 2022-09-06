@@ -20,4 +20,6 @@ trait DbCollections {
   val dbUserSession = new DbUserSession {}
   val dbUserMessages = new DbUserMessages {}
   val dbUserIntent = new DbUserIntent {}
+  val dbSale = new DbSale {}
+  val dbMobileSale = new DbMobileSale {}
 }

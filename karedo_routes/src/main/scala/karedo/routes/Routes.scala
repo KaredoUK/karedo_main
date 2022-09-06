@@ -7,6 +7,7 @@ import karedo.routes.intent.{Kar169_getIntent, Kar170_postIntent, Kar171_putInte
 import karedo.routes.login.{Kar138_Login, Kar141_SendCode, Kar143_verify, Kar145_EnterCode}
 import karedo.routes.prefs.{Kar194_getPrefs, Kar195_postPrefs}
 import karedo.routes.profile.{Kar188_getProfile, Kar189_postProfile}
+import karedo.routes.transfer.Kar183_putTransfer
 import karedo.sample.Entities
 import karedo.util.RouteDebug
 //import org.clapper.classutil.ClassInfo
@@ -36,7 +37,7 @@ trait Routes
     Kar134_ads.route ~ Kar135_points.route ~ Kar136_messages.route ~ Kar166_interaction.route ~
       Kar169_getIntent.route ~ Kar170_postIntent.route ~ Kar171_putIntent.route ~ Kar172_deleteIntent.route ~ Kar188_getProfile.route ~ Kar189_postProfile.route ~
       Kar194_getPrefs.route ~ Kar195_postPrefs.route ~ Kar141_SendCode.route ~ Kar143_verify.route ~ Kar145_EnterCode.route ~
-      Kar138_Login.route
+      Kar138_Login.route ~ Kar183_putTransfer.route
   }
 
 //  override val routes = {
@@ -76,7 +77,7 @@ trait CorsSupport {
   protected def corsAllowOrigins: List[String] = List("*")
 
   protected def corsAllowedHeaders: List[String]
-    = List("Origin", "X-Requested-With", "Content-Type", "Accept", "Accept-Encoding", "Accept-Language", "Host", "Referer", "User-Agent")
+    = List("Origin", "X-Requested-With", "Content-Type", "Accept", "Accept-Encoding", "Accept-Language", "Host", "Referer", "User-Agent", "Geolocation")
 
   protected def corsAllowCredentials: Boolean = true
 

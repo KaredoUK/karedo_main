@@ -8,6 +8,8 @@ import org.specs2.mutable.Specification
 import utils.MongoTestUtils
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
+import karedo.util.Util.now
+
 
 @RunWith(classOf[JUnitRunner])
 class DbUserAccountSpec
@@ -68,6 +70,120 @@ class DbUserAccountSpec
 
         case KO(err) => ko(err)
       }
+    }
+    "should be able to find the active mobile and email" in {
+      accountDAO.find(userAccount.id) match {
+        case OK(account) => {
+          accountDAO.update(account.copy(
+            mobile = List(Mobile(msisdn = "1", valid = true, ts_validated = Some(now)), Mobile(msisdn = "2", valid = true, ts_validated = Some(now)), Mobile(msisdn = "3", valid = false)),
+            email = List(Email(address = "1", valid = true, ts_validated = Some(now)), Email(address = "2", valid = true, ts_validated = Some(now)), Email(address = "3", valid = false))
+          )) must beOK
+          accountDAO.findActiveMobile(account.id) match {
+            case OK(x) =>
+              x.msisdn must beEqualTo("2")
+            case KO(err) => ko(err)
+          }
+          accountDAO.findActiveEmail(account.id) match {
+            case OK(x) =>
+              x.address must beEqualTo("2")
+            case KO(err) => ko(err)
+          }
+        }
+        case KO(err) => ko(err)
+      }
+
+      accountDAO.find(userAccount.id) match {
+        case OK(account) => {
+          account.findActiveMobile match {
+            case OK(x) =>
+              x must not be null
+              x.msisdn must beEqualTo("2")
+            case KO(err) => ko(err)
+          }
+          account.findActiveEmail match {
+            case OK(x) =>
+              x.address must beEqualTo("2")
+            case KO(err) => ko(err)
+          }
+
+        }
+        case KO(err) => ko(err)
+      }
+
+      accountDAO.find(userAccount.id) match {
+        case OK(account) => {
+          accountDAO.update(account.copy(
+            mobile = List(Mobile(msisdn = "4", valid = true, ts_validated = Some(now)), Mobile(msisdn = "5", valid = false)),
+            email = List(Email(address = "4", valid = true, ts_validated = Some(now)), Email(address = "5", valid = false))
+          )) must beOK
+          accountDAO.findActiveMobile(account.id) match {
+            case OK(x) =>
+              x.msisdn must beEqualTo("4")
+            case KO(err) => ko(err)
+          }
+          accountDAO.findActiveEmail(account.id) match {
+            case OK(x) =>
+              x.address must beEqualTo("4")
+            case KO(err) => ko(err)
+          }
+        }
+        case KO(err) => ko(err)
+      }
+
+      accountDAO.find(userAccount.id) match {
+        case OK(account) => {
+          account.findActiveMobile match {
+            case OK(x) =>
+              x.msisdn must beEqualTo("4")
+            case KO(err) => ko(err)
+          }
+          account.findActiveEmail match {
+            case OK(x) =>
+              x.address must beEqualTo("4")
+            case KO(err) => ko(err)
+          }
+
+        }
+        case KO(err) => ko(err)
+      }
+
+      accountDAO.find(userAccount.id) match {
+        case OK(account) => {
+          accountDAO.update(account.copy(
+            mobile = List(Mobile(msisdn = "6", valid = true, ts_validated = Some(now)), Mobile(msisdn = "7", valid = false, ts_validated = Some(now))),
+            email = List(Email(address = "6", valid = true, ts_validated = Some(now)), Email(address = "7", valid = false, ts_validated = Some(now)))
+          )) must beOK
+          accountDAO.findActiveMobile(account.id) match {
+            case OK(x) =>
+              x.msisdn must beEqualTo("6")
+            case KO(err) => ko(err)
+          }
+          accountDAO.findActiveEmail(account.id) match {
+            case OK(x) =>
+              x.address must beEqualTo("6")
+            case KO(err) => ko(err)
+          }
+        }
+        case KO(err) => ko(err)
+      }
+
+      accountDAO.find(userAccount.id) match {
+        case OK(account) => {
+          account.findActiveMobile match {
+            case OK(x) =>
+              x.msisdn must beEqualTo("6")
+            case KO(err) => ko(err)
+          }
+          account.findActiveEmail match {
+            case OK(x) =>
+              x.address must beEqualTo("6")
+            case KO(err) => ko(err)
+          }
+
+        }
+        case KO(err) => ko(err)
+      }
+
     }
     "should be able to delete the user if needed" in {
       val tobedeleted = UserAccount()

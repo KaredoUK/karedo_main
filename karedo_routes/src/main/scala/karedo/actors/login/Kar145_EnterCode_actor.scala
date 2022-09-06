@@ -15,7 +15,9 @@ trait Kar145_EnterCode_actor
   extends DbCollections
   with KaredoAuthentication
   with KaredoJsonHelpers
-  with KaredoConstants {
+  with KaredoConstants
+  with KaredoUtils
+{
   override val logger = LoggerFactory.getLogger(classOf[Kar145_EnterCode_actor])
 
   def exec(request:Kar145Req): Result[Error, APIResponse] = {
@@ -62,10 +64,29 @@ trait Kar145_EnterCode_actor
                           dbUserMobile.insertNew(UserMobile(msisdn, account_id, true, now, now)) match {
                             case KO(error) => MAKE_ERROR(error)
                             case OK(_) => {
-                              // @TODO: All the Sale & Transfer Stuff
+                              // @TODO: Test - All the Sale & Transfer Stuff
+                              dbMobileSale.find(msisdn) match {
+                                case OK(mobileSale) => {
+                                  mobileSale.sale_ids.foreach(sale_id => {
+                                    dbSale.find(sale_id) match {
+                                      case OK(sale) => {
+                                        moveKaredosBetweenAccounts(sale.sender_id, account_id, Some(sale.karedos),
+                                          s"Completing Transfer from ${sale.sender_id} to ${account_id} for ${sale.karedos} Karedos")
 
+                                        dbSale.update(sale.copy(receiver_id = account_id, status = TRANS_STATUS_COMPLETE,
+                                          ts_updated = now, ts_completed = Some(now)))
 
-                              OK(APIResponse(Kar145Res(account_id).toJson.toString, 200))
+                                        sendSMS(sale.sender_id, s"Success. Transfer of ${sale.karedos} Karedos to ${account_id} Completed.")
+                                        sendSMS(account_id, s"Success. Transfer of ${sale.karedos} Karedos from ${sale.sender_id} (${sale.sender_name}) Completed.")
+                                      }
+                                      case KO(error) => logger.error(error)
+                                    }
+                                  })
+                                }
+                                case KO(_) =>
+                              }
+
+                              OK(APIResponse(Kar145Res(account_id).toJson.toString, HTTP_OK_200))
                             }
                           }
                         }

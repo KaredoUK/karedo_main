@@ -14,7 +14,9 @@ trait Kar138_login_actor
   extends DbCollections
   with KaredoAuthentication
   with KaredoJsonHelpers
-  with KaredoConstants {
+  with KaredoConstants
+  with KaredoUtils
+{
   override val logger = LoggerFactory.getLogger(classOf[Kar138_login_actor])
 
   def exec

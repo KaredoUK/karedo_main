@@ -29,7 +29,7 @@ trait Kar134_adsActor
 
   override val logger = LoggerFactory.getLogger(classOf[Kar134_adsActor])
 
-  val adActor = system.actorOf(Props[AdActor])
+  val adActor = actor_system.actorOf(Props[AdActor])
 
   def exec(accountId: String,
            deviceId: Option[String],

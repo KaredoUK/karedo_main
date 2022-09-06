@@ -9,7 +9,7 @@ import spray.json.{JsObject, JsString}
   * Created by pakkio on 10/9/16.
   */
 
-trait KaredoAuthentication extends KaredoConstants {
+trait KaredoAuthentication extends KaredoConstants with KaredoUtils {
   self: DbCollections  =>
   val logger = LoggerFactory.getLogger(classOf[KaredoAuthentication])
 
@@ -35,11 +35,11 @@ trait KaredoAuthentication extends KaredoConstants {
       else {
         if (allowCreation) {
           // Create a new userAccount and connect it to applicationId
-          val emptyAccount = UserAccount()
-          val uacct = dbUserAccount.insertNew(emptyAccount)
+          val account_id = getNewRandomID
+          val uacct = createAndInsertNewAccount(account_id)
           if (uacct.isOK) {
 
-            val app = UserApp(id = applicationId, account_id = emptyAccount.id)
+            val app = UserApp(id = applicationId, account_id = account_id)
             val uNewApp = dbUserApp.insertNew(app)
             f(uNewApp, uacct, HTTP_OK_CREATED_201) // creating a new mapping
 

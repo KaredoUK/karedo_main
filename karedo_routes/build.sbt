@@ -7,10 +7,12 @@ scalaVersion := "2.11.8"
 resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases/"
 resolvers += Resolver.mavenLocal
 
+lazy val root = Project("project-name", file(".")).enablePlugins(SbtTwirl)
 
 libraryDependencies ++= {
   val akkaV = "2.4.11"
   val karedoV = "0.0.2-SNAPSHOT"
+  val zxingV = "3.3.0"
   Seq(
     "karedo" %% "persist" % karedoV,
     "karedo" %% "rtb" % karedoV,
@@ -32,9 +34,13 @@ libraryDependencies ++= {
     "org.scalatest" %% "scalatest" % "3.0.0" % "test",
     "org.specs2" %% "specs2-core" % "3.8.5" % "test",
     "org.specs2" %% "specs2-junit" % "3.8.5.1" % "test",
-    "junit" % "junit" % "4.8.1" % "test"
+    "junit" % "junit" % "4.8.1" % "test",
+    "com.google.zxing" % "core" % zxingV,
+    "com.google.zxing" % "javase" % zxingV
   )
 }
+
+sourceDirectories in (Compile, TwirlKeys.compileTemplates) := (unmanagedSourceDirectories in Compile).value
 
 scalacOptions ++= Seq(
   "-unchecked",
