@@ -7,7 +7,7 @@ scalaVersion := "2.11.8"
 resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases/"
 resolvers += Resolver.mavenLocal
 
-lazy val root = Project("project-name", file(".")).enablePlugins(SbtTwirl)
+lazy val root = Project("routes", file(".")).enablePlugins(SbtTwirl)
 
 libraryDependencies ++= {
   val akkaV = "2.4.11"
