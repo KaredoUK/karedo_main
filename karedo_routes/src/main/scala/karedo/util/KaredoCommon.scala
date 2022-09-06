@@ -79,7 +79,7 @@ trait KaredoIds {
 
   def getNewSMSCode = {
     val random = new scala.util.Random
-    random.alphanumeric take 6 mkString
+    (random.alphanumeric take 6 mkString).toUpperCase
   }
 
   def getNewSaleCode = {
