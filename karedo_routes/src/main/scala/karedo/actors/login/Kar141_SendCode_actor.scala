@@ -26,6 +26,39 @@ trait Kar141_SendCode_actor
 
   override val logger = LoggerFactory.getLogger(classOf[Kar141_SendCode_actor])
 
+  def exec(
+            request: Kar141_SendCode_Req
+          ): Result[Error, APIResponse] = {
+
+    Try[Result[Error, APIResponse]] {
+      val applicationId = request.application_id
+      val firstName = request.first_name
+      val lastName = request.last_name
+      val msisdn = request.msisdn
+      val userType = request.user_type
+      val email = request.email
+
+      if (applicationId == null || applicationId.equals("")) KO(Error(s"application_id is null"))
+      if (firstName == null || firstName.equals("")) KO(Error(s"first_name is null"))
+      if (lastName == null || lastName.equals("")) KO(Error(s"last_name is null"))
+      if (msisdn == null || msisdn.equals("")) KO(Error(s"msisdn is null"))
+
+      if (email == null || email.equals("")) KO(Error(s"email is null"))
+      if (userType == null || userType.equals("")) KO(Error(s"user_type is null"))
+      if (!userType.equals("CUSTOMER")) KO(Error(s"user_type value is not CUSTOMER. Only one value is supported"))
+
+      logger.info(s"OK applicationId: $applicationId firstName: $firstName lastName: $lastName msisdn: $msisdn userType: $userType email: $email")
+
+      dbUserApp.find(applicationId) match {
+        case OK(userApp) => known_app(userApp, msisdn, email, (firstName, lastName))
+        case KO(_) => unknown_app(applicationId,msisdn, email, (firstName, lastName))
+      }
+    } match {
+      case Success(s) => s
+      case Failure(f) => MAKE_ERROR(f)
+    }
+  }
+
   def updateNameInProfile(account_id: String, name:(String, String)): Result[String, UserProfile] = {
     dbUserProfile.find(account_id) match {
       case OK(userProfile) => dbUserProfile.update(userProfile.copy(first_name = name._1, last_name = name._2, ts_updated = now)   )
@@ -40,26 +73,30 @@ trait Kar141_SendCode_actor
     }
   }
 
-  def known_app_known_mobile(userApp: UserApp, userMobile: UserMobile, email:String, name:(String, String)): Result[Error, APIResponse] = {
-    if( userApp.account_id == userMobile.account_id ) known_app_known_mobile_matching_mobile(userMobile.account_id, email, name)
+  def known_app_known_mobile
+  (userApp: UserApp, userMobile: UserMobile, email:String, name:(String, String)): Result[Error, APIResponse] = {
+    if( userApp.account_id == userMobile.account_id ) known_app_known_mobile_matching_mobile(userApp, userMobile.account_id, email, name)
     else known_app_known_mobile_diff_mobile(userApp, userMobile, email, name)
   }
 
-  def known_app_known_mobile_matching_mobile(account_id: String, email:String, name:(String, String)): Result[Error, APIResponse] = {
+  def known_app_known_mobile_matching_mobile
+  (userApp: UserApp, account_id: String, email:String, name:(String, String)): Result[Error, APIResponse] = {
     dbUserEmail.find(email) match {
-      case OK(userEmail) => known_app_known_mobile_matching_mobile_known_email(account_id, userEmail, name)
-      case KO(_) => known_app_known_mobile_matching_mobile_unknown_email(account_id, email, name)
+      case OK(userEmail) => known_app_known_mobile_matching_mobile_known_email(userApp, account_id, userEmail, name)
+      case KO(_) => known_app_known_mobile_matching_mobile_unknown_email(userApp, account_id, email, name)
     }
   }
 
-  def known_app_known_mobile_matching_mobile_known_email(account_id: String, userEmail:UserEmail, name:(String, String)): Result[Error, APIResponse] = {
-    if( userEmail.account_id != account_id ) add_email_to_account_for_verification(account_id, userEmail.id)
+  def known_app_known_mobile_matching_mobile_known_email
+  (userApp: UserApp, account_id: String, userEmail:UserEmail, name:(String, String)): Result[Error, APIResponse] = {
+    if( userEmail.account_id != account_id ) add_email_to_account_for_verification(userApp.id, account_id, userEmail.id)
 
     get_account_update_profile_check_temp(account_id, name)
   }
 
-  def known_app_known_mobile_matching_mobile_unknown_email(account_id: String, email: String, name:(String, String)): Result[Error, APIResponse] = {
-    add_email_to_account_for_verification(account_id, email)
+  def known_app_known_mobile_matching_mobile_unknown_email
+  (userApp: UserApp, account_id: String, email: String, name:(String, String)): Result[Error, APIResponse] = {
+    add_email_to_account_for_verification(userApp.id, account_id, email)
 
     get_account_update_profile_check_temp(account_id, name)
   }
@@ -114,7 +151,7 @@ trait Kar141_SendCode_actor
     else {
       if( userApp.email_linked ) {
         add_mobile_to_account_for_verification(userApp.account_id, msisdn)
-        add_email_to_account_for_verification(userApp.account_id, userEmail.id)
+        add_email_to_account_for_verification(userApp.id, userApp.account_id, userEmail.id)
 
         updateNameInProfile(userApp.account_id, name)
 
@@ -143,30 +180,30 @@ trait Kar141_SendCode_actor
   def known_app_unknown_mobile_unknown_email
   (userApp: UserApp, msisdn: String, email: String, name: (String, String)): Result[Error, APIResponse] = {
     add_mobile_to_account_for_verification(userApp.account_id, msisdn)
-    add_email_to_account_for_verification(userApp.account_id, email)
+    add_email_to_account_for_verification(userApp.id, userApp.account_id, email)
 
     updateNameInProfile(userApp.account_id, name)
 
     OK(APIResponse(Kar141_SendCode_Res(false, None).toJson.toString, HTTP_OK_200))
   }
 
-  def unknown_app(msisdn:String, email:String, name:(String, String))(application_id: String): Result[Error, APIResponse] = {
+  def unknown_app(application_id:String, msisdn:String, email:String, name:(String, String)): Result[Error, APIResponse] = {
       dbUserMobile.find(msisdn) match {
-        case OK(userMobile) => unknown_app_known_mobile(userMobile, email, name)(application_id)
-        case KO(_) => unknown_app_unknown_mobile(msisdn, email, name)(application_id)
+        case OK(userMobile) => unknown_app_known_mobile(application_id, userMobile, email, name)
+        case KO(_) => unknown_app_unknown_mobile(application_id, msisdn, email, name)
       }
   }
 
   def unknown_app_known_mobile
-  (userMobile: UserMobile, email:String, name:(String, String))(application_id: String): Result[Error, APIResponse] = {
+  (application_id: String, userMobile: UserMobile, email:String, name:(String, String)): Result[Error, APIResponse] = {
     dbUserEmail.find(email) match {
-      case OK(userEmail) => unknown_app_known_mobile_known_email(userMobile, userEmail, name)(application_id)
-      case KO(_) => unknown_app_known_mobile_unknown_email(userMobile, email, name)(application_id)
+      case OK(userEmail) => unknown_app_known_mobile_known_email(application_id, userMobile, userEmail, name)
+      case KO(_) => unknown_app_known_mobile_unknown_email(application_id, userMobile, email, name)
     }
   }
 
   def unknown_app_known_mobile_known_email
-  (userMobile: UserMobile, userEmail: UserEmail, name: (String, String))(application_id: String): Result[Error, APIResponse] = {
+  (application_id: String, userMobile: UserMobile, userEmail: UserEmail, name: (String, String)): Result[Error, APIResponse] = {
 
     if(userMobile.account_id == userEmail.account_id) {
       val account_id = userMobile.account_id
@@ -184,10 +221,10 @@ trait Kar141_SendCode_actor
   }
 
   def unknown_app_known_mobile_unknown_email
-  (userMobile: UserMobile, email: String, name: (String, String))(application_id: String): Result[Error, APIResponse] = {
+  (application_id: String, userMobile: UserMobile, email: String, name: (String, String)): Result[Error, APIResponse] = {
     val account_id = userMobile.account_id
 
-    add_email_to_account_for_verification(account_id, email)
+    add_email_to_account_for_verification(application_id, account_id, email)
 
     dbUserApp.insertNew(UserApp(application_id, account_id, mobile_linked = true, email_linked = false, now))
 
@@ -196,15 +233,16 @@ trait Kar141_SendCode_actor
     OK(APIResponse(Kar141_SendCode_Res(true, Some(account_id)).toJson.toString, HTTP_OK_200))
   }
 
-  def unknown_app_unknown_mobile(msisdn:String, email:String, name:(String, String))(application_id: String): Result[Error, APIResponse] = {
+  def unknown_app_unknown_mobile
+  (application_id: String, msisdn:String, email:String, name:(String, String)): Result[Error, APIResponse] = {
     dbUserEmail.find(email) match {
-      case OK(userEmail) => unknown_app_unknown_mobile_known_email(msisdn, userEmail, name)(application_id)
-      case KO(_) => unknown_app_unknown_mobile_unknown_email(msisdn, email, name)(application_id)
+      case OK(userEmail) => unknown_app_unknown_mobile_known_email(application_id, msisdn, userEmail, name)
+      case KO(_) => unknown_app_unknown_mobile_unknown_email(application_id, msisdn, email, name)
     }
   }
 
   def unknown_app_unknown_mobile_known_email
-  (msisdn: String, userEmail: UserEmail, name:(String, String))(application_id: String): Result[Error, APIResponse] = {
+  (application_id: String, msisdn: String, userEmail: UserEmail, name:(String, String)): Result[Error, APIResponse] = {
     val account_id = userEmail.account_id
 
     add_mobile_to_account_for_verification(account_id, msisdn)
@@ -217,14 +255,14 @@ trait Kar141_SendCode_actor
   }
 
   def unknown_app_unknown_mobile_unknown_email
-  (msisdn: String, email: String, name:(String, String))(application_id: String): Result[Error, APIResponse] = {
+  (application_id: String, msisdn: String, email: String, name:(String, String)): Result[Error, APIResponse] = {
 
     val account_id = getNewRandomID
 
     createAndInsertNewAccount(account_id)
 
     add_mobile_to_account_for_verification(account_id, msisdn)
-    add_email_to_account_for_verification(account_id, email)
+    add_email_to_account_for_verification(application_id, account_id, email)
 
     // Add the account to UserApp
     dbUserApp.insertNew(UserApp(application_id, account_id, mobile_linked = false, email_linked = false, now))
@@ -234,46 +272,16 @@ trait Kar141_SendCode_actor
     OK(APIResponse(Kar141_SendCode_Res(false, None).toJson.toString, HTTP_OK_200))
   }
 
-  def exec(
-            request: Kar141_SendCode_Req
-          ): Result[Error, APIResponse] = {
-
-    Try[Result[Error, APIResponse]] {
-      val applicationId = request.application_id
-      val firstName = request.first_name
-      val lastName = request.last_name
-      val msisdn = request.msisdn
-      val userType = request.user_type
-      val email = request.email
-
-      if (applicationId == null || applicationId.equals("")) KO(Error(s"application_id is null"))
-      if (firstName == null || firstName.equals("")) KO(Error(s"first_name is null"))
-      if (lastName == null || lastName.equals("")) KO(Error(s"last_name is null"))
-      if (msisdn == null || msisdn.equals("")) KO(Error(s"msisdn is null"))
-
-      if (email == null || email.equals("")) KO(Error(s"email is null"))
-      if (userType == null || userType.equals("")) KO(Error(s"user_type is null"))
-      if (!userType.equals("CUSTOMER")) KO(Error(s"user_type value is not CUSTOMER. Only one value is supported"))
-
-      logger.info(s"OK applicationId: $applicationId firstName: $firstName lastName: $lastName msisdn: $msisdn userType: $userType email: $email")
-
-      dbUserApp.find(applicationId) match {
-        case OK(userApp) => known_app(userApp, msisdn, email, (firstName, lastName))
-        case KO(_) => unknown_app(msisdn, email, (firstName, lastName))(applicationId)
-      }
-    } match {
-      case Success(s) => s
-      case Failure(f) => MAKE_ERROR(f)
-    }
-  }
-
-  def add_email_to_account_for_verification(account_id: String, email: String, email_code: String = getNewRandomID): Result[Error, APIResponse] = {
+  def add_email_to_account_for_verification(application_id: String, account_id: String, email: String, email_code: String = getNewRandomID): Result[Error, APIResponse] = {
     Try[Result[Error, APIResponse]] {
       val userAccount = dbUserAccount.find(account_id).get
 
       val emails = userAccount.email
 
-      val email_verify_url = s"${notification_base_url}/verify?e=${email}&c=${email_code}&a=${account_id}"
+      val verify_id = getNewRandomID
+      dbEmailVerify.insertNew(EmailVerify(id = verify_id, account_id = account_id, application_id = application_id))
+
+      val email_verify_url = s"${notification_base_url}/verify?e=${email}&c=${email_code}&v=${verify_id}"
 
       val email_subject = "Welcome to Karedo"
       val email_body = s"Welcome to Karedo. \nYou're on your way to gaining from your attention. Click on [$email_verify_url] to verify your email"

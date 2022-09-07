@@ -22,4 +22,5 @@ trait DbCollections {
   val dbUserIntent = new DbUserIntent {}
   val dbSale = new DbSale {}
   val dbMobileSale = new DbMobileSale {}
+  val dbEmailVerify = new DbEmailVerify {}
 }

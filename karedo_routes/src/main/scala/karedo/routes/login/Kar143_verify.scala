@@ -20,11 +20,11 @@ object Kar143_verify extends KaredoRoute
       // GET /verify?e={email}&c={email_code}&a={account_id}
       path("verify" ) {
         get {
-          parameters('e, 'c, 'a ?) {
-            (email, email_code, accountId) =>
+          parameters( 'e, 'c, 'v ? ) {
+            ( email, email_code, verifyId ) =>
               doCall(
                 {
-                  exec(email, email_code, accountId)
+                  exec(email, email_code, verifyId)
                 }
               )
 
