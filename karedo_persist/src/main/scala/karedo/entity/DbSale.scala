@@ -17,7 +17,7 @@ case class Sale
   , sender_id: String = ""
   , sender_name: String = ""
   , sender_msisdn: String = ""
-  , karedos: Double = 0
+  , karedos: Long = 0
   , sale_type: String = ""
   , status: String = ""
   , ts_created: DateTime = now

@@ -18,14 +18,14 @@ case class UserKaredos
 (
   // accountId
   @Key("_id") id: String = UUID.randomUUID().toString
-  , karedos: Double = 0
+  , karedos: Long = 0
   , ts: DateTime = now
 )
 extends Keyable[String]
 
 trait DbUserKaredos extends DbMongoDAO[String,UserKaredos] {
-  def addKaredos(accountId: String, points: Double): Result[String,UserKaredos] = {
-    Try {
+  def addKaredos(accountId: String, points: Long): Result[String,UserKaredos] = {
+    Try[Result[String,UserKaredos]] {
       dao.findOneById(accountId) match {
         case None => insertNew(UserKaredos(accountId, points))
         case Some(r) => {
@@ -37,6 +37,15 @@ trait DbUserKaredos extends DbMongoDAO[String,UserKaredos] {
       case Success(x) => x
       case Failure(error) => KO(error.toString)
 
+    }
+  }
+
+  def moveKaredosBetweenAccounts(from: String, to: String, karedos: String): Result[String, String] = {
+    Try[Result[String, String]] {
+      KO("Not Yet Implemented")
+    } match {
+      case Success(s) => s
+      case Failure(f) => KO(f.getMessage + "\n" + f.getStackTrace)
     }
   }
 }

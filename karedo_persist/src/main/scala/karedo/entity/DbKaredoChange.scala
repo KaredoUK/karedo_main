@@ -23,7 +23,7 @@ case class KaredoChange
 (
   @Key("_id") id: String = UUID.randomUUID().toString
   , accountId: String
-  , karedos: Double
+  , karedos: Long
   , trans_type: String
   , trans_info: String
   , trans_currency: String

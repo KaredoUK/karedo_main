@@ -23,12 +23,12 @@ class DbUserAppSpec
     "userapp should insert " in {
       val acctId = UUID.randomUUID()
       val appId = "app1"
-      val r = UserApp(appId, acctId, map_confirmed = false)
+      val r = UserApp(appId, acctId, mobile_linked = false, email_linked = true)
       test.insertNew(r) must beOK
-      val updated = r.copy(map_confirmed = true)
+      val updated = r.copy(mobile_linked = true)
       test.update(updated)
       test.find(appId) match {
-        case OK(x) => x.map_confirmed must beTrue
+        case OK(x) => x.mobile_linked must beTrue
         case KO(error) => ko("update didn't work")
       }
 

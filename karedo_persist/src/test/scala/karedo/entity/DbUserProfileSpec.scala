@@ -23,7 +23,7 @@ class DbUserProfileSpec
     "userprofile should insert " in {
       val acctId = UUID.randomUUID()
       val appId = UUID.randomUUID()
-      val r = UserProfile(appId, Some("M"), Some("Claudio"), Some("Pacchiega"))
+      val r = UserProfile(appId, Some("M"), "Claudio", "Pacchiega")
       test.insertNew(r) must beOK
       val updated = r.copy(yob = Some(1962))
       test.update(updated)
