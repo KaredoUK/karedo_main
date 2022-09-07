@@ -230,7 +230,10 @@ trait KaredoUtils
 
       dbUserKaredos.insertNew(UserKaredos(account_id, 0, now))
       dbUserProfile.insertNew(UserProfile(id = account_id))
-      dbUserPrefs.insertNew(UserPrefs(id = account_id))
+
+      val pref_map = dbPrefs.ids.get.map (x => x -> 0.5) (collection.breakOut): Map[String, Double]
+
+      dbUserPrefs.insertNew(UserPrefs(id = account_id, prefs = pref_map))
       dbUserIntent.insertNew(UserIntent(id = account_id))
       dbUserMessages.insertNew(UserMessages(getNewRandomID, account_id,
         Some("Welcome to Karedo"), Some("Welcome to Karedo"), Some("Welcome to Karedo")) )
