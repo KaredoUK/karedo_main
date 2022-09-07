@@ -35,7 +35,7 @@ trait KaredoJsonHelpers
 
   implicit val jsonUserProfile = jsonFormat12(UserProfile)
 
-  case class Kar189ReqProfile(gender:Option[String], first_name:Option[String], last_name: Option[String],
+  case class Kar189ReqProfile(gender:Option[String], first_name:String, last_name: String,
                               yob: Option[Int], kids: Option[Int], income: Option[Int], location: Option[Boolean],
                               opt_in: Option[Boolean], third_party: Option[Boolean])
   case class Kar189Req(application_id: String, session_id: String, profile: Kar189ReqProfile )
@@ -90,5 +90,13 @@ trait KaredoJsonHelpers
   case class Receiver(first_name: String, last_name: String, msisdn:String)
   case class Kar183Req(account_id: String, application_id: String, session_id: String, app_karedos:Int, receiver:Receiver )
   implicit val jsonReceiver = jsonFormat3(Receiver)
-  implicit val jaonKar183Req:RootJsonFormat[Kar183Req] = jsonFormat5(Kar183Req)
+  implicit val jsonKar183Req:RootJsonFormat[Kar183Req] = jsonFormat5(Kar183Req)
+
+  case class Kar197Req(account_id: String, application_id: String, session_id: String, app_karedos:Int )
+  implicit val jsonKar197Req = jsonFormat4(Kar197Req)
+
+  case class Kar197Res(sale_id: String)
+  implicit val jsonKar197Res = jsonFormat1(Kar197Res)
+
+  implicit val jsonSale = jsonFormat13(Sale)
 }

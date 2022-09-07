@@ -5,6 +5,7 @@ import karedo.entity.{UserAccount, UserApp, UserProfile}
 import karedo.util.Util.now
 import karedo.util._
 import org.slf4j.LoggerFactory
+import scala.util.{Try, Success, Failure}
 
 /**
   * Created by pakkio on 10/8/16.
@@ -29,38 +30,30 @@ trait Kar189_postProfile_actor
 
     authenticate(accountId, deviceId, applicationId, sessionId, allowCreation = false)(
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
-        if (uAccount.isKO) KO(Error(s"internal error ${uAccount.err}"))
-        else {
-          val acc = uAccount.get
+        Try[Result[String, UserProfile]] {
+          val user_account = uAccount.get
 
-          val profileResult = dbUserProfile.find(acc.id)
+          dbUserProfile.find(user_account.id) match {
+            case OK(userProfile) => {
+              val profile = UserProfile(user_account.id, request.profile.gender, request.profile.first_name,
+                request.profile.last_name, request.profile.yob, request.profile.kids, request.profile.income,
+                request.profile.location, request.profile.opt_in, request.profile.third_party, userProfile.ts_created , now)
 
-          if( profileResult.isKO) {
-            // Create a new profile.
-            val profile = UserProfile(acc.id, request.profile.gender, request.profile.first_name,
-              request.profile.last_name, request.profile.yob, request.profile.kids, request.profile.income,
-              request.profile.location, request.profile.opt_in, request.profile.third_party, Some(now), now)
-
-            val res = dbUserProfile.insertNew(profile)
-
-            if( res.isOK) {
-              OK(APIResponse("", code))
-            } else {
-              KO(Error(s"Internal Error ${res.err}"))
+              dbUserProfile.update(profile)
             }
-          } else {
-            val profile = UserProfile(acc.id, request.profile.gender, request.profile.first_name,
-              request.profile.last_name, request.profile.yob, request.profile.kids, request.profile.income,
-              request.profile.location, request.profile.opt_in, request.profile.third_party, profileResult.get.ts_created , now)
+            case KO(_) => {
+              val profile = UserProfile(id = user_account.id, gender = request.profile.gender,
+                first_name = request.profile.first_name, last_name = request.profile.last_name,
+                yob = request.profile.yob, kids = request.profile.kids, income = request.profile.income,
+                location = request.profile.location, opt_in = request.profile.opt_in,
+                third_party = request.profile.third_party, ts_created = now, ts_updated = now)
 
-            val res = dbUserProfile.update(profile)
-
-            if( res.isOK) {
-              OK(APIResponse("", code))
-            } else {
-              KO(Error(s"Internal Error ${res.err}"))
+              dbUserProfile.insertNew(profile)
             }
           }
+        } match {
+          case Success(s) => OK(APIResponse("", HTTP_OK_200))
+          case Failure(f) => MAKE_ERROR(f)
         }
       }
     )

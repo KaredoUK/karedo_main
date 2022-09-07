@@ -24,7 +24,7 @@ trait KaredoConstants extends Configurable {
   val KAREDO_REVENUE_PERCENT = 0.80
   val USER_PERCENT =   .40
 
-  val APP_KAREDO_CONV = 10.0
+  val APP_KAREDO_CONV:Long = 10
 
   val SMS_CODE_LENGTH = 10
 
@@ -103,9 +103,11 @@ trait KaredoUtils
 
   def MAKE_ERROR(error:String, text:String = "") = KO(Error(s"$text \n\t---> $error"))
 
+  def MAKE_ERROR(error:Throwable) = KO(Error(error.getMessage + " >> " + error.getStackTrace.foldLeft[String]("")((z, x) => z + " -> " + x.toString ) ))
+
 
   def moveKaredosBetweenAccounts
-  (from_id: String, to_id: String, karedos: Option[Double], text: String = "", currency: String = "KAR"): Result[Error, String] = {
+  (from_id: String, to_id: String, karedos: Option[Long], text: String = "", currency: String = "KAR"): Result[Error, String] = {
     val fromUserKaredo = dbUserKaredos.find(from_id).get
     val toUserKaredo = dbUserKaredos.find(to_id).get
 
@@ -209,7 +211,7 @@ trait KaredoUtils
         UserAccount(account_id, None, None, DEFAULT_CUSTOMER_TYPE, List(), List(), true, now, now)
       )
 
-      dbUserKaredos.insertNew(UserKaredos(account_id, 0.0, now))
+      dbUserKaredos.insertNew(UserKaredos(account_id, 0, now))
       dbUserProfile.insertNew(UserProfile(id = account_id))
       dbUserPrefs.insertNew(UserPrefs(id = account_id))
       dbUserIntent.insertNew(UserIntent(id = account_id))
@@ -222,5 +224,6 @@ trait KaredoUtils
       case Failure(f) => KO(f.toString)
     }
   }
+
 }
 

@@ -7,6 +7,7 @@ import karedo.routes.intent.{Kar169_getIntent, Kar170_postIntent, Kar171_putInte
 import karedo.routes.login.{Kar138_Login, Kar141_SendCode, Kar143_verify, Kar145_EnterCode}
 import karedo.routes.prefs.{Kar194_getPrefs, Kar195_postPrefs}
 import karedo.routes.profile.{Kar188_getProfile, Kar189_postProfile}
+import karedo.routes.sale.{Kar197_putSale, Kar198_getSale}
 import karedo.routes.transfer.Kar183_putTransfer
 import karedo.sample.Entities
 import karedo.util.RouteDebug
@@ -37,7 +38,7 @@ trait Routes
     Kar134_ads.route ~ Kar135_points.route ~ Kar136_messages.route ~ Kar166_interaction.route ~
       Kar169_getIntent.route ~ Kar170_postIntent.route ~ Kar171_putIntent.route ~ Kar172_deleteIntent.route ~ Kar188_getProfile.route ~ Kar189_postProfile.route ~
       Kar194_getPrefs.route ~ Kar195_postPrefs.route ~ Kar141_SendCode.route ~ Kar143_verify.route ~ Kar145_EnterCode.route ~
-      Kar138_Login.route ~ Kar183_putTransfer.route
+      Kar138_Login.route ~ Kar183_putTransfer.route ~ Kar197_putSale.route ~ Kar198_getSale.route
   }
 
 //  override val routes = {

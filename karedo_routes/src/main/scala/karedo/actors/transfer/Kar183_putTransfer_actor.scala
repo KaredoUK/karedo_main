@@ -37,16 +37,16 @@ trait Kar183_putTransfer_actor
     authenticate(accountId, deviceId, applicationId, sessionId, allowCreation = false)(
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
 
-        Try {
+        Try[Result[Error, APIResponse]] {
           val senderAccount = uAccount.get
           val senderProfile = dbUserProfile.find(senderAccount.id).get
           val sender_id = senderAccount.id
-          val sender_name = s"${senderProfile.last_name.get}, ${senderProfile.first_name.get}"
+          val sender_name = s"${senderProfile.last_name}, ${senderProfile.first_name}"
           val sender_msisdn = senderAccount.findActiveMobile.get.msisdn
 
           // IF we got till here. Sender account exists.
 
-          val karedos:Double = request.app_karedos * APP_KAREDO_CONV
+          val karedos:Long = request.app_karedos * APP_KAREDO_CONV
           val sale_type = TRANS_TYPE_TRANSFER
           val trans_status = TRANS_STATUS_OPEN
 
