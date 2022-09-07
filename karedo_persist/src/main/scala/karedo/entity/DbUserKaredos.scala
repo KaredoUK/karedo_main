@@ -18,14 +18,14 @@ case class UserKaredos
 (
   // accountId
   @Key("_id") id: String = UUID.randomUUID().toString
-  , karedos: Long = 0
+  , karedos: Double = 0
   , ts: DateTime = now
 )
 extends Keyable[String]
 
 trait DbUserKaredos extends DbMongoDAO[String,UserKaredos] {
-  def addKaredos(accountId: String, points: Long): Result[String,UserKaredos] = {
-    Try[Result[String,UserKaredos]] {
+  def addKaredos(accountId: String, points: Double): Result[String,UserKaredos] = {
+    Try {
       dao.findOneById(accountId) match {
         case None => insertNew(UserKaredos(accountId, points))
         case Some(r) => {
@@ -39,14 +39,20 @@ trait DbUserKaredos extends DbMongoDAO[String,UserKaredos] {
 
     }
   }
+  // see unit tests for effective testing this
+  def transferKaredo(from:String, to: String, amount: Double): Result[String,Any] ={
+    // naive implementation but using monad transport for ko
+    def opt(x:Option[String]) = x
+    val result = for {
 
-  def moveKaredosBetweenAccounts(from: String, to: String, karedos: String): Result[String, String] = {
-    Try[Result[String, String]] {
-      KO("Not Yet Implemented")
-    } match {
-      case Success(s) => s
-      case Failure(f) => KO(f.getMessage + "\n" + f.getStackTrace)
-    }
+      acc1 <- find(from)
+      acc2 <- find(to)
+      acc1upd <- update(acc1.copy(karedos=acc1.karedos - amount, ts = now))
+      acc2upd <- update(acc2.copy(karedos=acc2.karedos + amount, ts = now))
+
+    } yield acc2upd
+    //println(s"changed account $result")
+    result
   }
 }
 

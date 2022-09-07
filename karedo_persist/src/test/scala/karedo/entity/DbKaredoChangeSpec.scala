@@ -15,7 +15,7 @@ class DbKaredoChangeSpec
     with MongoTestUtils {
 
   val test = new DbKaredoChange {}
-  test.deleteAll()
+  //test.deleteAll()
 
   sequential
 
@@ -33,8 +33,8 @@ class DbKaredoChangeSpec
 
     test.insertNew(r2) must beOK
     val change1: List[KaredoChange] = test.getChanges(acctId)
-    changes.size must beEqualTo(1)
-    changes(0).karedos must beEqualTo(52)
+    change1.size must beEqualTo(2)
+    change1(1).karedos must beEqualTo(52)
   }
 
 
