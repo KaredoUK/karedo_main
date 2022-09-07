@@ -18,13 +18,12 @@ object Kar138_Login extends KaredoRoute
     Route {
 
       // POST /account/{{account_id}}/application/{{application_id}}/login
-      path("account" / Segment / "application" / Segment / "login") {
-        (accountId, applicationId) =>
+      path("login") {
           post {
             entity(as[Kar138Req]) {
               request =>
                 doCall({
-                  exec(accountId, applicationId, request)
+                  exec(request)
                 }
                 )
             }

@@ -75,14 +75,14 @@ trait KaredoJsonHelpers
   case class Kar145Res(account_id:String)
   implicit val jsonKar145Res = jsonFormat1(Kar145Res)
 
-  case class Kar135Res(account_id:Option[String], app_karedos:Double)
+  case class Kar135Res(account_id:Option[String], app_karedos:Int)
   implicit val jsonKar135Res = jsonFormat2(Kar135Res)
 
   case class Kar134Res(account_id:Option[String], ad_count:Int, ads:List[AdUnit] )
   implicit val jsonKar134Res = jsonFormat3(Kar134Res)
 
-  case class Kar138Req(password: String)
-  implicit val jsonKar138Req = jsonFormat1(Kar138Req)
+  case class Kar138Req(account_id: String, application_id:String, password: String)
+  implicit val jsonKar138Req = jsonFormat3(Kar138Req)
 
   case class Kar138Res(session_id: String)
   implicit val jsonKar138Res = jsonFormat1(Kar138Res)
@@ -99,4 +99,13 @@ trait KaredoJsonHelpers
   implicit val jsonKar197Res = jsonFormat1(Kar197Res)
 
   implicit val jsonSale = jsonFormat13(Sale)
+
+  case class Kar199Res(qr_code: String)
+  implicit val jsonKar199Res = jsonFormat1(Kar199Res)
+
+  case class Kar186Req(account_id: String, application_id: String, session_id: String )
+  implicit val jsonKar186Req = jsonFormat3(Kar186Req)
+
+  case class MessageRes(message: String)
+  implicit val jsonMessageRes = jsonFormat1(MessageRes)
 }

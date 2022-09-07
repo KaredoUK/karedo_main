@@ -29,11 +29,10 @@ trait Kar135_pointsActor extends DbCollections
         else {
           val acc = uAccount.get
           val upoints = dbUserKaredos.find(acc.id)
-          // @TODO: Add capability of converting karedos to app_karedos
 
           if (upoints.isKO) KO(Error(s"internal error ${upoints.err}"))
           else {
-            val app_karedos = upoints.get.karedos / APP_KAREDO_CONV
+            val app_karedos = karedos_to_appKaredos(upoints.get.karedos)
             val ret = Kar135Res(JsonAccountIfNotTemp(acc), app_karedos).toJson.toString
               OK(APIResponse(ret, code))
           }

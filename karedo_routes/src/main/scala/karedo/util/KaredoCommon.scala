@@ -58,6 +58,10 @@ trait KaredoConstants extends Configurable {
   val HTTP_CONFLICT_409 = 409
   val HTTP_SERVER_ERROR_500 = 500
 
+  val MIME_JSON = "JSON"
+  val MIME_TEXT = "TEXT"
+  val MIME_HTML = "HTML"
+
   val DEFAULT_CUSTOMER_TYPE = "CUSTOMER"
 
   val notification_base_url = conf.getString("notification.base.url")
@@ -71,7 +75,8 @@ trait KaredoConstants extends Configurable {
   val notification_sms_server_endpoint = conf.getString("notification.sms.server.endpoint")
   val notification_sms_sender = conf.getString("notification.sms.sender")
 
-
+  val qr_base_url = conf.getString("qr.base.url")
+  val qr_img_path = conf.getString("qr.img.path")
 }
 
 trait KaredoIds {
@@ -139,13 +144,17 @@ trait KaredoUtils
 
         else {
 
-          val insChangeFrom = dbKaredoChange.insertNew(KaredoChange(from_id, to_id, (-act_karedo).toInt,
-            TRANS_TYPE_TRANSFER, s"Moved Karedos: $karedos from $from_id to $to_id -> $text", currency, now))
+          val insChangeFrom = dbKaredoChange.insertNew(KaredoChange(
+            accountId = from_id, karedos = -act_karedo, trans_type = TRANS_TYPE_TRANSFER,
+            trans_info = s"Moved Karedos: $karedos from $from_id to $to_id -> $text",
+            trans_currency = currency, ts = now))
           if (insChangeFrom.isKO) MAKE_ERROR(insChangeFrom.err, "Unable to update KaredoChange")
           else {
 
-            val insChangeTo = dbKaredoChange.insertNew(KaredoChange(to_id, from_id, act_karedo.toInt,
-              TRANS_TYPE_TRANSFER, s"Moved Karedos: $karedos from $from_id to $to_id -> $text", currency, now))
+            val insChangeTo = dbKaredoChange.insertNew(KaredoChange(
+              accountId = to_id, karedos = act_karedo, trans_type = TRANS_TYPE_TRANSFER,
+              trans_info = s"Moved Karedos: $karedos from $from_id to $to_id -> $text",
+              trans_currency = currency, ts = now))
             if (insChangeTo.isKO) MAKE_ERROR(insChangeTo.err, "Unable to update KaredoChange")
             else
               OK("Complete")
@@ -155,6 +164,14 @@ trait KaredoUtils
     }
 
 
+  }
+
+  def karedos_to_appKaredos(karedos: Long): Int = {
+    (karedos / APP_KAREDO_CONV).toInt
+  }
+
+  def appKaredos_to_karedos(app_karedos: Int): Long = {
+    (app_karedos * APP_KAREDO_CONV).toLong
   }
 
 

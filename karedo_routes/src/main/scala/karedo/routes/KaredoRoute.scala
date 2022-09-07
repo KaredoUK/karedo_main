@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import karedo.actors.{APIResponse, Error}
 import karedo.entity._
-import karedo.util.{KO, KaredoJsonHelpers, OK, Result}
+import karedo.util._
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.slf4j.LoggerFactory
@@ -20,7 +20,7 @@ import scala.concurrent.Future
 /**
   * Created by pakkio on 05/10/16.
   */
-trait KaredoRoute extends KaredoJsonHelpers  {
+trait KaredoRoute extends KaredoJsonHelpers with KaredoConstants  {
 
   val _log = LoggerFactory.getLogger(classOf[KaredoRoute])
 
@@ -33,10 +33,16 @@ trait KaredoRoute extends KaredoJsonHelpers  {
           result match {
             case OK(response) => {
               _log.debug(s"[CODE: ${response.code}] ${response.msg}")
-              HttpResponse(response.code, entity = HttpEntity(ContentTypes.`application/json`, response.msg))
+              val entity = response.mime match {
+                case MIME_TEXT => HttpEntity(ContentTypes.`text/plain(UTF-8)`, response.msg)
+                case MIME_HTML => HttpEntity(ContentTypes.`text/html(UTF-8)`, response.msg)
+                case MIME_JSON => HttpEntity(ContentTypes.`application/json`, response.msg)
+                case _ => HttpEntity(ContentTypes.`application/json`, response.msg)
+              }
+
+              HttpResponse(response.code, entity = entity)
             }
 
-            // @TODO: Response has to be as JSON as well. Format: { "error_code": "", "error_text": "" }
             case KO(Error(err,code)) => {
               _log.error(s"[CODE: $code] $err")
               HttpResponse(code, entity = HttpEntity(ContentTypes.`application/json`,

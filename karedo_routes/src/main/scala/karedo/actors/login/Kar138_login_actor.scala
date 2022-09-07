@@ -21,9 +21,10 @@ trait Kar138_login_actor
 
   def exec
   (
-    account_id: String,
-    application_id: String,
     request:Kar138Req): Result[Error, APIResponse] = {
+
+    val account_id = request.account_id
+    val application_id = request.application_id
 
     logger.info(s"Login\nAccountID: ${account_id}\nApplicationID: ${application_id}")
 

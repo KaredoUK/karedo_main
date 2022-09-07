@@ -36,7 +36,7 @@ trait Kar143_verify_actor
       val userApp = dbUserApp.find(application_id).get
       val userAccount = dbUserAccount.find(account_id).get
       val accEmail = userAccount.email.filter(e => e.address == email).head
-      val acc_email_code = accEmail.email_code
+      val acc_email_code = accEmail.email_code.get
 
       if( acc_email_code == email_code ) {
         val restEmails = userAccount.email.filter(e => ! e.address.equals(email) )
@@ -46,24 +46,25 @@ trait Kar143_verify_actor
         dbUserAccount.update(newUserAccount)
 
 
-        val userEmail = dbUserEmail.find(email).get
+        dbUserEmail.find(email) match {
+          case OK(userEmail) => {
+            if( userEmail.account_id == account_id) OK(APIResponse("Verfication Successful. Welcome to Karedo", HTTP_OK_200, MIME_TEXT))
+            else OK(APIResponse(s"Verification failed. Email $email already registered another account", HTTP_OK_200, MIME_TEXT))
+          }
+          case KO(_) => {
+            dbUserEmail.insertNew(UserEmail(email, account_id, true, now, now))
 
-        if( userEmail.account_id == account_id) OK(APIResponse(s"Verification failed. Email already verified for $email in $account_id", HTTP_OK_200))
-        else OK(APIResponse(s"Verification failed. Email $email already registered to ${userEmail.account_id} bu trying for $account_id", HTTP_OK_200))
+            dbUserApp.update(userApp.copy(email_linked = true, ts = now))
 
-        dbUserEmail.insertNew(UserEmail(email, account_id, true, now, now))
-
-
-        dbUserApp.update(userApp.copy(email_linked = true, ts = now))
-
-        OK(APIResponse(Kar145Res(account_id).toJson.toString, HTTP_OK_200))
-
+            OK(APIResponse("Verfication Successful. Welcome to Karedo", HTTP_OK_200, MIME_TEXT))
+          }
+        }
       } else {
         KO(Error("Validation Error. Code Doesn't match"))
       }
     } match {
       case Success(s) => s
-      case Failure(f) => OK(APIResponse(s"Somethign went wrong. ${f.toString}", HTTP_OK_200))
+      case Failure(f) => OK(APIResponse(s"Somethign went wrong. ${f.toString}", HTTP_OK_200, MIME_TEXT))
     }
   }
 }

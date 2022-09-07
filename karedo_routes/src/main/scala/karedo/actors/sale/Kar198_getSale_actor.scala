@@ -31,10 +31,11 @@ trait Kar198_getSale_actor
     authenticate(accountId, deviceId, applicationId, sessionId, allowCreation = false)(
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
         Try[Result[Error, APIResponse]] {
-          dbSale.find(saleId) match {
-            case OK(sale) => OK(APIResponse(sale.toJson.toString, HTTP_OK_200))
-            case KO(error) => MAKE_ERROR(error)
-          }
+          val sale = dbSale.find(saleId).get
+
+//          if( sale.receiver_id != accountId) OK(APIResponse("Conflict", HTTP_CONFLICT_409))
+//          else
+          OK(APIResponse(sale.toJson.toString, HTTP_OK_200))
         } match {
           case Success(s) => s
           case Failure(f) => MAKE_ERROR(f)

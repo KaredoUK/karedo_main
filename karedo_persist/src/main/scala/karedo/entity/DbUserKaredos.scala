@@ -18,13 +18,13 @@ case class UserKaredos
 (
   // accountId
   @Key("_id") id: String = UUID.randomUUID().toString
-  , karedos: Double = 0
+  , karedos: Long = 0
   , ts: DateTime = now
 )
 extends Keyable[String]
 
 trait DbUserKaredos extends DbMongoDAO[String,UserKaredos] {
-  def addKaredos(accountId: String, points: Double): Result[String,UserKaredos] = {
+  def addKaredos(accountId: String, points: Long): Result[String,UserKaredos] = {
     Try {
       dao.findOneById(accountId) match {
         case None => insertNew(UserKaredos(accountId, points))
@@ -41,7 +41,7 @@ trait DbUserKaredos extends DbMongoDAO[String,UserKaredos] {
   }
 
   // see unit tests for effective testing this
-  def transferKaredo(from:String, to: String, amount: Double): Result[String,Any] ={
+  def transferKaredo(from:String, to: String, amount: Long): Result[String,Any] ={
     KO("Not Yet Implemented")
 
 //    // naive implementation but using monad transport for ko

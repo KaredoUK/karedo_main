@@ -46,7 +46,7 @@ trait Kar183_putTransfer_actor
 
           // IF we got till here. Sender account exists.
 
-          val karedos:Long = request.app_karedos * APP_KAREDO_CONV
+          val karedos:Long = appKaredos_to_karedos(request.app_karedos)
           val sale_type = TRANS_TYPE_TRANSFER
           val trans_status = TRANS_STATUS_OPEN
 
@@ -88,7 +88,7 @@ trait Kar183_putTransfer_actor
               sendSMS(sender_msisdn, s"Success. Transfer of ${request.app_karedos} Karedos to ${receiver_msisdn} (${receiver_name}) Completed.")
               sendSMS(receiver_msisdn, s"Success. Transfer of ${request.app_karedos} Karedos from ${sender_msisdn} (${sender_name}) Completed.")
 
-              OK(APIResponse("complete", HTTP_OK_200))
+              OK(APIResponse("", HTTP_OK_200))
             }
             case KO(_) => {
               // Unknown Mobile - Set up a MobileSale
@@ -121,7 +121,7 @@ trait Kar183_putTransfer_actor
               sendSMS(sender_msisdn, s"${receiver_msisdn} (${receiver_name}) is not yet a member of Karedo. Transfer of ${request.app_karedos} Karedos will complete after they sign up")
               sendSMS(receiver_msisdn, s"${sender_msisdn} (${sender_name}) has sent you ${request.app_karedos} Karedos. Please sign up for Karedo to receive it.")
 
-              OK(APIResponse("complete", HTTP_OK_200))
+              OK(APIResponse("", HTTP_OK_200))
             }
           }
         } match {

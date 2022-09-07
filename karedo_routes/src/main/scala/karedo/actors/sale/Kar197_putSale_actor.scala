@@ -49,7 +49,7 @@ trait Kar197_putSale_actor
 
           // IF we got till here. Sender account exists.
 
-          val karedos:Long = request.app_karedos * APP_KAREDO_CONV
+          val karedos:Long = appKaredos_to_karedos(request.app_karedos)
           val sale_type = TRANS_TYPE_SEND_RECEIVE
           val trans_status = TRANS_STATUS_OPEN
 
@@ -61,7 +61,7 @@ trait Kar197_putSale_actor
             // Customer - ID, Name, MSISDN
             // No Sender.
             // Karedos, Sale Type, Status
-            karedos = karedos, sale_type = TRANS_TYPE_TRANSFER, status = TRANS_STATUS_OPEN,
+            karedos = karedos, sale_type = sale_type, status = trans_status,
             // Timestamps
             ts_created = now, ts_updated = now
           )

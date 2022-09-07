@@ -23,8 +23,8 @@ class Kar138_login_test extends AllTests {
 
 
     "* POST /account/{{account_id}}/application/{{application_id}}/login" in {
-      val request = Kar138Req(password="pippo").toJson.toString
-      Post(s"/account/$acctId/application/$appId/login",
+      val request = Kar138Req(acctId, appId, password="pippo").toJson.toString
+      Post(s"/login",
         HttpEntity(ContentTypes.`application/json`, request)) ~>
         routesWithLogging ~>
         check {
