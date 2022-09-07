@@ -39,20 +39,23 @@ trait DbUserKaredos extends DbMongoDAO[String,UserKaredos] {
 
     }
   }
+
   // see unit tests for effective testing this
   def transferKaredo(from:String, to: String, amount: Double): Result[String,Any] ={
-    // naive implementation but using monad transport for ko
-    def opt(x:Option[String]) = x
-    val result = for {
+    KO("Not Yet Implemented")
 
-      acc1 <- find(from)
-      acc2 <- find(to)
-      acc1upd <- update(acc1.copy(karedos=acc1.karedos - amount, ts = now))
-      acc2upd <- update(acc2.copy(karedos=acc2.karedos + amount, ts = now))
-
-    } yield acc2upd
-    //println(s"changed account $result")
-    result
+//    // naive implementation but using monad transport for ko
+//    def opt(x:Option[String]) = x
+//    val result = for {
+//
+//      acc1 <- find(from)
+//      acc2 <- find(to)
+//      acc1upd <- update(acc1.copy(karedos=acc1.karedos - amount, ts = now))
+//      acc2upd <- update(acc2.copy(karedos=acc2.karedos + amount, ts = now))
+//
+//    } yield acc2upd
+//    //println(s"changed account $result")
+//    result
   }
 }
 
