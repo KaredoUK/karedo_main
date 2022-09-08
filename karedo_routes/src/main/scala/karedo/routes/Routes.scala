@@ -2,7 +2,7 @@ package karedo.routes
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import karedo.routes.ads.{Kar134_ads, Kar135_points, Kar136_messages, Kar166_interaction}
+import karedo.routes.ads._
 import karedo.routes.intent.{Kar169_getIntent, Kar170_postIntent, Kar171_putIntent, Kar172_deleteIntent}
 import karedo.routes.login._
 import karedo.routes.prefs.{Kar194_getPrefs, Kar195_postPrefs}
@@ -47,7 +47,10 @@ trait Routes
       Kar194_getPrefs.route ~ Kar195_postPrefs.route ~
     // Sale
       Kar183_putTransfer.route ~ Kar197_putSale.route ~ Kar198_getSale.route ~ Kar186_postSale.route ~
-      Kar199_getSaleQR.route
+      Kar199_getSaleQR.route ~
+    // Interaction et al
+      Kar165_getFavourite.route ~ Kar166_interaction.route ~ Kar165_postFavourite.route ~
+      Kar167_share_data.route
   }
 
 //  override val routes = {
