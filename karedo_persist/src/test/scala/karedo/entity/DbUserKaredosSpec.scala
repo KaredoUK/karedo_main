@@ -3,6 +3,7 @@ package karedo.entity
 import java.util.{Random, UUID}
 
 import karedo.util.{KO, OK, Result}
+import org.junit.Ignore
 import org.specs2.matcher.EitherMatchers
 import org.specs2.mutable.Specification
 import utils.MongoTestUtils
@@ -13,6 +14,7 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
+@Ignore
 @RunWith(classOf[JUnitRunner])
 class DbUserKaredosSpec
   extends Specification
