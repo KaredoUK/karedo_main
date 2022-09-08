@@ -35,7 +35,7 @@ object MongoInstance {
 
     def open = {
       println(s"*** mongoHost: $mongoHost, mongoPort: $mongoPort")
-      val options = MongoClientOptions(connectionsPerHost = 1)
+      val options = MongoClientOptions(connectionsPerHost = 100)
       if (mongoDbUser.isEmpty) {
 
         MongoClient(new ServerAddress(mongoHost, mongoPort), options = options)

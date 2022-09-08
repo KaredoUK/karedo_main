@@ -4,7 +4,7 @@ import java.util.UUID
 
 import com.mongodb.casbah.Imports._
 import karedo.entity.dao._
-import karedo.util.{KO, Result}
+import karedo.util.{KO, Result, Util}
 import org.joda.time.DateTime
 import salat.annotations._
 import karedo.util.Util.now
@@ -19,6 +19,7 @@ case class UserKaredos
   // accountId
   @Key("_id") id: String = UUID.randomUUID().toString
   , karedos: Double = 0
+  , lockedBy: String = ""
   , ts: DateTime = now
 )
 extends Keyable[String]
@@ -39,10 +40,30 @@ trait DbUserKaredos extends DbMongoDAO[String,UserKaredos] {
 
     }
   }
+  def transferKaredo(from: String, to: String, amount: Double) = {
+    // better implementation of transfer with locking
+    if(from<to) transferKaredoOrdered(from,to,amount)
+    else transferKaredoOrdered(to,from,-amount)
+  }
   // see unit tests for effective testing this
-  def transferKaredo(from:String, to: String, amount: Double): Result[String,Any] ={
-    // naive implementation but using monad transport for ko
-    def opt(x:Option[String]) = x
+  private def transferKaredoOrdered(from:String, to: String, amount: Double): Result[String,UserKaredos] ={
+    val transid = Util.newUUID
+    val result = for {
+
+      acc1 <- lock(from, transid)
+      acc2 <- lock(to, transid)
+      acc1upd <- update(acc1.copy(karedos=acc1.karedos - amount, ts = now))
+      acc2upd <- update(acc2.copy(karedos=acc2.karedos + amount, ts = now))
+      unlock2 <- unlock(to, transid)
+      unlock1 <- unlock(from, transid)
+
+    } yield unlock1
+    //println(s"changed account $result")
+    result
+  }
+  // this is the transfer without lock which is dangerous
+  def transferKaredoNaive(from:String, to: String, amount: Double): Result[String,UserKaredos] ={
+    val transid = Util.newUUID
     val result = for {
 
       acc1 <- find(from)
