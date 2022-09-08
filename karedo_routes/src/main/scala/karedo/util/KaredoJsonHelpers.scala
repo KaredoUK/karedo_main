@@ -112,4 +112,7 @@ trait KaredoJsonHelpers
 
   case class MessageRes(message: String)
   implicit val jsonMessageRes = jsonFormat1(MessageRes)
+
+  case class Kar147_Resend(application_id: String, msisdn: String)
+  implicit val jsonKar147_Resend = jsonFormat2(Kar147_Resend)
 }

@@ -19,9 +19,7 @@ trait Kar138_login_actor
 {
   override val logger = LoggerFactory.getLogger(classOf[Kar138_login_actor])
 
-  def exec
-  (
-    request:Kar138Req): Result[Error, APIResponse] = {
+  def exec(request:Kar138Req): Result[Error, APIResponse] = {
 
     val account_id = request.account_id
     val application_id = request.application_id

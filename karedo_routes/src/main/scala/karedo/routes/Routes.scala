@@ -4,7 +4,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import karedo.routes.ads.{Kar134_ads, Kar135_points, Kar136_messages, Kar166_interaction}
 import karedo.routes.intent.{Kar169_getIntent, Kar170_postIntent, Kar171_putIntent, Kar172_deleteIntent}
-import karedo.routes.login.{Kar138_Login, Kar141_SendCode, Kar143_verify, Kar145_EnterCode}
+import karedo.routes.login._
 import karedo.routes.prefs.{Kar194_getPrefs, Kar195_postPrefs}
 import karedo.routes.profile.{Kar188_getProfile, Kar189_postProfile}
 import karedo.routes.sale.{Kar186_postSale, Kar197_putSale, Kar198_getSale, Kar199_getSaleQR}
@@ -40,7 +40,7 @@ trait Routes
     // intent
       Kar169_getIntent.route ~ Kar170_postIntent.route ~ Kar171_putIntent.route ~ Kar172_deleteIntent.route ~
     // login
-      Kar138_Login.route ~ Kar141_SendCode.route ~ Kar143_verify.route ~ Kar145_EnterCode.route ~
+      Kar138_Login.route ~ Kar141_SendCode.route ~ Kar143_verify.route ~ Kar145_EnterCode.route ~ Kar147_Resend.route ~
     // profile
       Kar188_getProfile.route ~ Kar189_postProfile.route ~
     // prefs

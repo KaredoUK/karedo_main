@@ -56,6 +56,7 @@ trait KaredoConstants extends Configurable {
   val HTTP_FORBIDDEN_403 = 403
   val HTTP_NOTFOUND_404 = 404
   val HTTP_CONFLICT_409 = 409
+  val HTTP_GONE_410 = 410
   val HTTP_SERVER_ERROR_500 = 500
 
   val MIME_JSON = "JSON"
