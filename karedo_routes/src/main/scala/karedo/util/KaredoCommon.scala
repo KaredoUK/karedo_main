@@ -63,6 +63,18 @@ trait KaredoConstants extends Configurable {
   val MIME_TEXT = "TEXT"
   val MIME_HTML = "HTML"
 
+  val AD_TYPE_IMAGE = "IMAGE"
+  val AD_TYPE_VIDEO = "VIDEO"
+  val AD_TYPE_IMAGE_NATIVE = "IMAGE_NATIVE"
+  val AD_TYPE_VIDEO_NATIVE = "VIDEO_NATIVE"
+
+  /* Choices {FACEBOOK, TWITTER, GOOGLE+, INTSAGRAM, EMAIL} */
+  val SOCIAL_FACEBOOK = "FACEBOOK"
+  val SOCIAL_TWITTER = "TWITTER"
+  val SOCIAL_GOOGLE_P = "GOOGLE+"
+  val SOCIAL_INSTAGRAM = "INSTAGRAM"
+  val SOCIAL_EMAIL = "EMAIL"
+
   val DEFAULT_CUSTOMER_TYPE = "CUSTOMER"
 
   val notification_base_url = conf.getString("notification.base.url")
@@ -78,6 +90,9 @@ trait KaredoConstants extends Configurable {
 
   val qr_base_url = conf.getString("qr.base.url")
   val qr_img_path = conf.getString("qr.img.path")
+
+  val url_magic_share_base = conf.getString("url.magic.share.base")
+  val url_magic_norm_base = conf.getString("url.magic.norm.base")
 }
 
 trait KaredoIds {
@@ -96,6 +111,10 @@ trait KaredoIds {
     val fourth = (random.alphanumeric take 4 mkString).toUpperCase
 
     s"${first}-${second}-${third}-${fourth}"
+  }
+
+  def getUrlCode(url: String): String = {
+    java.security.MessageDigest.getInstance("SHA-1").digest(url.getBytes("UTF-8")).map("%02x".format(_)).mkString
   }
 }
 
@@ -256,5 +275,21 @@ trait KaredoUtils
     ListMap(prefMap.toSeq.sortWith(_._2.order < _._2.order):_*)
   }
 
+  def storeUrlMagic(first_url:String, second_url:Option[String]):Result[String, String] = {
+    val url = second_url match {
+      case Some(second_url) => s"${first_url}_${second_url}"
+      case None => first_url
+    }
+
+    val url_code = getUrlCode(url)
+
+    dbUrlMagic.find(url_code) match {
+      case KO(_) => dbUrlMagic.insertNew(UrlMagic(url_code, first_url, second_url, now)) match {
+        case OK(_) => OK(url_code)
+        case KO(_) => KO(url_code)
+      }
+      case OK(_) => KO(url_code)
+    }
+  }
 }
 

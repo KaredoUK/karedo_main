@@ -23,4 +23,10 @@ trait DbCollections {
   val dbSale = new DbSale {}
   val dbMobileSale = new DbMobileSale {}
   val dbEmailVerify = new DbEmailVerify {}
+  val dbUserInteract = new DbUserInteract {}
+  val dbUserShare = new DbUserShare {}
+  val dbUserFavourite = new DbUserFavourite {}
+  val dbUrlMagic = new DbUrlMagic {}
+  val dbUserUrlAccess = new DbUserUrlAccess {}
+
 }

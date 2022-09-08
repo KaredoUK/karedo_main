@@ -12,6 +12,7 @@ import org.joda.time.format.ISODateTimeFormat
 import org.slf4j.LoggerFactory
 import spray.json._
 
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -40,7 +41,7 @@ trait KaredoRoute extends KaredoJsonHelpers with KaredoConstants  {
                 case _ => HttpEntity(ContentTypes.`application/json`, response.msg)
               }
 
-              HttpResponse(response.code, entity = entity)
+              HttpResponse(response.code, entity = entity, headers = response.headers)
             }
 
             case KO(Error(err,code)) => {
