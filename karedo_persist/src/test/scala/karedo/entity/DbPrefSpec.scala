@@ -30,7 +30,7 @@ class DbPrefSpec
       val list = prefDAO.load()
         list(0) match {
           case x =>
-            x.id must beEqualTo("IAB1")
+            x.id must beEqualTo("IAB22")
 
         }
         list(22) match {

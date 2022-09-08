@@ -8,10 +8,10 @@ import karedo.entity._
 import scala.concurrent.Future
 import karedo.util.Util.now
 
+import scala.collection.immutable.ListMap
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-
 
 
 /**
@@ -231,7 +231,7 @@ trait KaredoUtils
       dbUserKaredos.insertNew(UserKaredos(account_id, 0, now))
       dbUserProfile.insertNew(UserProfile(id = account_id))
 
-      val pref_map = dbPrefs.ids.get.map (x => x -> 0.5) (collection.breakOut): Map[String, Double]
+      val pref_map = getDefaultPrefMap
 
       dbUserPrefs.insertNew(UserPrefs(id = account_id, prefs = pref_map))
       dbUserIntent.insertNew(UserIntent(id = account_id))
@@ -243,6 +243,16 @@ trait KaredoUtils
       case Success(s) => s
       case Failure(f) => KO(f.toString)
     }
+  }
+
+  def getDefaultPrefMap():Map[String, UserPrefData] = {
+    val prefMap = dbPrefs.load.map(x => x.id -> UserPrefData(x.default, x.name, x.order))(collection.breakOut): Map[String, UserPrefData]
+
+    sortPrefMap(prefMap.filter(_._2.include))
+  }
+
+  def sortPrefMap(prefMap:Map[String, UserPrefData]): Map[String, UserPrefData] = {
+    ListMap(prefMap.toSeq.sortWith(_._2.order < _._2.order):_*)
   }
 
 }

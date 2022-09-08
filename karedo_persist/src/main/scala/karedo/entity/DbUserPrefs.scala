@@ -15,12 +15,13 @@ case class UserPref
   , value: Double
 )
 */
+case class UserPrefData(value: Double, name: String, order: Int, include:Boolean = true)
 
 case class UserPrefs
 (
   // it is the AccountId
   @Key("_id") id: String = UUID.randomUUID().toString
-  , prefs: Map[String, Double] = Map()
+  , prefs: Map[String, UserPrefData] = Map()
   , ts_created: Option[DateTime] = Some(now)
   , ts_updated: DateTime = now
 )

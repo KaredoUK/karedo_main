@@ -21,15 +21,15 @@ class DbUserPrefsSpec
     sequential
 
     "userPrefs should insert " in {
-      val list: Map[String,Double] = Map(("IAB1",5), ("IAB2",7))
-      val list2: Map[String, Double] = Map(("IAB1",4), ("IAB2",7))
+      val list: Map[String,UserPrefData] = Map(("IAB1", UserPrefData(5, "IAB1", 0)), ("IAB2", UserPrefData(7, "IAB2", 1)))
+      val list2: Map[String, UserPrefData] = Map(("IAB1", UserPrefData(4, "IAB1", 0)), ("IAB2", UserPrefData(7, "IAB2", 1)))
       val acctId = UUID.randomUUID()
       val r = UserPrefs(acctId, list)
       test.insertNew(r) must beOK
       val updated = r.copy(prefs = list2)
       test.update(updated)
       test.find(acctId) match {
-        case OK(x) => x.prefs must contain(("IAB1",4.0))
+        case OK(x) => x.prefs must contain(("IAB1",UserPrefData(4.0, "IAB1", 0)))
         case KO(x) => ko(x)
       }
 

@@ -1,11 +1,12 @@
 package karedo.actors.prefs
 
 import karedo.actors.{APIResponse, Error, KaredoAuthentication}
-import karedo.entity.{UserAccount, UserApp, UserPrefs}
+import karedo.entity.{UserAccount, UserApp, UserPrefData, UserPrefs}
 import karedo.util.Util.now
 import karedo.util._
 import org.slf4j.LoggerFactory
 import spray.json._
+import scala.util.{Try, Success, Failure}
 
 /**
   * Created by pakkio on 10/8/16.
@@ -28,39 +29,29 @@ trait Kar194_getPrefs_actor
 
     authenticate(accountId, deviceId, applicationId, sessionId, allowCreation = false)(
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
-        if (uAccount.isKO) KO(Error(s"internal error ${uAccount.err}"))
-        else {
+        Try[Result[Error, APIResponse]] {
           val acc = uAccount.get
 
-          val prefsRes = dbUserPrefs.find(acc.id)
-
-          if( prefsRes.isKO) {
-            // Create a new Prefs
-            val prefListRes = dbPrefs.ids
-
-            if( prefListRes.isOK ) {
-              val prefList = prefListRes.get
-              val prefMap = prefList.map (x => x -> 0.5) (collection.breakOut): Map[String, Double]
+          dbUserPrefs.find(acc.id) match {
+            case OK(userPrefs) => {
+              val ret = Kar194Res_Prefs(sortPrefMap(userPrefs.prefs)).toJson.toString
+              OK(APIResponse(ret, code))
+            }
+            case KO(_) => {
+              val prefMap = getDefaultPrefMap
 
               val prefs = UserPrefs(acc.id,
                 prefMap, Some(now), now )
 
               val res = dbUserPrefs.insertNew(prefs)
 
-              if( res.isOK) {
-                val ret = prefs.toJson.toString
-                OK(APIResponse(ret, code))
-              } else {
-                KO(Error(s"Internal Error ${res.err}"))
-              }
-            } else {
-              KO(Error(s"Internal Error ${prefListRes.err}"))
+              val ret = Kar194Res_Prefs(sortPrefMap(prefMap)).toJson.toString
+              OK(APIResponse(ret, code))
             }
-          } else {
-            // Send the profile we have
-            val ret = prefsRes.get.toJson.toString
-            OK(APIResponse(ret, code))
           }
+        } match {
+          case Success(s) => s
+          case Failure(f) => MAKE_ERROR(f)
         }
       }
     )

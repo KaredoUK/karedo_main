@@ -5,6 +5,7 @@ import karedo.entity._
 import karedo.util.Util.now
 import karedo.util._
 import org.slf4j.LoggerFactory
+import scala.util.{Try, Success, Failure}
 
 /**
   * Created by pakkio on 10/8/16.
@@ -29,46 +30,45 @@ trait Kar195_postPrefs_actor
 
     authenticate(accountId, deviceId, applicationId, sessionId, allowCreation = false)(
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
-        if (uAccount.isKO) KO(Error(s"internal error ${uAccount.err}"))
-        else {
-          val acc = uAccount.get
+        Try [Result[Error, APIResponse]] {
+          dbUserPrefs.find(accountId) match {
+            case OK(userPrefs) => {
+              val prefMapOrig:Map[String, UserPrefData] = userPrefs.prefs
+              val prefMapDefault:Map[String, UserPrefData] = getDefaultPrefMap
 
-          val prefListRes = dbPrefs.ids
+              val prefMapLocked:Map[String, UserPrefData] = if( prefMapOrig.size < prefMapDefault.size ) prefMapDefault else Map()
 
-          if( prefListRes.isKO ) {
-            KO(Error(s"Internal Error ${prefListRes.err}"))
-          }
-          val prefList = prefListRes.get
-          val prefMapLocked = prefList.map (x => x -> 0.5) (collection.breakOut): Map[String, Double]
-          val prefMap = collection.mutable.Map() ++ prefMapLocked
+              val prefMap:collection.mutable.Map[String, UserPrefData] = collection.mutable.Map() ++ prefMapLocked
 
-          request.prefs.foreach(x => prefMap(x._1) = x._2)
+              prefMapOrig.foreach(x => prefMap(x._1) = prefMapOrig(x._1))
 
-          val prefs = UserPrefs(acc.id,
-            Map(prefMap.toSeq: _*), Some(now), now )
+              request.prefs.foreach(x => prefMap(x._1) = prefMap(x._1).copy(value = x._2))
 
-          val prefRes = dbUserPrefs.find(acc.id)
+              val prefs = UserPrefs(accountId,
+                Map(prefMap.toSeq: _*), Some(now), now )
 
-          if( prefRes.isKO) {
-            // Create a new Prefs
+              dbUserPrefs.update(prefs)
 
-            val res = dbUserPrefs.insertNew(prefs)
-
-            if( res.isOK) {
               OK(APIResponse("", code))
-            } else {
-              KO(Error(s"Internal Error ${res.err}"))
             }
-          } else {
-            // Update old
-            val res = dbUserPrefs.update(prefs)
+            case KO(_) => {
+              val prefListRes = dbPrefs.ids
+              val prefMapLocked = getDefaultPrefMap
+              val prefMap = collection.mutable.Map() ++ prefMapLocked
 
-            if( res.isOK) {
+              request.prefs.foreach(x => prefMap(x._1) = prefMap(x._1).copy(value = x._2))
+
+              val prefs = UserPrefs(accountId,
+                Map(prefMap.toSeq: _*), Some(now), now )
+
+              dbUserPrefs.insertNew(prefs)
+
               OK(APIResponse("", code))
-            } else {
-              KO(Error(s"Internal Error ${res.err}"))
             }
           }
+        } match {
+          case Success(s) => s
+          case Failure(f) => MAKE_ERROR(f)
         }
       }
     )

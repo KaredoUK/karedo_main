@@ -4,7 +4,7 @@ import java.util.UUID
 
 import com.mongodb.casbah.Imports._
 import karedo.entity.dao._
-import karedo.util.{KO, Result}
+import karedo.util.{KO, OK, Result}
 import org.joda.time.DateTime
 import salat.annotations._
 import karedo.util.Util.now
@@ -41,21 +41,17 @@ trait DbUserKaredos extends DbMongoDAO[String,UserKaredos] {
   }
 
   // see unit tests for effective testing this
-  def transferKaredo(from:String, to: String, amount: Long): Result[String,Any] ={
-    KO("Not Yet Implemented")
+  def transferKaredo(from:String, to: String, amount: Long): Result[String,String] ={
 
-//    // naive implementation but using monad transport for ko
-//    def opt(x:Option[String]) = x
-//    val result = for {
-//
-//      acc1 <- find(from)
-//      acc2 <- find(to)
-//      acc1upd <- update(acc1.copy(karedos=acc1.karedos - amount, ts = now))
-//      acc2upd <- update(acc2.copy(karedos=acc2.karedos + amount, ts = now))
-//
-//    } yield acc2upd
-//    //println(s"changed account $result")
-//    result
+    val from_acc = find(from).get
+    val to_acc = find(to).get
+
+    if(from_acc.karedos < amount) KO("Not enough Karedos")
+
+    update(from_acc.copy(karedos=from_acc.karedos - amount, ts = now))
+    update(to_acc.copy(karedos=to_acc.karedos + amount, ts = now))
+
+    OK("Success")
   }
 }
 
