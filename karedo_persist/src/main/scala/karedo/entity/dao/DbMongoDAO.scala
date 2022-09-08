@@ -70,42 +70,48 @@ abstract class DbMongoDAO[K, T <: Keyable[K]]
 
   }
 
-  override def lock(id: K, transId: String, transField: String = "lockedBy", tsField: String = "ts", max: Int = 10): Result[String,T] = {
+  override def lock(id: K, transId: String, transField: String = "lockedBy", tsField: String = "ts", max: Int = 1000): Result[String, T] = {
 
-    //val r = dao.findAndModify();
-    val ret = dao.update(MongoDBObject("_id" -> id, transField -> ""),
-      MongoDBObject(
-        "$set" -> MongoDBObject(transField -> transId, tsField -> Util.now)
-      ), upsert = false)
-    //      val ret = dao.collection.findAndModify(
-    //        query = MongoDBObject("_id" -> id, transField -> ""),
-    //        update = MongoDBObject(
-    //          "$set" -> MongoDBObject(transField -> transId, tsField -> Util.now)
-    //        ), returnNew = true, upsert = false, fields = null,
-    //        sort = null,
-    //        remove = false)
     val found = find(id)
     if (found.isKO) found
     else {
+      //val r = dao.findAndModify();
+      val ret = dao.update(MongoDBObject("_id" -> id, transField -> ""),
+        MongoDBObject(
+          "$set" -> MongoDBObject(transField -> transId, tsField -> Util.now)
+        ), upsert = false)
+      //      val ret = dao.collection.findAndModify(
+      //        query = MongoDBObject("_id" -> id, transField -> ""),
+      //        update = MongoDBObject(
+      //          "$set" -> MongoDBObject(transField -> transId, tsField -> Util.now)
+      //        ), returnNew = true, upsert = false, fields = null,
+      //        sort = null,
+      //        remove = false)
+
       if (ret.getN == 0) {
         if (max == 0) {
+          println("Wait too long")
           KO("Wait too long for lock to be aquired")
         } else {
-          Thread.sleep(100)
+          Thread.sleep(10)
           lock(id, transId, transField, tsField, max - 1)
         }
-      } else
-        found
+      } else {
+        find(id)
+
+      }
 
     }
 
 
   }
+
   override def unlock(id: K, transId: String, transField: String = "lockedBy", tsField: String = "ts") = {
     val ret = dao.update(MongoDBObject("_id" -> id, transField -> transId),
       MongoDBObject(
         "$set" -> MongoDBObject(transField -> "", tsField -> Util.now)
       ), upsert = false)
+    if(ret.getN()<1) println("Unlock failed (not previously locked")
     find(id)
   }
 

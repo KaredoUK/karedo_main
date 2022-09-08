@@ -48,16 +48,22 @@ trait DbUserKaredos extends DbMongoDAO[String,UserKaredos] {
   // see unit tests for effective testing this
   private def transferKaredoOrdered(from:String, to: String, amount: Double): Result[String,UserKaredos] ={
     val transid = Util.newUUID
+    var step = 0
     val result = for {
 
-      acc1 <- lock(from, transid)
-      acc2 <- lock(to, transid)
-      acc1upd <- update(acc1.copy(karedos=acc1.karedos - amount, ts = now))
-      acc2upd <- update(acc2.copy(karedos=acc2.karedos + amount, ts = now))
-      unlock2 <- unlock(to, transid)
-      unlock1 <- unlock(from, transid)
+      acc1 <- { step=1; lock(from, transid) }
 
-    } yield unlock1
+      acc2 <- { step=2; lock(to, transid) }
+      acc1upd <- { step=3; update(acc1.copy(karedos=acc1.karedos - amount, ts = now)) }
+      acc2upd <- { step=4; update(acc2.copy(karedos=acc2.karedos + amount, ts = now)) }
+
+    } yield acc2upd
+
+    // be sure to remove any locks
+    unlock(to, transid)
+    unlock(from, transid)
+
+    //{ println(s"step $step ")}
     //println(s"changed account $result")
     result
   }

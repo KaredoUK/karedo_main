@@ -86,9 +86,9 @@ class DbUserKaredosSpec
     test.insertNew(UserKaredos(acct2,ACCT2START))
 
     // launch 1000 transfers which should not alter the initial amount
-    val futures = for{ i <- 1 to 10}
+    val futures = for{ i <- 1 to 100}
       yield Future {
-        for (j <- 1 to 1) {
+        for (j <- 1 to 100) {
           var kar = new Random().nextInt(100000)
           //println(s"$i/$j transferring 1")
           f(acct1, acct2, kar)
