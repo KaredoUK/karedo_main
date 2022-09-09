@@ -37,8 +37,6 @@ trait KaredoConstants extends Configurable {
   val TRANS_TYPE_REDEEM_BANK = "REDEEM_BANK"
   val TRANS_TYPE_REDEEM_CARD = "REDEEM_CARD"
 
-  //             "deception": "Values are OPEN, FAILED, COMPLETE, EXPIRED, CANCELLED"
-
   val TRANS_STATUS_OPEN = "OPEN"
   val TRANS_STATUS_FAILED = "FAILED"
   val TRANS_STATUS_CLOSED = "CLOSED"
@@ -82,6 +80,9 @@ trait KaredoConstants extends Configurable {
   val SOCIAL_EMAIL = "EMAIL"
 
   val DEFAULT_CUSTOMER_TYPE = "CUSTOMER"
+
+  val GET_TERM = "TERMS"
+  val GET_ABOUT = "ABOUT"
 
   val notification_base_url = conf.getString("notification.base.url")
   val notification_bcc_list = conf.getString("notification.bcc.list")

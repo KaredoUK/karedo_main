@@ -3,13 +3,14 @@ package karedo.routes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import karedo.routes.ads._
-import karedo.routes.intent.{Kar169_getIntent, Kar170_postIntent, Kar171_putIntent, Kar172_deleteIntent}
+import karedo.routes.intent._
 import karedo.routes.login._
-import karedo.routes.prefs.{Kar194_getPrefs, Kar195_postPrefs}
-import karedo.routes.profile.{Kar188_getProfile, Kar189_postProfile}
-import karedo.routes.sale.{Kar186_postSale, Kar197_putSale, Kar198_getSale, Kar199_getSaleQR}
-import karedo.routes.transfer.Kar183_putTransfer
+import karedo.routes.prefs._
+import karedo.routes.profile._
+import karedo.routes.sale._
+import karedo.routes.transfer._
 import karedo.routes.url._
+import karedo.routes.termsabout._
 import karedo.sample.Entities
 import karedo.util.RouteDebug
 //import org.clapper.classutil.ClassInfo
@@ -53,7 +54,9 @@ trait Routes
       Kar165_getFavourite.route ~ Kar166_interaction.route ~ Kar165_postFavourite.route ~
       Kar167_share_data.route ~
     // Url Magic
-      UrlMagic_normal.route ~ UrlMagic_share.route
+      UrlMagic_normal.route ~ UrlMagic_share.route ~
+    // Terms and About
+      Terms.route ~ About.route
   }
 
 //  override val routes = {
