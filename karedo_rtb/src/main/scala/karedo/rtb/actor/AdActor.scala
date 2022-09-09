@@ -39,7 +39,7 @@ class AdActor extends Actor with DbCollections {
             ad_type_IMAGE,
             java.util.UUID.randomUUID.toString,
             java.util.UUID.randomUUID.toString,
-            Ad( u._1, u._2, None, Some(250), Some(300), None),
+            Ad( u._1, u._2, "Short Headline Text about the Ad", None, Some(250), Some(300), None),
             Math.random() * 100,
             Some(List("karedo.co.uk")),
             None,
