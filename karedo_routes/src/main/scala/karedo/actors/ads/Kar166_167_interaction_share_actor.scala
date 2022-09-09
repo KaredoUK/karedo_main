@@ -21,10 +21,11 @@ trait Kar166_interaction_actor extends DbCollections
   with KaredoJsonHelpers {
   override val logger = LoggerFactory.getLogger(classOf[Kar166_interaction_actor])
 
-  def exec(accountId: String, sessionId: Option[String], deviceId: Option[String], request: Kar166Request): Result[Error, APIResponse] = {
+  def exec(accountId: String, deviceId: Option[String], request: Kar166Request): Result[Error, APIResponse] = {
     val applicationId = request.application_id
+    val sessionId = request.session_id
     logger.info(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\nsessionId: $sessionId")
-    authenticate(accountId, deviceId, applicationId, sessionId, allowCreation = false)(
+    authenticate(accountId, deviceId, applicationId, Some(sessionId), allowCreation = false)(
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
 
         Try[Result[Error, APIResponse]] {
@@ -52,22 +53,28 @@ trait Kar167_share_data_actor extends DbCollections
   with KaredoJsonHelpers {
   override val logger = LoggerFactory.getLogger(classOf[Kar167_share_data_actor])
 
-  def exec(accountId: String, sessionId: Option[String], deviceId: Option[String], request: Kar167Request): Result[Error, APIResponse] = {
+  def exec(accountId: String, deviceId: Option[String], request: Kar167Request): Result[Error, APIResponse] = {
     val applicationId = request.application_id
+    val sessionId = request.session_id
     logger.info(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\nsessionId: $sessionId")
-    authenticate(accountId, deviceId, applicationId, sessionId, allowCreation = false)(
+    authenticate(accountId, deviceId, applicationId, Some(sessionId), allowCreation = false)(
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
 
         Try[Result[Error, APIResponse]] {
           val url_code = storeUrlMagic(request.share.imp_url, Some(request.share.click_url)) match {
-            case OK(url_code) => url_code
-            case KO(error) => MAKE_ERROR(error)
+            case OK(u) => u
+            case KO(u) => u
           }
 
-          val share_url = s"${url_magic_share_base}${url_code}"
+          val account_hash = storeAccountHash(accountId) match {
+            case OK(h) => h
+            case KO(h) => h
+          }
 
-          val social_share_data = ""
-          val email_share_date = ""
+          val share_url = s"${url_magic_share_base}/shr?u=${url_code}&v=${account_hash}"
+
+          val social_share_data = "Karedo Social"
+          val email_share_date = "Karedo Email"
 
           val outChannels = request.share.channels.getOrElse(List()).map(c => {
             val share_data = c.channel match {
@@ -95,10 +102,11 @@ trait Kar165_postFavourite_actor extends DbCollections
   with KaredoJsonHelpers {
   override val logger = LoggerFactory.getLogger(classOf[Kar165_postFavourite_actor])
 
-  def exec(accountId: String, sessionId: Option[String], deviceId: Option[String], request: Kar165Request): Result[Error, APIResponse] = {
+  def exec(accountId: String, deviceId: Option[String], request: Kar165Request): Result[Error, APIResponse] = {
     val applicationId = request.application_id
+    val sessionId = request.session_id
     logger.info(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\nsessionId: $sessionId")
-    authenticate(accountId, deviceId, applicationId, sessionId, allowCreation = false)(
+    authenticate(accountId, deviceId, applicationId, Some(sessionId), allowCreation = false)(
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
 
         Try[Result[Error, APIResponse]] {

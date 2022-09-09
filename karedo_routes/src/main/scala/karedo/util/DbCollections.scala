@@ -28,5 +28,5 @@ trait DbCollections {
   val dbUserFavourite = new DbUserFavourite {}
   val dbUrlMagic = new DbUrlMagic {}
   val dbUserUrlAccess = new DbUserUrlAccess {}
-
+  val dbHashedAccount = new DbHashedAccount {}
 }

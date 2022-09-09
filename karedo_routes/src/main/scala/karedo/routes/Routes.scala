@@ -9,6 +9,7 @@ import karedo.routes.prefs.{Kar194_getPrefs, Kar195_postPrefs}
 import karedo.routes.profile.{Kar188_getProfile, Kar189_postProfile}
 import karedo.routes.sale.{Kar186_postSale, Kar197_putSale, Kar198_getSale, Kar199_getSaleQR}
 import karedo.routes.transfer.Kar183_putTransfer
+import karedo.routes.url._
 import karedo.sample.Entities
 import karedo.util.RouteDebug
 //import org.clapper.classutil.ClassInfo
@@ -50,7 +51,9 @@ trait Routes
       Kar199_getSaleQR.route ~
     // Interaction et al
       Kar165_getFavourite.route ~ Kar166_interaction.route ~ Kar165_postFavourite.route ~
-      Kar167_share_data.route
+      Kar167_share_data.route ~
+    // Url Magic
+      UrlMagic_normal.route ~ UrlMagic_share.route
   }
 
 //  override val routes = {

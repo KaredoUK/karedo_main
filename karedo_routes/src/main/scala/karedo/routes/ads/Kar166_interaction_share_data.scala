@@ -20,22 +20,18 @@ object Kar166_interaction extends KaredoRoute
       // POST /account/{account_id}/ad/interaction
       path("account" / Segment / "ad" / "interaction") {
         accountId =>
-          parameters('s ?) {
-            sessionId => {
               optionalHeaderValueByName("X_Identification") {
                 deviceId =>
                   post {
                     entity(as[Kar166Request]) {
                       request =>
                         doCall({
-                          exec(accountId, sessionId, deviceId, request)
+                          exec(accountId, deviceId, request)
                         }
                         )
                     }
                   }
               }
-            }
-          }
 
       }
     }
@@ -49,22 +45,18 @@ object Kar167_share_data extends KaredoRoute
     Route {
       path("account" / Segment / "ad" / "share_data") {
         accountId =>
-          parameters('s ?) {
-            sessionId => {
               optionalHeaderValueByName("X_Identification") {
                 deviceId =>
                   post {
                     entity(as[Kar167Request]) {
                       request =>
                         doCall({
-                          exec(accountId, sessionId, deviceId, request)
+                          exec(accountId, deviceId, request)
                         }
                         )
                     }
                   }
               }
-            }
-          }
 
       }
     }
@@ -78,22 +70,18 @@ object Kar165_postFavourite extends KaredoRoute
     Route {
       path("account" / Segment / "ad" / "favourite") {
         accountId =>
-          parameters('s ?) {
-            sessionId => {
               optionalHeaderValueByName("X_Identification") {
                 deviceId =>
                   post {
                     entity(as[Kar165Request]) {
                       request =>
                         doCall({
-                          exec(accountId, sessionId, deviceId, request)
+                          exec(accountId, deviceId, request)
                         }
                         )
                     }
                   }
               }
-            }
-          }
 
       }
     }

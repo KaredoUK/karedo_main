@@ -1,5 +1,6 @@
 package karedo.actors.login
 
+import akka.http.scaladsl.model.headers.{Cookie, HttpCookiePair}
 import karedo.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.entity.{UserEmail, UserMobile}
 import karedo.util.Util.now
@@ -48,15 +49,15 @@ trait Kar143_verify_actor
 
         dbUserEmail.find(email) match {
           case OK(userEmail) => {
-            if( userEmail.account_id == account_id) OK(APIResponse("Verfication Successful. Welcome to Karedo", HTTP_OK_200, MIME_TEXT))
-            else OK(APIResponse(s"Verification failed. Email $email already registered another account", HTTP_OK_200, MIME_TEXT))
+            if( userEmail.account_id == account_id) OK(APIResponse("Verfication Successful. Welcome to Karedo", HTTP_OK_200, MIME_TEXT, headers = List(Cookie(HttpCookiePair(COOKIE_ACCOUNT, account_id)))))
+            else OK(APIResponse(s"Verification failed. Email $email already registered another account", HTTP_OK_200, MIME_TEXT, headers = List(Cookie(HttpCookiePair(COOKIE_ACCOUNT, account_id)))))
           }
           case KO(_) => {
             dbUserEmail.insertNew(UserEmail(email, account_id, true, now, now))
 
             dbUserApp.update(userApp.copy(email_linked = true, ts = now))
 
-            OK(APIResponse("Verfication Successful. Welcome to Karedo", HTTP_OK_200, MIME_TEXT))
+            OK(APIResponse("Verfication Successful. Welcome to Karedo", HTTP_OK_200, MIME_TEXT, headers = List(Cookie(HttpCookiePair(COOKIE_ACCOUNT, account_id)))))
           }
         }
       } else {
@@ -64,7 +65,7 @@ trait Kar143_verify_actor
       }
     } match {
       case Success(s) => s
-      case Failure(f) => OK(APIResponse(s"Somethign went wrong. ${f.toString}", HTTP_OK_200, MIME_TEXT))
+      case Failure(f) => OK(APIResponse(s"Verification Failed. Somethiing went wrong. ${f.toString}", HTTP_OK_200, MIME_TEXT))
     }
   }
 }

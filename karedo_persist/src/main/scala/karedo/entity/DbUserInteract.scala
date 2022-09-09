@@ -72,9 +72,17 @@ case class UrlMagic
 
 trait DbUrlMagic extends DbMongoDAO[String, UrlMagic]
 
+case class HashedAccount
+(
+  @Key("_id") id:String = Util.newUUID
+  , account_id: String
+) extends Keyable[String]
+
+trait DbHashedAccount extends DbMongoDAO[String, HashedAccount]
+
 case class UrlAccess
 (
-  @Key("_id") id:String
+  @Key("_id") id:String = Util.newUUID
   , account_id: String
   , access_url: String
   , ts:DateTime = now

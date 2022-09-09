@@ -1,6 +1,7 @@
 package karedo.actors.ads
 
 import akka.actor.Props
+import akka.http.scaladsl.model.headers._
 import akka.pattern.ask
 import akka.util.Timeout
 import karedo.actors.{APIResponse, Error, KaredoAuthentication}
@@ -101,7 +102,7 @@ trait Kar134_adsActor
               val uAds = getAdsFor(app, acct)
               if (uAds.isOK) {
                 val ads = uAds.get
-                OK(APIResponse(ads.toString, code))
+                OK(APIResponse(msg = ads.toString, code = code))
               } else KO(Error(s"Can't get ads because of ${uAds.err}"))
             }
           } else KO(Error(s"application cant be found because of ${uapp.err}"))

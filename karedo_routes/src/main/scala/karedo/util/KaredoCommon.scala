@@ -7,6 +7,7 @@ import karedo.entity._
 
 import scala.concurrent.Future
 import karedo.util.Util.now
+import org.slf4j.LoggerFactory
 
 import scala.collection.immutable.ListMap
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -51,6 +52,9 @@ trait KaredoConstants extends Configurable {
   val HTTP_OK_NOCONTENT_204 = 204
   val HTTP_OK_RESETCONTENT_205 = 205
   val HTTP_OK_PARTIALCONTENT_NOTINASESSION_206 = 206
+
+  val HTTP_REDIRECT_302 = 302
+
   val HTTP_BADREQUEST_400 = 400
   val HTTP_UNAUTHORISED_401 = 401
   val HTTP_FORBIDDEN_403 = 403
@@ -62,6 +66,8 @@ trait KaredoConstants extends Configurable {
   val MIME_JSON = "JSON"
   val MIME_TEXT = "TEXT"
   val MIME_HTML = "HTML"
+
+  val COOKIE_ACCOUNT = "_a"
 
   val AD_TYPE_IMAGE = "IMAGE"
   val AD_TYPE_VIDEO = "VIDEO"
@@ -93,6 +99,7 @@ trait KaredoConstants extends Configurable {
 
   val url_magic_share_base = conf.getString("url.magic.share.base")
   val url_magic_norm_base = conf.getString("url.magic.norm.base")
+  val url_magic_fallback_url = conf.getString("url.magic.fallback.url")
 }
 
 trait KaredoIds {
@@ -113,8 +120,8 @@ trait KaredoIds {
     s"${first}-${second}-${third}-${fourth}"
   }
 
-  def getUrlCode(url: String): String = {
-    java.security.MessageDigest.getInstance("SHA-1").digest(url.getBytes("UTF-8")).map("%02x".format(_)).mkString
+  def getSHA1Hash(s: String): String = {
+    java.security.MessageDigest.getInstance("SHA-1").digest(s.getBytes("UTF-8")).map("%02x".format(_)).mkString
   }
 }
 
@@ -281,7 +288,7 @@ trait KaredoUtils
       case None => first_url
     }
 
-    val url_code = getUrlCode(url)
+    val url_code = getSHA1Hash(url)
 
     dbUrlMagic.find(url_code) match {
       case KO(_) => dbUrlMagic.insertNew(UrlMagic(url_code, first_url, second_url, now)) match {
@@ -289,6 +296,24 @@ trait KaredoUtils
         case KO(_) => KO(url_code)
       }
       case OK(_) => KO(url_code)
+    }
+  }
+
+  def storeAccountHash(account_id: String): Result[String, String] = {
+    val account_hash = getSHA1Hash(account_id)
+
+    Try[Result[String, HashedAccount]] {
+      dbHashedAccount.find(account_hash) match {
+        case KO(_) => dbHashedAccount.insertNew(HashedAccount(account_hash, account_id))
+        case OK(_) => OK(HashedAccount(account_hash, account_id))
+      }
+    } match {
+      case Success(s) => OK(account_hash)
+      case Failure(f) => {
+        val logger = LoggerFactory.getLogger(classOf[KaredoUtils])
+        logger.error("Hashing Account Failed", f)
+        OK(account_hash)
+      }
     }
   }
 }

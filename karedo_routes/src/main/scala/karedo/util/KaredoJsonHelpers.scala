@@ -31,22 +31,22 @@ trait KaredoJsonHelpers
 
   implicit val jsonUserAd = jsonFormat10(UserAd)
 
-  case class Kar166Request(application_id: String, entries: List[InteractUnit] = List())
+  case class Kar166Request(application_id: String, session_id:String, entries: List[InteractUnit] = List())
 
   implicit val jsonChannelUnit = jsonFormat4(ChannelUnit)
   implicit val jsonInteractUnit = jsonFormat10(InteractUnit)
-  implicit val jsonKar166Request:RootJsonFormat[Kar166Request] = jsonFormat2(Kar166Request)
+  implicit val jsonKar166Request:RootJsonFormat[Kar166Request] = jsonFormat3(Kar166Request)
 
-  case class Kar167Request(application_id: String, share: InteractUnit)
-  implicit val jsonKar167Request:RootJsonFormat[Kar167Request] = jsonFormat2(Kar167Request)
+  case class Kar167Request(application_id: String, session_id:String, share: InteractUnit)
+  implicit val jsonKar167Request:RootJsonFormat[Kar167Request] = jsonFormat3(Kar167Request)
 
   case class Kar167Res(channels: List[ChannelUnit])
   implicit val jsonKar167Res:RootJsonFormat[Kar167Res] = jsonFormat1(Kar167Res)
 
   implicit val jsonFavouriteUnit = jsonFormat6(FavouriteUnit)
 
-  case class Kar165Request(application_id: String, favourites: List[FavouriteUnit])
-  implicit val jsonKar165Request:RootJsonFormat[Kar165Request] = jsonFormat2(Kar165Request)
+  case class Kar165Request(application_id: String, session_id:String, favourites: List[FavouriteUnit])
+  implicit val jsonKar165Request:RootJsonFormat[Kar165Request] = jsonFormat3(Kar165Request)
 
   case class Kar165Res(favourites: List[FavouriteUnit])
   implicit val jsonKar165Res:RootJsonFormat[Kar165Res] = jsonFormat1(Kar165Res)
@@ -134,4 +134,6 @@ trait KaredoJsonHelpers
 
   case class Kar147_Resend(application_id: String, msisdn: String)
   implicit val jsonKar147_Resend = jsonFormat2(Kar147_Resend)
+
+  case class UrlCodeAndAccountHash(url_code: String, account_hash: String)
 }
