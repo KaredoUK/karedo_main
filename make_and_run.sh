@@ -14,6 +14,15 @@ cd $DIR
 
 git pull
 
+cd karedo_persist
+sbt clean compile publish-local
+
+cd ../karedo_rtb
+
+sbt clean compile publish-local
+
+cd ..
+
 sbt clean
 sbt compile publish-local
 sbt routes:assembly
