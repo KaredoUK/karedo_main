@@ -4,7 +4,7 @@ import java.util.UUID
 
 import com.mongodb.casbah.Imports._
 import karedo.entity.dao._
-import karedo.util.{KO, OK, Result}
+import karedo.util.{KO, Result, Util}
 import org.joda.time.DateTime
 import salat.annotations._
 import karedo.util.Util.now
@@ -39,19 +39,46 @@ trait DbUserKaredos extends DbMongoDAO[String,UserKaredos] {
 
     }
   }
-
+  def transferKaredo(from: String, to: String, amount: Double) = {
+    // better implementation of transfer with locking
+    if(from<to) transferKaredoOrdered(from,to,amount)
+    else transferKaredoOrdered(to,from,-amount)
+  }
   // see unit tests for effective testing this
-  def transferKaredo(from:String, to: String, amount: Long): Result[String,String] ={
+  private def transferKaredoOrdered(from:String, to: String, amount: Double): Result[String,UserKaredos] ={
+    val transid = Util.newUUID
+    var step = 0
+    val result = for {
 
-    val from_acc = find(from).get
-    val to_acc = find(to).get
+      acc1 <- { step=1; lock(from, transid) }
 
-    if(from_acc.karedos < amount) KO("Not enough Karedos")
+      acc2 <- { step=2; lock(to, transid) }
+      acc1upd <- { step=3; update(acc1.copy(karedos=acc1.karedos - amount, ts = now)) }
+      acc2upd <- { step=4; update(acc2.copy(karedos=acc2.karedos + amount, ts = now)) }
 
-    update(from_acc.copy(karedos=from_acc.karedos - amount, ts = now))
-    update(to_acc.copy(karedos=to_acc.karedos + amount, ts = now))
+    } yield acc2upd
 
-    OK("Success")
+    // be sure to remove any locks
+    unlock(to, transid)
+    unlock(from, transid)
+
+    //{ println(s"step $step ")}
+    //println(s"changed account $result")
+    result
+  }
+  // this is the transfer without lock which is dangerous
+  def transferKaredoNaive(from:String, to: String, amount: Double): Result[String,UserKaredos] ={
+    val transid = Util.newUUID
+    val result = for {
+
+      acc1 <- find(from)
+      acc2 <- find(to)
+      acc1upd <- update(acc1.copy(karedos=acc1.karedos - amount, ts = now))
+      acc2upd <- update(acc2.copy(karedos=acc2.karedos + amount, ts = now))
+
+    } yield acc2upd
+    //println(s"changed account $result")
+    result
   }
 }
 
