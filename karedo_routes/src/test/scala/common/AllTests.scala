@@ -28,18 +28,8 @@ trait AllTests extends WordSpec
 
   // can't clear everything otherwise tests cannot go in parallel (!)
   DbMongoDAO.tablePrefix = "TestRoutes_"
-  // mongoClient.dropDatabase(mongoDbName)
-  val presetAppId = Util.newMD5
-  var currentAccountId: String = "unset"
-  dbAds.preload(presetAppId,10)
 
 
-  val presetAccount = Util.newUUID
-  val KAREDO_AMOUNT = 2718281
-
-  dbUserAccount.insertNew(UserAccount(presetAccount))
-  dbUserApp.insertNew(UserApp(presetAppId,presetAccount))
-  dbUserKaredos.insertNew(UserKaredos(presetAccount,KAREDO_AMOUNT))
 
 
 

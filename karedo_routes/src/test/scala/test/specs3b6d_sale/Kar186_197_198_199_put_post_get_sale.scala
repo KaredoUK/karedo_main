@@ -1,4 +1,4 @@
-package specs3b6d_sale
+package test.specs3b6d_sale
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import common.AllTests
@@ -35,18 +35,6 @@ class Kar186_197_198_199_put_post_get_sale extends AllTests {
     val r_l_name = "Beeblebrox"
     val r_f_name = "Zaphod"
     val r_name = s"$r_l_name, $r_f_name"
-
-
-    // Delete ALL
-    //dbUserApp.deleteAll()
-    //dbUserAccount.deleteAll()
-    //dbUserSession.deleteAll()
-    //dbUserKaredos.deleteAll()
-    //dbUserMobile.deleteAll()
-    //dbUserProfile.deleteAll()
-    //dbSale.deleteAll()
-//    dbSale.deleteAll()
-//    dbMobileSale.deleteAll()
 
 
     // Set up All Auth.

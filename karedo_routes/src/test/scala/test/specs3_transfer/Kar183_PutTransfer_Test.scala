@@ -32,15 +32,7 @@ class Kar183_PutTransfer_Test extends AllTests {
     val r_accId1 = "r_accId1_" + getNewRandomID
     val r_accId2 = "r_accId2_" + getNewRandomID
 
-    // Delete ALL
-    dbUserApp.deleteAll()
-    dbUserAccount.deleteAll()
-    dbUserSession.deleteAll()
-    dbUserKaredos.deleteAll()
-    dbUserMobile.deleteAll()
-    dbUserProfile.deleteAll()
-//    dbSale.deleteAll()
-//    dbMobileSale.deleteAll()
+
 
 
     // Set up All Auth.

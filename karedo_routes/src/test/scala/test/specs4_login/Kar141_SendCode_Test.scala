@@ -27,7 +27,7 @@ class Kar141_SendCode_Test extends AllTests {
         application_id = appId,
         first_name = "John",
         last_name = "Doe",
-        msisdn = "00393319345235",
+        msisdn = "", //00393319345235",
         user_type = "",
         email = "pakkio@gmail.com"
 

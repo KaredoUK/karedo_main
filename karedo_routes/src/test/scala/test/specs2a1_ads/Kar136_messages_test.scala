@@ -12,6 +12,11 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class Kar136_messages_test extends AllTests {
 
+  val presetAppId = Util.newMD5
+  val presetAccount = Util.newUUID
+
+  dbUserAccount.insertNew(UserAccount(presetAccount))
+  dbUserApp.insertNew(UserApp(presetAppId,presetAccount))
 
   private val my_tweet = Some("my_tweet")
 
