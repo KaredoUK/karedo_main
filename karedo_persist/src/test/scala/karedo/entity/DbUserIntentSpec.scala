@@ -23,7 +23,7 @@ class DbUserIntentSpec
 
 
 
-  intentDao.deleteAll()
+  //intentDao.deleteAll()
 
   val uuid = UUID.randomUUID().toString
   val intent1 =

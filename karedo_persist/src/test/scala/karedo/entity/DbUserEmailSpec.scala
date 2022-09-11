@@ -17,7 +17,7 @@ class DbUserEmailSpec
       with MongoTestUtils {
 
     val test = new DbUserEmail {}
-    test.deleteAll()
+    //test.deleteAll()
 
     sequential
 

@@ -16,7 +16,7 @@ class DbUserAppSpec
       with MongoTestUtils {
 
     val test = new DbUserApp {}
-    test.deleteAll()
+    //test.deleteAll()
 
     sequential
 

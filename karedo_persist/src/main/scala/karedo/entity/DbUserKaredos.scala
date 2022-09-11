@@ -39,13 +39,13 @@ trait DbUserKaredos extends DbMongoDAO[String,UserKaredos] {
 
     }
   }
-  def transferKaredo(from: String, to: String, amount: Double) = {
+  def transferKaredo(from: String, to: String, amount: Long) = {
     // better implementation of transfer with locking
     if(from<to) transferKaredoOrdered(from,to,amount)
     else transferKaredoOrdered(to,from,-amount)
   }
   // see unit tests for effective testing this
-  private def transferKaredoOrdered(from:String, to: String, amount: Double): Result[String,UserKaredos] ={
+  private def transferKaredoOrdered(from:String, to: String, amount: Long): Result[String,UserKaredos] ={
     val transid = Util.newUUID
     var step = 0
     val result = for {
@@ -67,7 +67,7 @@ trait DbUserKaredos extends DbMongoDAO[String,UserKaredos] {
     result
   }
   // this is the transfer without lock which is dangerous
-  def transferKaredoNaive(from:String, to: String, amount: Double): Result[String,UserKaredos] ={
+  def transferKaredoNaive(from:String, to: String, amount: Long): Result[String,UserKaredos] ={
     val transid = Util.newUUID
     val result = for {
 

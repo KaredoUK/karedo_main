@@ -35,7 +35,7 @@ abstract class DbMongoDAO[K, T <: Keyable[K]]
   val thisClass = manifestT.runtimeClass
   val simpleName = thisClass.getSimpleName
   val logger = LoggerFactory.getLogger(thisClass)
-  logger.info(s"setting up $thisClass")
+  //logger.info(s"setting up $thisClass")
 
   lazy val dao = new SalatDAO[T, K](collection = db(s"${DbMongoDAO.tablePrefix}$simpleName")) {}
 

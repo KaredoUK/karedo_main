@@ -80,7 +80,7 @@ class DbUserKaredosSpec
     lockedinvalid must beKO
   }
 
-  def transferWithFunction( f: (String,String,Double)=>Result[String,UserKaredos]) = {
+  def transferWithFunction( f: (String,String,Long)=>Result[String,UserKaredos]) = {
     val acct1 = UUID.randomUUID()
     val acct2 = UUID.randomUUID()
 

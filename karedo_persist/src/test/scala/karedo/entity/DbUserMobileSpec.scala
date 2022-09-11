@@ -16,7 +16,7 @@ class DbUserMobileSpec
       with MongoTestUtils {
 
     val test = new DbUserMobile {}
-    test.deleteAll()
+    //test.deleteAll()
 
     sequential
 

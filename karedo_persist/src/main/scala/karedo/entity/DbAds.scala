@@ -51,7 +51,7 @@ trait DbAds extends DbMongoDAO[String, Ads] {
   // preloads some values associated to accountId: accountid
   def preload(applicationId: String, count: Int) = {
 
-    deleteAll()
+    //deleteAll()
 
     def element(i: Int): Ad = Ad(price=10,imageAd = Some(ImageAd(s"Image $i")))
 
