@@ -256,7 +256,7 @@ trait KaredoUtils
         UserAccount(account_id, None, None, DEFAULT_CUSTOMER_TYPE, List(), List(), true, now, now)
       )
 
-      dbUserKaredos.insertNew(UserKaredos(account_id, 0, now))
+      dbUserKaredos.insertNew(UserKaredos(account_id, 0))
       dbUserProfile.insertNew(UserProfile(id = account_id))
 
       val pref_map = getDefaultPrefMap
