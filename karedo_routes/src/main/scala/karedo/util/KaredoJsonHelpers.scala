@@ -52,13 +52,13 @@ trait KaredoJsonHelpers
   implicit val jsonKar165Res:RootJsonFormat[Kar165Res] = jsonFormat1(Kar165Res)
 
 
-  implicit val jsonUserProfile = jsonFormat12(UserProfile)
+  implicit val jsonUserProfile = jsonFormat13(UserProfile)
 
   case class Kar189ReqProfile(gender:Option[String], first_name:String, last_name: String,
-                              yob: Option[Int], kids: Option[Int], income: Option[Int], location: Option[Boolean],
+                              yob: Option[Int], kids: Option[Int], income: Option[Int], postcode: Option[String], location: Option[Boolean],
                               opt_in: Option[Boolean], third_party: Option[Boolean])
   case class Kar189Req(application_id: String, session_id: String, profile: Kar189ReqProfile )
-  implicit val jsonKar189ReqProfile = jsonFormat9(Kar189ReqProfile)
+  implicit val jsonKar189ReqProfile = jsonFormat10(Kar189ReqProfile)
   implicit val jsonKar189Req:RootJsonFormat[Kar189Req] = jsonFormat3(Kar189Req)
 
   implicit val jsonUserPrefData = jsonFormat4(UserPrefData)
