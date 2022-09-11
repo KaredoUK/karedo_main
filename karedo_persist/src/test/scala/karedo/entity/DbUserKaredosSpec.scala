@@ -52,7 +52,7 @@ class DbUserKaredosSpec
 
     test.insertNew(UserKaredos(acct1,ACCT1START))
     test.insertNew(UserKaredos(acct2,ACCT2START))
-    test.transferKaredo(acct1,acct2,100)
+    test.transferKaredo(acct1,acct2,100,"TRANSFER")
 
     test.find(acct1) match {
       case OK(x) => x.karedos must beEqualTo(900)
@@ -80,7 +80,8 @@ class DbUserKaredosSpec
     lockedinvalid must beKO
   }
 
-  def transferWithFunction( f: (String,String,Long)=>Result[String,UserKaredos]) = {
+  "can we transfer safely? (10 threads each inserting and removing same random quantities should keep original balance)" in {
+    //transferWithFunction(test.transferKaredo)
     val acct1 = UUID.randomUUID()
     val acct2 = UUID.randomUUID()
 
@@ -88,14 +89,15 @@ class DbUserKaredosSpec
     test.insertNew(UserKaredos(acct2,ACCT2START))
 
     // launch 1000 transfers which should not alter the initial amount
+    val transferType = "TRANSFER"
     val futures = for{ i <- 1 to 10}
       yield Future {
         for (j <- 1 to 10) {
           var kar = new Random().nextInt(100000)
           //println(s"$i/$j transferring 1")
-          f(acct1, acct2, kar)
+          test.transferKaredo(acct1, acct2, kar, transferType)
           //println(s"$i/$j transferring 2")
-          f(acct2, acct1, kar)
+          test.transferKaredo(acct2, acct1, kar, transferType)
         }
       }
 
@@ -111,18 +113,15 @@ class DbUserKaredosSpec
       case KO(x) => ko(x)
     }
   }
-  "can we transfer safely? (10 threads each inserting and removing same random quantities should keep original balance)" in {
-    transferWithFunction(test.transferKaredo)
-  }
-  "naive should fail (10 threads with +- random quantities should alter balance" in {
-    Try { transferWithFunction(test.transferKaredoNaive) }
-    match {
-      case Success(_) => ko("should have produced an error")
-      case Failure(x) => {
-        val s = s"it's ok error produced is $x"
-        println(s)
-        ok(s)
-      }
-    }
-  }
+//  "naive should fail (10 threads with +- random quantities should alter balance" in {
+//    Try { transferWithFunction(test.transferKaredoNaive) }
+//    match {
+//      case Success(_) => ko("should have produced an error")
+//      case Failure(x) => {
+//        val s = s"it's ok error produced is $x"
+//        println(s)
+//        ok(s)
+//      }
+//    }
+//  }
 }

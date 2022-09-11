@@ -156,38 +156,11 @@ trait KaredoUtils
       MAKE_ERROR(s"From UserKaredos doesn't have enough Karedos accountId: ${from_id}")
     } else {
 
-      val diff1 = fromUserKaredo.karedos - act_karedo
-      val new_fromUserKaredo = fromUserKaredo.copy(karedos = diff1.toInt, ts = now)
-
-      val diff2 = toUserKaredo.karedos + act_karedo
-      val new_toUserKaredo = toUserKaredo.copy(karedos = diff2.toInt, ts = now)
-
-      val updFromUserKaredo = dbUserKaredos.update(new_fromUserKaredo)
-
-      if (updFromUserKaredo.isKO) MAKE_ERROR(updFromUserKaredo.err, s"Unable to update Karedos. accountId: $from_id")
-      else {
-
-        val updToUserKaredo = dbUserKaredos.update(new_toUserKaredo)
-        if (updToUserKaredo.isKO) MAKE_ERROR(updToUserKaredo.err, s"Unable to update Karedos. accountId: $to_id")
-
-        else {
-
-          val insChangeFrom = dbKaredoChange.insertNew(KaredoChange(
-            accountId = from_id, karedos = -act_karedo, trans_type = TRANS_TYPE_TRANSFER,
-            trans_info = s"Moved Karedos: $karedos from $from_id to $to_id -> $text",
-            trans_currency = currency, ts = now))
-          if (insChangeFrom.isKO) MAKE_ERROR(insChangeFrom.err, "Unable to update KaredoChange")
-          else {
-
-            val insChangeTo = dbKaredoChange.insertNew(KaredoChange(
-              accountId = to_id, karedos = act_karedo, trans_type = TRANS_TYPE_TRANSFER,
-              trans_info = s"Moved Karedos: $karedos from $from_id to $to_id -> $text",
-              trans_currency = currency, ts = now))
-            if (insChangeTo.isKO) MAKE_ERROR(insChangeTo.err, "Unable to update KaredoChange")
-            else
-              OK("Complete")
-          }
-        }
+      val completed = dbUserKaredos.transferKaredo(from_id, to_id, act_karedo, text, currency)
+      if(completed.isKO){
+        MAKE_ERROR(completed.err, "Unable to transfer karedos")
+      } else {
+        OK("Complete")
       }
     }
 

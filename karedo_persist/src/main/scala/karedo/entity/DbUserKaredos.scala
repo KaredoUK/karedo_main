@@ -40,33 +40,56 @@ trait DbUserKaredos extends DbMongoDAO[String,UserKaredos] {
 
     }
   }
-  def transferKaredo(from: String, to: String, amount: Long) = {
-    // better implementation of transfer with locking
-    if(from<to) transferKaredoOrdered(from,to,amount)
-    else transferKaredoOrdered(to,from,-amount)
+  def transferKaredo(
+                      pfrom: String,
+                      pto: String,
+                      pamount: Long,
+                      transType: String,
+                      text: String = "",
+                      currency: String = "KAR",
+                      history:DbKaredoChange = new DbKaredoChange {}) = {
+    val transInfo = s"Moved Karedos: $pamount from $pfrom to $pto -> $text"
+
+    def transferKaredoOrdered(from:String, to: String, amount: Long): Result[String,UserKaredos] = {
+      val transid = Util.newUUID
+      var step = 0
+      val result = for {
+
+        acc1 <- { step=1; lock(from, transid) }
+        acc2 <- { step=2; lock(to, transid) }
+        change1 <- { step=3; history.insertNew(
+          KaredoChange(
+            accountId = from,
+            karedos = -amount,
+            trans_type = transType,
+            trans_info = transInfo,
+            trans_currency = currency))
+        }
+        acc1upd <- { step=4; update(acc1.copy(karedos=acc1.karedos - amount, ts = now)) }
+        change2 <- { step=5; history.insertNew(
+          KaredoChange(
+            accountId = to,
+            karedos = amount,
+            trans_type = transType,
+            trans_info = transInfo,
+            trans_currency = currency))
+        }
+        acc2upd <- { step=6; update(acc2.copy(karedos=acc2.karedos + amount, ts = now)) }
+
+      } yield acc2upd
+
+      // be sure to remove any locks
+      unlock(to, transid)
+      unlock(from, transid)
+
+      //{ println(s"step $step ")}
+      //println(s"changed account $result")
+      result
+    }
+    if(pfrom<pto) transferKaredoOrdered(pfrom,pto,pamount)
+    else transferKaredoOrdered(pto,pfrom,-pamount)
   }
-  // see unit tests for effective testing this
-  private def transferKaredoOrdered(from:String, to: String, amount: Long): Result[String,UserKaredos] ={
-    val transid = Util.newUUID
-    var step = 0
-    val result = for {
 
-      acc1 <- { step=1; lock(from, transid) }
-
-      acc2 <- { step=2; lock(to, transid) }
-      acc1upd <- { step=3; update(acc1.copy(karedos=acc1.karedos - amount, ts = now)) }
-      acc2upd <- { step=4; update(acc2.copy(karedos=acc2.karedos + amount, ts = now)) }
-
-    } yield acc2upd
-
-    // be sure to remove any locks
-    unlock(to, transid)
-    unlock(from, transid)
-
-    //{ println(s"step $step ")}
-    //println(s"changed account $result")
-    result
-  }
   // this is the transfer without lock which is dangerous
   def transferKaredoNaive(from:String, to: String, amount: Long): Result[String,UserKaredos] ={
     val transid = Util.newUUID
