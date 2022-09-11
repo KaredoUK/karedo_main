@@ -38,13 +38,13 @@ class Kar186_197_198_199_put_post_get_sale extends AllTests {
 
 
     // Delete ALL
-    dbUserApp.deleteAll()
-    dbUserAccount.deleteAll()
-    dbUserSession.deleteAll()
-    dbUserKaredos.deleteAll()
-    dbUserMobile.deleteAll()
-    dbUserProfile.deleteAll()
-    dbSale.deleteAll()
+    //dbUserApp.deleteAll()
+    //dbUserAccount.deleteAll()
+    //dbUserSession.deleteAll()
+    //dbUserKaredos.deleteAll()
+    //dbUserMobile.deleteAll()
+    //dbUserProfile.deleteAll()
+    //dbSale.deleteAll()
 //    dbSale.deleteAll()
 //    dbMobileSale.deleteAll()
 
