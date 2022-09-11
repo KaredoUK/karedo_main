@@ -36,7 +36,7 @@ trait Kar189_postProfile_actor
           dbUserProfile.find(user_account.id) match {
             case OK(userProfile) => {
               val profile = UserProfile(user_account.id, request.profile.gender, request.profile.first_name,
-                request.profile.last_name, request.profile.yob, request.profile.kids, request.profile.income,
+                request.profile.last_name, request.profile.yob, request.profile.kids, request.profile.income, request.profile.postcode,
                 request.profile.location, request.profile.opt_in, request.profile.third_party, userProfile.ts_created , now)
 
               dbUserProfile.update(profile)
@@ -45,6 +45,7 @@ trait Kar189_postProfile_actor
               val profile = UserProfile(id = user_account.id, gender = request.profile.gender,
                 first_name = request.profile.first_name, last_name = request.profile.last_name,
                 yob = request.profile.yob, kids = request.profile.kids, income = request.profile.income,
+                postcode = request.profile.postcode,
                 location = request.profile.location, opt_in = request.profile.opt_in,
                 third_party = request.profile.third_party, ts_created = now, ts_updated = now)
 

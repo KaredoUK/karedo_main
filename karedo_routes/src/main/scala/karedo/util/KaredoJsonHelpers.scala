@@ -52,7 +52,7 @@ trait KaredoJsonHelpers
   implicit val jsonKar165Res:RootJsonFormat[Kar165Res] = jsonFormat1(Kar165Res)
 
 
-  implicit val jsonUserProfile = jsonFormat12(UserProfile)
+  implicit val jsonUserProfile = jsonFormat13(UserProfile)
 
   case class Kar189ReqProfile(gender:Option[String], first_name:String, last_name: String,
                               yob: Option[Int], kids: Option[Int], income: Option[Int], postcode: Option[String], location: Option[Boolean],

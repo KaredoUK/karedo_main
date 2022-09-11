@@ -38,7 +38,7 @@ trait Kar188_getProfile_actor
             // Create a new profile.
             val profile = UserProfile(
               id = acc.id, gender = None, first_name =  "", last_name =  "",
-              yob = None, kids = None, income = None, location = Some(true), opt_in = Some(true), third_party = Some(true),
+              yob = None, kids = None, income = None, postcode = None, location = Some(true), opt_in = Some(true), third_party = Some(true),
               now, now)
             val res = dbUserProfile.insertNew(profile)
             if( res.isOK) {
