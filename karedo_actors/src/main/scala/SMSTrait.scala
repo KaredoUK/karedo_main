@@ -55,7 +55,7 @@ object testSMS extends App {
     override val materializer = ActorMaterializer()
   }
 
-  it.sendSMS("00393319345235","text of message 2")
+  //it.sendSMS("00393319345235","text of message 2")
 }
 
 
