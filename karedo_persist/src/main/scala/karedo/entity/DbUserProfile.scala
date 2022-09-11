@@ -20,6 +20,7 @@ case class UserProfile
   , yob: Option[Int] = None
   , kids: Option[Int] = None
   , income: Option[Int] = None
+  , postcode: Option[String] = None
   , location: Option[Boolean] = Some(true)
   , opt_in: Option[Boolean] = Some(true)
   , third_party: Option[Boolean] = Some(true)
