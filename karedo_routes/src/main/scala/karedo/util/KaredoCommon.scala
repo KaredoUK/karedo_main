@@ -156,7 +156,7 @@ trait KaredoUtils
       MAKE_ERROR(s"From UserKaredos doesn't have enough Karedos accountId: ${from_id}")
     } else {
 
-      val completed = dbUserKaredos.transferKaredo(from_id, to_id, act_karedo, text, currency)
+      val completed = dbUserKaredos.transferKaredo(from_id, to_id, act_karedo, "TRANSFER", text, currency)
       if(completed.isKO){
         MAKE_ERROR(completed.err, "Unable to transfer karedos")
       } else {
