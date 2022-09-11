@@ -70,7 +70,7 @@ class DbUserKaredosSpec
     test.insertNew(UserKaredos(acct1,0))
     val locked = test.lock(acct1,"transid")
     locked must beOK
-    val locked1 = test.lock(acct1,"transid2")
+    val locked1 = test.lock(acct1,"transid2",max = 5)
     locked1 must beKO
     val unlock = test.unlock(acct1,"transid")
     unlock must beOK
@@ -88,9 +88,9 @@ class DbUserKaredosSpec
     test.insertNew(UserKaredos(acct2,ACCT2START))
 
     // launch 1000 transfers which should not alter the initial amount
-    val futures = for{ i <- 1 to 100}
+    val futures = for{ i <- 1 to 10}
       yield Future {
-        for (j <- 1 to 100) {
+        for (j <- 1 to 10) {
           var kar = new Random().nextInt(100000)
           //println(s"$i/$j transferring 1")
           f(acct1, acct2, kar)

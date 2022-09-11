@@ -19,6 +19,7 @@ case class UserKaredos
   // accountId
   @Key("_id") id: String = UUID.randomUUID().toString
   , karedos: Long = 0
+  , lockedBy: String = ""
   , ts: DateTime = now
 )
 extends Keyable[String]

@@ -70,7 +70,7 @@ abstract class DbMongoDAO[K, T <: Keyable[K]]
 
   }
 
-  override def lock(id: K, transId: String, transField: String = "lockedBy", tsField: String = "ts", max: Int = 1000): Result[String, T] = {
+  override def lock(id: K, transId: String, transField: String = "lockedBy", tsField: String = "ts", max: Int = 100): Result[String, T] = {
 
     val found = find(id)
     if (found.isKO) found
