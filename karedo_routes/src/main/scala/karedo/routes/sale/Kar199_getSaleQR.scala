@@ -40,7 +40,7 @@ object Kar199_getSaleQR extends KaredoRoute
   }
 }
 
-object Kar199_postSaleQR extends KaredoRoute
+object Kar199_postQR extends KaredoRoute
   with Kar199_postSaleQR_actor {
 
 //  val multipartForm =
@@ -51,7 +51,6 @@ object Kar199_postSaleQR extends KaredoRoute
 
   def route = {
     Route {
-
       path( "qr" ) {
         post {
           uploadedFile("file") {
