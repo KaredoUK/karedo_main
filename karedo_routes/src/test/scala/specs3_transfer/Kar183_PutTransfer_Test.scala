@@ -48,7 +48,7 @@ class Kar183_PutTransfer_Test extends AllTests {
     dbUserAccount.insertNew(UserAccount(s_acctId,password=Some("pippo")))
     dbUserSession.insertNew(UserSession(s_sessId, s_acctId, ts_created = now))
     dbUserKaredos.insertNew(UserKaredos(s_acctId, 20000 * APP_KAREDO_CONV))
-    dbUserProfile.insertNew(UserProfile(s_acctId, Some("F"), "John", "Doe" ))
+    dbUserProfile.insertNew(UserProfile(s_acctId, Some("F"), Some("John"), Some("Doe") ))
 
     // Set up working receiver account.
     dbUserAccount.insertNew(UserAccount(r_accId1,password=Some("pippo")))

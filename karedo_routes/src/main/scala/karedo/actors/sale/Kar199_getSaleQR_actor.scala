@@ -1,5 +1,7 @@
 package karedo.actors.sale
 
+import java.io.File
+
 import karedo.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.entity.{UserAccount, UserApp}
 import karedo.util._
@@ -17,16 +19,30 @@ trait Kar199_getSaleQR_actor
   extends DbCollections
   with KaredoAuthentication
   with KaredoJsonHelpers
-  with KaredoConstants {
+  with KaredoConstants
+  with KaredoQRCode {
   override val logger = LoggerFactory.getLogger(classOf[Kar199_getSaleQR_actor])
 
   def exec(saleId: String): Result[Error, APIResponse] = {
-    OK(APIResponse(getQRForSale(saleId).toJson.toString, HTTP_OK_200))
+    getQRCode(saleId) match {
+      case OK(s) => OK(APIResponse(Kar199Res(s).toJson.toString, HTTP_OK_200))
+      case KO(e) => KO(e)
+    }
   }
+}
 
-  def getQRForSale(saleId: String): Kar199Res = {
-    val qrFileName = "qr.png"
+trait Kar199_postSaleQR_actor
+  extends DbCollections
+    with KaredoAuthentication
+    with KaredoJsonHelpers
+    with KaredoConstants
+    with KaredoQRCode {
+  override val logger = LoggerFactory.getLogger(classOf[Kar199_getSaleQR_actor])
 
-    Kar199Res(s"${qr_base_url}/${qrFileName}")
+  def exec(imageFile: File): Result[Error, APIResponse] = {
+    decodeQRCode(imageFile) match {
+      case OK(s) => OK(APIResponse(Kar199Res(s).toJson.toString, HTTP_OK_200))
+      case KO(e) => KO(e)
+    }
   }
 }

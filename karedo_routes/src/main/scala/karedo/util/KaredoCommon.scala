@@ -1,7 +1,19 @@
 package karedo.util
 
+import java.io.File
 import java.util.UUID
+import javax.imageio.ImageIO
 
+import com.google.zxing.client.j2se.{BufferedImageLuminanceSource, MatrixToImageConfig, MatrixToImageWriter}
+import com.google.zxing.common.HybridBinarizer
+import com.google.zxing.{BarcodeFormat, BinaryBitmap, EncodeHintType}
+import com.google.zxing.qrcode._
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
+import com.google.zxing.qrcode.encoder.QRCode
+import com.sun.javafx.iio.ImageStorage.ImageType
+
+import scala.collection.{JavaConversions, mutable}
+import scala.collection.JavaConverters._
 import karedo.actors.Error
 import karedo.entity._
 
@@ -12,6 +24,7 @@ import org.slf4j.LoggerFactory
 import scala.collection.immutable.ListMap
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.tools.nsc.io.Path
 import scala.util.{Failure, Success, Try}
 
 
@@ -95,8 +108,9 @@ trait KaredoConstants extends Configurable {
   val notification_sms_server_endpoint = conf.getString("notification.sms.server.endpoint")
   val notification_sms_sender = conf.getString("notification.sms.sender")
 
-  val qr_base_url = conf.getString("qr.base.url")
-  val qr_img_path = conf.getString("qr.img.path")
+  val qr_base_file_path = conf.getString("qr.base.file.path")
+  val qr_img_file_path = conf.getString("qr.img.file.path")
+  val qr_base_img_url = conf.getString("qr.base.img.url")
 
   val url_magic_share_base = conf.getString("url.magic.share.base")
   val url_magic_norm_base = conf.getString("url.magic.norm.base")
@@ -314,6 +328,59 @@ trait KaredoUtils
         val logger = LoggerFactory.getLogger(classOf[KaredoUtils])
         logger.error("Hashing Account Failed", f)
         OK(account_hash)
+      }
+    }
+  }
+}
+
+trait KaredoQRCode extends KaredoConstants {
+  val logger = LoggerFactory.getLogger(classOf[KaredoQRCode])
+
+  def getQRCode(text: String): Result[Error, String] = {
+    try {
+
+      val basePath = qr_base_file_path + File.separator + qr_img_file_path
+      val basePathFile = new File(basePath)
+      val baseUrl = qr_base_img_url + File.separator + qr_img_file_path
+
+      if( ! basePathFile.exists() ) basePathFile.mkdirs()
+
+      val qrw = new QRCodeWriter()
+      val hints: scala.collection.mutable.Map[EncodeHintType, Any] = scala.collection.mutable.Map()
+
+      hints += (EncodeHintType.ERROR_CORRECTION -> ErrorCorrectionLevel.H)
+      hints += (EncodeHintType.CHARACTER_SET -> "utf-8")
+
+      val qr_bitMatrix = qrw.encode(text, BarcodeFormat.QR_CODE, 250, 250, hints.asJava)
+
+      val qrFile = new File(basePath + File.separator + text + ".png")
+      qrFile.createNewFile()
+      MatrixToImageWriter.writeToPath(qr_bitMatrix, "png", qrFile.toPath(), new MatrixToImageConfig())
+
+      OK(qr_base_img_url + File.separator + text + ".png")
+    } catch {
+      case ex: Exception => {
+        logger.error("Couldn't create QR Code", ex)
+        KO(Error("Couldn't create QR Code: " + ex.toString))
+      }
+    }
+  }
+
+  def decodeQRCode(file: File): Result[Error, String] = {
+    try {
+      val image = ImageIO.read(file)
+      val lumSource = new BufferedImageLuminanceSource(image)
+      val bitmap = new BinaryBitmap(new HybridBinarizer(lumSource))
+
+      val qrr = new QRCodeReader()
+      val res = qrr.decode(bitmap)
+
+      OK(res.getText)
+
+    } catch {
+      case ex:Exception => {
+        logger.error("Couldn't decode QR Code", ex)
+        KO(Error("Couldn't decode QR Code: " + ex.toString))
       }
     }
   }

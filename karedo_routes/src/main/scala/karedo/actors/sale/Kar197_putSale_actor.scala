@@ -38,13 +38,11 @@ trait Kar197_putSale_actor
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
 
         Try[Result[Error, APIResponse]] {
-          val receiverAccount = uAccount match {
-            case OK(ua) => ua
-            case KO(_) => throw Error("BAM! BAM!")
-          }
+          val receiverAccount = uAccount.get
+
           val receiverProfile = dbUserProfile.find(receiverAccount.id).get
           val receiver_id = receiverAccount.id
-          val receiver_name = s"${receiverProfile.last_name}, ${receiverProfile.first_name}"
+          val receiver_name = s"${receiverProfile.last_name.get}, ${receiverProfile.first_name.get}"
           val receiver_msisdn = receiverAccount.findActiveMobile.get.msisdn
 
           // IF we got till here. Sender account exists.

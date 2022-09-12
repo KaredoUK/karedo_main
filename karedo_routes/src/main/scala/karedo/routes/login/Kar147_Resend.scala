@@ -5,7 +5,7 @@ package karedo.routes.login
   */
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import karedo.actors.login.Kar147_Resend_actor
+import karedo.actors.login._
 import karedo.routes.KaredoRoute
 
 /**
@@ -26,6 +26,51 @@ object Kar147_Resend extends KaredoRoute
                 )
             }
           }
+      }
+    }
+  }
+}
+
+
+
+object Kar147_ResetEmail extends KaredoRoute
+  with Kar147_ResetEmail_actor {
+
+  def route = {
+    Route {
+      path("resend" / "email") {
+        put {
+          entity(as[Kar147_ResetEmail]) {
+            request =>
+              doCall({
+                exec(request)
+              }
+              )
+          }
+        }
+      }
+    }
+  }
+}
+
+object Kar147_ValidateEmail extends KaredoRoute
+  with Kar147_ValidateEmail_actor {
+
+  def route = {
+    Route {
+      path("validate" / "email") {
+        optionalHeaderValueByName("X_Identification") {
+          deviceId =>
+            post {
+              entity(as[Kar147_ValidateEmail_Request]) {
+                request =>
+                  doCall({
+                    exec(deviceId, request)
+                  }
+                  )
+              }
+            }
+        }
       }
     }
   }

@@ -61,8 +61,8 @@ trait Kar141_SendCode_actor
 
   def updateNameInProfile(account_id: String, name:(String, String)): Result[String, UserProfile] = {
     dbUserProfile.find(account_id) match {
-      case OK(userProfile) => dbUserProfile.update(userProfile.copy(first_name = name._1, last_name = name._2, ts_updated = now)   )
-      case KO(_) => dbUserProfile.insertNew(UserProfile(id = account_id, first_name = name._1, last_name = name._2))
+      case OK(userProfile) => dbUserProfile.update(userProfile.copy(first_name = Some(name._1), last_name = Some(name._2), ts_updated = now)   )
+      case KO(_) => dbUserProfile.insertNew(UserProfile(id = account_id, first_name = Some(name._1), last_name = Some(name._2)))
     }
   }
 
@@ -286,7 +286,7 @@ trait Kar141_SendCode_actor
       val email_subject = "Welcome to Karedo"
       val email_body = s"Welcome to Karedo. \nYou're on your way to gaining from your attention. Click on [$email_verify_url] to verify your email"
       sendEmail(email, email_subject, email_body) onComplete {
-        case Failure(error) => throw error
+        case Failure(e) => logger.error(s"Unable to send Email message to ${email}", e)
         case Success(s) =>
       }
 
@@ -326,7 +326,7 @@ trait Kar141_SendCode_actor
 
       val sms_text = s"Welcome to Karedo. You're on your way to gaining from your attention. Code is [$sms_code]. Start the Karedo App to activate it"
       sendSMS(msisdn, sms_text) onComplete {
-        case Failure(error) => throw error
+        case Failure(e) => logger.error(s"Unable to send SMS message to ${msisdn}", e)
         case Success(s) =>
       }
 

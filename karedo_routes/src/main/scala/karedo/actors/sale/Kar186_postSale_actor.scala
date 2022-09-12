@@ -43,7 +43,7 @@ trait Kar186_postSale_actor
           val app_karedos = karedos_to_appKaredos(sale.karedos)
           val sender_id = accountId
           val userProfile = dbUserProfile.find(sender_id).get
-          val sender_name = s"${userProfile.last_name}, ${userProfile.first_name}"
+          val sender_name = s"${userProfile.last_name.get}, ${userProfile.first_name.get}"
           val sender_msisdn = dbUserAccount.find(accountId).get.findActiveMobile.get.msisdn
 
           if(sale.sale_type != TRANS_TYPE_SEND_RECEIVE || sale.status != TRANS_STATUS_OPEN )

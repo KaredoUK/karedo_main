@@ -6,6 +6,7 @@ scalaVersion := "2.11.8"
 
 resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases/"
 resolvers += Resolver.mavenLocal
+resolvers += "jitpack.io" at "https://jitpack.io"
 
 lazy val root = Project("routes", file(".")).enablePlugins(SbtTwirl)
 
@@ -36,7 +37,8 @@ libraryDependencies ++= {
     "org.specs2" %% "specs2-junit" % "3.8.5.1" % "test",
     "junit" % "junit" % "4.8.1" % "test",
     "com.google.zxing" % "core" % zxingV,
-    "com.google.zxing" % "javase" % zxingV
+    "com.google.zxing" % "javase" % zxingV,
+    "com.github.kenglxn.qrgen" % "javase" % "2.2.0"
   )
 }
 

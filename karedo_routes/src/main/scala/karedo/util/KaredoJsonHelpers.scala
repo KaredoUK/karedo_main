@@ -54,7 +54,7 @@ trait KaredoJsonHelpers
 
   implicit val jsonUserProfile = jsonFormat13(UserProfile)
 
-  case class Kar189ReqProfile(gender:Option[String], first_name:String, last_name: String,
+  case class Kar189ReqProfile(gender:Option[String], first_name:Option[String], last_name: Option[String],
                               yob: Option[Int], kids: Option[Int], income: Option[Int], postcode: Option[String], location: Option[Boolean],
                               opt_in: Option[Boolean], third_party: Option[Boolean])
   case class Kar189Req(application_id: String, session_id: String, profile: Kar189ReqProfile )
@@ -134,6 +134,15 @@ trait KaredoJsonHelpers
 
   case class Kar147_Resend(application_id: String, msisdn: String)
   implicit val jsonKar147_Resend = jsonFormat2(Kar147_Resend)
+
+  case class Kar147_ResetEmail(application_id: String, email: String)
+  implicit val jsonKar147_ResetEmail = jsonFormat2(Kar147_ResetEmail)
+
+  case class Kar147_ValidateEmail_Request(application_id: String, account_id: String, session_id: String, email: String)
+  implicit val jsonKar147_ValidateEmail_Request = jsonFormat4(Kar147_ValidateEmail_Request)
+
+  case class Kar147_ValidateEmail_Res(valid: Boolean)
+  implicit val jsonKar147_ValidateEmail_Res = jsonFormat1(Kar147_ValidateEmail_Res)
 
   case class UrlCodeAndAccountHash(url_code: String, account_hash: String)
 }

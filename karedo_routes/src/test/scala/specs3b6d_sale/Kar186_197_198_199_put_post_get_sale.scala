@@ -55,7 +55,7 @@ class Kar186_197_198_199_put_post_get_sale extends AllTests {
       mobile = List(Mobile(s_msisdn, Some("CODE"), true, now, Some(now)))))
     dbUserSession.insertNew(UserSession(s_sessId, s_acctId, ts_created = now))
     dbUserKaredos.insertNew(UserKaredos(s_acctId, 20000 * APP_KAREDO_CONV))
-    dbUserProfile.insertNew(UserProfile(s_acctId, Some("F"), s_f_name, s_l_name ))
+    dbUserProfile.insertNew(UserProfile(s_acctId, Some("F"), Some(s_f_name), Some(s_l_name) ))
     dbUserMobile.insertNew(UserMobile(s_msisdn, s_acctId, true, now))
 
     // Set up working receiver account.
@@ -64,7 +64,7 @@ class Kar186_197_198_199_put_post_get_sale extends AllTests {
       mobile = List(Mobile(r_msisdn, Some("CODE"), true, now, Some(now)))))
     dbUserSession.insertNew(UserSession(r_sessId, r_acctId, ts_created = now))
     dbUserKaredos.insertNew(UserKaredos(r_acctId, 20000 * APP_KAREDO_CONV))
-    dbUserProfile.insertNew(UserProfile(r_acctId, Some("F"), r_f_name, r_l_name ))
+    dbUserProfile.insertNew(UserProfile(r_acctId, Some("F"), Some(r_f_name), Some(r_l_name) ))
     dbUserMobile.insertNew(UserMobile(r_msisdn, r_acctId, true, now))
 
     TestSetup (s_acctId, s_appId, s_sessId, s_msisdn, s_name,

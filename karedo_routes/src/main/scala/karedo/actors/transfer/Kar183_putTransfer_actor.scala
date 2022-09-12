@@ -41,7 +41,7 @@ trait Kar183_putTransfer_actor
           val senderAccount = uAccount.get
           val senderProfile = dbUserProfile.find(senderAccount.id).get
           val sender_id = senderAccount.id
-          val sender_name = s"${senderProfile.last_name}, ${senderProfile.first_name}"
+          val sender_name = s"${senderProfile.last_name.get}, ${senderProfile.first_name.get}"
           val sender_msisdn = senderAccount.findActiveMobile.get.msisdn
 
           // IF we got till here. Sender account exists.
@@ -77,7 +77,7 @@ trait Kar183_putTransfer_actor
 
               moveKaredosBetweenAccounts(sender_id, receiver_id, Some(karedos),
                 s"Tranfer setup from ${sender_id} to ${receiver_id} for ${karedos} Karedos") match {
-                case KO(error) => throw error
+                case KO(e) => logger.error(s"Unable to Tranfer setup from ${sender_id} to ${receiver_id} for ${karedos} Karedos", e)
                 case OK(_) =>
               }
 

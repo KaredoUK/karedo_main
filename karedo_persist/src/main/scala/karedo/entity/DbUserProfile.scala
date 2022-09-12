@@ -15,8 +15,8 @@ case class UserProfile
   // id is the same as AccountId
   @Key("_id") id: String = UUID.randomUUID().toString
   , gender: Option[String] = None
-  , first_name: String = ""
-  , last_name: String = ""
+  , first_name: Option[String] = Some("")
+  , last_name: Option[String] = Some("")
   , yob: Option[Int] = None
   , kids: Option[Int] = None
   , income: Option[Int] = None

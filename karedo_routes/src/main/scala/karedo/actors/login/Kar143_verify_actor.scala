@@ -65,7 +65,7 @@ trait Kar143_verify_actor
       }
     } match {
       case Success(s) => s
-      case Failure(f) => OK(APIResponse(s"Verification Failed. Somethiing went wrong. ${f.toString}", HTTP_OK_200, MIME_TEXT))
+      case Failure(f) => OK(APIResponse(s"Verification Failed. Something went wrong. ${f.toString}", HTTP_OK_200, MIME_TEXT))
     }
   }
 }

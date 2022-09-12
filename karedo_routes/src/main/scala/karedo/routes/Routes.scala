@@ -43,13 +43,14 @@ trait Routes
       Kar169_getIntent.route ~ Kar170_postIntent.route ~ Kar171_putIntent.route ~ Kar172_deleteIntent.route ~
     // login
       Kar138_Login.route ~ Kar141_SendCode.route ~ Kar143_verify.route ~ Kar145_EnterCode.route ~ Kar147_Resend.route ~
+      Kar147_ResetEmail.route ~
     // profile
       Kar188_getProfile.route ~ Kar189_postProfile.route ~
     // prefs
       Kar194_getPrefs.route ~ Kar195_postPrefs.route ~
     // Sale
       Kar183_putTransfer.route ~ Kar197_putSale.route ~ Kar198_getSale.route ~ Kar186_postSale.route ~
-      Kar199_getSaleQR.route ~
+      Kar199_getSaleQR.route ~ Kar199_postSaleQR.route
     // Interaction et al
       Kar165_getFavourite.route ~ Kar166_interaction.route ~ Kar165_postFavourite.route ~
       Kar167_share_data.route ~

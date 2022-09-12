@@ -73,7 +73,7 @@ trait Kar145_EnterCode_actor
                 dbSale.update(sale.copy(receiver_id = account_id, status = TRANS_STATUS_COMPLETE,
                   ts_updated = now, ts_completed = Some(now)))
 
-                sendSMS(sale.sender_msisdn, s"Success. Transfer of ${sale.karedos} Karedos to ${account_id} Completed.")
+                sendSMS(sale.sender_msisdn, s"Success. Transfer of ${sale.karedos} Karedos to ${msisdn} Completed.")
                 sendSMS(msisdn, s"Success. Transfer of ${sale.karedos} Karedos from ${sale.sender_id} (${sale.sender_name}) Completed.")
               })
             }
