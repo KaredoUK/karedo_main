@@ -1,4 +1,4 @@
-package specs4_login
+package test.specs4_login
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import common.AllTests

@@ -10,10 +10,10 @@ import org.specs2.mutable.Specification
 trait MongoTestUtils extends Configurable {
   self: Specification  =>
   def beOK[T]: AnyRef with Matcher[AnyRef] = {
-    beAnInstanceOf[OK[Any, T]]
+    beAnInstanceOf[OK[T]]
   }
   def beKO[T]: AnyRef with Matcher[AnyRef] = {
-    beAnInstanceOf[KO[String, Any]]
+    beAnInstanceOf[KO[String]]
   }
   DbMongoDAO.tablePrefix = "TestPersist_"
   implicit def stringWrapper(u: UUID) = u.toString

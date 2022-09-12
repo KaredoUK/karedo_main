@@ -16,7 +16,7 @@ class DbUserProfileSpec
       with MongoTestUtils {
 
     val test = new DbUserProfile {}
-    test.deleteAll()
+    //test.deleteAll()
 
     sequential
 

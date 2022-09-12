@@ -31,7 +31,7 @@ class DbUserAccountSpec
 
 
 
-  accountDAO.deleteAll()
+  //accountDAO.deleteAll()
 
 
   "UserAccountMongoDAO" should {

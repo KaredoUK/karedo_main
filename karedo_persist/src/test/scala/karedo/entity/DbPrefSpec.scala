@@ -18,7 +18,7 @@ class DbPrefSpec
 
 
 
-  prefDAO.deleteAll()
+  //prefDAO.deleteAll()
 
 
   "prefDAO" should {

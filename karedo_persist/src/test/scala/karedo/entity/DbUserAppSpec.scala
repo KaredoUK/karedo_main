@@ -2,7 +2,7 @@ package karedo.entity
 
 import java.util.UUID
 
-import karedo.util.{KO, OK}
+import karedo.util.{KO, OK, Util}
 import org.specs2.matcher.EitherMatchers
 import org.specs2.mutable.Specification
 import utils.MongoTestUtils
@@ -16,13 +16,13 @@ class DbUserAppSpec
       with MongoTestUtils {
 
     val test = new DbUserApp {}
-    test.deleteAll()
+    //test.deleteAll()
 
     sequential
 
     "userapp should insert " in {
       val acctId = UUID.randomUUID()
-      val appId = "app1"
+      val appId = Util.newMD5
       val r = UserApp(appId, acctId, mobile_linked = false, email_linked = true)
       test.insertNew(r) must beOK
       val updated = r.copy(mobile_linked = true)

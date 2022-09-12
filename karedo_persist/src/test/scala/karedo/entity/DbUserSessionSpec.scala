@@ -16,7 +16,7 @@ class DbUserSessionSpec
       with MongoTestUtils {
 
     val test = new DbUserSession {}
-    test.deleteAll()
+    //test.deleteAll()
 
     sequential
 

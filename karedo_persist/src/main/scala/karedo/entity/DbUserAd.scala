@@ -41,7 +41,7 @@ trait DbUserAd extends DbMongoDAO[String, UserAd] {
       ))
     }
 
-    deleteAll()
+    //deleteAll()
     for (i <- 1 to 100) add(i)
     100
 

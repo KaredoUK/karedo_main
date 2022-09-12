@@ -1,4 +1,4 @@
-package specs2a1_ads
+package test.specs2a1_ads
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import common.AllTests

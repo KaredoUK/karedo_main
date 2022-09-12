@@ -2,7 +2,7 @@ package karedo.entity
 
 import java.util.UUID
 
-import karedo.util.{KO, OK}
+import karedo.util.{KO, OK, Util}
 import org.specs2.matcher.EitherMatchers
 import org.specs2.mutable.Specification
 import utils.MongoTestUtils
@@ -16,12 +16,12 @@ class DbUserMobileSpec
       with MongoTestUtils {
 
     val test = new DbUserMobile {}
-    test.deleteAll()
+    //test.deleteAll()
 
     sequential
 
     "userMobile should insert " in {
-      val mobile = "12345678"
+      val mobile = Util.newMD5
       val acctId = UUID.randomUUID()
       val r = UserMobile(mobile, acctId, active = false)
       test.insertNew(r) must beOK

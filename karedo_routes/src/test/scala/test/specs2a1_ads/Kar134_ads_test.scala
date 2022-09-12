@@ -1,6 +1,7 @@
-package specs2a1_ads
+package test.specs2a1_ads
 
 import common.AllTests
+import karedo.entity.{UserAccount, UserApp}
 import karedo.rtb.model.AdModel.AdResponse
 import karedo.util.Util
 import org.junit.runner.RunWith
@@ -12,10 +13,17 @@ import org.scalatest.junit.{JUnit3Suite, JUnitRunner}
   */
 @RunWith(classOf[JUnitRunner])
 class Kar134_ads_test extends AllTests {
+  val presetAppId = Util.newMD5
+  val presetAccount = Util.newUUID
+
+  dbUserAccount.insertNew(UserAccount(presetAccount))
+  dbUserApp.insertNew(UserApp(presetAppId,presetAccount))
+
   "Kar134_ads" should {
 
 
     val newApp=Util.newMD5
+    var currentAccountId = ""
 
     "* create a new account with anonymous access first time /account/0/ads" in {
       // this is also creating an application associated with a dummy user

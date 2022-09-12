@@ -1,8 +1,8 @@
-package specs6_intent
+package test.specs6_intent
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import common.AllTests
-import karedo.entity.UserIntent
+import karedo.entity.{UserAccount, UserApp, UserIntent}
 import karedo.util.Util
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -13,6 +13,11 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class Kar169_getIntent_test extends AllTests {
 
+  val presetAppId = Util.newMD5
+  val presetAccount = Util.newUUID
+
+  dbUserAccount.insertNew(UserAccount(presetAccount))
+  dbUserApp.insertNew(UserApp(presetAppId,presetAccount))
   val uuids:Array[String] = Array(getNewRandomID, getNewRandomID, getNewRandomID)
 
 
