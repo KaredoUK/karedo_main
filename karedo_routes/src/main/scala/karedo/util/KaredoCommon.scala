@@ -283,7 +283,7 @@ trait KaredoUtils
         case OK(_) => OK(url_code)
         case KO(_) => KO(url_code)
       }
-      case OK(_) => KO(url_code)
+      case OK(_) => OK(url_code)
     }
   }
 

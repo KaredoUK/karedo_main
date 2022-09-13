@@ -68,7 +68,9 @@ trait Kar167_share_data_actor extends DbCollections
             case KO(h) => h
           }
 
-          val outChannels = request.share.channels.getOrElse(List()).map(c => {
+          val reqChannels = request.share.channels.getOrElse(List())
+
+          val outChannels = reqChannels.map(c => {
             c.channel match {
               case SOCIAL_EMAIL => {
                 val email_imp_url_code = storeUrlMagic(request.share.imp_url, None) match {
@@ -83,13 +85,19 @@ trait Kar167_share_data_actor extends DbCollections
                 }
                 val email_click_url = s"${url_magic_share_base}/shr?u=${email_click_url_code}&v=${account_hash}"
 
-                val email = dbUserAccount.findActiveEmail(accountId).get.address
+                dbUserAccount.findActiveEmail(accountId) match {
+                  case OK(email) if email != null => {
+                    val email_share_data = "<html><head><title>Shared from Karedo</title></head><body><p>" +
+                      request.share.ad_text.getOrElse("Shared from Karedo") + "<p><a href\"" + email_imp_url +
+                      "\"><img src=\"" + email_click_url + "\"></a></body></html>"
 
-                val email_share_data = "<html><body><a href\"" + email_imp_url + "\"><img src=\"" + email_click_url + "\"></a></body></html>"
+                    sendEmail(email.address, "Shared from Karedo", email_share_data)
 
-                sendEmail(email, "Shared from Karedo", email_share_data)
+                    c.copy(share_data = Some(email_share_data), share_url = Some(email_click_url))
+                  }
+                  case _ => c
+                }
 
-                c.copy(share_data = Some(email_share_data), share_url = Some(email_click_url))
               }
               case _ => {
                 val url_code = storeUrlMagic(request.share.imp_url, Some(request.share.click_url)) match {
@@ -101,7 +109,8 @@ trait Kar167_share_data_actor extends DbCollections
 
                 val social_share_data = request.share.ad_text.getOrElse("Shared from Karedo")
 
-                c.copy(share_data = Some(social_share_data), share_url = Some(share_url))              }
+                c.copy(share_data = Some(social_share_data), share_url = Some(share_url))
+              }
             }
           })
 

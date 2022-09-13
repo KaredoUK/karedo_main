@@ -6,6 +6,8 @@ version := "0.0.2-SNAPSHOT"
 
 scalaVersion := "2.11.8"
 
+jacoco.settings
+
 lazy val root = project.in(file(".")).aggregate(db,rtb,routes)
 
 lazy val db = project.in(file("karedo_persist"))

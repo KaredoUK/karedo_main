@@ -30,12 +30,13 @@ sealed trait UserAccountDefs {
 
   def findActiveMobile: Result[String, Mobile] = {
     Try {
-      mobile.filter(_.valid).foldLeft[Mobile](null)((c, z) => {
-        if (c == null) z // First time.
-        else {
-          if (c.ts_validated.get.compareTo(z.ts_validated.get) > 0) c else z
-        }
-      })
+      mobile.filter(_.valid).reduce((c,z) => if (c.ts_validated.get.compareTo(z.ts_validated.get) > 0) c else z )
+//        .foldLeft[Mobile](null)((c, z) => {
+//        if (c == null) z // First time.
+//        else {
+//          if (c.ts_validated.get.compareTo(z.ts_validated.get) > 0) c else z
+//        }
+//      })
     } match {
       case Success(x) => OK(x)
       case Failure(error) => KO(error.toString)
@@ -44,12 +45,13 @@ sealed trait UserAccountDefs {
 
   def findActiveEmail: Result[String, Email] = {
     Try {
-      email.filter(_.valid).foldLeft[Email](null)((c, z) => {
-        if (c == null) z // First time.
-        else {
-          if (c.ts_validated.get.compareTo(z.ts_validated.get) > 0) c else z
-        }
-      })
+      email.filter(_.valid).reduce((c,z) => if (c.ts_validated.get.compareTo(z.ts_validated.get) > 0) c else z )
+//        List().foldLeft[Email](null)((c, z) => {
+//        if (c == null) z // First time.
+//        else {
+//          if (c.ts_validated.get.compareTo(z.ts_validated.get) > 0) c else z
+//        }
+//      })
     } match {
       case Success(x) => OK(x)
       case Failure(error) => KO(error.toString)
