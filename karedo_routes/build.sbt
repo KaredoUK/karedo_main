@@ -57,6 +57,6 @@ scalacOptions ++= Seq(
 
 parallelExecution in Test := false
 
-//test in assembly := {}
+test in assembly := {}
 
 
