@@ -50,7 +50,7 @@ trait KaredoRoute extends KaredoJsonHelpers with KaredoConstants  {
                 case MIME_TEXT => HttpEntity(ContentTypes.`text/plain(UTF-8)`, err)
                 case MIME_HTML => HttpEntity(ContentTypes.`text/html(UTF-8)`, err)
                 case MIME_JSON => HttpEntity(ContentTypes.`application/json`, ErrorRes(code, None, err).toJson.toString)
-                case _ => HttpEntity(ContentTypes.`application/json`, err)
+                case _ => HttpEntity(ContentTypes.`application/json`, ErrorRes(code, None, err).toJson.toString)
               }
 
               HttpResponse(code, entity = entity, headers = headers)
