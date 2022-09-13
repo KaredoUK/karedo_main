@@ -330,7 +330,7 @@ trait KaredoQRCode extends KaredoConstants {
       qrFile.createNewFile()
       MatrixToImageWriter.writeToPath(qr_bitMatrix, "png", qrFile.toPath(), new MatrixToImageConfig())
 
-      OK(qr_base_img_url + File.separator + text + ".png")
+      OK(baseUrl + File.separator + text + ".png")
     } catch {
       case ex: Exception => {
         logger.error("Couldn't create QR Code", ex)
