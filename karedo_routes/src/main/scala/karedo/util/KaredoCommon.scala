@@ -97,7 +97,7 @@ trait KaredoConstants extends Configurable {
   val GET_TERM = "TERMS"
   val GET_ABOUT = "ABOUT"
 
-  val QR_SIZE = 450
+  val QR_SIZE = 300
 
   val notification_base_url = conf.getString("notification.base.url")
   val notification_bcc_list = conf.getString("notification.bcc.list")
