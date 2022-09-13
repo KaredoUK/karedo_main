@@ -18,13 +18,13 @@ cd karedo_persist
 sbt clean compile publish-local
 
 cd ../karedo_rtb
+sbt clean compile publish-local
 
+cd ../karedo_routes
 sbt clean compile publish-local
 
 cd ..
 
-sbt clean
-sbt compile publish-local
 sbt routes:assembly
 
 nohup java -jar karedo_routes/target/scala-2.11/routes-assembly-0.0.2-SNAPSHOT.jar &
