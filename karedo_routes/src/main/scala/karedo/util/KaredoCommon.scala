@@ -97,6 +97,8 @@ trait KaredoConstants extends Configurable {
   val GET_TERM = "TERMS"
   val GET_ABOUT = "ABOUT"
 
+  val QR_SIZE = 450
+
   val notification_base_url = conf.getString("notification.base.url")
   val notification_bcc_list = conf.getString("notification.bcc.list")
 
@@ -324,7 +326,7 @@ trait KaredoQRCode extends KaredoConstants {
       hints += (EncodeHintType.ERROR_CORRECTION -> ErrorCorrectionLevel.H)
       hints += (EncodeHintType.CHARACTER_SET -> "utf-8")
 
-      val qr_bitMatrix = qrw.encode(text, BarcodeFormat.QR_CODE, 250, 250, hints.asJava)
+      val qr_bitMatrix = qrw.encode(text, BarcodeFormat.QR_CODE, QR_SIZE, QR_SIZE, hints.asJava)
 
       val qrFile = new File(basePath + File.separator + text + ".png")
       qrFile.createNewFile()
