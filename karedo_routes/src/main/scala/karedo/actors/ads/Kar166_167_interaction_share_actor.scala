@@ -50,7 +50,8 @@ trait Kar166_interaction_actor extends DbCollections
 
 trait Kar167_share_data_actor extends DbCollections
   with KaredoAuthentication
-  with KaredoJsonHelpers {
+  with KaredoJsonHelpers
+  with KaredoUtils {
   override val logger = LoggerFactory.getLogger(classOf[Kar167_share_data_actor])
 
   def exec(accountId: String, deviceId: Option[String], request: Kar167Request): Result[Error, APIResponse] = {
@@ -61,28 +62,47 @@ trait Kar167_share_data_actor extends DbCollections
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
 
         Try[Result[Error, APIResponse]] {
-          val url_code = storeUrlMagic(request.share.imp_url, Some(request.share.click_url)) match {
-            case OK(u) => u
-            case KO(u) => u
-          }
 
           val account_hash = storeAccountHash(accountId) match {
             case OK(h) => h
             case KO(h) => h
           }
 
-          val share_url = s"${url_magic_share_base}/shr?u=${url_code}&v=${account_hash}"
-
-          val social_share_data = "Karedo Social"
-          val email_share_date = "Karedo Email"
-
           val outChannels = request.share.channels.getOrElse(List()).map(c => {
-            val share_data = c.channel match {
-              case SOCIAL_EMAIL => email_share_date
-              case _ => social_share_data
-            }
+            c.channel match {
+              case SOCIAL_EMAIL => {
+                val email_imp_url_code = storeUrlMagic(request.share.imp_url, None) match {
+                  case OK(u) => u
+                  case KO(u) => u
+                }
+                val email_imp_url = s"${url_magic_share_base}/shr?u=${email_imp_url_code}&v=${account_hash}"
 
-            c.copy(share_data = Some(share_data), share_url = Some(share_url))
+                val email_click_url_code = storeUrlMagic(request.share.click_url, None) match {
+                  case OK(u) => u
+                  case KO(u) => u
+                }
+                val email_click_url = s"${url_magic_share_base}/shr?u=${email_click_url_code}&v=${account_hash}"
+
+                val email = dbUserAccount.findActiveEmail(accountId).get.address
+
+                val email_share_data = "<html><body><a href\"" + email_imp_url + "\"><img src=\"" + email_click_url + "\"></a></body></html>"
+
+                sendEmail(email, "Shared from Karedo", email_share_data)
+
+                c.copy(share_data = Some(email_share_data), share_url = Some(email_click_url))
+              }
+              case _ => {
+                val url_code = storeUrlMagic(request.share.imp_url, Some(request.share.click_url)) match {
+                  case OK(u) => u
+                  case KO(u) => u
+                }
+
+                val share_url = s"${url_magic_share_base}/shr?u=${url_code}&v=${account_hash}"
+
+                val social_share_data = request.share.ad_text.getOrElse("Shared from Karedo")
+
+                c.copy(share_data = Some(social_share_data), share_url = Some(share_url))              }
+            }
           })
 
           dbUserShare.insertNew(UserInteraction(account_id = accountId, interaction = request.share.copy(channels = Some(outChannels))))
@@ -96,6 +116,8 @@ trait Kar167_share_data_actor extends DbCollections
     )
   }
 }
+
+
 
 trait Kar165_postFavourite_actor extends DbCollections
   with KaredoAuthentication

@@ -38,12 +38,12 @@ trait Routes
 
   override val routes = cors {
     // Ads
-    Kar134_ads.route ~ Kar135_points.route ~ Kar136_messages.route ~ Kar166_interaction.route ~
+    Kar134_ads.route ~ Kar135_points.route ~ Kar136_messages.route ~
     // intent
       Kar169_getIntent.route ~ Kar170_postIntent.route ~ Kar171_putIntent.route ~ Kar172_deleteIntent.route ~
     // login
       Kar138_Login.route ~ Kar141_SendCode.route ~ Kar143_verify.route ~ Kar145_EnterCode.route ~ Kar147_Resend.route ~
-      Kar147_ResetEmail.route ~
+      Kar147_ResetEmail.route ~ Kar147_ValidateEmail.route ~
     // profile
       Kar188_getProfile.route ~ Kar189_postProfile.route ~
     // prefs
