@@ -6,7 +6,7 @@ version := "0.0.2-SNAPSHOT"
 
 scalaVersion in ThisBuild := "2.11.8"
 
-coverageEnabled := false
+coverageEnabled := true
 
 lazy val root = project.in(file(".")).aggregate(db,rtb,routes)
 

@@ -62,7 +62,7 @@ scalacOptions ++= Seq(
 parallelExecution in Test := false
 //parallelExecution in jacoco.Config := false
 
-coverageEnabled := false
+coverageEnabled := true
 test in assembly := {}
 
 
