@@ -49,15 +49,16 @@ trait Kar143_verify_actor
 
         dbUserEmail.find(email) match {
           case OK(userEmail) => {
-            if( userEmail.account_id == account_id) OK(APIResponse("Verfication Successful. Welcome to Karedo", HTTP_OK_200, MIME_TEXT, headers = List(Cookie(HttpCookiePair(COOKIE_ACCOUNT, account_id)))))
-            else OK(APIResponse(s"Verification failed. Email $email already registered another account", HTTP_OK_200, MIME_TEXT, headers = List(Cookie(HttpCookiePair(COOKIE_ACCOUNT, account_id)))))
+            if( userEmail.account_id == account_id) OK(APIResponse(welcome.html.email_verify_success.render().toString,
+              HTTP_OK_200, MIME_HTML, headers = List(Cookie(HttpCookiePair(COOKIE_ACCOUNT, account_id)))))
+            else OK(APIResponse(welcome.html.email_verify_failure.render(email).toString, HTTP_OK_200, MIME_HTML, headers = List(Cookie(HttpCookiePair(COOKIE_ACCOUNT, account_id)))))
           }
           case KO(_) => {
             dbUserEmail.insertNew(UserEmail(email, account_id, true, now, now))
 
             dbUserApp.update(userApp.copy(email_linked = true, ts = now))
 
-            OK(APIResponse("Verfication Successful. Welcome to Karedo", HTTP_OK_200, MIME_TEXT, headers = List(Cookie(HttpCookiePair(COOKIE_ACCOUNT, account_id)))))
+            OK(APIResponse(welcome.html.email_verify_success.render().toString, HTTP_OK_200, MIME_HTML, headers = List(Cookie(HttpCookiePair(COOKIE_ACCOUNT, account_id)))))
           }
         }
       } else {
@@ -65,7 +66,7 @@ trait Kar143_verify_actor
       }
     } match {
       case Success(s) => s
-      case Failure(f) => OK(APIResponse(s"Verification Failed. Something went wrong. ${f.toString}", HTTP_OK_200, MIME_TEXT))
+      case Failure(f) => OK(APIResponse(welcome.html.email_verify_error.render(f.toString).toString, HTTP_OK_200, MIME_HTML))
     }
   }
 }

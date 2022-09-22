@@ -1,0 +1,2 @@
+@(sms_code: String)
+Welcome to Karedo

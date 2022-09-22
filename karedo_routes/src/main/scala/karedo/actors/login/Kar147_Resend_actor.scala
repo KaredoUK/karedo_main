@@ -40,7 +40,7 @@ trait Kar147_Resend_actor
                    dbUserAccount.update(userAccount.copy(mobile = List(mobile)
                      ++ userAccount.mobile.filter(x => x.msisdn != msisdn)))
 
-                   val sms_text = s"Welcome to Karedo. You're on your way to gaining from your attention. Code is [$sms_code]. Start the Karedo App to activate it"
+                   val sms_text = welcome.txt.sms_verify.render(sms_code).toString
                    sendSMS(msisdn, sms_text)
 
                    OK(APIResponse("", HTTP_OK_200))

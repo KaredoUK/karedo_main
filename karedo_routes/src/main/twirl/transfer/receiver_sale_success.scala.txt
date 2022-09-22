@@ -1,0 +1,3 @@
+@* Activated by Kar186_postSale_actor and Kar183_putTransfer_actor  *@
+@(app_karedos: Long, sender_msisdn: String, sender_name: String )
+Transaction Complete. Received @app_karedos Karedos to @sender_msisdn (@sender_name).

@@ -73,8 +73,10 @@ trait Kar145_EnterCode_actor
                 dbSale.update(sale.copy(receiver_id = account_id, status = TRANS_STATUS_COMPLETE,
                   ts_updated = now, ts_completed = Some(now)))
 
-                sendSMS(sale.sender_msisdn, s"Success. Transfer of ${sale.karedos} Karedos to ${msisdn} Completed.")
-                sendSMS(msisdn, s"Success. Transfer of ${sale.karedos} Karedos from ${sale.sender_id} (${sale.sender_name}) Completed.")
+                val app_karedos = karedos_to_appKaredos(sale.karedos)
+
+                sendSMS(sale.sender_msisdn, transfer.txt.sender_transfer_success.render(app_karedos, msisdn).toString)
+                sendSMS(msisdn, transfer.txt.receiver_transfer_success.render(app_karedos, sale.sender_msisdn, sale.sender_name ).toString)
               })
             }
 

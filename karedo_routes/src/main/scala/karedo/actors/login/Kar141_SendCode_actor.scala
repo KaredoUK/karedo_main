@@ -301,7 +301,8 @@ trait Kar141_SendCode_actor
       val email_verify_url = s"${notification_base_url}/verify?e=${email}&c=${email_code}&v=${verify_id}"
 
       val email_subject = "Welcome to Karedo"
-      val email_body = s"Welcome to Karedo. \nYou're on your way to gaining from your attention. Click on [$email_verify_url] to verify your email"
+      val email_body = welcome.html.email_verify.render(email_verify_url).toString
+        //s"Welcome to Karedo. \nYou're on your way to gaining from your attention. Click on [$email_verify_url] to verify your email"
       sendEmail(email, email_subject, email_body) onComplete {
         case Failure(e) => logger.error(s"Unable to send Email message to ${email}", e)
         case Success(s) =>
@@ -341,7 +342,7 @@ trait Kar141_SendCode_actor
 
       val msisdns = userAccount.mobile
 
-      val sms_text = s"Welcome to Karedo. You're on your way to gaining from your attention. Code is [$sms_code]. Start the Karedo App to activate it"
+      val sms_text = welcome.txt.sms_verify.render(sms_code).toString
       sendSMS(msisdn, sms_text) onComplete {
         case Failure(e) => logger.error(s"Unable to send SMS message to ${msisdn}", e)
         case Success(s) =>

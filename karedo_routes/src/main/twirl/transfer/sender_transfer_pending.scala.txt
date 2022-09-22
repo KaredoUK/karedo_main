@@ -1,0 +1,3 @@
+@* Activated by Kar183_putTransfer_actor when pending Transfers are completed *@
+@(app_karedos: Long, receiver_msisdn: String, receiver_name: String )
+@receiver_msisdn (@receiver_name) is not yet a member of Karedo. Transfer of @app_karedos Karedos will complete after they sign up.

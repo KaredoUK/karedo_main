@@ -4,13 +4,12 @@ version := "0.0.2-SNAPSHOT"
 
 scalaVersion := "2.11.8"
 
-jacoco.settings
+// jacoco.settings
 
 resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases/"
 resolvers += Resolver.mavenLocal
 resolvers += "jitpack.io" at "https://jitpack.io"
 
-lazy val root = Project("routes", file(".")).enablePlugins(SbtTwirl)
 
 libraryDependencies ++= {
   val akkaV = "2.4.11"
@@ -44,7 +43,10 @@ libraryDependencies ++= {
   )
 }
 
-sourceDirectories in (Compile, TwirlKeys.compileTemplates) := (unmanagedSourceDirectories in Compile).value
+// Setting up Twirl
+//lazy val root = (project in file(".")).enablePlugins(SbtTwirl)
+SbtTwirl.projectSettings
+//sourceDirectories in (Compile, TwirlKeys.compileTemplates) := (unmanagedSourceDirectories in Compile).value
 
 scalacOptions ++= Seq(
   "-unchecked",
@@ -58,10 +60,9 @@ scalacOptions ++= Seq(
 )
 
 parallelExecution in Test := false
-parallelExecution in jacoco.Config := false
+//parallelExecution in jacoco.Config := false
 
-coverageEnabled := true
-
+coverageEnabled := false
 test in assembly := {}
 
 

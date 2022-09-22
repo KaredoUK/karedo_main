@@ -4,7 +4,7 @@ version := "0.0.2-SNAPSHOT"
 
 scalaVersion := "2.11.8"
 
-jacoco.settings
+coverageEnabled := false
 
 resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases/"
 resolvers += Resolver.mavenLocal

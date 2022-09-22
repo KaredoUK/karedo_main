@@ -4,9 +4,9 @@ name := "karedo"
 
 version := "0.0.2-SNAPSHOT"
 
-scalaVersion := "2.11.8"
+scalaVersion in ThisBuild := "2.11.8"
 
-jacoco.settings
+coverageEnabled := false
 
 lazy val root = project.in(file(".")).aggregate(db,rtb,routes)
 

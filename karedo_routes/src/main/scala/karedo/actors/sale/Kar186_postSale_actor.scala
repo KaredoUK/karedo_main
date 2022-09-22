@@ -60,8 +60,8 @@ trait Kar186_postSale_actor
             val receiver_msisdn = sale.receiver_msisdn
             val receiver_name = sale.receiver_name
 
-            sendSMS(sender_msisdn, s"Transaction Complete. Sent ${app_karedos} Karedos to ${receiver_msisdn} (${receiver_name}).")
-            sendSMS(receiver_msisdn, s"Transaction Complete. Received ${app_karedos} Karedos from ${sender_msisdn} (${sender_name}).")
+            sendSMS(sender_msisdn, transfer.txt.sender_sale_success.render(app_karedos, receiver_msisdn, receiver_name).toString)
+            sendSMS(receiver_msisdn, transfer.txt.receiver_sale_success.render(app_karedos, sender_msisdn, sender_name).toString)
 
             OK(APIResponse("", HTTP_OK_200))
           }

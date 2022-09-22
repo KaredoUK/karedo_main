@@ -85,8 +85,8 @@ trait Kar183_putTransfer_actor
 
               dbSale.update(completeSale)
 
-              sendSMS(sender_msisdn, s"Success. Transfer of ${request.app_karedos} Karedos to ${receiver_msisdn} (${receiver_name}) Completed.")
-              sendSMS(receiver_msisdn, s"Success. Transfer of ${request.app_karedos} Karedos from ${sender_msisdn} (${sender_name}) Completed.")
+              sendSMS(sender_msisdn, transfer.txt.sender_sale_success.render(request.app_karedos, receiver_msisdn, receiver_name).toString )
+              sendSMS(receiver_msisdn, transfer.txt.receiver_sale_success.render(request.app_karedos, sender_msisdn, sender_name).toString )
 
               OK(APIResponse("", HTTP_OK_200))
             }
@@ -118,8 +118,8 @@ trait Kar183_putTransfer_actor
                 }
               }
 
-              sendSMS(sender_msisdn, s"${receiver_msisdn} (${receiver_name}) is not yet a member of Karedo. Transfer of ${request.app_karedos} Karedos will complete after they sign up")
-              sendSMS(receiver_msisdn, s"${sender_msisdn} (${sender_name}) has sent you ${request.app_karedos} Karedos. Please sign up for Karedo to receive it.")
+              sendSMS(sender_msisdn, transfer.txt.sender_transfer_pending.render(request.app_karedos, receiver_msisdn, receiver_name).toString)
+              sendSMS(receiver_msisdn, transfer.txt.receiver_transfer_pending.render(request.app_karedos, sender_msisdn, sender_name).toString)
 
               OK(APIResponse("", HTTP_OK_200))
             }
