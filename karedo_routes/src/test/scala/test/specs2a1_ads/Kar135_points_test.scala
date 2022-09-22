@@ -37,8 +37,9 @@ class Kar135_points_test extends AllTests {
     }
     "* get points as an invalid applicationId should fail with explanation " in {
       Get(s"/account/unknown/points?p=unknown") ~> routesWithLogging ~> check {
-        status.intValue() shouldEqual (500) // ?????
-        responseAs[String] should include regex("No record found in table .*UserAccount")
+        status.intValue() shouldEqual (HTTP_NOTFOUND_404) // ?????
+        val res = responseAs[ErrorRes]
+        res.error_code shouldEqual HTTP_NOTFOUND_404
       }
     }
 

@@ -18,6 +18,12 @@ trait KaredoJsonHelpers
   case class ErrorRes(error_code: Int, error_type: Option[String], error_text: String)
   implicit val jsonErrorRes = jsonFormat3(ErrorRes)
 
+  case class ErrorStack(stack: List[String])
+  implicit val jsonErrorStack = jsonFormat1(ErrorStack)
+
+  case class ErrorInfo(message:String, info: String)
+  implicit val jsonErrorInfo = jsonFormat2(ErrorInfo)
+
   implicit val jsonChannel = jsonFormat2(Channel)
   implicit val jsonBacon = jsonFormat1(entity.Beacon)
   implicit val jsonImage = jsonFormat5(ImageAd)

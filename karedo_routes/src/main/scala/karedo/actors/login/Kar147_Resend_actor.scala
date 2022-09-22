@@ -61,7 +61,7 @@ trait Kar147_Resend_actor
 
     } match {
       case Success(s) => s
-      case Failure(f) => MAKE_ERROR(f)
+      case Failure(f) => MAKE_THROWN_ERROR(f)
     }
   }
 }
@@ -124,7 +124,7 @@ trait Kar147_ResetEmail_actor
 
     } match {
       case Success(s) => s
-      case Failure(f) => MAKE_ERROR(f)
+      case Failure(f) => MAKE_THROWN_ERROR(f)
     }
   }
 }
@@ -158,7 +158,7 @@ trait Kar147_ValidateEmail_actor
           }
         } match {
           case Success(s) => s
-          case Failure(f) => MAKE_ERROR(f)
+          case Failure(f) => MAKE_THROWN_ERROR(f)
         }
       }
     )

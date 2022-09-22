@@ -54,7 +54,7 @@ trait Kar189_postProfile_actor
           }
         } match {
           case Success(s) => OK(APIResponse("", HTTP_OK_200))
-          case Failure(f) => MAKE_ERROR(f)
+          case Failure(f) => MAKE_THROWN_ERROR(f)
         }
       }
     )

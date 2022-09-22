@@ -4,6 +4,7 @@ import java.io.File
 import java.util.UUID
 import javax.imageio.ImageIO
 
+import akka.http.scaladsl.model.HttpHeader
 import com.google.zxing.client.j2se.{BufferedImageLuminanceSource, MatrixToImageConfig, MatrixToImageWriter}
 import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.{BarcodeFormat, BinaryBitmap, EncodeHintType}
@@ -150,9 +151,16 @@ trait KaredoUtils
   with KaredoJsonHelpers
 {
 
-  def MAKE_ERROR(error:String, text:String = "") = KO(Error(s"$text \n\t---> $error"))
+  def MAKE_ERROR(error:String, text:String = "", code: Int = 500, mime:String = "", headers:List[HttpHeader] = List()) = {
+    KO(Error(ErrorInfo(error, text).toJson.toString, code, mime, headers))
+  }
 
-  def MAKE_ERROR(error:Throwable) = KO(Error(error.getMessage + " >> " + error.getStackTrace.foldLeft[String]("")((z, x) => z + " -> " + x.toString ) ))
+  def MAKE_THROWN_ERROR(error:Throwable, code: Int = 500, mime:String = "", headers:List[HttpHeader] = List()) = {
+    val message = error.getMessage
+    val stack = error.getStackTrace.map(_.toString).toList
+
+    MAKE_ERROR(message, ErrorStack(stack).toJson.toString, code, mime, headers)
+  }
 
 
   def moveKaredosBetweenAccounts

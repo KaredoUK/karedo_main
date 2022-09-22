@@ -46,7 +46,7 @@ trait KaredoAuthentication extends KaredoConstants with KaredoUtils {
           }
           else KO(Error(s"Error ${uacct.err} while inserting new account"))
         }
-        else OK(APIResponse("Application not found", HTTP_NOTFOUND_404))
+        else OK(APIResponse("Application Not Registered", HTTP_NOTFOUND_404))
       }
 
 

@@ -55,7 +55,7 @@ trait Kar141_SendCode_actor
       }
     } match {
       case Success(s) => s
-      case Failure(f) => MAKE_ERROR(f)
+      case Failure(f) => MAKE_THROWN_ERROR(f)
     }
   }
 
@@ -104,19 +104,27 @@ trait Kar141_SendCode_actor
   def known_app_known_mobile_diff_mobile
   (userApp: UserApp, userMobile:UserMobile, email:String, name:(String, String)): Result[Error, APIResponse] = {
     if( ! userApp.mobile_linked) {
-      val tempUserAccount = dbUserAccount.find(userApp.account_id).get
+      // @TODO: Copy code from known_app_unknown_mobile_known_email()
+
       val realUserAccount = dbUserAccount.find(userMobile.account_id).get
 
       if (realUserAccount.temp) MAKE_ERROR(s"Real UserAccount is set to temp=true for accountId: ${userMobile.account_id}")
+      else {
+        realUserAccount.mobile.filter(x => x.msisdn == userMobile.id) match {
+          case Nil => MAKE_ERROR(s"Mobile ${userMobile.id} is not present in UserAccount accountId: ${userMobile.account_id}")
+          case h :: t if h.valid != true => MAKE_ERROR(s"Mobile ${userMobile.id} in UserAccount accountId: ${userMobile.account_id} is not validated.")
+          case _ => {
+            moveKaredosBetweenAccounts(userApp.account_id, userMobile.account_id, None,
+              s"From TEMP account ${userApp.account_id} to REAL account ${userMobile.account_id}")
 
-      moveKaredosBetweenAccounts(userApp.account_id, userMobile.account_id, None,
-        s"From TEMP account ${userApp.account_id} to REAL account ${userMobile.account_id}")
+            // Make the new link. Also set map_confirmed=true
+            val newUserApp = userApp.copy(account_id = userMobile.account_id, mobile_linked = true, ts = now)
+            dbUserApp.update(newUserApp)
 
-      // Make the new link. Also set map_confirmed=true
-      val newUserApp = userApp.copy(account_id = userApp.account_id, mobile_linked = true, ts = now)
-      dbUserApp.update(newUserApp)
-
-      get_account_update_profile_check_temp(userMobile.account_id, name)
+            get_account_update_profile_check_temp(userMobile.account_id, name)
+          }
+        }
+      }
     }
     else OK(
       APIResponse(
@@ -157,22 +165,31 @@ trait Kar141_SendCode_actor
 
         OK(APIResponse(Kar141_SendCode_Res(false, None).toJson.toString, HTTP_OK_200))
       } else {
-        val tempUserAccount = dbUserAccount.find(userApp.account_id).get
+        // @TODO: HOW DO WE KNOW THE UserAccount(UserApp) is Temp? SHouldn't we check.
+        // @TODO: I Guess if email and mobile not linked to the account. It can be migrated.
+
         val realUserAccount = dbUserAccount.find(userEmail.account_id).get
 
         if (realUserAccount.temp) MAKE_ERROR(s"Real UserAccount is set to temp=true for accountId: ${userEmail.account_id}")
+        else {
+          realUserAccount.email.filter(x => x.address == userEmail.id) match {
+            case Nil => MAKE_ERROR(s"Email ${userEmail.id} is not present in UserAccount accountId: ${userEmail.account_id}")
+            case h :: t if h.valid != true => MAKE_ERROR(s"Email ${userEmail.id} in UserAccount accountId: ${userEmail.account_id} is not validated.")
+            case _ => {
+              moveKaredosBetweenAccounts(userApp.account_id, userEmail.account_id, None,
+                s"From TEMP account ${userApp.account_id} to REAL account ${userEmail.account_id}")
 
-        moveKaredosBetweenAccounts(userApp.account_id, userEmail.account_id, None,
-          s"From TEMP account ${userApp.account_id} to REAL account ${userEmail.account_id}")
+              // Make the new link. Also set map_confirmed=true
+              val newUserApp = userApp.copy(account_id = userEmail.account_id, email_linked = true, ts = now)
 
-        // Make the new link. Also set map_confirmed=true
-        val newUserApp = userApp.copy(account_id = userApp.account_id, email_linked= true,  ts = now)
+              dbUserApp.update(newUserApp)
 
-        dbUserApp.update(newUserApp)
+              updateNameInProfile(realUserAccount.id, name)
 
-        updateNameInProfile(realUserAccount.id, name)
-
-        OK(APIResponse(Kar141_SendCode_Res(false, None).toJson.toString, HTTP_OK_200))
+              OK(APIResponse(Kar141_SendCode_Res(false, None).toJson.toString, HTTP_OK_200))
+            }
+          }
+        }
       }
     }
   }
@@ -314,7 +331,7 @@ trait Kar141_SendCode_actor
       }
     } match {
       case Success(s) => s
-      case Failure(f) => MAKE_ERROR(f)
+      case Failure(f) => MAKE_THROWN_ERROR(f)
     }
   }
 
@@ -354,7 +371,7 @@ trait Kar141_SendCode_actor
       }
     } match {
       case Success(s) => s
-      case Failure(f) => MAKE_ERROR(f)
+      case Failure(f) => MAKE_THROWN_ERROR(f)
     }
   }
 

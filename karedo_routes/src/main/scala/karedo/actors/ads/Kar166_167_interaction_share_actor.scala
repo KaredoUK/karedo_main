@@ -41,7 +41,7 @@ trait Kar166_interaction_actor extends DbCollections
           OK(APIResponse("", code))
         } match {
           case Success(s) => s
-          case Failure(f) => MAKE_ERROR(f)
+          case Failure(f) => MAKE_THROWN_ERROR(f)
         }
       }
     )
@@ -119,7 +119,7 @@ trait Kar167_share_data_actor extends DbCollections
           OK(APIResponse(Kar167Res(outChannels).toJson.toString, code))
         } match {
           case Success(s) => s
-          case Failure(f) => MAKE_ERROR(f)
+          case Failure(f) => MAKE_THROWN_ERROR(f)
         }
       }
     )
@@ -158,7 +158,7 @@ trait Kar165_postFavourite_actor extends DbCollections
           OK(APIResponse("", code))
         } match {
           case Success(s) => s
-          case Failure(f) => MAKE_ERROR(f)
+          case Failure(f) => MAKE_THROWN_ERROR(f)
         }
       }
     )
@@ -187,7 +187,7 @@ trait Kar165_getFavourite_actor extends DbCollections
           }
         } match {
           case Success(s) => s
-          case Failure(f) => MAKE_ERROR(f)
+          case Failure(f) => MAKE_THROWN_ERROR(f)
         }
       }
     )
