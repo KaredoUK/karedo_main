@@ -62,11 +62,11 @@ trait Kar143_verify_actor
           }
         }
       } else {
-        KO(Error("Validation Error. Code Doesn't match"))
+        OK(APIResponse(welcome.html.email_verify_failure.render(email).toString, HTTP_OK_200, MIME_HTML, headers = List(Cookie(HttpCookiePair(COOKIE_ACCOUNT, account_id)))))
       }
     } match {
       case Success(s) => s
-      case Failure(f) => OK(APIResponse(welcome.html.email_verify_error.render(f.toString + "<br>" + f.getStackTrace.map(_.toString).reduce(_ + "<br>" + _)).toString, HTTP_OK_200, MIME_HTML))
+      case Failure(f) => OK(APIResponse(welcome.html.email_verify_error.render(f.toString + "</br>" + f.getStackTrace.map(_.toString).reduce(_ + "</br>" + _)).toString, HTTP_OK_200, MIME_HTML))
     }
   }
 }
