@@ -71,7 +71,7 @@ class AdActor extends Actor with DbCollections {
       ("http://karedo.co.uk/ads/c5.jpg", "http://www.bbc.co.uk/news/uk-37951771", "Armistice Day in pictures"),
       ("http://karedo.co.uk/ads/c6.jpg", "http://www.forbes.com/sites/kathleenchaykowski/2016/11/10/mark-zuckerberg-says-fake-news-on-facebook-did-not-sway-the-u-s-election/#4415191146a5",
         "Mark Zuckerberg Says Fake News On Facebook Did Not Sway The U.S. Election"),
-      ("http://karedo.co.uk/ads/c7.png", "https://www.theguardian.com/sport/blog/2016/nov/10/conor-mcgregor-eddie-alvarez-ufc-205",
+      ("http://karedo.co.uk/ads/c7.jpg", "https://www.theguardian.com/sport/blog/2016/nov/10/conor-mcgregor-eddie-alvarez-ufc-205",
         "The cheapening of Conor McGregor's once-clever act"),
       ("http://karedo.co.uk/ads/c8.jpg", "http://www.nytimes.com/2016/11/12/technology/10-second-videos-from-your-sunglasses-thank-snapchat.html?ref=technology",
         "10-Second Videos From Your Sunglasses. Thank Snapchat.")
