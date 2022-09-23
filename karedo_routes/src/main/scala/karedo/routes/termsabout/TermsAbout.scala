@@ -41,3 +41,21 @@ object About extends KaredoRoute
   }
 }
 
+object Privacy extends KaredoRoute
+  with TermsAbout {
+
+  def route = {
+    Route {
+      path("privacy" ) {
+        get {
+          doCall({
+            import karedo.util.KaredoConstants
+            exec(GET_PRIVACY)
+          }
+          )
+        }
+      }
+    }
+  }
+}
+

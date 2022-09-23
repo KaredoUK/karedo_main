@@ -57,7 +57,7 @@ trait Routes
     // Url Magic
       UrlMagic_normal.route ~ UrlMagic_share.route ~
     // Terms and About
-      Terms.route ~ About.route
+      Terms.route ~ About.route ~ Privacy.route
   }
 
 //  override val routes = {

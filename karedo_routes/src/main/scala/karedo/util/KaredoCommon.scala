@@ -97,6 +97,7 @@ trait KaredoConstants extends Configurable {
 
   val GET_TERM = "TERMS"
   val GET_ABOUT = "ABOUT"
+  val GET_PRIVACY = "PRIVACY"
 
   val QR_SIZE = 300
 

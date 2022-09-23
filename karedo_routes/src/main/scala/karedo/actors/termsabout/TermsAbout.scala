@@ -22,10 +22,13 @@ trait TermsAbout extends DbCollections
   override val logger = LoggerFactory.getLogger(classOf[TermsAbout])
 
   def exec(termsAbout: String): Result[Error, APIResponse] = {
-    termsAbout match {
-      case GET_TERM => OK(APIResponse(msg = "<html><body><h1>TERMS</h1></body></html>", code = HTTP_OK_200, mime = MIME_HTML))
-      case GET_ABOUT  => OK(APIResponse(msg = "<html><body><h1>ABOUT</h1></body></html>", code = HTTP_OK_200, mime = MIME_HTML))
-      case _ => OK(APIResponse(msg = "<html><body><h1>INFO</h1></body></html>", code = HTTP_OK_200, mime = MIME_HTML))
+    val msg: String = termsAbout match {
+      case GET_TERM => terms.html.terms.render().toString
+      case GET_ABOUT  => terms.html.about.render().toString
+      case GET_PRIVACY  => terms.html.privacy.render().toString
+      case _ => "<html><body><h1>INFO</h1></body></html>"
     }
+
+    OK(APIResponse(msg = msg, code = HTTP_OK_200, mime = MIME_HTML))
   }
 }
