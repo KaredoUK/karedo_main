@@ -101,9 +101,9 @@ trait Kar147_ResetEmail_actor
                     val verify_id = getNewRandomID
                     dbEmailVerify.insertNew(EmailVerify(id = verify_id, account_id = userAccount.id, application_id = application_id))
 
-                    val email_verify_url = s"${notification_base_url}/verify?e=${email}&c=${email_code}&v=${verify_id}"
+                    val email_verify_url = s"${notification_base_url}/verify?e=${email.address}&c=${email_code}&v=${verify_id}"
                     val email_subject = "Welcome to Karedo"
-                    val email_body = s"Welcome to Karedo. \nYou're on your way to gaining from your attention. Click on [$email_verify_url] to verify your email"
+                    val email_body = welcome.html.email_verify.render(email_verify_url).toString
                     sendEmail(address, email_subject, email_body)
 
                     OK(APIResponse("", HTTP_OK_200))
