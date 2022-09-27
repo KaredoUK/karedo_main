@@ -88,7 +88,7 @@ trait Kar183_putTransfer_actor
               sendSMS(sender_msisdn, transfer.txt.sender_sale_success.render(request.app_karedos, receiver_msisdn, receiver_name).toString )
               sendSMS(receiver_msisdn, transfer.txt.receiver_sale_success.render(request.app_karedos, sender_msisdn, sender_name).toString )
 
-              OK(APIResponse("", HTTP_OK_200))
+              OK(APIResponse(Kar197Res(completeSale.id).toJson.toString, HTTP_OK_200))
             }
             case KO(_) => {
               // Unknown Mobile - Set up a MobileSale
@@ -121,7 +121,7 @@ trait Kar183_putTransfer_actor
               sendSMS(sender_msisdn, transfer.txt.sender_transfer_pending.render(request.app_karedos, receiver_msisdn, receiver_name).toString)
               sendSMS(receiver_msisdn, transfer.txt.receiver_transfer_pending.render(request.app_karedos, sender_msisdn, sender_name).toString)
 
-              OK(APIResponse("", HTTP_OK_200))
+              OK(APIResponse(Kar197Res(origSale.id).toJson.toString, HTTP_OK_200))
             }
           }
         } match {
