@@ -74,7 +74,7 @@ trait Kar167_share_data_actor extends DbCollections
             c.channel match {
               case SOCIAL_EMAIL => {
                 val userProfile = dbUserProfile.find(accountId).get
-                val from_name = userProfile.first_name + " " + userProfile.last_name
+                val from_name = userProfile.first_name.getOrElse("Someone") + " " + userProfile.last_name.getOrElse("")
 
                 val email_imp_url_code = storeUrlMagic(request.share.imp_url, None) match {
                   case OK(u) => u
