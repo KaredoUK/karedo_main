@@ -25,6 +25,7 @@ object AdModel {
                  imp_url: String,
                  click_url: String,
                  ad_text: String,
+                 ad_source: Option[String],
                  duration: Option[Int] = None,
                  h: Option[Int] = None,
                  w: Option[Int] = None,
@@ -48,7 +49,7 @@ object AdModel {
 
 
   implicit val beacon = jsonFormat1(Beacon)
-  implicit val ad = jsonFormat7(Ad)
+  implicit val ad = jsonFormat8(Ad)
   implicit val adUnit = jsonFormat12(AdUnit)
 
   implicit val adResponse:RootJsonFormat[AdResponse] = jsonFormat2(AdResponse)
