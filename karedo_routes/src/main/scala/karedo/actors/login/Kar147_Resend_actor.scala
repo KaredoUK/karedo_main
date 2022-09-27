@@ -67,14 +67,14 @@ trait Kar147_Resend_actor
 }
 
 
-trait Kar147_ResetEmail_actor
+trait Kar147_ResendEmail_actor
   extends DbCollections
     with KaredoAuthentication
     with KaredoJsonHelpers
     with KaredoConstants
     with KaredoUtils
 {
-  override val logger = LoggerFactory.getLogger(classOf[Kar147_ResetEmail_actor])
+  override val logger = LoggerFactory.getLogger(classOf[Kar147_ResendEmail_actor])
 
   def exec(request:Kar147_ResetEmail): Result[Error, APIResponse] = {
     Try[Result[Error, APIResponse]] {

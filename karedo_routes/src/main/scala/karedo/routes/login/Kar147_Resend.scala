@@ -33,8 +33,8 @@ object Kar147_Resend extends KaredoRoute
 
 
 
-object Kar147_ResetEmail extends KaredoRoute
-  with Kar147_ResetEmail_actor {
+object Kar147_ResendEmail extends KaredoRoute
+  with Kar147_ResendEmail_actor {
 
   def route = {
     Route {

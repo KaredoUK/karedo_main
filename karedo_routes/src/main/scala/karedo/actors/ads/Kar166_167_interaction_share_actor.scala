@@ -73,6 +73,9 @@ trait Kar167_share_data_actor extends DbCollections
           val outChannels = reqChannels.map(c => {
             c.channel match {
               case SOCIAL_EMAIL => {
+                val userProfile = dbUserProfile.find(accountId).get
+                val from_name = userProfile.first_name + " " + userProfile.last_name
+
                 val email_imp_url_code = storeUrlMagic(request.share.imp_url, None) match {
                   case OK(u) => u
                   case KO(u) => u
@@ -85,19 +88,20 @@ trait Kar167_share_data_actor extends DbCollections
                 }
                 val email_click_url = s"${url_magic_share_base}/shr?u=${email_click_url_code}&v=${account_hash}"
 
-                dbUserAccount.findActiveEmail(accountId) match {
-                  case OK(email) if email != null => {
-                    val email_share_data = "<html><head><title>Shared from Karedo</title></head><body><p>" +
-                      request.share.ad_text.getOrElse("Shared from Karedo") + "<p><a href\"" + email_imp_url +
-                      "\"><img src=\"" + email_click_url + "\"></a></body></html>"
-
-                    sendEmail(email.address, "Shared from Karedo", email_share_data)
-
-                    c.copy(share_data = Some(email_share_data), share_url = Some(email_click_url))
+                val email_address = if( c.channel_id != null )
+                  c.channel_id
+                else
+                  dbUserAccount.findActiveEmail(accountId) match {
+                    case OK(email) => email.address
+                    case KO(_) => throw MAKE_THROWABLE("No valid email address found")
                   }
-                  case _ => c
-                }
 
+                val email_share_data = share.html.email_share.render( from_name,
+                  request.share.ad_text.getOrElse("Shared from Karedo"), email_imp_url, email_click_url ).toString
+
+                sendEmail(email_address, "Shared from Karedo", email_share_data)
+
+                c.copy(share_data = Some(email_share_data), share_url = Some(email_click_url))
               }
               case _ => {
                 val url_code = storeUrlMagic(request.share.imp_url, Some(request.share.click_url)) match {

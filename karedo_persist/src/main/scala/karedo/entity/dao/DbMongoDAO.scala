@@ -25,6 +25,7 @@ abstract class DbMongoDAO[K, T <: Keyable[K]]
 )
 
   extends DbDAO[K, T]
+    with DbDAOExtensions[K, T]
     with MongoConnection {
 
 
@@ -64,6 +65,21 @@ abstract class DbMongoDAO[K, T <: Keyable[K]]
       case Failure(x) =>
         KO(x.toString)
 
+    }
+    logger.info(s"getById returning $ret")
+    ret
+
+  }
+
+  override def findByAccount(account_id: String): Result[String, List[T]] = {
+    logger.info(s"find by account $account_id")
+    val ret = Try {
+      dao.find(MongoDBObject("account_id" -> account_id) )
+    } match {
+      case Success(x) if x.isEmpty => KO(s"No record found in table ${dao.collection.name} for account_id = $account_id")
+      case Success(x) => OK(x.toList)
+      case Failure(x) =>
+        KO(x.toString)
     }
     logger.info(s"getById returning $ret")
     ret

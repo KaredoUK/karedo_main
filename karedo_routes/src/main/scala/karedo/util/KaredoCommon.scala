@@ -151,9 +151,12 @@ trait KaredoUtils
   with DefaultActorSystem
   with KaredoJsonHelpers
 {
+  def MAKE_THROWABLE(error:String, text:String = "", code: Int = 500, mime:String = "", headers:List[HttpHeader] = List()) = {
+    Error(ErrorInfo(error, text).toJson.toString, code, mime, headers)
+  }
 
   def MAKE_ERROR(error:String, text:String = "", code: Int = 500, mime:String = "", headers:List[HttpHeader] = List()) = {
-    KO(Error(ErrorInfo(error, text).toJson.toString, code, mime, headers))
+    KO(MAKE_THROWABLE(error, text, code, mime, headers))
   }
 
   def MAKE_THROWN_ERROR(error:Throwable, code: Int = 500, mime:String = "", headers:List[HttpHeader] = List()) = {

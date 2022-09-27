@@ -92,6 +92,9 @@ trait KaredoJsonHelpers
                                  msisdn: String, user_type: String, email: String)
   implicit val jsonKar141_SendCode_Req = jsonFormat6(Kar141_SendCode_Req)
 
+  case class Kar141_DeleteAccount_Req(application_id: String, account_id: String, session_id: String)
+  implicit val jsonKar141_DeleteAccount_Req = jsonFormat3(Kar141_DeleteAccount_Req)
+
   case class Kar141_SendCode_Res(returning_user: Boolean, account_id: Option[String])
   implicit val jsonKar141_SendCode_Res = jsonFormat2(Kar141_SendCode_Res)
 
