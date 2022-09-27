@@ -40,7 +40,7 @@ object Kar147_ResendEmail extends KaredoRoute
     Route {
       path("resend" / "email") {
         put {
-          entity(as[Kar147_ResetEmail]) {
+          entity(as[Kar147_ResendEmail]) {
             request =>
               doCall({
                 exec(request)

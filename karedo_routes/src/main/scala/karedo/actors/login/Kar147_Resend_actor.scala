@@ -76,7 +76,7 @@ trait Kar147_ResendEmail_actor
 {
   override val logger = LoggerFactory.getLogger(classOf[Kar147_ResendEmail_actor])
 
-  def exec(request:Kar147_ResetEmail): Result[Error, APIResponse] = {
+  def exec(request:Kar147_ResendEmail): Result[Error, APIResponse] = {
     Try[Result[Error, APIResponse]] {
       val application_id = request.application_id
       val address = request.email
@@ -151,10 +151,10 @@ trait Kar147_ValidateEmail_actor
 
           uAccount.get.email.filter(x => x.address == request.email) match {
             case mh :: mt => {
-              if(mh.valid) OK(APIResponse(Kar147_ValidateEmail_Res(true).toString.toString, code))
-              else OK(APIResponse(Kar147_ValidateEmail_Res(false).toString.toString, code))
+              if(mh.valid) OK(APIResponse(Kar147_ValidateEmail_Res(true).toJson.toString.toString, code))
+              else OK(APIResponse(Kar147_ValidateEmail_Res(false).toJson.toString.toString, code))
             }
-            case Nil => OK(APIResponse(Kar147_ValidateEmail_Res(false).toString.toString, code))
+            case Nil => OK(APIResponse(Kar147_ValidateEmail_Res(false).toJson.toString.toString, code))
           }
         } match {
           case Success(s) => s

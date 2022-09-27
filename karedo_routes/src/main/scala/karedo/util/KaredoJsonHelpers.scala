@@ -144,8 +144,8 @@ trait KaredoJsonHelpers
   case class Kar147_Resend(application_id: String, msisdn: String)
   implicit val jsonKar147_Resend = jsonFormat2(Kar147_Resend)
 
-  case class Kar147_ResetEmail(application_id: String, email: String)
-  implicit val jsonKar147_ResetEmail = jsonFormat2(Kar147_ResetEmail)
+  case class Kar147_ResendEmail(application_id: String, email: String)
+  implicit val jsonKar147_ResetEmail = jsonFormat2(Kar147_ResendEmail)
 
   case class Kar147_ValidateEmail_Request(application_id: String, account_id: String, session_id: String, email: String)
   implicit val jsonKar147_ValidateEmail_Request = jsonFormat4(Kar147_ValidateEmail_Request)
