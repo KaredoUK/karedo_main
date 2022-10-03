@@ -13,11 +13,11 @@ object BidModel {
   import DefaultJsonProtocol._
   import spray.httpx.SprayJsonSupport._
 
-  case class BidRequest_2_3_1(id:String,
-                              imp:Imp_2_3_1,
+  case class BidRequest_2_4(id:String,
+                              imp:Imp_2_4,
                               site:Option[Site] = None,
                               app:Option[App] = None,
-                              device:Device_2_3_1,
+                              device:Device_2_4,
                               user:User,
                               test:Option[Int] = Some(0),
                               at:Option[Int] = Some(2),
@@ -45,7 +45,7 @@ object BidModel {
                               regs:Option[Regs] = None)
 
   case class Imp_2_2_1(id:String,
-                       banner:Option[Banner] = None,
+                       banner:Option[Banner_2_2_1] = None,
                        video:Option[Video] = None,
                        displaymanager:Option[String] = None,
                        displaymanagerver:Option[String] = None,
@@ -57,16 +57,40 @@ object BidModel {
                        iframebuster:Option[List[String]] = None,
                        pmp:Option[Pmp] = None)
 
-  case class Imp_2_3_1(id:String,
-                       banner:Option[Banner] = None,
+  case class Imp_2_4(id:String,
+                       banner:Option[Banner_2_4] = None,
                        video:Option[Video] = None,
+                     audio: Option[Audio] = None,
                        native:Option[Native] = None,
-                       instl:Option[Int] = None,
+                     displaymanager: Option[String] = None,
+                     displaymanagerver: Option[String] = None,
+                       instl:Option[Int] = Some(0),
+                     tagid: Option[String] = None,
                        bidfloor:Option[Double] = Some(5.0),
+                     bidfloorcur: Option[String] = Some("USD"),
+                     clickbrowser: Option[Int] = None,
                        secure:Option[Int] = Some(0),
+                     iframebuster: Option[List[String]] = None,
+                     exp:Option[Int] = None,
                        pmp:Option[Pmp] = None)
 
-  case class Banner(w:Int = 300,
+  case class Banner_2_4(w:Int = 300,
+                    h:Int = 250,
+                        format: Option[Format] = None,
+//                    wmax:Option[Int] = None,
+//                    hmax:Option[Int] = None,
+//                    wmin:Option[Int] = None,
+//                    hmin:Option[Int] = None,
+                    id:Option[String] = None,
+                    pos:Option[Int] = Some(0),
+                    btype:Option[List[Int]] = None,
+                    battr:Option[List[Int]] = None,
+                    mimes:Option[List[String]] = Some(List("image/jpg", "image/png", "image/gif")),
+                    topframe:Option[Int] = Some(1),
+                    expdir:Option[List[Int]] = Some(List(1,2,3,4)),
+                    api:Option[List[Int]] = None)
+
+  case class Banner_2_2_1(w:Int = 300,
                     h:Int = 250,
                     wmax:Option[Int] = None,
                     hmax:Option[Int] = None,
@@ -81,7 +105,33 @@ object BidModel {
                     expdir:Option[List[Int]] = Some(List(1,2,3,4)),
                     api:Option[List[Int]] = None)
 
-  case class Video(mimes:Option[List[String]] = Some(List("video/mp4")),
+  case class Format(w:Int, h: Int)
+
+  case class Video_2_4(mimes:Option[List[String]] = Some(List("video/mp4")),
+                   minduration:Option[Int] = Some(5),
+                   maxduration:Option[Int] = Some(30),
+                   protocols:Option[List[Int]] = Some(List(3)),
+                   w:Int = 300,
+                   h:Int = 250,
+                   startdelay:Option[Int] = Some(0),
+                   linearity:Option[Int] = Some(1),
+                       skip:Option[Int] = None,
+                       skipmin:Option[Int] = Some(0),
+                       skipafter:Option[Int] = Some(0),
+                   sequence:Option[Int] = None,
+                   battr:Option[List[Int]] = None,
+                   maxextended:Option[Int] = None,
+                   minbitrate:Option[Int] = Some(500),
+                   maxbitrate:Option[Int] = Some(3000),
+                   boxingallowed:Option[Int] = Some(0),
+                   playbackmethod:Option[List[Int]] = None,
+                   delivery:Option[List[Int]] = Some(List(1, 2)),
+                   pos:Option[Int] = Some(0),
+                   companionad:Option[List[Banner_2_4]] = Some(List(Banner_2_4())),
+                   api:Option[List[Int]] = Some(List(5)),
+                   companiontype:Option[List[Int]] = Some(List(1)) )
+
+  case class Video_2_2_2(mimes:Option[List[String]] = Some(List("video/mp4")),
                    minduration:Option[Int] = Some(5),
                    maxduration:Option[Int] = Some(30),
                    protocols:Option[List[Int]] = Some(List(3)),
@@ -98,9 +148,17 @@ object BidModel {
                    playbackmethod:Option[List[Int]] = None,
                    delivery:Option[List[Int]] = Some(List(1, 2)),
                    pos:Option[Int] = Some(0),
-                   companionad:Option[List[Banner]] = Some(List(Banner())),
+                   companionad:Option[List[Banner_2_2_1]] = Some(List(Banner_2_2_1())),
                    api:Option[List[Int]] = Some(List(5)),
                    companiontype:Option[List[Int]] = Some(List(1)) )
+
+  case class Audio_2_4
+  (
+    mimes:Option[List[String]] = Some(List("audio/mp4")),
+      minduration:Option[Int] = Some(5),
+  maxduration:Option[Int] = Some(30),
+  protocols:Option[List[Int]] = Some(List(3)),
+  )
 
   // Only version 2.3 onwards.
   case class Native(request:String,

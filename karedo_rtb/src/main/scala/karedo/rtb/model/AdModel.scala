@@ -38,7 +38,7 @@ object AdModel {
                      impid: String,
                      ad: Ad,
                      price: Double, // In USD/M eCPM * 0.8
-                     adomain: Option[List[String]],
+                     ad_domain: Option[List[String]],
                      iurl: Option[String],
                      nurl: Option[String],
                      cid: Option[String],
