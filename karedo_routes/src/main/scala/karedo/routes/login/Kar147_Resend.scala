@@ -75,3 +75,25 @@ object Kar147_ValidateEmail extends KaredoRoute
     }
   }
 }
+
+object Kar147_ValidateSession extends KaredoRoute
+  with Kar147_ValidateSession_actor {
+
+  def route = {
+    Route {
+      path("validate" / "session") {
+        optionalHeaderValueByName("X_Identification") {
+          deviceId =>
+            get {
+              parameters( 'a, 'p, 's ? ) {
+                (account_id, application_id, session_id) =>
+                  doCall({
+                    exec(deviceId, account_id, application_id, session_id)
+                  })
+              }
+            }
+        }
+      }
+    }
+  }
+}

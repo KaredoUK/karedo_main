@@ -165,3 +165,39 @@ trait Kar147_ValidateEmail_actor
   }
 }
 
+trait Kar147_ValidateSession_actor
+  extends DbCollections
+    with KaredoAuthentication
+    with KaredoJsonHelpers
+    with KaredoConstants
+    with KaredoUtils
+{
+  override val logger = LoggerFactory.getLogger(classOf[Kar147_ValidateEmail_actor])
+
+  def exec(deviceId:Option[String], account_id:String, application_id:String, session_id:Option[String]): Result[Error, APIResponse] = {
+
+    authenticate(account_id, deviceId, application_id, session_id, allowCreation = false)(
+      (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
+
+        Try[Result[Error, APIResponse]] {
+          val uApp_AccountId = uapp.get.account_id
+          val uAccId = uAccount.get.id
+
+          dbUserSession.find(session_id.get) match {
+            case OK(uSession) => {
+              val uSess_AccountId = uSession.account_id
+
+              if( uApp_AccountId != uAccId || uAccId != uSess_AccountId ) OK(APIResponse(Kar147_ValidateEmail_Res(false).toJson.toString.toString, code))
+              else OK(APIResponse(Kar147_ValidateEmail_Res(true).toJson.toString.toString, code))
+            }
+            case KO(_) => OK(APIResponse(Kar147_ValidateEmail_Res(false).toJson.toString.toString, code))
+          }
+        } match {
+          case Success(s) => s
+          case Failure(f) => MAKE_THROWN_ERROR(f)
+        }
+      }
+    )
+  }
+}
+
