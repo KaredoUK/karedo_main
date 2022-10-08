@@ -6,7 +6,6 @@ import java.io.File
 
 import akka.actor.Actor
 import karedo.rtb.model._
-import karedo.rtb.model.BidModel._
 import karedo.rtb.model.AdModel._
 import karedo.util.{KO, OK, Result}
 import karedo.rtb.model.DbCollections
@@ -85,7 +84,7 @@ class AdActor extends Actor with DbCollections {
 
 class Auctioneer extends Actor {
   def receive = {
-    case BidRequest_2_3_1(_,_,_,_,_,_,_,_,_,_,_,_,_,_,_) => {
+    case _ => {
       // @TODO: make requests to the AdExcahnge,
       // @TODO: timeout after TTL
       // @TODO: return the BidResponse
