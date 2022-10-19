@@ -1,10 +1,10 @@
 package karedo.util
 
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import karedo.entity
 import karedo.entity._
 import karedo.rtb.model.AdModel.AdUnit
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 
 /**
   * Created by pakkio on 10/9/16.

@@ -119,6 +119,30 @@ trait KaredoConstants extends Configurable {
   val url_magic_share_base = conf.getString("url.magic.share.base")
   val url_magic_norm_base = conf.getString("url.magic.norm.base")
   val url_magic_fallback_url = conf.getString("url.magic.fallback.url")
+
+  def getDeviceType(make: Option[String], model: Option[String]): Int = {
+    val DEVICE_TYPE_MOBILE_TABLET: Int = 1
+    val DEVICE_TYPE_PC: Int = 2
+    val DEVICE_TYPE_TV: Int = 3
+    val DEVICE_TYPE_PHONE: Int = 4
+    val DEVICE_TYPE_TABLET: Int = 5
+    val DEVICE_TYPE_DEVICE: Int = 6
+    val DEVICE_TYPE_STB: Int = 7
+
+    implicit class StringInterpolations(sc: StringContext) {
+      def ic = new {
+        def unapply(other: String) = sc.parts.mkString.equalsIgnoreCase(other)
+      }
+    }
+
+    (make, model) match {
+      case (Some(ic"Apple"), None) => DEVICE_TYPE_MOBILE_TABLET
+      case (Some(ic"Apple"), Some(ic"iPhone")) => DEVICE_TYPE_PHONE
+      case (Some(ic"Apple"), Some(ic"iPad")) => DEVICE_TYPE_TABLET
+      case (Some(ic"Android"), None) => DEVICE_TYPE_MOBILE_TABLET
+      case _ => DEVICE_TYPE_MOBILE_TABLET
+    }
+  }
 }
 
 trait KaredoIds {
