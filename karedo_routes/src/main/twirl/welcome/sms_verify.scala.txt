@@ -1,2 +1,2 @@
 @(sms_code: String)
-Welcome to Karedo. You're on your way to sharing our success. Code is [@sms_code]. Start the Karedo App to use it.
+Welcome to Karedo. You're on your way to sharing our success. Code is @sms_code . Start the Karedo App to use it.
