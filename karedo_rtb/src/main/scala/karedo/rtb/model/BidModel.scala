@@ -1,9 +1,8 @@
 package karedo.rtb.model
 
 import spray.json._
-
 import DefaultJsonProtocol._
-import spray.httpx.SprayJsonSupport._
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 
 
 /**
@@ -12,7 +11,7 @@ import spray.httpx.SprayJsonSupport._
   * Contains the case classes for OpenRTB versions 2.2.1 & 2.4
   */
 
-sealed trait BidRequestCommon {
+object BidRequestCommon extends DefaultJsonProtocol {
   // Site or App => Not both
   case class App
   ( id:String,
@@ -32,7 +31,7 @@ sealed trait BidRequestCommon {
   )
 
   case class Content
-  ( id:String,
+  ( id:Option[String] = None,
     episode:Option[Int] = None,
     title:Option[String] = None,
     series:Option[String] = None,
@@ -67,6 +66,23 @@ sealed trait BidRequestCommon {
     domain:Option[String] = Some("karedo.co.uk")
   )
 
+  case class Site
+  ( id:String,
+    name:Option[String] = Some("karedo"),
+    domain:Option[String] = Some("karedo.co.uk"),
+    cat:Option[List[String]] = None,
+    sectioncat:Option[List[String]] = None,
+    pagecat:Option[List[String]] = None,
+    page:Option[String] = Some("http://www.karedo.co.uk/main"),
+    privacypolicy:Option[Int] = Some(0),
+    ref:Option[String] = None,
+    search:Option[String] = None,
+    mobile:Option[Int] = Some(1), // 2.4 Only
+    publisher:Option[Publisher] = None,
+    content:Option[Content] = None,
+    keywords:Option[String] = None
+  )
+
   case class Data
   ( id:Option[String] = None,
     name:Option[String] = None,
@@ -96,18 +112,84 @@ sealed trait BidRequestCommon {
     wadomain:Option[List[String]] = None
   )
 
+  case class Geo
+  ( lat:Option[Double] = None,                                       // Y
+    lon:Option[Double] = None,                                       // Y
+    // $type:Int = 1,
+    accuracy: Option[Int] = None, // 2.4 Only
+    lastfix:Option[Int] = None, // 2.4 Only
+    ipservice: Option[Int] = None, // 2.4 Only
+    country:Option[String] = Some("GB"),              // ISO 3166-1 Alpha 3
+    region:Option[String] = None,                     // ISO 3166-2
+    regionfips104:Option[String] = None,              // FIPS 10-4
+    metro:Option[String] = None,
+    city:Option[String] = None,
+    zip:Option[String] = None,                        // Y, postcode
+    utoffset:Option[Int] = None // 2.4 Only
+  )
+
+  case class User
+  ( id:String,
+    buyeruid:Option[String] = None,
+    yob:Option[Int] = None,
+    gender:Option[String] = None,
+    keywords:Option[List[String]] = None,
+    customdata:Option[String] = None,
+    geo:Option[Geo] = None,
+    data:Option[List[Data]] = None
+  )
+
+  case class Device
+  ( ua:Option[String] = None,                                 // Y
+    geo:Option[Geo] = None, // 2.4 Only                       // Y
+    dnt:Option[Int] = Some(0), // OK ot track.
+    lmt:Option[Int] = Some(1), // 2.4 Only
+    ip:Option[String] = Some("127.0.0.1"),                    // Y
+    // ipv6:Option[String] = None, // 2.2.1 Only
+    devicetype:Option[Int] = Some(1),                         // Y, 1 - mobile/tablet, 4 - phone, 5 - tablet
+    make:Option[String] = None,                               // Y
+    model:Option[String] = None,                              // Y
+    os:Option[String] = None,                                 // Y
+    osv:Option[String] = None,                                // Y
+    hwv:Option[String] = None, // 2.4 Only
+    h:Option[Int] = None, // 2.4 Only
+    w:Option[Int] = None, // 2.4 Only
+    // ppi:Option[Int] = Some(200), // 2.4 Only
+    // pxratio:Option[Double] = Some(1.17), // 2.4 Only
+    js:Option[Int] = Some(0),
+    // geofetch:Option[Int] = Some(0), //2.4 Only
+    // flashver:Option[String] = None,
+    language:Option[String] = None,
+    // carrier:Option[String] = None,
+    // connectiontype:Option[Int] = None,
+    ifa:Option[String] = None,                                 // N (Apple's IFA or Android's Advertiding ID)
+    didsha1:Option[String] = None,                             // IMEI or MEID or ESN
+    didmd5:Option[String] = None,
+    dpidsha1:Option[String] = None,                            // Android ID or UDID in iOS
+    dpidmd5:Option[String] = None,
+    macsha1:Option[String] = None,                             // MAC address
+    macmd5:Option[String] = None
+  )
+
+  implicit  val json_Segment = jsonFormat3(Segment)
+  implicit  val json_Data = jsonFormat3(Data)
+  implicit  val json_Geo = jsonFormat12(Geo)
+  implicit  val json_User = jsonFormat8(User)
+  implicit  val json_Device = jsonFormat22(Device)
+
   implicit  val json_Deal = jsonFormat6(Deal)
   implicit  val json_Pmp = jsonFormat2(Pmp)
   implicit  val json_Regs = jsonFormat1(Regs)
-  implicit  val json_Segment = jsonFormat3(Segment)
-  implicit  val json_Data = jsonFormat3(Data)
   implicit  val json_Producer = jsonFormat4(Producer)
   implicit  val json_Publisher = jsonFormat4(Publisher)
   implicit  val json_Content = jsonFormat19(Content)
+  implicit  val json_Site = jsonFormat14(Site)
   implicit  val json_App = jsonFormat14(App)
 }
 
-trait BidRequestModel_2_2_1 extends BidRequestCommon {
+object BidRequestModel_2_2_1 extends DefaultJsonProtocol  {
+
+  import BidRequestCommon._
 
   case class BidRequest
   (id:String,
@@ -119,9 +201,9 @@ trait BidRequestModel_2_2_1 extends BidRequestCommon {
    at:Option[Int] = Some(2),
    tmax:Option[Int] = Some(250), //@TODO: Set from application.conf
    wseat:Option[List[String]] = None,
-   allimps:Option[Int] = Some(1),
+   allimps:Option[Int] = None,
    cur:Option[String] = None, //Some("USD"),
-   bcat:Option[String] = None, // @TODO: Need some values here.
+   bcat:Option[List[String]] = None, // @TODO: Need some values here.
    badv:Option[List[String]] = None,
    regs:Option[Regs] = None
   )
@@ -148,8 +230,8 @@ trait BidRequestModel_2_2_1 extends BidRequestCommon {
     hmax:Option[Int] = None,
     wmin:Option[Int] = None,
     hmin:Option[Int] = None,
-    id:Option[String] = None,
-    pos:Option[Int] = Some(0),
+    id:Int,
+    pos:Option[Int] = Some(1),
     btype:Option[List[Int]] = None,
     battr:Option[List[Int]] = None,
     mimes:Option[List[String]] = Some(List("image/jpg", "image/png", "image/gif")),
@@ -177,88 +259,20 @@ trait BidRequestModel_2_2_1 extends BidRequestCommon {
    playbackmethod:Option[List[Int]] = None,
    delivery:Option[List[Int]] = Some(List(1, 2)),
    pos:Option[Int] = Some(0),
-   companionad:Option[List[Banner]] = Some(List(Banner())),
+   companionad:List[Banner],
    api:Option[List[Int]] = Some(List(5)),
    companiontype:Option[List[Int]] = Some(List(1))
   )
 
-  case class Site
-  ( id:String,
-    name:Option[String] = Some("karedo"),
-    domain:Option[String] = Some("karedo.co.uk"),
-    cat:Option[List[String]] = None,
-    sectioncat:Option[List[String]] = None,
-    pagecat:Option[List[String]] = None,
-    page:Option[String] = Some("http://www.karedo.co.uk/main"),
-    privacypolicy:Option[Int] = Some(0),
-    ref:Option[String] = None,
-    search:Option[String] = None,
-    publisher:Option[Publisher] = None,
-    content:Option[Content] = None,
-    keywords:Option[String] = None
-  )
-
-
-  case class Device
-  ( dnt:Option[Int] = Some(1),
-    ua:Option[String] = None,
-    ip:Option[String] = Some("127.0.0.1"),
-    geo:Option[Geo] = None,
-    didsha1:Option[String] = None,
-    didmd5:Option[String] = None,
-    dpidsha1:Option[String] = None,
-    dpidmd5:Option[String] = None,
-    macsha1:Option[String] = None,
-    macmd5:Option[String] = None,
-    ipv6:Option[String] = None,
-    carrier:Option[String] = None,
-    language:Option[String] = None,
-    make:Option[String] = None,
-    model:Option[String] = None,
-    os:Option[String] = None,
-    osv:Option[String] = None,
-    js:Option[Int] = Some(0),
-    connectiontype:Option[Int] = None,
-    devicetype:Option[Int] = Some(1),
-    flashver:Option[String] = None,
-    ifa:Option[String] = None
-  )
-
-  case class Geo
-  ( lat:Double,
-    lon:Double,
-    // $type:Int = 1,
-    country:String = "GB",
-    region:Option[String] = None,
-    regionfips104:Option[String] = None,
-    metro:Option[String] = None,
-    city:Option[String] = None,
-    zip:Option[String] = None
-  )
-
-  case class User
-  ( id:String,
-    buyeruid:String,
-    yob:Option[Int] = None,
-    gender:Option[String] = None,
-    keywords:Option[String] = None,
-    customdata:Option[String] = None,
-    geo:Option[Geo] = None,
-    data:Option[List[Data]] = None
-  )
-
-  implicit  val json_Geo_2_2_1 = jsonFormat8(Geo)
-  implicit  val json_User_2_2_1 = jsonFormat8(User)
-  implicit  val json_Device_2_2_1 = jsonFormat22(Device)
-  implicit  val json_Site_2_2_1 = jsonFormat13(Site)
-  implicit  val json_Banner_2_2_1 = jsonFormat14(Banner)
-  implicit  val json_Video_2_2_1 = jsonFormat21(Video)
-  implicit  val json_Imp_2_2_1 = jsonFormat12(Imp)
-  implicit  val json_bidRequest_2_2_1:RootJsonFormat[BidRequest] = jsonFormat14(BidRequest)
-
+  implicit  val json_Banner_2_2_1 = jsonFormat14(BidRequestModel_2_2_1.Banner)
+  implicit  val json_Video_2_2_1 = jsonFormat21(BidRequestModel_2_2_1.Video)
+  implicit  val json_Imp_2_2_1 = jsonFormat12(BidRequestModel_2_2_1.Imp)
+  implicit  val json_bidRequest_2_2_1:RootJsonFormat[BidRequestModel_2_2_1.BidRequest] = jsonFormat14(BidRequestModel_2_2_1.BidRequest)
 }
 
-trait BidRequestModel_2_4 extends BidRequestCommon {
+object BidRequestModel_2_4 extends DefaultJsonProtocol {
+
+  import BidRequestCommon._
 
   case class BidRequest
   (id:String,
@@ -273,7 +287,7 @@ trait BidRequestModel_2_4 extends BidRequestCommon {
    wseat:Option[List[String]] = None,
    allimps:Option[Int] = Some(0),
    cur:Option[String] = None, //Some("USD"),
-   bcat:Option[String] = None, //@TODO: Need some values here
+   bcat:Option[List[String]] = None, //@TODO: Need some values here
    badv:Option[List[String]] = None,
    bapp: Option[List[String]] = None,
    regs:Option[Regs] = None
@@ -303,7 +317,7 @@ trait BidRequestModel_2_4 extends BidRequestCommon {
     h:Int = 250,
     format: Option[Format] = None,
     id:Option[String] = None,
-    pos:Option[Int] = Some(0),
+    pos:Option[Int] = Some(1),
     btype:Option[List[Int]] = None,
     battr:Option[List[Int]] = None,
     mimes:Option[List[String]] = Some(List("image/jpg", "image/png", "image/gif")),
@@ -372,96 +386,17 @@ trait BidRequestModel_2_4 extends BidRequestCommon {
     battr:Option[List[Int]] = None
   )
 
-  case class Site
-  ( id:String,
-    name:Option[String] = Some("karedo"),
-    domain:Option[String] = Some("karedo.co.uk"),
-    cat:Option[List[String]] = None,
-    sectioncat:Option[List[String]] = None,
-    pagecat:Option[List[String]] = None,
-    page:Option[String] = Some("http://www.karedo.co.uk/main"),
-    privacypolicy:Option[Int] = Some(0),
-    ref:Option[String] = None,
-    search:Option[String] = None,
-    mobile:Option[Int] = Some(1),
-    publisher:Option[Publisher] = None,
-    content:Option[Content] = None,
-    keywords:Option[String] = None
-  )
-
-  case class Device
-  ( ua:Option[String] = None,
-    geo:Option[Geo] = None,
-    dnt:Option[Int] = Some(1),
-    lmt:Option[Int] = Some(1),
-    ip:Option[String] = Some("127.0.0.1"),
-    devicetype:Option[Int] = Some(1),
-    make:Option[String] = None,
-    model:Option[String] = None,
-    os:Option[String] = None,
-    osv:Option[String] = None,
-    hwv:Option[String] = None,
-    h:Option[Int] = Some(600),
-    w:Option[Int] = Some(300),
-    // ppi:Option[Int] = Some(200),
-    // pxratio:Option[Double] = Some(1.17),
-    js:Option[Int] = Some(0),
-    // geofetch:Option[Int] = Some(0),
-    // flashver:Option[String] = None,
-    language:Option[String] = None,
-    // carrier:Option[String] = None,
-    // connectiontype:Option[Int] = None,
-    ifa:Option[String] = None,
-    didsha1:Option[String] = None,
-    didmd5:Option[String] = None,
-    pdidsha1:Option[String] = None,
-    dpidmd5:Option[String] = None,
-    macsha1:Option[String] = None,
-    macmd5:Option[String] = None
-  )
-
-  case class Geo
-  ( lat:Double,
-    lon:Double,
-    // $type:Int = 1,
-    accuracy: Option[Int] = None,
-    lastfix:Option[Int] = None,
-    ipservice: Option[Int] = None,
-    country:String = "GB",
-    region:Option[String] = None,
-    regionfips104:Option[String] = None,
-    metro:Option[String] = None,
-    city:Option[String] = None,
-    zip:Option[String] = None,
-    utoffset:Option[Int] = None
-  )
-
-  case class User
-  ( id:String,
-    buyeruid:String,
-    yob:Option[Int] = None,
-    gender:Option[String] = None,
-    keywords:Option[String] = None,
-    customdata:Option[String] = None,
-    geo:Option[Geo] = None,
-    data:Option[List[Data]] = None
-  )
-
-  implicit  val json_Format = jsonFormat2(Format)
-  implicit  val json_Geo_2_4 = jsonFormat12(Geo)
-  implicit  val json_User_2_4 = jsonFormat8(User)
-  implicit  val json_Device_2_4 = jsonFormat22(Device)
-  implicit  val json_Site_2_4 = jsonFormat14(Site)
-  implicit  val json_Native = jsonFormat4(Native)
-  implicit  val json_Banner_2_4 = jsonFormat11(Banner)
-  implicit  val json_Audio_2_4 = jsonFormat18(Audio)
-  implicit  val json_Video_2_4 = jsonFormat21(Video)
-  implicit  val json_Imp_2_4 = jsonFormat16(Imp)
-  implicit  val json_bidRequest_2_4:RootJsonFormat[BidRequest] = jsonFormat16(BidRequest)
+  implicit  val json_Format = jsonFormat2(BidRequestModel_2_4.Format)
+  implicit  val json_Native = jsonFormat4(BidRequestModel_2_4.Native)
+  implicit  val json_Banner_2_4 = jsonFormat11(BidRequestModel_2_4.Banner)
+  implicit  val json_Audio_2_4 = jsonFormat18(BidRequestModel_2_4.Audio)
+  implicit  val json_Video_2_4 = jsonFormat21(BidRequestModel_2_4.Video)
+  implicit  val json_Imp_2_4 = jsonFormat16(BidRequestModel_2_4.Imp)
+  implicit  val json_bidRequest_2_4:RootJsonFormat[BidRequestModel_2_4.BidRequest] = jsonFormat16(BidRequestModel_2_4.BidRequest)
 
 }
 
-trait BidResponseModelCommon {
+object BidResponseModelCommon extends DefaultJsonProtocol {
 
   // TODO: Update Bid Response
   case class BidResponse
@@ -469,8 +404,8 @@ trait BidResponseModelCommon {
     seatbid:List[SeatBid],
     bidid:String,
     cur:Option[String] = Some("USD"),
-    customdata:Option[String],
-    nbr:Option[Int]
+    customdata:Option[String] = None,
+    nbr:Option[Int] = None
   )
 
   case class SeatBid
@@ -484,7 +419,7 @@ trait BidResponseModelCommon {
     impid:String,
     price:Double,
     adid:String,
-    nurl:String,
+    nurl:Option[String],
     adm:Option[String],
     adomain:Option[List[String]],
     // ONly in 2.3.1 onwards

@@ -2,16 +2,40 @@ package karedo.rtb.model
 
 import java.util.UUID
 
+import karedo.rtb.util.{Android, DeviceMake, iOS}
+import spray.json._
+import DefaultJsonProtocol._
+
 
 /**
   * Created by crajah on 03/09/2016.
   */
-object AdModel {
-  import spray.json._
-  import DefaultJsonProtocol._
+object AdModel extends DefaultJsonProtocol {
 
+  case class DeviceRequest
+  (
+    ua : Option[String] = None
+    , xff: Option[String] = None
+    , ifa : Option[String] = None
+    , deviceType: Option[Int] = None
+    , ip: Option[String] = None
+    , make: Option[String] = None
+    , model: Option[String] = None
+    , os: Option[String] = None
+    , osv: Option[String] = None
+    , did: Option[String] = None
+    , dpid: Option[String] = None
+    , mac: Option[String] = None
+    , lat: Option[Double] = None
+    , lon: Option[Double] = None
+    , country: Option[String] = Some("GB")
+  )
 
-  case class AdRequest(userId: String, count: Int)
+  case class AdRequest
+  ( userId: String
+    , count: Int
+    , device: DeviceRequest
+  )
 
   case class AdResponse(ad_count:Int, ads: List[AdUnit])
 
@@ -54,6 +78,7 @@ object AdModel {
 
   implicit val adResponse:RootJsonFormat[AdResponse] = jsonFormat2(AdResponse)
 
-  implicit val adRequest:RootJsonFormat[AdRequest] = jsonFormat2(AdRequest)
+  implicit val json_DeviceRequest = jsonFormat15(DeviceRequest)
+  implicit val adRequest:RootJsonFormat[AdRequest] = jsonFormat3(AdRequest)
 
 }
