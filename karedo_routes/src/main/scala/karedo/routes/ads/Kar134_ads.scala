@@ -26,31 +26,34 @@ object Kar134_ads extends KaredoRoute
                 ua =>
                   optionalHeaderValueByName("X-Forwarded-For") {
                     xff =>
-                      get {
-                        parameters('p, 's ?, 'c.as[Int], 'lat.as[Double].?, 'lon.as[Double].?, 'ifa ?, 'ip ?, 'make ?, 'model ?, 'os ?, 'osv ?, 'did ?, 'dpid ?, 'mac ?, 'cc ?) {
-                          (applicationId, sessionId, adCount, lat, lon, ifa, ip, make, model, os, osv, did, dpid, mac, cc) =>
-                            doCall({
-                              val devObj = DeviceRequest(
-                                ua = ua,
-                                xff = xff,
-                                ifa = ifa,
-                                deviceType = Some(getDeviceType(make, model)),
-                                ip = ip,
-                                make = make,
-                                model = model,
-                                os = os,
-                                osv = osv,
-                                did = did,
-                                dpid = dpid,
-                                mac = mac,
-                                lat = lat,
-                                lon = lon,
-                                country = cc
-                              )
-                              exec(accountId, deviceId, applicationId, sessionId, adCount, devObj)
+                      extractClientIP {
+                        ip =>
+                          get {
+                            parameters('p, 's ?, 'c.as[Int], 'lat.as[Double].?, 'lon.as[Double].?, 'ifa ?, 'make ?, 'model ?, 'os ?, 'osv ?, 'did ?, 'dpid ?, 'mac ?, 'cc ?) {
+                              (applicationId, sessionId, adCount, lat, lon, ifa, make, model, os, osv, did, dpid, mac, cc) =>
+                                doCall({
+                                  val devObj = DeviceRequest(
+                                    ua = ua,
+                                    xff = xff,
+                                    ifa = ifa,
+                                    deviceType = Some(getDeviceType(make, model)),
+                                    ip = ip.toOption.map(_.getHostAddress),
+                                    make = make,
+                                    model = model,
+                                    os = os,
+                                    osv = osv,
+                                    did = did,
+                                    dpid = dpid,
+                                    mac = mac,
+                                    lat = lat,
+                                    lon = lon,
+                                    country = cc
+                                  )
+                                  exec(accountId, deviceId, applicationId, sessionId, adCount, devObj)
+                                }
+                                )
                             }
-                            )
-                        }
+                          }
                       }
                   }
 

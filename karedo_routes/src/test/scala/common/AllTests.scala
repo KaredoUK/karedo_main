@@ -29,9 +29,4 @@ trait AllTests extends WordSpec
   // can't clear everything otherwise tests cannot go in parallel (!)
   DbMongoDAO.tablePrefix = "TestRoutes_"
 
-
-
-
-
-
 }
