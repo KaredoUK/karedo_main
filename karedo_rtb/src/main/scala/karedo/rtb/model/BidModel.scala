@@ -199,7 +199,7 @@ object BidRequestModel_2_2_1 extends DefaultJsonProtocol  {
    device:Device,
    user:User,
    at:Option[Int] = Some(2),
-   tmax:Option[Int] = Some(250), //@TODO: Set from application.conf
+   tmax:Option[Int] = Some(250), //@TODO: Set from exchange.conf
    wseat:Option[List[String]] = None,
    allimps:Option[Int] = None,
    cur:Option[String] = None, //Some("USD"),
@@ -283,7 +283,7 @@ object BidRequestModel_2_4 extends DefaultJsonProtocol {
    user:User,
    test:Option[Int] = Some(0),
    at:Option[Int] = Some(2),
-   tmax:Option[Int] = Some(200), //@TODO: Set from application.conf
+   tmax:Option[Int] = Some(200), //@TODO: Set from exchange.conf
    wseat:Option[List[String]] = None,
    allimps:Option[Int] = Some(0),
    cur:Option[String] = None, //Some("USD"),

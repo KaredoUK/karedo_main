@@ -10,8 +10,9 @@ import karedo.entity.UserPrefData
 import karedo.rtb.dsp._
 import karedo.rtb.model._
 import karedo.rtb.model.AdModel._
-import karedo.util.{Configurable, KO, OK, Result}
+import karedo.util.{KO, OK, Result}
 import karedo.rtb.model.DbCollections
+import karedo.rtb.util.Configurable
 
 import scala.util.{Failure, Success, Try}
 import scala.concurrent.{Await, ExecutionContext, Future}
