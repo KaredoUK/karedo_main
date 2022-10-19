@@ -1,10 +1,8 @@
 package karedo.rtb.model
 
-import java.util.UUID
 
 import karedo.rtb.util.{Android, DeviceMake, iOS}
 import spray.json._
-import DefaultJsonProtocol._
 
 
 /**

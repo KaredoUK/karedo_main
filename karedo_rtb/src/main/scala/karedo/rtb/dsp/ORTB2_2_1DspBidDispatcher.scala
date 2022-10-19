@@ -3,20 +3,21 @@ package karedo.rtb.dsp
 import java.util.concurrent.Executors
 
 import akka.actor.ActorSystem
+import akka.http.scaladsl.model.Uri.Path
+import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.ActorMaterializer
 import karedo.entity.UserPrefData
 import karedo.rtb.model.AdModel._
 import karedo.rtb.model.BidRequestCommon._
 import karedo.rtb.model.BidResponseModelCommon._
 import karedo.rtb.model.BidRequestModel_2_2_1._
+import karedo.rtb.model.BidJsonImplicits
 import karedo.rtb.util._
 
 import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.concurrent.duration._
 import karedo.util.Util.newUUID
-import spray.json.{DefaultJsonProtocol, RootJsonFormat}
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import spray.http.HttpHeaders.RawHeader
+import karedo.util.Util.now
+import org.slf4j.MarkerFactory
 
 /**
   * Created by crajah on 28/11/2016.
@@ -25,12 +26,15 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
   extends DspBidDispather
     with DeviceMakes
     with RtbConstants
-    with LoggingSupport {
+    with LoggingSupport
+    with BidJsonImplicits {
 
   implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
 
 
   override def getAds(count: Int, user: User, device: Device, iabCatMap: Map[String, UserPrefData], make: DeviceMake): List[AdUnit] = {
+    logger.debug(marker, s"IN: ORTB2_2_1DspBidDispatcher.getAds. Count is ${count}, User is: ${user}, Device is ${device}" )
+
     try {
       val fSeq = Future.sequence(
         (0 until count).toList.map(
@@ -51,6 +55,8 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
         })
         .map(x => getAdUnitFromBidResponse(x.get)).flatten
 
+      logger.debug(marker, s"IN: ORTB2_2_1DspBidDispatcher.getAds. Ads Returned: ${ads}" )
+
       ads
     } catch {
       case e: Exception => {
@@ -62,8 +68,9 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
   }
 
   def getAdUnitFromBidResponse(response:BidResponse): List[AdUnit] = {
+    logger.debug(marker, s"IN: ORTB2_2_1DspBidDispatcher.getAdUnitFromBidResponse. Response is ${response.toJson.toString}" )
 
-    response.seatbid.map(sb => sb.bid.map(b => {
+    val adUnit = response.seatbid.map(sb => sb.bid.map(b => {
       AdUnit(
         ad_type = ad_type_IMAGE
         , ad_id = b.adid
@@ -79,12 +86,20 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
         , h = b.h
       )
     })).flatten
+
+    logger.debug(marker, s"IN: ORTB2_2_1DspBidDispatcher.getAdUnitFromBidResponse. AdUnit Returned is ${adUnit}" )
+
+    adUnit
   }
 
   def getAdFromBid(orig_bid: Bid, response_id:String, seat_id: String): Ad = {
+    logger.debug(marker, s"IN: ORTB2_2_1DspBidDispatcher.getAdFromBid. Orig Bid is ${orig_bid.toJson.toString}, Response ID: ${response_id}, Seat ID: ${seat_id}" )
+
     import scala.util.{Try, Success, Failure}
 
     def getUrlPair(ad_markup: String): (String, String) = {
+      logger.debug(marker, s"IN: ORTB2_2_1DspBidDispatcher.getAdFromBid.getUrlPair. Ad Markup: ${ad_markup}" )
+
       import scala.xml._
 
       val ns = XML.loadString(ad_markup)
@@ -102,7 +117,7 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
         case Some(adm) => adm
         case None => bid.nurl match {
           case Some(nurl) => nurl
-          case None => throw new Error("Ad MArkup not found in both adm and nurl")
+          case None => throw new Error(s"Ad Markup not found in both adm <${bid.adm}> and nurl <${bid.nurl}>")
         }
       }
 
@@ -131,7 +146,7 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
 
   def substituteUrlMacrosInBidResponse(bid:Bid, response_id:String, seat_id: String): Bid = {
     def macroReplace(in:Option[String]) : Option[String] = {
-      in match {
+      val out = in match {
         case Some(str) => {
           Some(Map(
             ("${AUCTION_ID}", response_id)
@@ -144,6 +159,10 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
         }
         case None => None
       }
+
+      logger.debug(marker, s"IN: ORTB2_2_1DspBidDispatcher.substituteUrlMacrosInBidResponse.macroReplace. In: ${in}, Out: ${out}" )
+
+      out
     }
 
     bid.copy(
@@ -154,53 +173,95 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
   }
 
   def sendBidRequest(bid:BidRequest): Option[BidResponse] = {
+    logger.debug(marker, s"IN: ORTB2_2_1DspBidDispatcher.sendBidRequest. Bid Request: ${bid.toJson.toString}" )
+
     import akka.http.scaladsl._
     import model._
+    import Uri._
     import HttpMethods._
     import HttpProtocols._
     import MediaTypes._
     import HttpCharsets._
     import StatusCodes._
+    import unmarshalling.{ Unmarshal, Unmarshaller }
+    import akka.stream.scaladsl.{ Source, Sink }
+
+    import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 
     implicit val actor_system = ActorSystem("rtb")
     implicit val actor_materializer = ActorMaterializer()
 
     val rtbHeader = headers.RawHeader("x-openrtb-version", "2.2")
 
-    try {
-      val responseFuture =
-        Http().singleRequest(
-          HttpRequest(
-            POST,
-            uri = config.endpoint,
-            entity = HttpEntity(`application/json`, bid.toJson.toString),
-            headers = List(rtbHeader)
-          )
+    def deserialize[T](r: HttpResponse)(implicit um: Unmarshaller[ResponseEntity, T]): Future[Option[T]] = {
+      r.status match {
+        case OK => {
+          logger.info(s"${config.name}: Successful Response 200 OK")
+          Unmarshal(r.entity).to[T] map Some.apply
+        }
+        case _ => {
+          logger.error(s"${config.name}: Failed Response: ${r}")
+          Future(None)
+        }
+      }
+    }
+
+    def apiCall: Future[Option[BidResponse]] = {
+      val source = Source.single(
+        HttpRequest(
+          POST,
+          uri = Uri(path = Path(config.path)),
+          entity = HttpEntity(`application/json`, bid.toJson.toString),
+          headers = List(rtbHeader)
         )
+      )
+
+      val flow = config.scheme match {
+        case HTTP => Http().outgoingConnection(host = config.host, port = config.port).mapAsync(1) { r => deserialize[BidResponse](r) }
+        case HTTPS => Http().outgoingConnectionHttps(host = config.host, port = config.port).mapAsync(1) { r => deserialize[BidResponse](r)
+        }
+      }
+
+      source.via(flow).runWith(Sink.head)
+    }
+
+
+    try {
+//      val responseFuture:Future[Option[BidResponse]] =
+//        Http().singleRequest(
+//          HttpRequest(
+//            POST,
+//            uri = config.endpoint,
+//            entity = HttpEntity(`application/json`, bid.toJson.toString),
+//            headers = List(rtbHeader)
+//          )
+//        ).map{r => deserialize[BidResponse](r)}
+
+      val responseFuture:Future[Option[BidResponse]] = apiCall
 
       val response = Await.result(responseFuture, rtb_max_wait)
 
-      logger.info(config.endpoint + " -> " + response.toString())
-      println(config.endpoint + " -> " + response.toString())
-      println(bid.toJson.toString)
+      logger.debug(s"${config.name}: Response from Exchange: " + response)
 
-      Some(response)
-      None
+      response
     } catch {
       case e: Exception => {
-        println(s"Dispatchers not found" + "\n" + e.getMessage + "\n" + e.getStackTrace.foldLeft("")((z, b) => z + b.toString + "\n"))
-        logger.error(s"Sending Bid Request to [${config.endpoint}] failed.\nBid Request:\n${bid.toJson.toString}", e)
+        logger.error(s"${config.name}: Sending Bid Request to [${config.endpoint}] failed.\nBid Request:\n${bid.toJson.toString}", e)
         None
       }
     }
   }
 
   def buildBidRequest(seqId: Int, user: User, device: Device, iabCatMap: Map[String, UserPrefData], make: DeviceMake): BidRequest = {
+    val ts = now
+    val suffix:String = s"${ts.getMillis}"
+    val _id:String = s"${user.id}-${suffix}"
+
     val iabCats:List[String] = (for((k, v) <- iabCatMap if(Math.random() < v.value)) yield k).toList
 
     BidRequest(
-      id = getId
-      , imp = getImps(seqId)
+      id = _id
+      , imp = getImps(seqId, _id)
       , app = Some(getApp(iabCats, make))
       , user = user
       , device = device
@@ -211,8 +272,8 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
 
   def getId = newUUID
 
-  def getImps(seqId: Int): List[Imp] = {
-    List(Imp(id = getId, banner = getBanner(seqId), secure = Some(1)))
+  def getImps(seqId: Int, _id: String): List[Imp] = {
+    List(Imp(id = s"${_id}", banner = getBanner(seqId), secure = Some(secure_ad)))
   }
 
   def getBanner(seqId: Int): Banner = {

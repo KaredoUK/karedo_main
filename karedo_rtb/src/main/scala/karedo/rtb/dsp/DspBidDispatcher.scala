@@ -14,4 +14,8 @@ trait DspBidDispather  {
   def getAds(count: Int, user: User, device: Device, iabCatMap: Map[String, UserPrefData], make: DeviceMake): List[AdUnit]
 }
 
-case class DspBidDispatcherConfig(name: String, kind: String, endpoint: String )
+case class DspBidDispatcherConfig(name: String, kind: String, scheme: HttpScheme, host: String, port: Int = 80, path: String, endpoint: String )
+
+sealed trait HttpScheme
+case object HTTP extends HttpScheme
+case object HTTPS extends HttpScheme

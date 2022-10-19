@@ -4,18 +4,23 @@ import java.util.concurrent.Executors
 
 import karedo.entity.UserPrefData
 import karedo.rtb.model.AdModel.{Ad, _}
+import karedo.rtb.model.BidJsonImplicits
 
 import scala.concurrent.{ExecutionContext, Future}
 import karedo.rtb.model.BidRequestCommon._
-import karedo.rtb.util.DeviceMake
+import karedo.rtb.util.{DeviceMake, LoggingSupport}
 
 /**
   * Created by crajah on 28/11/2016.
   */
 
-class DummyDspBidDispatcher(config: DspBidDispatcherConfig) extends DspBidDispather  {
+class DummyDspBidDispatcher(config: DspBidDispatcherConfig)
+  extends DspBidDispather
+    with LoggingSupport
+    with BidJsonImplicits {
+
   override def getAds(count: Int, user: User, device: Device, iabCatMap: Map[String, UserPrefData], make: DeviceMake): List[AdUnit] = {
-//    implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
+    logger.debug(marker, s"IN: DummyDspBidDispatcher.getAds. Count is ${count}, User is: ${user}, Device is ${device}" )
 
       val adUnits = scala.collection.mutable.ListBuffer.empty[AdUnit]
 

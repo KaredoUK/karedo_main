@@ -12,14 +12,15 @@ import karedo.rtb.model._
 import karedo.rtb.model.AdModel._
 import karedo.util.{KO, OK, Result}
 import karedo.rtb.model.DbCollections
-import karedo.rtb.util.Configurable
+import karedo.util.Configurable
 
 import scala.util.{Failure, Success, Try}
 import scala.concurrent.{Await, ExecutionContext, Future}
 import collection.JavaConverters._
 import karedo.rtb.model.BidRequestCommon._
 import karedo.rtb.util._
-import RTBUtils._
+import RtbUtils._
+import org.slf4j.MarkerFactory
 
 /**
   * Created by crajah on 25/08/2016.
@@ -29,14 +30,22 @@ class AdActor
     with Configurable
     with DeviceMakes
     with RtbConstants
-    with LoggingSupport {
+    with LoggingSupport
+    with BidJsonImplicits {
   var dspDispatchers:Option[List[DspBidDispather]] = None
 
   preStart
 
   def preStart = {
     val dspDispatcherConfigs = conf.getConfigList("dsp.dispatchers").asScala.map(c => {
-      DspBidDispatcherConfig(c.getString("name"), c.getString("kind"), c.getString("endpoint"))
+      DspBidDispatcherConfig(
+        name = c.getString("name"),
+        kind = c.getString("kind"),
+        scheme = c.getString("scheme") match {case "https" => HTTPS case _ => HTTP },
+        host = c.getString("host"),
+        port = c.getInt("port"),
+        path = c.getString("path"),
+        endpoint = c.getString("endpoint"))
     }).toList
 
     val dispatchers:List[DspBidDispather] = dspDispatcherConfigs.map(dc => {
@@ -52,110 +61,109 @@ class AdActor
   }
 
   def getAds(request:AdRequest) : List[AdUnit] = {
+    logger.info(marker, s"IN: getAds. AdRequest is: ${request.toJson.toString}" )
+
     implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
 
-      val adUnits:List[AdUnit] = Try [List[AdUnit]] {
-        val userProfile = dbUserProfile.find(request.userId).get
-        val userPrefs = dbUserPrefs.find(request.userId).get
-        val devReq = request.device
+    val adUnits:List[AdUnit] = Try [List[AdUnit]] {
+      val userProfile = dbUserProfile.find(request.userId).get
+      val userPrefs = dbUserPrefs.find(request.userId).get
+      val devReq = request.device
 
-        val make = devReq.make.getOrElse("") match {
-          case DEVICE_MAKE_IOS => iOS
-          case DEVICE_MAKE_ANDROID => Android
-          case _ => iOS
-        }
+      val make = devReq.make.getOrElse("") match {
+        case DEVICE_MAKE_IOS => iOS
+        case DEVICE_MAKE_ANDROID => Android
+        case _ => iOS
+      }
 
-        val userObj: User = User(
-          id = request.userId,
-          gender = userProfile.gender,
-          yob = userProfile.yob,
-          geo =
-              Some(Geo(
-                lat = devReq.lat,
-                lon = devReq.lon,
-                country = devReq.country
-              ))
-          )
-
-
-        def getHashes(in: Option[String]): (Option[String], Option[String]) = in match {
-          case Some(d) => (Some(getMD5Hash(d)), Some(getSHA1Hash(d)))
-          case _ => (None, None)
-        }
-
-        val did:(Option[String], Option[String]) = getHashes(devReq.did)
-        val dpid:(Option[String], Option[String]) = getHashes(devReq.dpid)
-        val mac:(Option[String], Option[String]) = getHashes(devReq.mac)
-
-        val deviceObj: Device = Device(
-          ua = devReq.ua,
-          ifa = if(devReq.ifa.isDefined) Some(getMD5Hash(devReq.ifa.get)) else None,
-          geo =
+      val userObj: User = User(
+        id = request.userId,
+        gender = userProfile.gender,
+        yob = userProfile.yob,
+        geo =
             Some(Geo(
               lat = devReq.lat,
               lon = devReq.lon,
               country = devReq.country
-            )),
-          didmd5 = did._1,
-          didsha1 = did._2,
-          dpidmd5 = dpid._1,
-          dpidsha1 = dpid._2,
-          macmd5 = mac._1,
-          macsha1 = mac._2,
-          ip = if(devReq.xff.isDefined) {
-            try {
-              val v = devReq.xff.get.split(",")(0)
-              val vn = java.net.InetAddress.getByName(v).getHostAddress
-              Some(vn)
-            } catch {
-              case e:Exception => {
-                logger.error(s"IP address conversion from XFF header ${devReq.xff} failed", e)
-                None
-              }
-            }
-          } else if(devReq.ip.isDefined) devReq.ip else None,
-          make = devReq.make,
-          model = devReq.model,
-          os = devReq.os,
-          osv = devReq.osv
+            ))
         )
-        val iabCatsMapObj: Map[String, UserPrefData] = userPrefs.prefs
 
-        val resp:List[List[AdUnit]] = dspDispatchers match {
-          case Some(dispatchers) => {
-            try {
-              val fSeq = Future.sequence(
-                dispatchers.map(d =>
-                  Future(
-                    d.getAds(request.count, userObj, deviceObj, iabCatsMapObj, make)
-                  )
-                )
-              )
 
-              val ads: List[List[AdUnit]] = Await.result(
-                fSeq.mapTo[List[List[AdUnit]]], dispatcher_max_wait)
-
-              ads
-            } catch {
-              case e: Exception => {
-                println(s"Dispatchers not found" + "\n" + e.getMessage + "\n" + e.getStackTrace.foldLeft("")((z, b) => z + b.toString + "\n"))
-                logger.error(s"Dispatchers not found", e)
-                List(List())
-              }
-            }
-          }
-          case None => List(List())
-        }
-
-        val r = resp
-
-        resp.flatten.sortWith(_.price > _.price).take(request.count)
-      } match {
-        case Success(s) => s
-        case Failure(f) => List()
+      def getHashes(in: Option[String]): (Option[String], Option[String]) = in match {
+        case Some(d) => (Some(getMD5Hash(d)), Some(getSHA1Hash(d)))
+        case _ => (None, None)
       }
 
-      adUnits
+      val did:(Option[String], Option[String]) = getHashes(devReq.did)
+      val dpid:(Option[String], Option[String]) = getHashes(devReq.dpid)
+      val mac:(Option[String], Option[String]) = getHashes(devReq.mac)
+
+      val deviceObj: Device = Device(
+        ua = devReq.ua,
+        ifa = if(devReq.ifa.isDefined) devReq.ifa else Some(request.userId),
+        geo =
+          Some(Geo(
+            lat = devReq.lat,
+            lon = devReq.lon,
+            country = devReq.country
+          )),
+        didmd5 = did._1,
+        didsha1 = did._2,
+        dpidmd5 = dpid._1,
+        dpidsha1 = dpid._2,
+        macmd5 = mac._1,
+        macsha1 = mac._2,
+        ip = devReq.ip,
+        make = devReq.make,
+        model = devReq.model,
+        os = devReq.os,
+        osv = devReq.osv
+      )
+      val iabCatsMapObj: Map[String, UserPrefData] = userPrefs.prefs
+
+      logger.info(marker, s"IN: getAds. UserObject is: ${userObj.toJson.toString} and DeviceObject is: ${deviceObj.toJson.toString}" )
+
+      val resp:List[List[AdUnit]] = dspDispatchers match {
+        case Some(dispatchers) => {
+          try {
+            val fSeq = Future.sequence(
+              dispatchers.map(d =>
+                Future(
+                  d.getAds(request.count, userObj, deviceObj, iabCatsMapObj, make)
+                )
+              )
+            )
+
+            val ads: List[List[AdUnit]] = Await.result(
+              fSeq.mapTo[List[List[AdUnit]]], dispatcher_max_wait)
+
+            ads
+          } catch {
+            case e: Exception => {
+              println(s"Dispatchers not found" + "\n" + e.getMessage + "\n" + e.getStackTrace.foldLeft("")((z, b) => z + b.toString + "\n"))
+              logger.error(s"Dispatchers not found ${dspDispatchers}", e)
+              List(List())
+            }
+          }
+        }
+        case None => List(List())
+      }
+
+      logger.debug(marker, s"IN: getAds. All Ads Returned is: ${resp}" )
+
+      val ads = resp.flatten.sortWith(_.price > _.price).take(request.count)
+
+      logger.debug(marker, s"IN: getAds. Top Priced Ads Returned is: ${ads}" )
+
+      ads
+    } match {
+      case Success(s) => s
+      case Failure(f) => List()
+    }
+
+    logger.debug(marker, s"IN: getAds. Ads Returned to caller: ${adUnits}" )
+
+    adUnits
   }
 
   /*

@@ -16,7 +16,7 @@ resolvers += Resolver.mavenLocal
 //resolvers += Resolver.typesafeIvyRepo("releases")
 resolvers += Resolver.sbtPluginRepo("releases")
 
-
+/*
 libraryDependencies := {
   CrossVersion.partialVersion(scalaVersion.value) match {
     // if scala 2.11+ is used, add dependency on scala-xml module
@@ -30,6 +30,7 @@ libraryDependencies := {
       libraryDependencies.value :+ "org.scala-lang" % "scala-swing" % scalaVersion.value
   }
 }
+*/
 
 
 
@@ -44,9 +45,9 @@ libraryDependencies ++= {
 
 //    "io.spray"            %%  "spray-can"         % sprayV,
 //    "io.spray"            %%  "spray-json"        % sprayV,
-    "io.spray"            %%  "spray-client"      % sprayV,
-    "io.spray"            %%  "spray-http"        % sprayV,
-    "io.spray"            %%  "spray-httpx"       % sprayV,
+//    "io.spray"            %%  "spray-client"      % sprayV,
+//    "io.spray"            %%  "spray-http"        % sprayV,
+//    "io.spray"            %%  "spray-httpx"       % sprayV,
 //    "io.spray"            %%  "spray-routing"     % sprayV,
 //    "io.spray"            %%  "spray-testkit"     % sprayV  % "test",
 
@@ -56,11 +57,18 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaV,
     "com.typesafe.scala-logging" % "scala-logging-slf4j_2.11" % "2.1.2",
     "com.typesafe.akka" %% "akka-slf4j" % akkaV,
-    "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test",
     "com.typesafe.akka"   %%  "akka-actor"        % akkaV,
-    "com.typesafe.akka"   %%  "akka-testkit"      % akkaV   % "test"
 
+    "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test",
+    "com.typesafe.akka"   %%  "akka-testkit"      % akkaV   % "test",
+
+    "ch.qos.logback" % "logback-classic" % "1.1.3",
+
+    "org.scalatest" %% "scalatest" % "3.0.0" % "test",
+    "org.specs2" %% "specs2-core" % "3.8.5" % "test",
+    "org.specs2" %% "specs2-junit" % "3.8.5.1" % "test",
+    "junit" % "junit" % "4.8.1" % "test"
   )
 }
 
-mainClass in (run) := Some("karedo.rtb.runner.BidRunner")
+// mainClass in (run) := Some("karedo.rtb.runner.BidRunner")

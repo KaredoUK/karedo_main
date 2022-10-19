@@ -11,6 +11,46 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
   * Contains the case classes for OpenRTB versions 2.2.1 & 2.4
   */
 
+trait BidJsonImplicits extends DefaultJsonProtocol {
+  import BidRequestCommon._
+  import BidRequestModel_2_2_1._
+  import BidRequestModel_2_4._
+  import BidResponseModelCommon._
+
+  implicit  val json_Segment = jsonFormat3(Segment)
+  implicit  val json_Data = jsonFormat3(Data)
+  implicit  val json_Geo = jsonFormat12(Geo)
+  implicit  val json_User = jsonFormat8(User)
+  implicit  val json_Device = jsonFormat22(Device)
+
+  implicit  val json_Deal = jsonFormat6(Deal)
+  implicit  val json_Pmp = jsonFormat2(Pmp)
+  implicit  val json_Regs = jsonFormat1(Regs)
+  implicit  val json_Producer = jsonFormat4(Producer)
+  implicit  val json_Publisher = jsonFormat4(Publisher)
+  implicit  val json_Content = jsonFormat19(Content)
+  implicit  val json_Site = jsonFormat14(Site)
+  implicit  val json_App = jsonFormat14(App)
+
+  implicit  val json_Banner_2_2_1 = jsonFormat14(BidRequestModel_2_2_1.Banner)
+  implicit  val json_Video_2_2_1 = jsonFormat21(BidRequestModel_2_2_1.Video)
+  implicit  val json_Imp_2_2_1 = jsonFormat12(BidRequestModel_2_2_1.Imp)
+  implicit  val json_bidRequest_2_2_1:RootJsonFormat[BidRequestModel_2_2_1.BidRequest] = jsonFormat14(BidRequestModel_2_2_1.BidRequest)
+
+  implicit  val json_Format = jsonFormat2(BidRequestModel_2_4.Format)
+  implicit  val json_Native = jsonFormat4(BidRequestModel_2_4.Native)
+  implicit  val json_Banner_2_4 = jsonFormat11(BidRequestModel_2_4.Banner)
+  implicit  val json_Audio_2_4 = jsonFormat18(BidRequestModel_2_4.Audio)
+  implicit  val json_Video_2_4 = jsonFormat21(BidRequestModel_2_4.Video)
+  implicit  val json_Imp_2_4 = jsonFormat16(BidRequestModel_2_4.Imp)
+  implicit  val json_bidRequest_2_4:RootJsonFormat[BidRequestModel_2_4.BidRequest] = jsonFormat16(BidRequestModel_2_4.BidRequest)
+
+  implicit val json_Bid = jsonFormat20(Bid)
+  implicit val json_SeatBid = jsonFormat3(SeatBid)
+  implicit val json_bidResponse:RootJsonFormat[BidResponse] = jsonFormat6(BidResponse)
+
+}
+
 object BidRequestCommon extends DefaultJsonProtocol {
   // Site or App => Not both
   case class App
@@ -171,20 +211,6 @@ object BidRequestCommon extends DefaultJsonProtocol {
     macmd5:Option[String] = None
   )
 
-  implicit  val json_Segment = jsonFormat3(Segment)
-  implicit  val json_Data = jsonFormat3(Data)
-  implicit  val json_Geo = jsonFormat12(Geo)
-  implicit  val json_User = jsonFormat8(User)
-  implicit  val json_Device = jsonFormat22(Device)
-
-  implicit  val json_Deal = jsonFormat6(Deal)
-  implicit  val json_Pmp = jsonFormat2(Pmp)
-  implicit  val json_Regs = jsonFormat1(Regs)
-  implicit  val json_Producer = jsonFormat4(Producer)
-  implicit  val json_Publisher = jsonFormat4(Publisher)
-  implicit  val json_Content = jsonFormat19(Content)
-  implicit  val json_Site = jsonFormat14(Site)
-  implicit  val json_App = jsonFormat14(App)
 }
 
 object BidRequestModel_2_2_1 extends DefaultJsonProtocol  {
@@ -264,10 +290,6 @@ object BidRequestModel_2_2_1 extends DefaultJsonProtocol  {
    companiontype:Option[List[Int]] = Some(List(1))
   )
 
-  implicit  val json_Banner_2_2_1 = jsonFormat14(BidRequestModel_2_2_1.Banner)
-  implicit  val json_Video_2_2_1 = jsonFormat21(BidRequestModel_2_2_1.Video)
-  implicit  val json_Imp_2_2_1 = jsonFormat12(BidRequestModel_2_2_1.Imp)
-  implicit  val json_bidRequest_2_2_1:RootJsonFormat[BidRequestModel_2_2_1.BidRequest] = jsonFormat14(BidRequestModel_2_2_1.BidRequest)
 }
 
 object BidRequestModel_2_4 extends DefaultJsonProtocol {
@@ -386,13 +408,6 @@ object BidRequestModel_2_4 extends DefaultJsonProtocol {
     battr:Option[List[Int]] = None
   )
 
-  implicit  val json_Format = jsonFormat2(BidRequestModel_2_4.Format)
-  implicit  val json_Native = jsonFormat4(BidRequestModel_2_4.Native)
-  implicit  val json_Banner_2_4 = jsonFormat11(BidRequestModel_2_4.Banner)
-  implicit  val json_Audio_2_4 = jsonFormat18(BidRequestModel_2_4.Audio)
-  implicit  val json_Video_2_4 = jsonFormat21(BidRequestModel_2_4.Video)
-  implicit  val json_Imp_2_4 = jsonFormat16(BidRequestModel_2_4.Imp)
-  implicit  val json_bidRequest_2_4:RootJsonFormat[BidRequestModel_2_4.BidRequest] = jsonFormat16(BidRequestModel_2_4.BidRequest)
 
 }
 
@@ -441,9 +456,6 @@ object BidResponseModelCommon extends DefaultJsonProtocol {
     exp:Option[Int]
   )
 
-  implicit val json_Bid = jsonFormat20(Bid)
-  implicit val json_SeatBid = jsonFormat3(SeatBid)
-  implicit val json_bidResponse:RootJsonFormat[BidResponse] = jsonFormat6(BidResponse)
 }
 
 

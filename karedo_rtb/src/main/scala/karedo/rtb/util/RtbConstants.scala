@@ -22,6 +22,7 @@ trait RtbConstants {
   val app_storeurl_android = "tbc"
   val app_privacypolicy = 1
   val app_paid = 0
+  val secure_ad = 0
 
   val rtb_max_wait = (bid_tmax * 20) milliseconds
   val dispatcher_max_wait = (bid_tmax * 100) milliseconds
