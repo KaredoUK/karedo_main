@@ -40,7 +40,7 @@ class AdActor
     val dspDispatcherConfigs = conf.getConfigList("dsp.dispatchers").asScala.map(c => {
       DspBidDispatcherConfig(
         name = c.getString("name"),
-        kind = c.getString("kind"),
+        kind = c.getString("kind") match {case "DUMMY" => DUMMY case "ORTB2.2" => ORTB2_2 case "ORTB2.2.1" => ORTB2_2 case _ => DUMMY },
         scheme = c.getString("scheme") match {case "https" => HTTPS case _ => HTTP },
         host = c.getString("host"),
         port = c.getInt("port"),
@@ -50,10 +50,8 @@ class AdActor
 
     val dispatchers:List[DspBidDispather] = dspDispatcherConfigs.map(dc => {
       dc.kind match {
-        case "DUMMY" => new DummyDspBidDispatcher(dc)
-        case "ORTB2.2" => new ORTB2_2_1DspBidDispatcher(dc)
-        case "ORTB2.2.1" => new ORTB2_2_1DspBidDispatcher(dc)
-        case _ => new DummyDspBidDispatcher(dc)
+        case DUMMY => new DummyDspBidDispatcher(dc)
+        case ORTB2_2 => new ORTB2_2_1DspBidDispatcher(dc)
       }
     })
 
