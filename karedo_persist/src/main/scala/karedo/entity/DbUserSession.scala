@@ -10,8 +10,9 @@ import karedo.util.Util.now
 
 object UserSession {
   val EXPIRY_MINUTES = 20
+  val EXPIRY_DAYS = 1
 
-  def expire = now.plusMinutes(EXPIRY_MINUTES)
+  def expire = now.plusDays(EXPIRY_DAYS)
 }
 
 case class UserSession
@@ -19,7 +20,7 @@ case class UserSession
   @Key("_id") id: String = UUID.randomUUID().toString
   , account_id: String
   , ts_created: DateTime = now
-  , ts_expire: DateTime = now.plusMinutes(UserSession.EXPIRY_MINUTES)
+  , ts_expire: DateTime = now.plusDays(UserSession.EXPIRY_DAYS)
   , info: Option[String] = None
 )
   extends Keyable[String]
