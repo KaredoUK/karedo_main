@@ -182,8 +182,8 @@ object BidRequestCommon extends DefaultJsonProtocol {
   case class Device
   ( ua:Option[String] = None,                                 // Y
     geo:Option[Geo] = None, // 2.4 Only                       // Y
-    dnt:Option[Int] = Some(0), // OK ot track.
-    lmt:Option[Int] = Some(1), // 2.4 Only
+    dnt:Option[Int] = None, // OK ot track.
+    lmt:Option[Int] = None, // 2.4 Only
     ip:Option[String] = Some("127.0.0.1"),                    // Y
     // ipv6:Option[String] = None, // 2.2.1 Only
     devicetype:Option[Int] = Some(1),                         // Y, 1 - mobile/tablet, 4 - phone, 5 - tablet
@@ -224,7 +224,7 @@ object BidRequestModel_2_2_1 extends DefaultJsonProtocol  {
    app:Option[App] = None,
    device:Device,
    user:User,
-   at:Option[Int] = Some(2),
+   at:Option[Int] = None,
    tmax:Option[Int] = Some(250), //@TODO: Set from exchange.conf
    wseat:Option[List[String]] = None,
    allimps:Option[Int] = None,
