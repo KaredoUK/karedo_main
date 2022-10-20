@@ -23,7 +23,7 @@ trait Kar147_Resend_actor
       val application_id = request.application_id
       val msisdn = request.msisdn
 
-      logger.info(s"Resend\nMobile: ${msisdn}\nApplicationID: ${application_id}")
+      logger.debug(s"Resend\nMobile: ${msisdn}\nApplicationID: ${application_id}")
 
       dbUserApp.find(application_id) match {
         case OK(userApp) => {
@@ -81,7 +81,7 @@ trait Kar147_ResendEmail_actor
       val application_id = request.application_id
       val address = request.email
 
-      logger.info(s"Resend\nAddress: ${address}\nApplicationID: ${application_id}")
+      logger.debug(s"Resend\nAddress: ${address}\nApplicationID: ${application_id}")
 
       dbUserApp.find(application_id) match {
         case OK(userApp) => {

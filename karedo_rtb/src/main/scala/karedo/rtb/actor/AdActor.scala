@@ -59,7 +59,7 @@ class AdActor
   }
 
   def getAds(request:AdRequest) : List[AdUnit] = {
-    logger.info(marker, s"IN: getAds. AdRequest is: ${request.toJson.toString}" )
+    logger.debug(marker, s"IN: getAds. AdRequest is: ${request.toJson.toString}" )
 
     implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
 
@@ -119,7 +119,7 @@ class AdActor
       )
       val iabCatsMapObj: Map[String, UserPrefData] = userPrefs.prefs
 
-      logger.info(marker, s"IN: getAds. UserObject is: ${userObj.toJson.toString} and DeviceObject is: ${deviceObj.toJson.toString}" )
+      logger.debug(marker, s"IN: getAds. UserObject is: ${userObj.toJson.toString} and DeviceObject is: ${deviceObj.toJson.toString}" )
 
       val resp:List[List[AdUnit]] = dspDispatchers match {
         case Some(dispatchers) => {

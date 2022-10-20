@@ -25,7 +25,7 @@ trait Kar169_getIntent_actor
            sessionId: Option[String],
            intentId: Option[String]): Result[Error, APIResponse] = {
 
-    logger.info(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\napplicationId: $applicationId\nsessionId: $sessionId\nintentId: $intentId")
+    logger.debug(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\napplicationId: $applicationId\nsessionId: $sessionId\nintentId: $intentId")
 
     authenticate(accountId, deviceId, applicationId, sessionId, allowCreation = false)(
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {

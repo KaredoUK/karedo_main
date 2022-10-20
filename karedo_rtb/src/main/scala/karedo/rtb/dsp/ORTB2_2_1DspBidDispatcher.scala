@@ -196,7 +196,7 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
     def deserialize[T](r: HttpResponse)(implicit um: Unmarshaller[ResponseEntity, T]): Future[Option[T]] = {
       r.status match {
         case OK => {
-          logger.info(s"${config.name}: Successful Response 200 OK")
+          logger.debug(s"${config.name}: Successful Response 200 OK")
           Unmarshal(r.entity).to[T] map Some.apply
         }
         case _ => {
@@ -207,13 +207,17 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
     }
 
     def apiCall: Future[Option[BidResponse]] = {
+      val bid_request = HttpRequest(
+        POST,
+        uri = Uri(path = Path(config.path)),
+        entity = HttpEntity(`application/json`, bid.toJson.toString),
+        headers = List(rtbHeader)
+      )
+
+      logger.info(s"Bid Reqest (${config.name}) => ${bid_request}")
+
       val source = Source.single(
-        HttpRequest(
-          POST,
-          uri = Uri(path = Path(config.path)),
-          entity = HttpEntity(`application/json`, bid.toJson.toString),
-          headers = List(rtbHeader)
-        )
+        bid_request
       )
 
       val flow = config.scheme match {
@@ -235,18 +239,21 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
 //            entity = HttpEntity(`application/json`, bid.toJson.toString),
 //            headers = List(rtbHeader)
 //          )
-//        ).map{r => deserialize[BidResponse](r)}
+//        ).map[Option[BidResponse]]{r => r.status match {
+//          case OK => Unmarshal(r.entity).to[BidResponse] map Some.apply
+//          case _ => Future(None)
+//        }}
 
       val responseFuture:Future[Option[BidResponse]] = apiCall
 
       val response = Await.result(responseFuture, rtb_max_wait)
 
-      logger.debug(s"${config.name}: Response from Exchange: " + response)
+      logger.info(s"${config.name}: Response from Exchange: " + response)
 
       response
     } catch {
       case e: Exception => {
-        logger.error(s"${config.name}: Sending Bid Request to [${config.endpoint}] failed.\nBid Request:\n${bid.toJson.toString}", e)
+        logger.error(s"${config.name}: Error Sending Bid Request to [${config.endpoint}] failed.\nBid Request:\n${bid.toJson.toString}", e)
         None
       }
     }

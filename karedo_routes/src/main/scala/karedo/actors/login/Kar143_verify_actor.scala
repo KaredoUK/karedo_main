@@ -28,7 +28,7 @@ trait Kar143_verify_actor
 
     Try [Result[Error, APIResponse]] {
 
-      logger.info(s"Email Verify\nmsisdn: ${email}\nsms_code: ${email_code}\nVerifyId: ${verifyId}")
+      logger.debug(s"Email Verify\nmsisdn: ${email}\nsms_code: ${email_code}\nVerifyId: ${verifyId}")
 
       val emailVerify = dbEmailVerify.find(verifyId.get).get
       val account_id = emailVerify.account_id

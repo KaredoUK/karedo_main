@@ -27,7 +27,7 @@ trait Kar172_deleteIntent_actor
     val sessionId = Some(request.session_id)
 
 
-    logger.info(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\napplicationId: $applicationId\nsessionId: $sessionId\nintentId: $intentId")
+    logger.debug(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\napplicationId: $applicationId\nsessionId: $sessionId\nintentId: $intentId")
 
     authenticate(accountId, deviceId, applicationId, sessionId, allowCreation = false)(
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {

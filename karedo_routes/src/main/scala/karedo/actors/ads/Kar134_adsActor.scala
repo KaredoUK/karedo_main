@@ -36,7 +36,7 @@ trait Kar134_adsActor
            adCount: Int,
            devObj: DeviceRequest): Result[Error, APIResponse] = {
 
-    logger.info(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\napplicationId: $applicationId\nsessionId: $sessionId\nadCount: $adCount")
+    logger.debug(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\napplicationId: $applicationId\nsessionId: $sessionId\nadCount: $adCount")
 
     val ret = authenticate(accountId, deviceId, applicationId, sessionId) {
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {

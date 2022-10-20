@@ -47,7 +47,7 @@ trait Kar141_SendCode_actor
       if (userType == null || userType.equals("")) KO(Error(s"user_type is null"))
       if (!userType.equals("CUSTOMER")) KO(Error(s"user_type value is not CUSTOMER. Only one value is supported"))
 
-      logger.info(s"OK applicationId: $applicationId firstName: $firstName lastName: $lastName msisdn: $msisdn userType: $userType email: $email")
+      logger.debug(s"OK applicationId: $applicationId firstName: $firstName lastName: $lastName msisdn: $msisdn userType: $userType email: $email")
 
       dbUserApp.find(applicationId) match {
         case OK(userApp) => known_app(userApp, msisdn, email, (firstName, lastName))

@@ -36,13 +36,13 @@ abstract class DbMongoDAO[K, T <: Keyable[K]]
   val thisClass = manifestT.runtimeClass
   val simpleName = thisClass.getSimpleName
   val logger = LoggerFactory.getLogger(thisClass)
-  //logger.info(s"setting up $thisClass")
+  //logger.debug(s"setting up $thisClass")
 
   lazy val dao = new SalatDAO[T, K](collection = db(s"${DbMongoDAO.tablePrefix}$simpleName")) {}
 
   override def insertNew(r: T): Result[String, T] = {
     val id = r.id
-    logger.info(s"insertNew $r")
+    logger.debug(s"insertNew $r")
     Try(
       dao.insert(
         r
@@ -55,7 +55,7 @@ abstract class DbMongoDAO[K, T <: Keyable[K]]
   }
 
   override def find(id: K): Result[String, T] = {
-    logger.info(s"find $id")
+    logger.debug(s"find $id")
     val ret = Try {
       dao.findOneById(id)
     } match {
@@ -66,13 +66,13 @@ abstract class DbMongoDAO[K, T <: Keyable[K]]
         KO(x.toString)
 
     }
-    logger.info(s"getById returning $ret")
+    logger.debug(s"getById returning $ret")
     ret
 
   }
 
   override def findByAccount(account_id: String): Result[String, List[T]] = {
-    logger.info(s"find by account $account_id")
+    logger.debug(s"find by account $account_id")
     val ret = Try {
       dao.find(MongoDBObject("account_id" -> account_id) )
     } match {
@@ -81,7 +81,7 @@ abstract class DbMongoDAO[K, T <: Keyable[K]]
       case Failure(x) =>
         KO(x.toString)
     }
-    logger.info(s"getById returning $ret")
+    logger.debug(s"getById returning $ret")
     ret
 
   }
@@ -132,7 +132,7 @@ abstract class DbMongoDAO[K, T <: Keyable[K]]
   }
 
   override def ids: Result[String, List[K]] = {
-    logger.info(s"findAll")
+    logger.debug(s"findAll")
     val ret = Try {
       dao.ids(MongoDBObject("_id" -> MongoDBObject("$exists" -> true)))
     } match {
@@ -141,14 +141,14 @@ abstract class DbMongoDAO[K, T <: Keyable[K]]
         KO(x.toString)
 
     }
-    logger.info(s"ids returning $ret")
+    logger.debug(s"ids returning $ret")
     ret
 
   }
 
   override def update(r: T): Result[String, T] = {
     val id = r.id
-    logger.info(s"updating $r")
+    logger.debug(s"updating $r")
     Try {
       dao.update(byId(id), grater[T].asDBObject(r))
     } match {
@@ -159,7 +159,7 @@ abstract class DbMongoDAO[K, T <: Keyable[K]]
 
   override def delete(r: T): Result[String, T] = {
     val id = r.id
-    logger.info(s"deleting id: $id}")
+    logger.debug(s"deleting id: $id}")
     Try {
       dao.removeById(id)
     } match {

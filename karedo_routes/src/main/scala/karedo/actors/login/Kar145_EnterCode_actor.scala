@@ -25,7 +25,7 @@ trait Kar145_EnterCode_actor
   def exec(request:Kar145Req): Result[Error, APIResponse] = {
 
     Try [Result[Error, APIResponse]] {
-      logger.info(s"Mobile Verify\nmsisdn: ${request.msisdn}\nsms_code: ${request.sms_code}\nApplicationID: ${request.application_id}")
+      logger.debug(s"Mobile Verify\nmsisdn: ${request.msisdn}\nsms_code: ${request.sms_code}\nApplicationID: ${request.application_id}")
 
       val msisdn = request.msisdn
       val sms_code = request.sms_code

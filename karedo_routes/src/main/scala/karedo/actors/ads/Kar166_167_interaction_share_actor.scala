@@ -24,7 +24,7 @@ trait Kar166_interaction_actor extends DbCollections
   def exec(accountId: String, deviceId: Option[String], request: Kar166Request): Result[Error, APIResponse] = {
     val applicationId = request.application_id
     val sessionId = request.session_id
-    logger.info(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\nsessionId: $sessionId")
+    logger.debug(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\nsessionId: $sessionId")
     authenticate(accountId, deviceId, applicationId, Some(sessionId), allowCreation = false)(
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
 
@@ -57,7 +57,7 @@ trait Kar167_share_data_actor extends DbCollections
   def exec(accountId: String, deviceId: Option[String], request: Kar167Request): Result[Error, APIResponse] = {
     val applicationId = request.application_id
     val sessionId = request.session_id
-    logger.info(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\nsessionId: $sessionId")
+    logger.debug(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\nsessionId: $sessionId")
     authenticate(accountId, deviceId, applicationId, Some(sessionId), allowCreation = false)(
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
 
@@ -140,7 +140,7 @@ trait Kar165_postFavourite_actor extends DbCollections
   def exec(accountId: String, deviceId: Option[String], request: Kar165Request): Result[Error, APIResponse] = {
     val applicationId = request.application_id
     val sessionId = request.session_id
-    logger.info(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\nsessionId: $sessionId")
+    logger.debug(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\nsessionId: $sessionId")
     authenticate(accountId, deviceId, applicationId, Some(sessionId), allowCreation = false)(
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
 
@@ -175,7 +175,7 @@ trait Kar165_getFavourite_actor extends DbCollections
   override val logger = LoggerFactory.getLogger(classOf[Kar165_getFavourite_actor])
 //accountId, deviceId, applicationId, sessionId
   def exec(accountId: String, deviceId: Option[String], applicationId:String, sessionId: Option[String]): Result[Error, APIResponse] = {
-    logger.info(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\nsessionId: $sessionId")
+    logger.debug(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\nsessionId: $sessionId")
     authenticate(accountId, deviceId, applicationId, sessionId, allowCreation = false)(
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
 

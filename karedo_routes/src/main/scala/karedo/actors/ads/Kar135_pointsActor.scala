@@ -23,7 +23,7 @@ trait Kar135_pointsActor extends DbCollections
            applicationId: String,
            sessionId: Option[String]): Result[Error, APIResponse] = {
 
-    logger.info(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\napplicationId: $applicationId\nsessionId: $sessionId")
+    logger.debug(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\napplicationId: $applicationId\nsessionId: $sessionId")
 
     authenticate(accountId, deviceId, applicationId, sessionId, allowCreation = false)(
       (uApp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {

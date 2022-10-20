@@ -25,7 +25,7 @@ trait Kar194_getPrefs_actor
            applicationId: String,
            sessionId: Option[String]): Result[Error, APIResponse] = {
 
-    logger.info(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\napplicationId: $applicationId\nsessionId: $sessionId")
+    logger.debug(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\napplicationId: $applicationId\nsessionId: $sessionId")
 
     authenticate(accountId, deviceId, applicationId, sessionId, allowCreation = false)(
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {

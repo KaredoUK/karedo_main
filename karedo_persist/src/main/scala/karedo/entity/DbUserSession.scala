@@ -34,7 +34,7 @@ trait DbUserSession extends DbMongoDAO[String, UserSession] {
       val sess = usess.get
       if (sess.ts_expire.isBeforeNow) {
         val result = super.delete(sess)
-        if (result.isKO) logger.info(s"cant remove expired sess ${result.err}")
+        if (result.isKO) logger.error(s"cant remove expired sess ${result.err}")
         KO(s"Session Expired on ${sess.ts_expire}")
       } else {
         val result = super.update(sess.copy(ts_expire = UserSession.expire))

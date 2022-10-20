@@ -24,7 +24,7 @@ trait Kar138_login_actor
     val account_id = request.account_id
     val application_id = request.application_id
 
-    logger.info(s"Login\nAccountID: ${account_id}\nApplicationID: ${application_id}")
+    logger.debug(s"Login\nAccountID: ${account_id}\nApplicationID: ${application_id}")
 
     val password = request.password
 
