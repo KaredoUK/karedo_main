@@ -117,7 +117,7 @@ object BidRequestCommon extends DefaultJsonProtocol {
     privacypolicy:Option[Int] = Some(0),
     ref:Option[String] = None,
     search:Option[String] = None,
-    mobile:Option[Int] = Some(1), // 2.4 Only
+    mobile:Option[Int] = None, // 2.4 Only
     publisher:Option[Publisher] = None,
     content:Option[Content] = None,
     keywords:Option[String] = None
@@ -433,7 +433,7 @@ object BidResponseModelCommon extends DefaultJsonProtocol {
   ( id:String,
     impid:String,
     price:Double,
-    adid:String,
+    adid:Option[String],
     nurl:Option[String],
     adm:Option[String],
     adomain:Option[List[String]],

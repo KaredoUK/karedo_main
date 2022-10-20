@@ -73,7 +73,7 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
     val adUnit = response.seatbid.map(sb => sb.bid.map(b => {
       AdUnit(
         ad_type = ad_type_IMAGE
-        , ad_id = b.adid
+        , ad_id = b.adid.getOrElse(s"${b.id}-${b.impid}")
         , impid = b.impid
         , ad = getAdFromBid(b, response.id, sb.seat)
         , price = b.price
@@ -153,7 +153,7 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
             , ("${AUCTION_BID_ID}", seat_id)
             , ("${AUCTION_IMP_ID}", bid.impid)
             , ("${AUCTION_SEAT_ID}", seat_id)
-            , ("${AUCTION_AD_ID}", bid.adid)
+            , ("${AUCTION_AD_ID}", bid.adid.getOrElse(s"${bid.id}-${bid.impid}"))
             , ("${AUCTION_PRICE}", bid.price.toString)
           ).foldLeft(str){case (s, (k, v)) => s.replaceAll(k, v)})
         }
@@ -269,7 +269,8 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
     BidRequest(
       id = _id
       , imp = getImps(seqId, _id)
-      , app = Some(getApp(iabCats, make))
+      , app = if(app_included) Some(getApp(iabCats, make)) else None
+      , site = if(site_included) Some(getSite(iabCats, make)) else None
       , user = user
       , device = device
       , bcat = Some(bid_bcat)
@@ -305,5 +306,18 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
       , cat = Some(iabCats)
       , content = Some(Content(cat = Some(iabCats)))
     )
+  }
+
+  def getSite(iabCats:List[String], deviceType: DeviceMake):Site = {
+    Site(
+      id = site_id
+      , name = Some(site_name)
+      , domain = Some(site_domain)
+      , cat = Some(iabCats)
+      , privacypolicy = Some(site_privacypolicy)
+      , content = Some(Content(cat = Some(iabCats)))
+      , page = Some(site_page)
+    )
+
   }
 }

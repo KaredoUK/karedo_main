@@ -82,7 +82,12 @@ class AdActor
             Some(Geo(
               lat = devReq.lat,
               lon = devReq.lon,
-              country = devReq.country
+              country = devReq.country,
+              zip = userProfile.postcode.map(s => devReq.country match {
+                case Some("GB") => s.substring(0, s.length - 2)
+                case _ => s
+              }
+              )
             ))
         )
 
