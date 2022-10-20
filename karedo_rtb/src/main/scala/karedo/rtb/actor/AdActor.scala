@@ -80,14 +80,18 @@ class AdActor
         yob = userProfile.yob,
         geo =
             Some(Geo(
-              lat = devReq.lat,
-              lon = devReq.lon,
-              country = devReq.country,
-              zip = userProfile.postcode.map(s => devReq.country match {
-                case Some("GB") => s.substring(0, s.length - 2)
-                case _ => s
+              lat = devReq.lat
+              , lon = devReq.lon
+              , country = devReq.country
+              , zip = userProfile.postcode match {
+                case Some(zip) => {
+                  devReq.country match {
+                    case Some(c) if c.equals("GB") && zip.length > 2 => Some(zip.substring(0, zip.length - 2))
+                    case _ => Some(zip)
+                  }
+                }
+                case _ => None
               }
-              )
             ))
         )
 
