@@ -4,8 +4,7 @@ import java.io.File
 import java.util.UUID
 import javax.imageio.ImageIO
 
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers.BasicHttpCredentials
+import akka.actor.ActorSystem
 import com.google.zxing.client.j2se.{BufferedImageLuminanceSource, MatrixToImageConfig, MatrixToImageWriter}
 import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.{BarcodeFormat, BinaryBitmap, EncodeHintType}
@@ -28,6 +27,15 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.tools.nsc.io.Path
 import scala.util.{Failure, Success, Try}
+import akka.http.scaladsl._
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.Uri._
+import akka.http.scaladsl.model.HttpMethods._
+import akka.http.scaladsl.model.MediaTypes._
+import akka.http.scaladsl.model.headers._
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.headers.BasicHttpCredentials
+import akka.stream.ActorMaterializer
 
 
 /**
@@ -173,7 +181,7 @@ trait KaredoUtils
   extends DbCollections
     with KaredoConstants
   with KaredoIds
-  with DefaultActorSystem
+//  with DefaultActorSystem
   with KaredoJsonHelpers
 {
   def MAKE_THROWABLE(error:String, text:String = "", code: Int = 500, mime:String = "", headers:List[HttpHeader] = List()) = {
@@ -230,17 +238,7 @@ trait KaredoUtils
 
 
   def sendSMS(msisdn: String, text: String): Future[Result[Error, String]] = {
-//    import spray.client.pipelining._
-//    import spray.http._
-
-    import akka.http.scaladsl._
-    import akka.http.scaladsl.model._
-    import akka.http.scaladsl.model.Uri._
-    import akka.http.scaladsl.model.HttpMethods._
-//    import akka.http.scaladsl.model.HttpProtocols._
-    import akka.http.scaladsl.model.MediaTypes._
-//    import akka.http.scaladsl.model.HttpCharsets._
-    import akka.http.scaladsl.model.headers._
+    import HttpDispatcher._
 
     val request = HttpRequest(
       POST,
@@ -251,41 +249,16 @@ trait KaredoUtils
 
     println(s"SMS Request: $request")
 
-    Http().singleRequest(
+    httpDispatcher.singleRequest(
               request
             ).map{r => r.status match {
       case akka.http.scaladsl.model.StatusCodes.OK => OK(s"[SMS] Sent a sms, response from service is $r")
       case _ => MAKE_ERROR(s"Request failed for reason ${r.status.value}:${r.status.defaultMessage}")
     }}
-
-//    val pipeline: HttpRequest => Future[HttpResponse] = {
-//      addHeader("Authorization", s"AccessKey $notification_sms_auth_accesskey") ~> sendReceive //~> unmarshal[String]
-//    }
-//
-//    pipeline {
-//      Post(
-//        Uri(notification_sms_server_endpoint), SMSRequest(msisdn, notification_sms_sender, text).toJson.toString)
-//    } map { httpResponse: HttpResponse =>
-//      if (httpResponse.status.isFailure) {
-//        MAKE_ERROR(s"Request failed for reason ${httpResponse.status.value}:${httpResponse.status.defaultMessage}")
-//      } else {
-//        OK(s"[SMS] Sent a sms, response from service is $httpResponse")
-//      }
-//    }
   }
 
   def sendEmail(email: String, subject: String, body: String): Future[Result[Error, String]] = {
-//    import spray.client.pipelining._
-//    import spray.http.{BasicHttpCredentials, FormData, HttpResponse}
-
-    import akka.http.scaladsl._
-    import akka.http.scaladsl.model._
-    import akka.http.scaladsl.model.Uri._
-    import akka.http.scaladsl.model.HttpMethods._
-    //    import akka.http.scaladsl.model.HttpProtocols._
-    import akka.http.scaladsl.model.MediaTypes._
-    //    import akka.http.scaladsl.model.HttpCharsets._
-    import akka.http.scaladsl.model.headers._
+    import HttpDispatcher._
 
     val request = HttpRequest(
       POST,
@@ -303,34 +276,12 @@ trait KaredoUtils
 
     println(s"EMAIL Request: $request")
 
-    Http().singleRequest(
+    httpDispatcher.singleRequest(
       request
     ).map{r => r.status match {
       case akka.http.scaladsl.model.StatusCodes.OK => OK(s"[[EMAIL] Email sent correctly answer is  $r")
       case _ => MAKE_ERROR(s"[EMAIL] Got an error response is ${r}")
     }}
-
-//    val requestPipeline = addCredentials(BasicHttpCredentials("api", s"$notification_email_auth_accesskey")) ~> sendReceive
-//
-//    requestPipeline {
-//      Post(
-//        notification_email_server_endpoint,
-//        FormData(
-//          Map(
-//            "from" -> notification_email_sender,
-//            "to" -> email,
-//            "subject" -> subject,
-//            "html" -> body
-//          )
-//        )
-//      )
-//    } map { httpResponse: HttpResponse =>
-//      if (httpResponse.status.isFailure) {
-//        MAKE_ERROR(s"[EMAIL] Got an error response is ${httpResponse.entity.asString}")
-//      } else {
-//        OK(s"[EMAIL] Email sent correctly answer is ${httpResponse.entity}")
-//      }
-//    }
   }
 
   def createAndInsertNewAccount(account_id: String): Result[String, UserAccount] = {
@@ -455,3 +406,6 @@ trait KaredoQRCode extends KaredoConstants {
   }
 }
 
+object HttpDispatcher extends DefaultActorSystem {
+  val httpDispatcher = Http()
+}

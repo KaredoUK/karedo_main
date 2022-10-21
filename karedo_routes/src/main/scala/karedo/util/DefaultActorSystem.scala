@@ -8,6 +8,6 @@ import akka.stream.ActorMaterializer
   */
 trait DefaultActorSystem {
   implicit val actor_system = ActorSystem("server")
-  implicit val actor_materializer = ActorMaterializer()
+  implicit val materializer = ActorMaterializer()
 
 }

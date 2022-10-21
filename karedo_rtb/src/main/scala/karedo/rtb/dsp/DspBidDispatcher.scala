@@ -1,5 +1,8 @@
 package karedo.rtb.dsp
 
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
+import akka.stream.ActorMaterializer
 import karedo.rtb.model.AdModel.AdUnit
 import karedo.entity._
 import karedo.rtb.model.BidRequestCommon._
@@ -23,3 +26,10 @@ case object HTTPS extends HttpScheme
 sealed trait DspKind
 case object DUMMY extends DspKind
 case object ORTB2_2 extends DspKind
+
+object HttpDispatcher {
+  implicit val actor_system = ActorSystem("rtb")
+  implicit val actor_materializer = ActorMaterializer()
+
+  val httpDispatcher = Http()
+}

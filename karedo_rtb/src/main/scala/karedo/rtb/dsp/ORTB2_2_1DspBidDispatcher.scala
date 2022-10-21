@@ -187,9 +187,11 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
     import akka.stream.scaladsl.{ Source, Sink }
 
     import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+    import HttpDispatcher._
 
-    implicit val actor_system = ActorSystem("rtb")
-    implicit val actor_materializer = ActorMaterializer()
+//    implicit val actor_system = ActorSystem("rtb")
+//    implicit val actor_materializer = ActorMaterializer()
+
 
     val rtbHeader = headers.RawHeader("x-openrtb-version", "2.2")
 
@@ -207,6 +209,7 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
     }
 
     def apiCall: Future[Option[BidResponse]] = {
+
       val bid_request = HttpRequest(
         POST,
         uri = Uri(path = Path(config.path)),
@@ -221,8 +224,8 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
       )
 
       val flow = config.scheme match {
-        case HTTP => Http().outgoingConnection(host = config.host, port = config.port).mapAsync(1) { r => deserialize[BidResponse](r) }
-        case HTTPS => Http().outgoingConnectionHttps(host = config.host, port = config.port).mapAsync(1) { r => deserialize[BidResponse](r)
+        case HTTP => httpDispatcher.outgoingConnection(host = config.host, port = config.port).mapAsync(1) { r => deserialize[BidResponse](r) }
+        case HTTPS => httpDispatcher.outgoingConnectionHttps(host = config.host, port = config.port).mapAsync(1) { r => deserialize[BidResponse](r)
         }
       }
 
@@ -231,18 +234,6 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
 
 
     try {
-//      val responseFuture:Future[Option[BidResponse]] =
-//        Http().singleRequest(
-//          HttpRequest(
-//            POST,
-//            uri = config.endpoint,
-//            entity = HttpEntity(`application/json`, bid.toJson.toString),
-//            headers = List(rtbHeader)
-//          )
-//        ).map[Option[BidResponse]]{r => r.status match {
-//          case OK => Unmarshal(r.entity).to[BidResponse] map Some.apply
-//          case _ => Future(None)
-//        }}
 
       val responseFuture:Future[Option[BidResponse]] = apiCall
 
