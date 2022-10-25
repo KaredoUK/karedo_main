@@ -11,14 +11,20 @@ object UrlMagic_share extends KaredoRoute
   def route = {
     Route {
       path("shr" ) {
-        get {
-          parameters('u, 'v) {
-            (url_code, hash_account) =>
-              doCall({
-                exec(url_code, hash_account, true)
-              }
-              )
-          }
+        optionalHeaderValueByName("User-Agent") {
+          ua =>
+            extractClientIP {
+              ip =>
+                get {
+                  parameters('u, 'v) {
+                    (url_code, hash_account) =>
+                      doCall({
+                        exec(url_code, hash_account, true, ua, ip)
+                      }
+                      )
+                  }
+                }
+            }
         }
       }
 

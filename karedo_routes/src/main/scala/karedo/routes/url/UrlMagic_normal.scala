@@ -11,14 +11,20 @@ object UrlMagic_normal extends KaredoRoute
   def route = {
     Route {
       path("nrm" ) {
-        get {
-          parameters('u, 'v) {
-            (url_code, hash_account) =>
-              doCall({
-                exec(url_code, hash_account, false)
-              }
-              )
-          }
+        optionalHeaderValueByName("User-Agent") {
+          ua =>
+            extractClientIP {
+              ip =>
+                get {
+                  parameters('u, 'v) {
+                    (url_code, hash_account) =>
+                      doCall({
+                        exec(url_code, hash_account, false, ua, ip)
+                      }
+                      )
+                  }
+                }
+            }
         }
       }
 

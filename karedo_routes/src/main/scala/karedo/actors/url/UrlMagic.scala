@@ -1,6 +1,6 @@
 package karedo.actors.url
 
-import akka.http.scaladsl.model.headers
+import akka.http.scaladsl.model.{RemoteAddress, headers}
 import karedo.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.entity.{UrlAccess, UserAccount, UserApp}
 import karedo.util._
@@ -21,11 +21,11 @@ trait UrlMagic extends DbCollections
   with KaredoConstants {
   override val logger = LoggerFactory.getLogger(classOf[UrlMagic])
 
-  def exec(url_code: String, account_hash:String, isShareUrl:Boolean  = false): Result[Error, APIResponse] = {
+  def exec(url_code: String, account_hash:String, isShareUrl:Boolean  = false, ua: Option[String] = None, ip: RemoteAddress): Result[Error, APIResponse] = {
     Try [Result[Error, APIResponse]] {
       val outUrl:String = dbUrlMagic.find(url_code) match {
         case OK(urlMagic) => {
-          if(isShareUrl) if(checkIfFirst) urlMagic.first_url else urlMagic.second_url.getOrElse(url_magic_fallback_url)
+          if(isShareUrl) if(checkIfFirst(ua, ip)) urlMagic.first_url else urlMagic.second_url.getOrElse(url_magic_fallback_url)
           else urlMagic.first_url
         }
         case KO(_) => url_magic_fallback_url
@@ -47,6 +47,12 @@ trait UrlMagic extends DbCollections
     }
   }
 
-  def checkIfFirst(): Boolean = true
-
+  def checkIfFirst(ua: Option[String] = None, ip: RemoteAddress): Boolean = {
+    ua match {
+      case None => false
+      case Some(u) => {
+        if(u.contains("facebookexternalhit") || u.contains("Google-HTTP-Java-Client") || u.contains("Yahoo!")) true else false
+      }
+    }
+  }
 }
