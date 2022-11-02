@@ -450,8 +450,8 @@ object BidResponseModelCommon extends DefaultJsonProtocol {
     protocol:Option[Int],
     qagmediarating:Option[Int],
     dealid:Option[String],
-    w:Int,
-    h:Int,
+    w:Option[Int],
+    h:Option[Int],
     // Only in 2.3.1 onwards
     exp:Option[Int]
   )

@@ -40,18 +40,21 @@ class AdActor
     val dspDispatcherConfigs = conf.getConfigList("dsp.dispatchers").asScala.map(c => {
       DspBidDispatcherConfig(
         name = c.getString("name"),
-        kind = c.getString("kind") match {case "DUMMY" => DUMMY case "ORTB2.2" => ORTB2_2 case "ORTB2.2.1" => ORTB2_2 case _ => DUMMY },
+        kind = c.getString("kind") match {case "DUMMY" => DUMMY case "ORTB2.2" => ORTB2_2 case "ORTB2.2.1" => ORTB2_2 case "smaato" => SMAATO case _ => DUMMY },
         scheme = c.getString("scheme") match {case "https" => HTTPS case _ => HTTP },
+        markup = c.getString("markup") match {case "nurl" => NURL case "adm" => ADM case "resp" => RESP },
         host = c.getString("host"),
         port = c.getInt("port"),
         path = c.getString("path"),
-        endpoint = c.getString("endpoint"))
+        endpoint = c.getString("endpoint"),
+        config = c)
     }).toList
 
     val dispatchers:List[DspBidDispather] = dspDispatcherConfigs.map(dc => {
       dc.kind match {
         case DUMMY => new DummyDspBidDispatcher(dc)
         case ORTB2_2 => new ORTB2_2_1DspBidDispatcher(dc)
+        case SMAATO => new SmaatoDspBidDispatcher(dc)
       }
     })
 
@@ -136,7 +139,7 @@ class AdActor
             val fSeq = Future.sequence(
               dispatchers.map(d =>
                 Future(
-                  d.getAds(request.count, userObj, deviceObj, iabCatsMapObj, make)
+                  d.getAds(request.count, userObj, deviceObj, iabCatsMapObj, make, devReq)
                 )
               )
             )

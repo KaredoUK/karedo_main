@@ -19,7 +19,7 @@ class DummyDspBidDispatcher(config: DspBidDispatcherConfig)
     with LoggingSupport
     with BidJsonImplicits {
 
-  override def getAds(count: Int, user: User, device: Device, iabCatMap: Map[String, UserPrefData], make: DeviceMake): List[AdUnit] = {
+  override def getAds(count: Int, user: User, device: Device, iabCatMap: Map[String, UserPrefData], make: DeviceMake, deviceRequest: DeviceRequest): List[AdUnit] = {
     logger.debug(marker, s"IN: DummyDspBidDispatcher.getAds. Count is ${count}, User is: ${user}, Device is ${device}" )
 
       val adUnits = scala.collection.mutable.ListBuffer.empty[AdUnit]
@@ -33,7 +33,7 @@ class DummyDspBidDispatcher(config: DspBidDispatcherConfig)
           java.util.UUID.randomUUID.toString,
           java.util.UUID.randomUUID.toString,
           Ad( u._1, u._2, u._3, u._4, None, Some(250), Some(300), None),
-          Math.random() * 2,
+          1,
           Some(List("karedo.co.uk")),
           None,
           None,

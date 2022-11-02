@@ -1,11 +1,5 @@
 package karedo.rtb.dsp
 
-import java.util.concurrent.Executors
-
-import akka.actor.ActorSystem
-import akka.http.scaladsl.model.Uri.Path
-import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.ActorMaterializer
 import karedo.entity.UserPrefData
 import karedo.rtb.model.AdModel._
 import karedo.rtb.model.BidRequestCommon._
@@ -13,11 +7,22 @@ import karedo.rtb.model.BidResponseModelCommon._
 import karedo.rtb.model.BidRequestModel_2_2_1._
 import karedo.rtb.model.BidJsonImplicits
 import karedo.rtb.util._
-
-import scala.concurrent.{Await, ExecutionContext, Future}
 import karedo.util.Util.newUUID
 import karedo.util.Util.now
-import org.slf4j.MarkerFactory
+import akka.http.scaladsl._
+import model._
+import Uri._
+import HttpMethods._
+import MediaTypes._
+import StatusCodes._
+import unmarshalling.{ Unmarshal, Unmarshaller }
+import akka.stream.scaladsl.{ Source, Sink }
+import scala.concurrent._
+import java.util.concurrent.Executors
+
+
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import HttpDispatcher._
 
 /**
   * Created by crajah on 28/11/2016.
@@ -32,7 +37,7 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
   implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
 
 
-  override def getAds(count: Int, user: User, device: Device, iabCatMap: Map[String, UserPrefData], make: DeviceMake): List[AdUnit] = {
+  override def getAds(count: Int, user: User, device: Device, iabCatMap: Map[String, UserPrefData], make: DeviceMake, deviceRequest: DeviceRequest): List[AdUnit] = {
     logger.debug(marker, s"IN: ORTB2_2_1DspBidDispatcher.getAds. Count is ${count}, User is: ${user}, Device is ${device}" )
 
     try {
@@ -82,8 +87,8 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
         , nurl = b.nurl
         , cid = b.cid
         , crid = b.crid
-        , w = b.w
-        , h = b.h
+        , w = b.w.getOrElse(banner_w)
+        , h = b.h.getOrElse(banner_h)
       )
     })).flatten
 
@@ -97,31 +102,49 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
 
     import scala.util.{Try, Success, Failure}
 
-    def getUrlPair(ad_markup: String): (String, String) = {
+    def getUrlPair(ad_markup: Option[String]): Option[(String, String)] = {
       logger.debug(marker, s"IN: ORTB2_2_1DspBidDispatcher.getAdFromBid.getUrlPair. Ad Markup: ${ad_markup}" )
 
       import scala.xml._
 
-      val ns = XML.loadString(ad_markup)
+      try {
+        ad_markup match {
+          case Some(markup) => {
+            val ns = XML.loadString(markup)
 
-      val click_url = (ns \ "a" \ "@src").toString
-      val imp_url = (ns \ "a" \ "img" \ "@src").toString
+            val click_url = (ns \ "a" \ "@src").toString
+            val imp_url = (ns \ "a" \ "img" \ "@src").toString
 
-      (imp_url, click_url)
+            Some((imp_url, click_url))
+          }
+          case None => None
+        }
+      } catch {
+        case e: Exception => None
+      }
     }
 
     Try [Ad] {
       val bid = substituteUrlMacrosInBidResponse(orig_bid, response_id, seat_id)
 
-      val ad_markup = bid.adm match {
-        case Some(adm) => adm
-        case None => bid.nurl match {
-          case Some(nurl) => nurl
-          case None => throw new Error(s"Ad Markup not found in both adm <${bid.adm}> and nurl <${bid.nurl}>")
-        }
+//      val ad_markup = bid.adm match {
+//        case Some(adm) => adm
+//        case None => bid.nurl match {
+//          case Some(nurl) => nurl
+//          case None => throw new Error(s"Ad Markup not found in both adm <${bid.adm}> and nurl <${bid.nurl}>")
+//        }
+//      }
+
+      val ad_markup:Option[String] = config.markup match {
+        case ADM  => bid.adm
+        case NURL => getAdMarkupFromNurl(bid.nurl)
+        case RESP => bid.adm
       }
 
-      val urlPair = getUrlPair(ad_markup)
+      val urlPair = getUrlPair(ad_markup) match {
+        case Some(pair) => pair
+        case None => ("","")
+      }
 
       Ad(
         imp_url = urlPair._1
@@ -129,8 +152,8 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
         , ad_text = ""
         , ad_source = bid.adomain match {case Some(add) => Some(add.head) case None => None}
         , duration = None
-        , h = Some(bid.h)
-        , w = Some(bid.w)
+        , h = bid.h
+        , w = bid.w
         , beacons = None
       )
     } match {
@@ -142,6 +165,29 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
         Ad( u._1, u._2, u._3, u._4, None, Some(250), Some(300), None)
       }
     }
+  }
+
+  def getAdMarkupFromNurl(nurl: Option[String]): Option[String] = {
+    nurl match {
+      case Some(nurl_path) => {
+        val http = config.scheme match {
+          case HTTP => httpDispatcher
+          case HTTPS => httpsDispatcher
+        }
+
+        val responseFuture = http.singleRequest(
+          HttpRequest(
+          GET,
+          uri = Uri(path = Path(nurl_path))
+        )).mapTo[String]
+
+        val response = Await.result(responseFuture, rtb_max_wait)
+
+        Some(response)
+      }
+      case None => None
+    }
+
   }
 
   def substituteUrlMacrosInBidResponse(bid:Bid, response_id:String, seat_id: String): Bid = {
@@ -174,23 +220,6 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
 
   def sendBidRequest(bid:BidRequest): Option[BidResponse] = {
     logger.debug(marker, s"IN: ORTB2_2_1DspBidDispatcher.sendBidRequest. Bid Request: ${bid.toJson.toString}" )
-
-    import akka.http.scaladsl._
-    import model._
-    import Uri._
-    import HttpMethods._
-    import HttpProtocols._
-    import MediaTypes._
-    import HttpCharsets._
-    import StatusCodes._
-    import unmarshalling.{ Unmarshal, Unmarshaller }
-    import akka.stream.scaladsl.{ Source, Sink }
-
-    import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-    import HttpDispatcher._
-
-//    implicit val actor_system = ActorSystem("rtb")
-//    implicit val actor_materializer = ActorMaterializer()
 
 
     val rtbHeader = headers.RawHeader("x-openrtb-version", "2.2")
@@ -225,7 +254,7 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
 
       val flow = config.scheme match {
         case HTTP => httpDispatcher.outgoingConnection(host = config.host, port = config.port).mapAsync(1) { r => deserialize[BidResponse](r) }
-        case HTTPS => httpDispatcher.outgoingConnectionHttps(host = config.host, port = config.port).mapAsync(1) { r => deserialize[BidResponse](r)
+        case HTTPS => httpsDispatcher.outgoingConnectionHttps(host = config.host, port = config.port).mapAsync(1) { r => deserialize[BidResponse](r)
         }
       }
 
