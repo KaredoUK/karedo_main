@@ -50,6 +50,8 @@ class AdActor
         config = c)
     }).toList
 
+    println("Found DSP Configs" + "\n" + dspDispatcherConfigs.toString)
+
     val dispatchers:List[DspBidDispather] = dspDispatcherConfigs.map(dc => {
       dc.kind match {
         case DUMMY => new DummyDspBidDispatcher(dc)
@@ -72,9 +74,9 @@ class AdActor
       val devReq = request.device
 
       val make = devReq.make.getOrElse("") match {
-        case DEVICE_MAKE_IOS => iOS
-        case DEVICE_MAKE_ANDROID => Android
-        case _ => iOS
+        case DEVICE_MAKE_IOS => DEV_TYPE_IOS
+        case DEVICE_MAKE_ANDROID => DEV_TYPE_ANDROID
+        case _ => DEV_TYPE_IOS
       }
 
       val userObj: User = User(
@@ -135,6 +137,7 @@ class AdActor
 
       val resp:List[List[AdUnit]] = dspDispatchers match {
         case Some(dispatchers) => {
+          println(s"Dispatchers Found" + "\n" + dispatchers.toString)
           try {
             val fSeq = Future.sequence(
               dispatchers.map(d =>
@@ -150,13 +153,15 @@ class AdActor
             ads
           } catch {
             case e: Exception => {
-              println(s"Dispatchers not found" + "\n" + e.getMessage + "\n" + e.getStackTrace.foldLeft("")((z, b) => z + b.toString + "\n"))
-              logger.error(s"Dispatchers not found ${dspDispatchers}", e)
+              logger.error("DSP Dispather Error", e)
               List(List())
             }
           }
         }
-        case None => List(List())
+        case None => {
+          logger.error(s"Dispatchers not found ${dspDispatchers}")
+          List(List())
+        }
       }
 
       logger.debug(marker, s"IN: getAds. All Ads Returned is: ${resp}" )

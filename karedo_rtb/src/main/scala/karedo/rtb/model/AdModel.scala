@@ -1,7 +1,7 @@
 package karedo.rtb.model
 
 
-import karedo.rtb.util.{Android, DeviceMake, iOS}
+import karedo.rtb.util.{DEV_TYPE_ANDROID, DeviceMake, DEV_TYPE_IOS}
 import spray.json._
 
 

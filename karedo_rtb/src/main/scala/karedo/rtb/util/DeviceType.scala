@@ -10,6 +10,6 @@ trait DeviceMakes {
 }
 
 sealed trait DeviceMake
-case object iOS extends DeviceMake
-case object Android extends DeviceMake
+case object DEV_TYPE_IOS extends DeviceMake
+case object DEV_TYPE_ANDROID extends DeviceMake
 

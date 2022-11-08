@@ -5,8 +5,9 @@ import java.util.concurrent.Executors
 import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.MediaTypes.`application/json`
 import akka.http.scaladsl.model.StatusCodes.OK
-import akka.http.scaladsl.model.Uri.Path
+import akka.http.scaladsl.model.Uri._
 import akka.http.scaladsl.model._
+
 import akka.http.scaladsl.unmarshalling.{Unmarshal, Unmarshaller}
 import akka.stream.scaladsl.{Sink, Source}
 import karedo.entity.UserPrefData
@@ -148,8 +149,8 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
 
   val apiver = "502"
 
-  val adSpaceID = ""
-  val publisherID = ""
+  val adSpaceID = "130211537"
+  val publisherID = "1100028064"
 
   val nsupport = "title,txt,image"
 
@@ -167,7 +168,7 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
 
   val responseFormat = "xml"
 
-  def buildRequest(seqId: Int, user: User, device: Device, iabCatMap: Map[String, UserPrefData], make: DeviceMake, deviceRequest: DeviceRequest): String = {
+  def buildRequest(seqId: Int, user: User, device: Device, iabCatMap: Map[String, UserPrefData], make: DeviceMake, deviceRequest: DeviceRequest): Map[String, String] = {
 
     import scala.collection._
 
@@ -202,14 +203,23 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
     params += ("width" -> banner_w.toString)
     params += ("height" -> banner_h.toString)
 
-    make match {
-      case iOS if deviceRequest.ifa.isDefined => {
-        params += ("iosadid" -> deviceRequest.ifa.get)
-        params += ("iosadtracking" -> iosadtracking)
+    if(deviceRequest.ifa.isDefined) {
+      make match {
+        case DEV_TYPE_ANDROID => {
+          params += ("googleadid" -> deviceRequest.ifa.get)
+        }
+        case iOS => {
+          params += ("iosadid" -> deviceRequest.ifa.get)
+        }
       }
-      case Android => {
-        params += ("googleadid" -> deviceRequest.ifa.get)
+    }
+
+    make match {
+      case DEV_TYPE_ANDROID => {
         params += ("googlednt" -> googlednt)
+      }
+      case iOS => {
+        params += ("iosadtracking" -> iosadtracking)
       }
     }
 
@@ -238,11 +248,11 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
 
     logger.debug(s"PARAMETERS: ${out}")
 
-    out
+    params.toMap
   }
 
-  def sendRequest(request:String, deviceRequest: DeviceRequest ): Option[SmaatoAdResponse] = {
-    logger.debug(marker, s"IN: ${class_name}.sendRequest. Request: ${request}" )
+  def sendRequest(params: Map[String, String], deviceRequest: DeviceRequest ): Option[SmaatoAdResponse] = {
+    logger.debug(marker, s"IN: ${class_name}.sendRequest. Request: ${params}" )
 
     import scala.collection._
 
@@ -263,7 +273,7 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
 
     if( deviceRequest.ua.isDefined ) http_headers += headers.RawHeader("x-mh-User-Agent", deviceRequest.ua.get)
 
-    val uri_path = config.endpoint + "?" + request
+    val uri_path = config.endpoint
 
 //    def deserialize[T](r: HttpResponse)(implicit um: Unmarshaller[ResponseEntity, T]): Future[Option[T]] = {
 //      r.status match {
@@ -289,9 +299,13 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
 
     // @TODO: Change Below.
     def apiCall: Future[HttpResponse] = {
+      val uri = Uri(uri_path).withQuery(Query(params))
+
+      logger.info(s"URI: ${uri}")
+
       val out_request = HttpRequest(
         GET,
-        uri = Uri(path = Path(uri_path)),
+        uri = uri,
         headers = http_headers.toList
       )
 
@@ -315,7 +329,7 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
       Some(responseEntityToSmaato(response))
     } catch {
       case e: Exception => {
-        logger.error(s"${config.name}: Error Sending Bid Request to [${config.endpoint}] failed.\n Request:\n${request}", e)
+        logger.error(s"${config.name}: Error Sending Bid Request to [${config.endpoint}] failed.\n Params:\n${params}", e)
         None
       }
     }

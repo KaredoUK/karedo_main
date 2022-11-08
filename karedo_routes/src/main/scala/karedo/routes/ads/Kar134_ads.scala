@@ -32,12 +32,14 @@ object Kar134_ads extends KaredoRoute
                             parameters('p, 's ?, 'c.as[Int], 'lat.as[Double].?, 'lon.as[Double].?, 'ifa ?, 'make ?, 'model ?, 'os ?, 'osv ?, 'did ?, 'dpid ?, 'mac ?, 'cc ?) {
                               (applicationId, sessionId, adCount, lat, lon, ifa, make, model, os, osv, did, dpid, mac, cc) =>
                                 doCall({
+                                  System.setProperty("java.net.preferIPv4Stack" , "true")
+
                                   val devObj = DeviceRequest(
                                     ua = ua,
                                     xff = xff,
                                     ifa = ifa,
                                     deviceType = Some(getDeviceType(make, model)),
-                                    ip = ip.toOption.map(_.getHostAddress),
+                                    ip = if( ip.getAddress.isPresent) Some(ip.getAddress.get.getHostAddress) else None,
                                     make = make,
                                     model = model,
                                     os = os,
