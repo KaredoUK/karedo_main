@@ -35,9 +35,19 @@ trait Kar189_postProfile_actor
 
           dbUserProfile.find(user_account.id) match {
             case OK(userProfile) => {
-              val profile = UserProfile(user_account.id, request.profile.gender, request.profile.first_name,
-                request.profile.last_name, request.profile.yob, request.profile.kids, request.profile.income, request.profile.postcode,
-                request.profile.location, request.profile.opt_in, request.profile.third_party, userProfile.ts_created , now)
+              val profile = userProfile.copy(
+                gender = if(request.profile.gender.isDefined) request.profile.gender else userProfile.gender,
+                first_name = if(request.profile.first_name.isDefined) request.profile.first_name else userProfile.first_name,
+                last_name = if(request.profile.last_name.isDefined) request.profile.last_name else userProfile.last_name,
+                yob = if(request.profile.yob.isDefined) request.profile.yob else userProfile.yob,
+                kids = if(request.profile.kids.isDefined) request.profile.kids else userProfile.kids,
+                income = if(request.profile.income.isDefined) request.profile.income else userProfile.income,
+                postcode = if(request.profile.postcode.isDefined) request.profile.postcode else userProfile.postcode,
+                location = if(request.profile.location.isDefined) request.profile.location else userProfile.location,
+                opt_in = if(request.profile.opt_in.isDefined) request.profile.opt_in else userProfile.opt_in,
+                third_party = if(request.profile.third_party.isDefined) request.profile.third_party else userProfile.third_party,
+                ts_updated = now
+              )
 
               dbUserProfile.update(profile)
             }
