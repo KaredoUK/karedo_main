@@ -19,6 +19,9 @@ import scala.concurrent._
 import scala.util.{Failure, Success, Try}
 
 import collection.JavaConverters._
+import scala.collection.JavaConverters._
+
+import org.jsoup._
 
 /**
   * Created by charaj on 27/12/2016.
@@ -78,7 +81,14 @@ class FeedBidDispatcher(config: DspBidDispatcherConfig)
         ad_id = item.guid,
         impid = item.guid,
         ad = Ad(
-          imp_url = if(enclosure.isDefined) enclosure.get.url else feed.image_url,
+          imp_url = enclosure match {
+            case Some(url) => url.url
+            case None => feed.image_url
+//              getLargestImageUrl(item.link) match {
+//              case Some(u) => u
+//              case None => feed.image_url
+//            }
+          },
           click_url = item.link,
           ad_text = item.title,
           ad_source = Some(feed.source),
@@ -112,13 +122,57 @@ class FeedBidDispatcher(config: DspBidDispatcherConfig)
      )
    })
   }
+
+
 }
 
-abstract class Reader  {
+abstract class Reader extends RtbConstants  {
   def extract(xml:Elem, name:String, image_url:String):Seq[RssFeed]
 
   def print(feed:RssFeed) {
     println(feed.items)
+  }
+
+  def getLargestImageUrl(url: String): Option[String] = {
+    try {
+      Await.result(Future {
+        val doc = Jsoup.connect(url).get()
+        val images = doc.select("img")
+
+        //     val imageSrcs = images.asScala.map(_.attr("src"))
+        //
+        //     val imgColl = images.asScala
+        //       .filter(i => { ! (i.attr("height").isEmpty || i.attr("width").isEmpty) })
+        //       .map(i => {
+        //         val url = i.attr("src")
+        //
+        //         var ha = i.attr("height")
+        //         var wa = i.attr("width")
+        //
+        //         ha = if(ha.endsWith("px")) ha.substring(0, ha.indexOf("px")) else ha
+        //         wa = if(wa.endsWith("px")) wa.substring(0, wa.indexOf("px")) else wa
+        //
+        //         ha = if(ha.endsWith("%")) ha.substring(0, ha.indexOf("%")) else ha
+        //         wa = if(wa.endsWith("%")) wa.substring(0, wa.indexOf("%")) else wa
+        //
+        //         val h = ha.toInt
+        //         val w = wa.toInt
+        //
+        //         val size = if((h > 5 && w > 5)) h * w else 0
+        //
+        //         (url, size)
+        //       })
+        //
+        //     val oUrl = if(imgColl.isEmpty) images.first().attr("src") else imgColl.maxBy(_._2)._1
+
+        Some(images.first().attr("src"))
+
+      }, rtb_max_wait)
+    } catch {
+      case e:Exception => {
+        None
+      }
+    }
   }
 }
 
@@ -189,7 +243,15 @@ class XmlReader extends Reader {
               length = (n \\ "@length").text.toInt,
               mime = (n \\ "@type").text
             )
-          ),
+          )
+//          match {
+//            case h::t => h::t
+//            case Nil => getLargestImageUrl((item \\ "link").text) match {
+//              case Some(u) => Seq(RssEnclosure(u, 0, "image/jpg"))
+//              case None => Nil
+//            }
+//          }
+          ,
           randonHint = Math.random()
         )
       }
