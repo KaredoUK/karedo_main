@@ -66,13 +66,14 @@ object AdModel extends DefaultJsonProtocol {
                      cid: Option[String],
                      crid: Option[String],
                      w: Int,
-                     h: Int
+                     h: Int,
+                     hint: Double = 0.0
                    )
 
 
   implicit val beacon = jsonFormat1(Beacon)
   implicit val ad = jsonFormat8(Ad)
-  implicit val adUnit = jsonFormat12(AdUnit)
+  implicit val adUnit = jsonFormat13(AdUnit)
 
   implicit val adResponse:RootJsonFormat[AdResponse] = jsonFormat2(AdResponse)
 

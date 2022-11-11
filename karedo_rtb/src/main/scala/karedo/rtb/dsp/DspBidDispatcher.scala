@@ -37,6 +37,7 @@ sealed trait DspKind
 case object DUMMY extends DspKind
 case object ORTB2_2 extends DspKind
 case object SMAATO extends DspKind
+case object FEED extends DspKind
 
 object HttpDispatcher {
   implicit val actor_system = ActorSystem("rtb")
