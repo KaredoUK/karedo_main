@@ -202,11 +202,15 @@ class AtomReader extends Reader {
           guid = (item \\ "id").text,
           enclosure = (item \\ "link")
             .filter(n => (n \ "@type").text.startsWith("image") || (n \ "@type").text.startsWith("video"))
-            .map(n => RssEnclosure(
+            .map(n => {
+              val enLen = (n \\ "@length").text
+              val enLenInt:Int = if(enLen != null && ! enLen.isEmpty) enLen.toInt else 0
+
+              RssEnclosure(
               url = (n \ "@href").text ,
-              length = (n \ "@length").text.toInt,
+              length = enLenInt,
               mime = (n \ "@type").text
-            )),
+            )}),
           randonHint = Math.random()
         )
       }
@@ -238,11 +242,15 @@ class XmlReader extends Reader {
           guid = (item \\ "guid").text,
           enclosure = (item \\ "enclosure").filter(n => (n \ "@type").text.startsWith("image") || (n \ "@type").text.startsWith("video"))
             .map(
-            n => RssEnclosure(
+            n => {
+              val enLen = (n \\ "@length").text
+              val enLenInt:Int = if(enLen != null && ! enLen.isEmpty) enLen.toInt else 0
+
+              RssEnclosure(
               url = (n \\ "@url").text,
-              length = (n \\ "@length").text.toInt,
+              length =  enLenInt,
               mime = (n \\ "@type").text
-            )
+            )}
           )
 //          match {
 //            case h::t => h::t
