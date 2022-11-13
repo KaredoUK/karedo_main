@@ -265,7 +265,7 @@ class XmlReader extends Reader {
       }
       XmlRssFeed(
         title = (channel \ "title").text.replaceAll("\n", "").replaceAll("\t", ""),
-        link = (channel \ "link").replaceAll("\n", "").replaceAll("\t", ""),
+        link = (channel \ "link").text.replaceAll("\n", "").replaceAll("\t", ""),
         desc = (channel \ "description").text,
         language = (channel \ "language").text,
         items = items,
