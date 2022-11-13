@@ -195,11 +195,11 @@ class AtomReader extends Reader {
     for (feed <- xml \\ "feed") yield {
       val items = for (item <- (feed \\ "entry")) yield {
         RssItem(
-          title = (item \\ "title").text.replaceAll("\n", ""),
-          link = getHtmlLink((item \\ "link")).replaceAll("\n", ""),
+          title = (item \\ "title").text.replaceAll("\n", "").replaceAll("\t", ""),
+          link = getHtmlLink((item \\ "link")).replaceAll("\n", "").replaceAll("\t", ""),
           desc = (item \\ "summary").text,
 //          date = parseAtomDate((item \\ "published").text, dateFormatter),
-          guid = (item \\ "id").text,
+          guid = (item \\ "id").text.replaceAll("\n", "").replaceAll("\t", ""),
           enclosure = (item \\ "link")
             .filter(n => (n \ "@type").text.startsWith("image") || (n \ "@type").text.startsWith("video"))
             .map(n => {
@@ -207,7 +207,7 @@ class AtomReader extends Reader {
               val enLenInt:Int = if(enLen != null && ! enLen.isEmpty) enLen.toInt else 0
 
               RssEnclosure(
-              url = (n \ "@href").text.replaceAll("\n", "") ,
+              url = (n \ "@href").text.replaceAll("\n", "").replaceAll("\t", ""),
               length = enLenInt,
               mime = (n \ "@type").text
             )}),
@@ -215,8 +215,8 @@ class AtomReader extends Reader {
         )
       }
       AtomRssFeed(
-        title = (feed \ "title").text,
-        link = getHtmlLink((feed \ "link")),
+        title = (feed \ "title").text.replaceAll("\n", "").replaceAll("\t", ""),
+        link = getHtmlLink((feed \ "link")).replaceAll("\n", "").replaceAll("\t", ""),
         desc = (feed \ "subtitle ").text,
         items = items,
         source = name,
@@ -235,11 +235,11 @@ class XmlReader extends Reader {
     for (channel <- xml \\ "channel") yield {
       val items = for (item <- (channel \\ "item")) yield {
         RssItem(
-          title = (item \\ "title").text.replaceAll("\n", ""),
-          link = (item \\ "link").text.replaceAll("\n", ""),
+          title = (item \\ "title").text.replaceAll("\n", "").replaceAll("\t", ""),
+          link = (item \\ "link").text.replaceAll("\n", "").replaceAll("\t", ""),
           desc = (item \\ "description").text,
 //          date = dateFormatter.parse((item \\ "pubDate").text),
-          guid = (item \\ "guid").text,
+          guid = (item \\ "guid").text.replaceAll("\n", "").replaceAll("\t", ""),
           enclosure = (item \\ "enclosure").filter(n => (n \ "@type").text.startsWith("image") || (n \ "@type").text.startsWith("video"))
             .map(
             n => {
@@ -247,7 +247,7 @@ class XmlReader extends Reader {
               val enLenInt:Int = if(enLen != null && ! enLen.isEmpty) enLen.toInt else 0
 
               RssEnclosure(
-              url = (n \\ "@url").text.replaceAll("\n", ""),
+              url = (n \\ "@url").text.replaceAll("\n", "").replaceAll("\t", ""),
               length =  enLenInt,
               mime = (n \\ "@type").text
             )}
@@ -264,8 +264,8 @@ class XmlReader extends Reader {
         )
       }
       XmlRssFeed(
-        title = (channel \ "title").text.replaceAll("\n", ""),
-        link = (channel \ "link").text.replaceAll("\n", ""),
+        title = (channel \ "title").text.replaceAll("\n", "").replaceAll("\t", ""),
+        link = (channel \ "link").replaceAll("\n", "").replaceAll("\t", ""),
         desc = (channel \ "description").text,
         language = (channel \ "language").text,
         items = items,
