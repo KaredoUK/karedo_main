@@ -195,8 +195,8 @@ class AtomReader extends Reader {
     for (feed <- xml \\ "feed") yield {
       val items = for (item <- (feed \\ "entry")) yield {
         RssItem(
-          title = (item \\ "title").text,
-          link = getHtmlLink((item \\ "link")),
+          title = (item \\ "title").text.replaceAll("\n", ""),
+          link = getHtmlLink((item \\ "link")).replaceAll("\n", ""),
           desc = (item \\ "summary").text,
 //          date = parseAtomDate((item \\ "published").text, dateFormatter),
           guid = (item \\ "id").text,
@@ -207,7 +207,7 @@ class AtomReader extends Reader {
               val enLenInt:Int = if(enLen != null && ! enLen.isEmpty) enLen.toInt else 0
 
               RssEnclosure(
-              url = (n \ "@href").text ,
+              url = (n \ "@href").text.replaceAll("\n", "") ,
               length = enLenInt,
               mime = (n \ "@type").text
             )}),
@@ -235,8 +235,8 @@ class XmlReader extends Reader {
     for (channel <- xml \\ "channel") yield {
       val items = for (item <- (channel \\ "item")) yield {
         RssItem(
-          title = (item \\ "title").text,
-          link = (item \\ "link").text,
+          title = (item \\ "title").text.replaceAll("\n", ""),
+          link = (item \\ "link").text.replaceAll("\n", ""),
           desc = (item \\ "description").text,
 //          date = dateFormatter.parse((item \\ "pubDate").text),
           guid = (item \\ "guid").text,
@@ -247,7 +247,7 @@ class XmlReader extends Reader {
               val enLenInt:Int = if(enLen != null && ! enLen.isEmpty) enLen.toInt else 0
 
               RssEnclosure(
-              url = (n \\ "@url").text,
+              url = (n \\ "@url").text.replaceAll("\n", ""),
               length =  enLenInt,
               mime = (n \\ "@type").text
             )}
@@ -264,8 +264,8 @@ class XmlReader extends Reader {
         )
       }
       XmlRssFeed(
-        title = (channel \ "title").text,
-        link = (channel \ "link").text,
+        title = (channel \ "title").text.replaceAll("\n", ""),
+        link = (channel \ "link").text.replaceAll("\n", ""),
         desc = (channel \ "description").text,
         language = (channel \ "language").text,
         items = items,
