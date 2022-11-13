@@ -32,6 +32,8 @@ trait RtbConstants {
   val site_privacypolicy = 1
   val site_page = "http://karedo.co.uk/main"
 
+  val floor_price = 0.50
+
   val rtb_max_wait = (bid_tmax * 20) milliseconds
   val dispatcher_max_wait = (bid_tmax * 100) milliseconds
 }

@@ -208,7 +208,7 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
         case DEV_TYPE_ANDROID => {
           params += ("googleadid" -> deviceRequest.ifa.get)
         }
-        case iOS => {
+        case DEV_TYPE_IOS => {
           params += ("iosadid" -> deviceRequest.ifa.get)
         }
       }
@@ -218,7 +218,7 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
       case DEV_TYPE_ANDROID => {
         params += ("googlednt" -> googlednt)
       }
-      case iOS => {
+      case DEV_TYPE_IOS => {
         params += ("iosadtracking" -> iosadtracking)
       }
     }

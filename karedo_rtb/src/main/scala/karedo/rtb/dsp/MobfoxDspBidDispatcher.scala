@@ -3,33 +3,22 @@ package karedo.rtb.dsp
 import java.util.concurrent.Executors
 
 import akka.http.scaladsl.model.HttpMethods._
-import akka.http.scaladsl.model.MediaTypes.`application/json`
-import akka.http.scaladsl.model.StatusCodes.OK
 import akka.http.scaladsl.model.Uri._
 import akka.http.scaladsl.model._
-
-import akka.http.scaladsl.unmarshalling.{Unmarshal, Unmarshaller}
-import akka.stream.scaladsl.{Sink, Source}
 import karedo.entity.UserPrefData
-import karedo.rtb.dsp.HttpDispatcher.{httpDispatcher, httpsDispatcher}
+import karedo.rtb.dsp.HttpDispatcher.{httpDispatcher, httpsDispatcher, _}
 import karedo.rtb.model.AdModel._
 import karedo.rtb.model.BidJsonImplicits
 import karedo.rtb.model.BidRequestCommon.{Device, User}
-import karedo.rtb.model.BidRequestModel_2_2_1.BidRequest
-import karedo.rtb.model.BidResponseModelCommon.BidResponse
-import karedo.rtb.util._
-import karedo.rtb.util.DeviceMakes
+import karedo.rtb.util.{DeviceMakes, _}
 import karedo.util.Util.now
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import HttpDispatcher._
-
 /**
   * Created by charaj on 16/12/2016.
   */
-class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
+class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
   extends DspBidDispather
     with DeviceMakes
     with RtbConstants
@@ -157,7 +146,7 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
   val format_image = "img"
   val format_natiev = "native"
 
-  val formatstrict = "false"
+  val formatstrict = "1" // 0 - False, 1 - True
   val dimension = "xxlarge"
   val dimensionstrict = "true"
 
@@ -167,6 +156,11 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
   val coppa = "0"
 
   val responseFormat = "xml"
+
+  val interstitial = "1"
+  val jscript_support = "0"
+
+  val allow_mr = "1"
 
   def buildRequest(seqId: Int, user: User, device: Device, iabCatMap: Map[String, UserPrefData], make: DeviceMake, deviceRequest: DeviceRequest): Map[String, String] = {
 
@@ -181,58 +175,87 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
 
     val params:mutable.Map[String, String] = mutable.Map()
 
-    params += ("apiver" -> apiver)
-    params += ("adspace" -> adSpaceID )
-    params += ("pub" -> publisherID )
+    params += ("rt" -> "api")
+    params += ("r_type" -> "native")
 
-    if( device.ip.isDefined ) params += ("devip" -> device.ip.get)
 
-    params += ("ref" -> site_page)
+    params += ("dev_js" -> jscript_support)
 
-    if(device.ua.isDefined) params += ("device" -> device.ua.get)
+    params += ("r_floor" -> floor_price.toString)
 
-    params += ("nsupport" -> nsupport)
-    params += ("nver" -> "1")
+//    params += ("apiver" -> apiver)
+//    params += ("adspace" -> adSpaceID )
+//    params += ("pub" -> publisherID )
 
-    params += ("format" -> format_image) //@TODO: Add Native here.
-    params += ("formatstrict" -> formatstrict)
+    params += ("sub_name" -> app_name)
+    params += ("sub_domain" -> app_domain)
+    params += ("sub_bundle_id" -> app_bundle)
+    params += ("sub_storeurl" -> (make match {
+      case DEV_TYPE_IOS => app_storeurl_ios
+      case DEV_TYPE_ANDROID => app_storeurl_android
+    }))
 
-    params += ("dimension" -> dimension)
-    params += ("dimensionstrict" -> dimensionstrict)
+    if(device.ip.isDefined ) params += ("i" -> device.ip.get)
+    if(device.ua.isDefined) params += ("u" -> java.net.URLEncoder.encode(device.ua.get, "UTF_8"))
 
-    params += ("width" -> banner_w.toString)
-    params += ("height" -> banner_h.toString)
+    params += ("n_adunit" -> "in_ad")
+    params += ("n_ver" -> "1.1")
+
+    params += ("n_layout" -> "content_wall")
+    params += ("n_context" -> "content")
+    params += ("n_plcmttype" -> "in_feed")
+
+    params += ("n_img_large_req" -> "1")
+    params += ("n_img_large_w" -> banner_w.toString)
+    params += ("n_img_large_h" -> banner_h.toString)
+
+    params += ("n_title_req" -> "1")
+
+    params += ("adspace_strict" -> formatstrict)
+
+    params += ("allow_mr" -> allow_mr)
+
+//    params += ("dimension" -> dimension)
+//    params += ("dimensionstrict" -> dimensionstrict)
+
+    params += ("adspace_width" -> banner_w.toString)
+    params += ("adspace_height" -> banner_h.toString)
+
+    params += ("imp_instl" -> interstitial)
 
     if(deviceRequest.ifa.isDefined) {
       make match {
         case DEV_TYPE_ANDROID => {
-          params += ("googleadid" -> deviceRequest.ifa.get)
+          params += ("o_andadvid" -> deviceRequest.ifa.get)
         }
-        case iOS => {
-          params += ("iosadid" -> deviceRequest.ifa.get)
+        case DEV_TYPE_IOS => {
+          params += ("o_iosadvid" -> deviceRequest.ifa.get)
         }
       }
     }
 
     make match {
       case DEV_TYPE_ANDROID => {
-        params += ("googlednt" -> googlednt)
+        params += ("dev_dnt" -> googlednt)
       }
-      case iOS => {
-        params += ("iosadtracking" -> iosadtracking)
+      case DEV_TYPE_IOS => {
+        params += ("dev_lmt" -> iosadtracking)
       }
     }
 
-    params += ("response" -> responseFormat)
+//    params += ("response" -> responseFormat)
 
-    params += ("coppa" -> coppa)
+//    params += ("coppa" -> coppa)
 
-    if (user.yob.isDefined) params += ("age" -> (now.getYear - user.yob.get + 1).toString)
-    if (user.gender.isDefined) params += ("gender" -> user.gender.get) //@TODO: May not be right. Check. Should be m/f
+    if (user.yob.isDefined) params += ("demo_age" -> (now.getYear - user.yob.get + 1).toString)
+    if (user.gender.isDefined) params += ("demo_gender" -> user.gender.get) //@TODO: May not be right. Check. Should be m/f
 
     device.geo match {
       case Some(geo) => {
-        if(geo.lat.isDefined && geo.lon.isDefined) params += ("gps" -> s"${geo.lat.get},${geo.lon.get}")
+        if(geo.lat.isDefined && geo.lon.isDefined) {
+          params += ("longitude" -> s"${geo.lon.get}")
+          params += ("latitude" -> s"${geo.lat.get}")
+        }
         if(geo.zip.isDefined) params += ("zip" -> geo.zip.get)
         if(geo.region.isDefined) params += ("regions" -> geo.region.get)
       }
@@ -242,7 +265,7 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
     if (device.make.isDefined) params += ("devicemake" -> device.make.get)
     if (device.model.isDefined) params += ("devicemodel" -> device.model.get)
 
-    params += ("kws" -> kws)
+    params += ("demo_keywords" -> kws)
 
     val out = params.toList.map(v => s"${v._1}=${v._2}").reduce((l,r) => s"${l}&${r}")
 

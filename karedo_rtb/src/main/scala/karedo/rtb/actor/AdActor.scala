@@ -46,6 +46,7 @@ class AdActor
           case "ORTB2.2.1" => ORTB2_2
           case "SMAATO" => SMAATO
           case "FEED" => FEED
+          case "MOBFOX" => MOBFOX
           case _ => DUMMY },
         scheme = c.getString("scheme") match {case "https" => HTTPS case _ => HTTP },
         markup = c.getString("markup") match {case "nurl" => NURL case "adm" => ADM case "resp" => RESP case _ => RESP },
@@ -64,6 +65,7 @@ class AdActor
         case ORTB2_2 => new ORTB2_2_1DspBidDispatcher(dc)
         case SMAATO => new SmaatoDspBidDispatcher(dc)
         case FEED => new FeedBidDispatcher(dc)
+        case MOBFOX => new MobfoxDspBidDispatcher(dc)
       }
     })
 
