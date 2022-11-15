@@ -15,7 +15,7 @@ import karedo.rtb.util.{DeviceMake, LoggingSupport}
   */
 
 class DummyDspBidDispatcher(config: DspBidDispatcherConfig)
-  extends DspBidDispather
+  extends DspBidDispather(config)
     with LoggingSupport
     with BidJsonImplicits {
 

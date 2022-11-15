@@ -27,7 +27,7 @@ import org.jsoup._
   * Created by charaj on 27/12/2016.
   */
 class FeedBidDispatcher(config: DspBidDispatcherConfig)
-  extends DspBidDispather
+  extends DspBidDispather(config)
     with LoggingSupport
     with BidJsonImplicits
     with RtbConstants

@@ -12,24 +12,22 @@ import unmarshalling.{Unmarshal, Unmarshaller}
 
 import akka.stream.scaladsl.{Sink, Source}
 import karedo.entity.UserPrefData
-import karedo.rtb.dsp.HttpDispatcher.{httpDispatcher, httpsDispatcher, _}
 import karedo.rtb.model.AdModel._
 import karedo.rtb.model.BidRequestCommon.{Device, User}
 import karedo.rtb.util.{DeviceMakes, _}
 import karedo.util.Util.now
-import spray.json.{DefaultJsonProtocol, RootJsonFormat}
+import spray.json._
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import HttpDispatcher._
 
 
 /**
   * Created by charaj on 16/12/2016.
   */
 class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
-  extends DspBidDispather
+  extends DspBidDispather(config)
     with DeviceMakes
     with RtbConstants
     with LoggingSupport
@@ -37,7 +35,7 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
 
   import ResponseNativeModel._
 
-  implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
+  implicit val ecLocal: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
 
   lazy val class_name = this.getClass.getName
 
@@ -63,7 +61,9 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
             case None => false
           }
         })
-        .map(x => getAdUnitFromResponse(x.get)).flatten
+        .map(x => {
+          getAdUnitFromResponse(x.get)
+        }).flatten
 
       logger.debug(marker, s"IN: ${class_name}.getAds. Ads Returned: ${ads}" )
 
@@ -77,16 +77,18 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
     }
   }
 
-  def getAdUnitFromResponse(response:NativeResponse): List[AdUnit] = {
+  def getAdUnitFromResponse(response:HttpAdResponse): List[AdUnit] = {
     logger.debug(marker, s"IN: ${class_name}.getAdUnitFromBidResponse. Response is ${response.toString}" )
 
-    val adUnit:Option[AdUnit] = response.error match {
+    val nativeResponse = JsonParser(response.content).convertTo[NativeResponse]
+
+    val adUnit:Option[AdUnit] = nativeResponse.error match {
       case Some(e) => {
         logger.error("Mobfox Error Response : " + e)
         None
       }
       case None => {
-        response.native match {
+        nativeResponse.native match {
           case None => None
           case Some(native) => {
             var icon:Option[Img] = None
@@ -133,9 +135,9 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
                 duration = None,
                 h = Some(main.getOrElse(Img("", banner_w, banner_h)).h),
                 w = Some(main.getOrElse(Img("", banner_w, banner_h)).h),
-                beacons = response.imptrackers.map(_.map(t => Beacon(t)))
+                beacons = nativeResponse.imptrackers.map(_.map(t => Beacon(t)))
               )
-              , price = 2.0
+              , price = nativeResponse.priceCPM.getOrElse(2.0)
               , ad_domain = None
               , iurl = None
               , nurl = None
@@ -287,7 +289,7 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
     params.toMap
   }
 
-  def sendRequest(params: Map[String, String], deviceRequest: DeviceRequest ): Option[NativeResponse] = {
+  def sendRequest(params: Map[String, String], deviceRequest: DeviceRequest ): Option[HttpAdResponse] = {
     logger.debug(marker, s"IN: ${class_name}.sendRequest. Request: ${params}" )
 
     import scala.collection._
@@ -309,60 +311,14 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
 
     val uri_path = config.endpoint
 
-    def deserialize[T](r: HttpResponse)(implicit um: Unmarshaller[ResponseEntity, T]): Future[Option[T]] = {
-      r.status match {
-        case OK => {
-          logger.info(s"${config.name}: Response 200 OK => ${r}")
-          Unmarshal(r.entity.withContentType(ContentTypes.`application/json`)).to[T] map Some.apply
-        }
-        case _ => {
-          logger.error(s"${config.name}: Failed Response: ${r}")
-          Future(None)
-        }
-      }
-    }
-
-    // @TODO: Change Below.
-    def apiCall: Future[Option[NativeResponse]] = {
-      val uri = Uri(uri_path).withQuery(Query(params))
-
-      logger.info(s"${config.name}: URI: ${uri}")
-
-      val out_request = HttpRequest(
-        GET,
-        uri = uri,
-        headers = http_headers.toList
-      )
-
-      logger.info(s"${config.name}: Request (${config.name}) => ${out_request}")
-
-      val source = Source.single(
-        out_request
-      )
-
-//      val dispatcher = config.scheme match {
-//        case HTTP => httpDispatcher
-//        case HTTPS => httpsDispatcher
-//      }
-
-      val flow = config.scheme match {
-        case HTTP => httpDispatcher.outgoingConnection(host = config.host, port = config.port).mapAsync(1) { r => deserialize[NativeResponse](r) }
-        case HTTPS => httpsDispatcher.outgoingConnectionHttps(host = config.host, port = config.port).mapAsync(1) { r => deserialize[NativeResponse](r)
-        }
-      }
-
-      // dispatcher.singleRequest(out_request).mapTo[NativeResponse]
-      source.via(flow).runWith(Sink.head)
-    }
-
     try {
-      val responseFuture = apiCall
+      val responseFuture = singleRequestCall(uri_path, params, http_headers.toList)
 
       val response = Await.result(responseFuture, rtb_max_wait)
 
       logger.info(s"${config.name}: Response from Exchange: " + response)
 
-      response
+      Some(responseEntityToHttpAdResponse(response))
     } catch {
       case e: Exception => {
         logger.error(s"${config.name}: Error Sending Bid Request to [${config.endpoint}] failed.\n Params:\n${params}", e)
@@ -387,6 +343,7 @@ object ResponseNativeModel  {
     error: Option[String] = None
     , native: Option[Native]
     , imptrackers: Option[List[String]]
+    , priceCPM: Option[Double] = None
   )
 
   case class Native
@@ -438,5 +395,5 @@ trait ResponseNativeImplicits extends DefaultJsonProtocol {
   implicit val json_Asset = jsonFormat6(Asset)
   implicit val json_Link = jsonFormat1(Link)
   implicit val json_Native = jsonFormat2(Native)
-  implicit val json_NativeResponse:RootJsonFormat[NativeResponse] = jsonFormat3(NativeResponse)
+  implicit val json_NativeResponse:RootJsonFormat[NativeResponse] = jsonFormat4(NativeResponse)
 }

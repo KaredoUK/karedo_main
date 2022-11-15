@@ -11,7 +11,6 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.{Unmarshal, Unmarshaller}
 import akka.stream.scaladsl.{Sink, Source}
 import karedo.entity.UserPrefData
-import karedo.rtb.dsp.HttpDispatcher.{httpDispatcher, httpsDispatcher}
 import karedo.rtb.model.AdModel._
 import karedo.rtb.model.BidJsonImplicits
 import karedo.rtb.model.BidRequestCommon.{Device, User}
@@ -24,19 +23,18 @@ import karedo.util.Util.now
 import scala.concurrent.{Await, ExecutionContext, Future}
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import HttpDispatcher._
 
 /**
   * Created by charaj on 16/12/2016.
   */
 class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
-  extends DspBidDispather
+  extends DspBidDispather(config)
     with DeviceMakes
     with RtbConstants
     with LoggingSupport
     with BidJsonImplicits {
 
-  implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
+  implicit val ecLocal: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
 
   lazy val class_name = this.getClass.getName
 
@@ -76,7 +74,7 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
     }
   }
 
-  def getAdUnitFromResponse(response:SmaatoAdResponse): List[AdUnit] = {
+  def getAdUnitFromResponse(response:HttpAdResponse): List[AdUnit] = {
     logger.debug(marker, s"IN: ${class_name}.getAdUnitFromBidResponse. Response is ${response.toString}" )
 
     val smaatoResponse = scalaxb.fromXML[generated.Response](xml.XML.loadString(response.content))
@@ -251,7 +249,7 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
     params.toMap
   }
 
-  def sendRequest(params: Map[String, String], deviceRequest: DeviceRequest ): Option[SmaatoAdResponse] = {
+  def sendRequest(params: Map[String, String], deviceRequest: DeviceRequest ): Option[HttpAdResponse] = {
     logger.debug(marker, s"IN: ${class_name}.sendRequest. Request: ${params}" )
 
     import scala.collection._
@@ -275,58 +273,14 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
 
     val uri_path = config.endpoint
 
-//    def deserialize[T](r: HttpResponse)(implicit um: Unmarshaller[ResponseEntity, T]): Future[Option[T]] = {
-//      r.status match {
-//        case OK => {
-//          logger.debug(s"${config.name}: Successful Response 200 OK")
-//          Unmarshal(r.entity).to[T] map Some.apply
-//        }
-//        case _ => {
-//          logger.error(s"${config.name}: Failed Response: ${r}")
-//          Future(None)
-//        }
-//      }
-//    }
-
-    def responseEntityToSmaato(r: HttpResponse): SmaatoAdResponse = {
-      logger.debug(marker, s"IN: ${class_name}.responseEntityToSmaato. Response: ${r}" )
-
-      SmaatoAdResponse(
-        headers = r.headers,
-        content = r.entity.dataBytes.toString
-      )
-    }
-
-    // @TODO: Change Below.
-    def apiCall: Future[HttpResponse] = {
-      val uri = Uri(uri_path).withQuery(Query(params))
-
-      logger.info(s"URI: ${uri}")
-
-      val out_request = HttpRequest(
-        GET,
-        uri = uri,
-        headers = http_headers.toList
-      )
-
-      logger.info(s"Request (${config.name}) => ${out_request}")
-
-      val dispatcher = config.scheme match {
-        case HTTP => httpDispatcher
-        case HTTPS => httpsDispatcher
-      }
-
-      dispatcher.singleRequest(out_request)
-    }
-
     try {
-      val responseFuture = apiCall
+      val responseFuture = singleRequestCall(uri_path, params, http_headers.toList)
 
       val response = Await.result(responseFuture, rtb_max_wait)
 
       logger.info(s"${config.name}: Response from Exchange: " + response)
 
-      Some(responseEntityToSmaato(response))
+      Some(responseEntityToHttpAdResponse(response))
     } catch {
       case e: Exception => {
         logger.error(s"${config.name}: Error Sending Bid Request to [${config.endpoint}] failed.\n Params:\n${params}", e)
@@ -335,9 +289,4 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
     }
   }
 
-  case class SmaatoAdResponse
-  (
-    headers: Seq[HttpHeader],
-    content: String
-  )
 }

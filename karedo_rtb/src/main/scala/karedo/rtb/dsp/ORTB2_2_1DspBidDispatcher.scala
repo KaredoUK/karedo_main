@@ -22,19 +22,18 @@ import java.util.concurrent.Executors
 
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import HttpDispatcher._
 
 /**
   * Created by crajah on 28/11/2016.
   */
 class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
-  extends DspBidDispather
+  extends DspBidDispather(config)
     with DeviceMakes
     with RtbConstants
     with LoggingSupport
     with BidJsonImplicits {
 
-  implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
+  implicit val ecLocal: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
 
 
   override def getAds(count: Int, user: User, device: Device, iabCatMap: Map[String, UserPrefData], make: DeviceMake, deviceRequest: DeviceRequest): List[AdUnit] = {
@@ -223,19 +222,6 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
 
 
     val rtbHeader = headers.RawHeader("x-openrtb-version", "2.2")
-
-    def deserialize[T](r: HttpResponse)(implicit um: Unmarshaller[ResponseEntity, T]): Future[Option[T]] = {
-      r.status match {
-        case OK => {
-          logger.debug(s"${config.name}: Successful Response 200 OK. ::: ${r}")
-          Unmarshal(r.entity).to[T] map Some.apply
-        }
-        case _ => {
-          logger.error(s"${config.name}: Failed Response: ${r}")
-          Future(None)
-        }
-      }
-    }
 
     def apiCall: Future[Option[BidResponse]] = {
 
