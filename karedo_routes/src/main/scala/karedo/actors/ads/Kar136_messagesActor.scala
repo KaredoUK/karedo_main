@@ -23,7 +23,7 @@ trait Kar136_messagesActor extends DbCollections
 
     logger.debug(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\napplicationId: $applicationId\nsessionId: $sessionId")
 
-    authenticate(accountId, deviceId, applicationId, sessionId, allowCreation = false)(
+    authenticate(accountId, deviceId, applicationId, sessionId, allowCreation = false, respondAnyway = true)(
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
         if (uAccount.isKO) KO(Error(s"internal error ${uAccount.err}"))
         else {

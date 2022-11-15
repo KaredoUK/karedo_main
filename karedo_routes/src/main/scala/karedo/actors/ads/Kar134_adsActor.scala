@@ -38,7 +38,7 @@ trait Kar134_adsActor
 
     logger.debug(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\napplicationId: $applicationId\nsessionId: $sessionId\nadCount: $adCount")
 
-    val ret = authenticate(accountId, deviceId, applicationId, sessionId) {
+    val ret = authenticate(accountId, deviceId, applicationId, sessionId, allowCreation = true, respondAnyway = true) {
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
 
         // 1 karedo for each ad returned :)

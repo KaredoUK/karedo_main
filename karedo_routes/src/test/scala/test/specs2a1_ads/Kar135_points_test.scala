@@ -37,9 +37,9 @@ class Kar135_points_test extends AllTests {
     }
     "* get points as an invalid applicationId should fail with explanation " in {
       Get(s"/account/unknown/points?p=unknown") ~> routesWithLogging ~> check {
-        status.intValue() shouldEqual (HTTP_NOTFOUND_404) // ?????
+        status.intValue() shouldEqual (HTTP_BADREQUEST_400) // ?????
         val res = responseAs[ErrorRes]
-        res.error_code shouldEqual HTTP_NOTFOUND_404
+        res.error_code shouldEqual HTTP_BADREQUEST_400
       }
     }
 

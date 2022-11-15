@@ -74,7 +74,13 @@ class FeedBidDispatcher(config: DspBidDispatcherConfig)
         None
       }
 
-      val ad_domain = (new URL(item.link)).getHost
+      var ad_domain = ""
+
+      try {
+        ad_domain = (new URL(item.link)).getHost
+      } catch {
+        case e:Exception => logger.error(s"${feed.source} => ${item.title} => ${item.link} => getHostFailed", e)
+      }
 
       AdUnit(
         ad_type = ad_type_NATIVE,

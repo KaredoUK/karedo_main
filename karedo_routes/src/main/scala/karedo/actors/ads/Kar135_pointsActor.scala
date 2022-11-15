@@ -25,7 +25,7 @@ trait Kar135_pointsActor extends DbCollections
 
     logger.debug(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\napplicationId: $applicationId\nsessionId: $sessionId")
 
-    authenticate(accountId, deviceId, applicationId, sessionId, allowCreation = false)(
+    authenticate(accountId, deviceId, applicationId, sessionId, allowCreation = false, respondAnyway = true)(
       (uApp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
         Try[Result[Error, APIResponse]] {
           uAccount match {
