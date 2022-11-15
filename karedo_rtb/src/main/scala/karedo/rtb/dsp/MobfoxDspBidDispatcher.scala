@@ -216,7 +216,7 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
     }))
 
     if(device.ip.isDefined ) params += ("i" -> device.ip.get)
-    if(device.ua.isDefined) params += ("u" -> java.net.URLEncoder.encode(device.ua.get))
+    if(device.ua.isDefined) params += ("u" -> java.net.URLEncoder.encode(device.ua.get, java.nio.charset.StandardCharsets.UTF_8.toString()))
 
     params += ("n_adunit" -> "in_ad")
     params += ("n_ver" -> "1.1")
