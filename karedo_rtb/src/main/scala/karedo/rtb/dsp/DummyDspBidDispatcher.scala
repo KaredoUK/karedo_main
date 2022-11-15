@@ -37,8 +37,8 @@ class DummyDspBidDispatcher(config: DspBidDispatcherConfig)
           Some(List("karedo.co.uk")),
           None,
           None,
-          Some(java.util.UUID.randomUUID.toString),
-          Some(java.util.UUID.randomUUID.toString),
+          java.util.UUID.randomUUID.toString,
+          java.util.UUID.randomUUID.toString,
           300,
           250
         )

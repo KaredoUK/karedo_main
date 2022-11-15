@@ -85,8 +85,8 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
         , ad_domain = b.adomain
         , iurl = b.iurl
         , nurl = b.nurl
-        , cid = b.cid
-        , crid = b.crid
+        , cid = b.cid.getOrElse(s"${b.id}-${b.impid}")
+        , crid = b.crid.getOrElse(s"${b.id}-${b.impid}")
         , w = b.w.getOrElse(banner_w)
         , h = b.h.getOrElse(banner_h)
       )
@@ -227,7 +227,7 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
     def deserialize[T](r: HttpResponse)(implicit um: Unmarshaller[ResponseEntity, T]): Future[Option[T]] = {
       r.status match {
         case OK => {
-          logger.debug(s"${config.name}: Successful Response 200 OK")
+          logger.debug(s"${config.name}: Successful Response 200 OK. ::: ${r}")
           Unmarshal(r.entity).to[T] map Some.apply
         }
         case _ => {

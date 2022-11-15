@@ -101,8 +101,8 @@ class FeedBidDispatcher(config: DspBidDispatcherConfig)
         ad_domain = Some(List(ad_domain)),
         iurl = Some(item.link),
         nurl = Some(item.link),
-        cid = Some(item.guid),
-        crid = Some(item.guid),
+        cid = item.guid,
+        crid = item.guid,
         w = 300,
         h = 250,
         hint = Math.random()

@@ -2,18 +2,28 @@ package karedo.rtb.dsp
 
 import java.util.concurrent.Executors
 
-import akka.http.scaladsl.model.HttpMethods._
-import akka.http.scaladsl.model.Uri._
-import akka.http.scaladsl.model._
+import akka.http.scaladsl._
+import model._
+import Uri._
+import HttpMethods._
+import MediaTypes._
+import StatusCodes._
+import unmarshalling.{Unmarshal, Unmarshaller}
+
+import akka.stream.scaladsl.{Sink, Source}
 import karedo.entity.UserPrefData
 import karedo.rtb.dsp.HttpDispatcher.{httpDispatcher, httpsDispatcher, _}
 import karedo.rtb.model.AdModel._
-import karedo.rtb.model.BidJsonImplicits
 import karedo.rtb.model.BidRequestCommon.{Device, User}
 import karedo.rtb.util.{DeviceMakes, _}
 import karedo.util.Util.now
+import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
 import scala.concurrent.{Await, ExecutionContext, Future}
+
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import HttpDispatcher._
+
 
 /**
   * Created by charaj on 16/12/2016.
@@ -23,7 +33,9 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
     with DeviceMakes
     with RtbConstants
     with LoggingSupport
-    with BidJsonImplicits {
+    with ResponseNativeImplicits {
+
+  import ResponseNativeModel._
 
   implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
 
@@ -65,74 +77,85 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
     }
   }
 
-  def getAdUnitFromResponse(response:SmaatoAdResponse): List[AdUnit] = {
+  def getAdUnitFromResponse(response:NativeResponse): List[AdUnit] = {
     logger.debug(marker, s"IN: ${class_name}.getAdUnitFromBidResponse. Response is ${response.toString}" )
 
-    val smaatoResponse = scalaxb.fromXML[generated.Response](xml.XML.loadString(response.content))
+    val adUnit:Option[AdUnit] = response.error match {
+      case Some(e) => {
+        logger.error("Mobfox Error Response : " + e)
+        None
+      }
+      case None => {
+        response.native match {
+          case None => None
+          case Some(native) => {
+            var icon:Option[Img] = None
+            var main:Option[Img] = None
+            var title:Option[Title] = None
+            var desc:Option[Data] = None
 
-    val adUnit:List[Option[AdUnit]] = smaatoResponse.status match {
-      case "success" => {
-        val sout:List[Option[AdUnit]] = smaatoResponse.ads.get.ad.map(a => {
-          val aout:Option[AdUnit] = getAdFromSmaato(a) match {
-            case Some(_ad) => {
-              Some(
-                  AdUnit(
-                  ad_type = ad_type_IMAGE
-                  , ad_id = a.id.get
-                  , impid = a.campaign.get.id
-                  , ad = _ad
-                  , price = if(a.pricing.isDefined) a.pricing.get.value.toDouble else 2.0
-                  , ad_domain = None
-                  , iurl = None
-                  , nurl = None
-                  , cid = if( a.campaign.isDefined) Some(a.campaign.get.id) else None
-                  , crid = a.id
-                  , w = banner_w
-                  , h = banner_h
-                )
+            var icon_id = java.util.UUID.randomUUID().toString
+            var main_id = java.util.UUID.randomUUID().toString
+            var title_id = java.util.UUID.randomUUID().toString
+            var desc_id = java.util.UUID.randomUUID().toString
+
+            native.assets.foreach(a => {
+              a.$type match {
+                case "icon" => {
+                  icon = a.img
+                  icon_id = a.id
+                }
+                case "main" => {
+                  main = a.img
+                  main_id = a.id
+                }
+                case "title" => {
+                  title = a.title
+                  title_id = a.id
+                }
+                case "desc" => {
+                  desc = a.data
+                  desc_id = a.id
+                }
+              }
+            })
+
+            val adUnit = AdUnit(
+              ad_type = ad_type_NATIVE
+              , ad_id = main_id
+              , impid = main_id
+              , ad = Ad
+              (
+                imp_url = main.getOrElse(icon.getOrElse(Img("", banner_w, banner_h))).url,
+                click_url = native.link.url,
+                ad_text = title.getOrElse(Title("")).text,
+                ad_source = Some("mobfox"),
+                duration = None,
+                h = Some(main.getOrElse(Img("", banner_w, banner_h)).h),
+                w = Some(main.getOrElse(Img("", banner_w, banner_h)).h),
+                beacons = response.imptrackers.map(_.map(t => Beacon(t)))
               )
-            }
-            case None => None
+              , price = 2.0
+              , ad_domain = None
+              , iurl = None
+              , nurl = None
+              , cid = main_id
+              , crid = main_id
+              , w = banner_w
+              , h = banner_h
+            )
+
+            Some(adUnit)
           }
-
-          aout
-        }).toList
-
-        sout
-      }
-      case "error" => {
-        val err = smaatoResponse.error.get
-        logger.error(s"SMAATO ERROR: ${err.code} -> ${err.desc}")
-        List(None)
-      }
-      case _ => {
-        logger.error(s"SMAATO ERROR: Received ${smaatoResponse.status} from SMAATO. Expecting either success or error")
-        List(None)
+        }
       }
     }
 
     logger.debug(marker, s"IN: ${class_name}.getAdUnitFromBidResponse. AdUnit Returned is ${adUnit}" )
 
-    adUnit.filter(_.isDefined).map(_.get)
-  }
-
-  def getAdFromSmaato(a: generated.Ad): Option[Ad] = {
-    a.action match {
-      case Some(_ad) => {
-        Some(
-          Ad(
-            imp_url = _ad.source.get,
-            click_url = _ad.target.get,
-            ad_text = a.adtext.getOrElse(""),
-            ad_source = if(a.brand.isDefined) Some(a.brand.get.name) else None ,
-            duration = None,
-            h  = a.height.map(_.toInt),
-            w = a.width.map(_.toInt),
-            beacons = if(a.beacons.isDefined) a.beacons.get.beacon.map(b => List(Beacon(b))) else None
-          )
-        )
-      }
-      case None => None
+    adUnit match {
+      case None => List()
+      case Some(a) => List(a)
     }
   }
 
@@ -140,6 +163,7 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
 
   val adSpaceID = "130211537"
   val publisherID = "1100028064"
+  val inventoryID = "415dbe4be9e47c5e2779ed03ba943ae5"
 
   val nsupport = "title,txt,image"
 
@@ -177,15 +201,9 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
 
     params += ("rt" -> "api")
     params += ("r_type" -> "native")
-
-
-    params += ("dev_js" -> jscript_support)
+    params += ("s" -> inventoryID)
 
     params += ("r_floor" -> floor_price.toString)
-
-//    params += ("apiver" -> apiver)
-//    params += ("adspace" -> adSpaceID )
-//    params += ("pub" -> publisherID )
 
     params += ("sub_name" -> app_name)
     params += ("sub_domain" -> app_domain)
@@ -196,7 +214,7 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
     }))
 
     if(device.ip.isDefined ) params += ("i" -> device.ip.get)
-    if(device.ua.isDefined) params += ("u" -> java.net.URLEncoder.encode(device.ua.get, "UTF_8"))
+    if(device.ua.isDefined) params += ("u" -> java.net.URLEncoder.encode(device.ua.get))
 
     params += ("n_adunit" -> "in_ad")
     params += ("n_ver" -> "1.1")
@@ -211,17 +229,16 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
 
     params += ("n_title_req" -> "1")
 
-    params += ("adspace_strict" -> formatstrict)
 
     params += ("allow_mr" -> allow_mr)
 
-//    params += ("dimension" -> dimension)
-//    params += ("dimensionstrict" -> dimensionstrict)
-
+    params += ("adspace_strict" -> formatstrict)
     params += ("adspace_width" -> banner_w.toString)
     params += ("adspace_height" -> banner_h.toString)
 
     params += ("imp_instl" -> interstitial)
+
+    params += ("dev_js" -> jscript_support)
 
     if(deviceRequest.ifa.isDefined) {
       make match {
@@ -243,9 +260,8 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
       }
     }
 
-//    params += ("response" -> responseFormat)
-
-//    params += ("coppa" -> coppa)
+    if (device.make.isDefined) params += ("devicemake" -> device.make.get)
+    if (device.model.isDefined) params += ("devicemodel" -> device.model.get)
 
     if (user.yob.isDefined) params += ("demo_age" -> (now.getYear - user.yob.get + 1).toString)
     if (user.gender.isDefined) params += ("demo_gender" -> user.gender.get) //@TODO: May not be right. Check. Should be m/f
@@ -262,9 +278,6 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
       case _ =>
     }
 
-    if (device.make.isDefined) params += ("devicemake" -> device.make.get)
-    if (device.model.isDefined) params += ("devicemodel" -> device.model.get)
-
     params += ("demo_keywords" -> kws)
 
     val out = params.toList.map(v => s"${v._1}=${v._2}").reduce((l,r) => s"${l}&${r}")
@@ -274,10 +287,11 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
     params.toMap
   }
 
-  def sendRequest(params: Map[String, String], deviceRequest: DeviceRequest ): Option[SmaatoAdResponse] = {
+  def sendRequest(params: Map[String, String], deviceRequest: DeviceRequest ): Option[NativeResponse] = {
     logger.debug(marker, s"IN: ${class_name}.sendRequest. Request: ${params}" )
 
     import scala.collection._
+
 
     val http_headers:mutable.MutableList[HttpHeader] = mutable.MutableList()
 
@@ -290,41 +304,29 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
     }
 
     if( xffOption.isDefined ) {
-      http_headers += headers.RawHeader("x-mh-X-Forwarded-For", xffOption.get)
       http_headers += headers.RawHeader("X-Forwarded-For", xffOption.get)
     }
 
-    if( deviceRequest.ua.isDefined ) http_headers += headers.RawHeader("x-mh-User-Agent", deviceRequest.ua.get)
-
     val uri_path = config.endpoint
 
-//    def deserialize[T](r: HttpResponse)(implicit um: Unmarshaller[ResponseEntity, T]): Future[Option[T]] = {
-//      r.status match {
-//        case OK => {
-//          logger.debug(s"${config.name}: Successful Response 200 OK")
-//          Unmarshal(r.entity).to[T] map Some.apply
-//        }
-//        case _ => {
-//          logger.error(s"${config.name}: Failed Response: ${r}")
-//          Future(None)
-//        }
-//      }
-//    }
-
-    def responseEntityToSmaato(r: HttpResponse): SmaatoAdResponse = {
-      logger.debug(marker, s"IN: ${class_name}.responseEntityToSmaato. Request: ${r}" )
-
-      SmaatoAdResponse(
-        headers = r.headers,
-        content = r.entity.dataBytes.toString
-      )
+    def deserialize[T](r: HttpResponse)(implicit um: Unmarshaller[ResponseEntity, T]): Future[Option[T]] = {
+      r.status match {
+        case OK => {
+          logger.info(s"${config.name}: Response 200 OK => ${r}")
+          Unmarshal(r.entity.withContentType(ContentTypes.`application/json`)).to[T] map Some.apply
+        }
+        case _ => {
+          logger.error(s"${config.name}: Failed Response: ${r}")
+          Future(None)
+        }
+      }
     }
 
     // @TODO: Change Below.
-    def apiCall: Future[HttpResponse] = {
+    def apiCall: Future[Option[NativeResponse]] = {
       val uri = Uri(uri_path).withQuery(Query(params))
 
-      logger.info(s"URI: ${uri}")
+      logger.info(s"${config.name}: URI: ${uri}")
 
       val out_request = HttpRequest(
         GET,
@@ -332,14 +334,25 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
         headers = http_headers.toList
       )
 
-      logger.info(s"Request (${config.name}) => ${out_request}")
+      logger.info(s"${config.name}: Request (${config.name}) => ${out_request}")
 
-      val dispatcher = config.scheme match {
-        case HTTP => httpDispatcher
-        case HTTPS => httpsDispatcher
+      val source = Source.single(
+        out_request
+      )
+
+//      val dispatcher = config.scheme match {
+//        case HTTP => httpDispatcher
+//        case HTTPS => httpsDispatcher
+//      }
+
+      val flow = config.scheme match {
+        case HTTP => httpDispatcher.outgoingConnection(host = config.host, port = config.port).mapAsync(1) { r => deserialize[NativeResponse](r) }
+        case HTTPS => httpsDispatcher.outgoingConnectionHttps(host = config.host, port = config.port).mapAsync(1) { r => deserialize[NativeResponse](r)
+        }
       }
 
-      dispatcher.singleRequest(out_request)
+      // dispatcher.singleRequest(out_request).mapTo[NativeResponse]
+      source.via(flow).runWith(Sink.head)
     }
 
     try {
@@ -349,7 +362,7 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
 
       logger.info(s"${config.name}: Response from Exchange: " + response)
 
-      Some(responseEntityToSmaato(response))
+      response
     } catch {
       case e: Exception => {
         logger.error(s"${config.name}: Error Sending Bid Request to [${config.endpoint}] failed.\n Params:\n${params}", e)
@@ -357,10 +370,73 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
       }
     }
   }
+}
 
-  case class SmaatoAdResponse
+object ResponseNativeModel  {
+
+  val type_icon = "icon"
+  val type_main = "main"
+  val type_title = "title"
+  val type_desc = "desc"
+  val type_rating = "rating"
+  val type_ctatext = "ctatext"
+  val type_sponsored = "sponsored"
+
+  case class NativeResponse
   (
-    headers: Seq[HttpHeader],
-    content: String
+    error: Option[String] = None
+    , native: Option[Native]
+    , imptrackers: Option[List[String]]
   )
+
+  case class Native
+  (
+    link: Link,
+    assets: List[Asset]
+  )
+
+  case class Link
+  (
+    url: String
+  )
+
+  case class Asset
+  (
+    id: String,
+    required: Int,
+    $type: String,
+    img: Option[Img],
+    title: Option[Title],
+    data: Option[Data]
+  )
+
+  case class Img
+  (
+    url: String,
+    w: Int,
+    h: Int
+  )
+
+  case class Title
+  (
+    text: String
+  )
+
+  case class Data
+  (
+    value: String
+  )
+
+}
+
+trait ResponseNativeImplicits extends DefaultJsonProtocol {
+  import ResponseNativeModel._
+
+  implicit val json_Data = jsonFormat1(Data)
+  implicit val json_Title = jsonFormat1(Title)
+  implicit val json_Img = jsonFormat3(Img)
+  implicit val json_Asset = jsonFormat6(Asset)
+  implicit val json_Link = jsonFormat1(Link)
+  implicit val json_Native = jsonFormat2(Native)
+  implicit val json_NativeResponse:RootJsonFormat[NativeResponse] = jsonFormat3(NativeResponse)
 }

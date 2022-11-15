@@ -96,8 +96,8 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
                   , ad_domain = None
                   , iurl = None
                   , nurl = None
-                  , cid = if( a.campaign.isDefined) Some(a.campaign.get.id) else None
-                  , crid = a.id
+                  , cid = a.campaign.get.id
+                  , crid = a.id.get
                   , w = banner_w
                   , h = banner_h
                 )
@@ -289,7 +289,7 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
 //    }
 
     def responseEntityToSmaato(r: HttpResponse): SmaatoAdResponse = {
-      logger.debug(marker, s"IN: ${class_name}.responseEntityToSmaato. Request: ${r}" )
+      logger.debug(marker, s"IN: ${class_name}.responseEntityToSmaato. Response: ${r}" )
 
       SmaatoAdResponse(
         headers = r.headers,

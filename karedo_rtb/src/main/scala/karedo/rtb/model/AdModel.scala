@@ -63,8 +63,8 @@ object AdModel extends DefaultJsonProtocol {
                      ad_domain: Option[List[String]],
                      iurl: Option[String],
                      nurl: Option[String],
-                     cid: Option[String],
-                     crid: Option[String],
+                     cid: String,
+                     crid: String,
                      w: Int,
                      h: Int,
                      hint: Double = 0.0
