@@ -4,8 +4,6 @@ version := "0.0.2-SNAPSHOT"
 
 scalaVersion := "2.11.8"
 
-coverageEnabled := true
-
 resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases/"
 resolvers += Resolver.mavenLocal
 
@@ -45,4 +43,6 @@ initialize := {
 }
 
 parallelExecution in Test := false
+
+coverageEnabled := false
 

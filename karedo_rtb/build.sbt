@@ -6,8 +6,6 @@ version := "0.0.2-SNAPSHOT"
 
 scalaVersion := "2.11.8"
 
-coverageEnabled := true
-
 resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases/"
 
 //resolvers += "spray repo" at "http://repo.spray.io"
@@ -98,3 +96,6 @@ lazy val root = (project in file(".")).
     // scalaxbPackageNames in (Compile, scalaxb)    := Map(uri("http://schemas.microsoft.com/2003/10/Serialization/") -> "microsoft.serialization"),
     // logLevel in (Compile, scalaxb) := Level.Debug
   )
+
+coverageEnabled := false
+
