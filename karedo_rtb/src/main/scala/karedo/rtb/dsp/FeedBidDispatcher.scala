@@ -103,7 +103,10 @@ class FeedBidDispatcher(config: DspBidDispatcherConfig)
           w = Some(300),
           beacons = None
         ),
-        price = if(ad_type == ad_type_NATIVE) 1.0 else if(ad_type == ad_type_VIDEO) 0.9 else 0.95,
+        price_USD_per_1k =
+          (if(ad_type == ad_type_NATIVE) config.price_cpm
+          else if(ad_type == ad_type_VIDEO) (config.price_cpm - 0.1)
+          else (config.price_cpm - 0.5)) * (1 - config.comm_percent),
         ad_domain = Some(List(ad_domain)),
         iurl = Some(item.link),
         nurl = Some(item.link),

@@ -53,6 +53,8 @@ class AdActor
         host = c.getString("host"),
         port = c.getInt("port"),
         path = c.getString("path"),
+        price_cpm = c.getDouble("price_cpm"),
+        comm_percent = c.getDouble("comm_percent"),
         endpoint = c.getString("endpoint"),
         config = c)
     }).toList
@@ -175,7 +177,7 @@ class AdActor
 
       logger.debug(marker, s"IN: getAds. All Ads Returned is: ${resp}" )
 
-      val ads = resp.flatten.sortWith(_.price > _.price).take(request.count)
+      val ads = resp.flatten.sortWith(_.price_USD_per_1k > _.price_USD_per_1k).take(request.count)
 
       logger.debug(marker, s"IN: getAds. Top Priced Ads Returned is: ${ads}" )
 

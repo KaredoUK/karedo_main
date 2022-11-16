@@ -48,7 +48,8 @@ trait KaredoConstants extends Configurable {
   val KAREDO_REVENUE_PERCENT = 0.80
   val USER_PERCENT =   .40
 
-  val APP_KAREDO_CONV:Long = 10
+  val APP_KAREDO_CONV:Long = 1000
+  val KAR_TO_USD:Double = 1000
 
   val SMS_CODE_LENGTH = 10
 

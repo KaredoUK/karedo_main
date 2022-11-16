@@ -90,7 +90,9 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
                   , ad_id = a.id.get
                   , impid = a.campaign.get.id
                   , ad = _ad
-                  , price = if(a.pricing.isDefined) a.pricing.get.value.toDouble else 2.0
+                  , price_USD_per_1k =
+                      ((if(a.pricing.isDefined) a.pricing.get.value.toDouble
+                      else config.price_cpm)* (1 - config.comm_percent))
                   , ad_domain = None
                   , iurl = None
                   , nurl = None

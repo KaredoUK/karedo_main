@@ -104,6 +104,8 @@ case class DspBidDispatcherConfig
  port: Int = 80,
  path: String,
  endpoint: String,
+ price_cpm: Double,
+ comm_percent: Double,
  config: Config )
 
 sealed trait HttpScheme

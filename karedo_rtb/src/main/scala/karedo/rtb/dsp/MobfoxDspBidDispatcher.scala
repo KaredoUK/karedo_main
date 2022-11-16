@@ -137,7 +137,7 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
                 w = Some(main.getOrElse(Img("", banner_w, banner_h)).h),
                 beacons = nativeResponse.imptrackers.map(_.map(t => Beacon(t)))
               )
-              , price = nativeResponse.priceCPM.getOrElse(2.0)
+              , price_USD_per_1k = (nativeResponse.priceCPM.getOrElse(config.price_cpm) * (1 - config.comm_percent))
               , ad_domain = None
               , iurl = None
               , nurl = None

@@ -80,7 +80,7 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
         , ad_id = b.adid.getOrElse(s"${b.id}-${b.impid}")
         , impid = b.impid
         , ad = getAdFromBid(b, response.id, sb.seat)
-        , price = b.price
+        , price_USD_per_1k = (b.price * (1 - config.comm_percent))
         , ad_domain = b.adomain
         , iurl = b.iurl
         , nurl = b.nurl

@@ -59,7 +59,7 @@ object AdModel extends DefaultJsonProtocol {
                      ad_id: String,
                      impid: String,
                      ad: Ad,
-                     price: Double, // In USD/M eCPM * 0.8
+                     price_USD_per_1k: Double, // In USD eCPM
                      ad_domain: Option[List[String]],
                      iurl: Option[String],
                      nurl: Option[String],

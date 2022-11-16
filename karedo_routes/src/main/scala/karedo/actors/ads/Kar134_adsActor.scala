@@ -43,7 +43,8 @@ trait Kar134_adsActor
 
         // 1 karedo for each ad returned :)
         def computePoints(ad: AdUnit): Double = {
-          ad.price * KAREDO_REVENUE_PERCENT * USER_PERCENT
+          val price_USD_per_1m = ad.price_USD_per_1k * 1000 // per USD $c
+          price_USD_per_1m * USER_PERCENT
         }
 
         def getAdsFor(application: UserApp, uAcc: UserAccount): Result[Error, String] = {
