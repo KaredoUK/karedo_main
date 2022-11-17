@@ -15,6 +15,16 @@ libraryDependencies ++= {
     //, "org.scalaz" %% "scalaz-core" % "7.2.6" // for Disjunction(Either class)
     , "com.typesafe" % "config" % "1.3.1"
 
+    , "com.typesafe.akka" %% "akka-stream" % akkaV
+    , "com.typesafe.akka" %% "akka-http-experimental" % akkaV
+    , "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaV
+    , "com.typesafe.scala-logging" % "scala-logging-slf4j_2.11" % "2.1.2"
+    , "com.typesafe.akka" %% "akka-slf4j" % akkaV
+    , "com.typesafe.akka"   %%  "akka-actor"        % akkaV
+
+    , "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test"
+    , "com.typesafe.akka"   %%  "akka-testkit"      % akkaV   % "test"
+
     //, "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaV
     , "org.specs2" %% "specs2-core" % "3.8.5" % "test"
     , "org.specs2" %% "specs2-junit" % "3.8.5.1" % "test"
