@@ -14,8 +14,6 @@ object ConfigLoader {
   println("Loading Local Config")
   val localConf = ConfigFactory.load()
 
-  println("Local Config : " + localConf)
-
   println("Loading Remote Config : " + localConf.getString("config.path"))
   val remoteConf = ConfigFactory.load(
     ConfigFactory.parseURL(
@@ -26,8 +24,6 @@ object ConfigLoader {
   )
 
   println("Checking Remote Config: " + remoteConf.getString("notification.bcc.list"))
-
-  println("Remote Config : " + localConf)
 
 }
 
