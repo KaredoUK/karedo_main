@@ -25,7 +25,7 @@ case class UserSession
 )
   extends Keyable[String]
 
-trait DbUserSession extends DbMongoDAO[String, UserSession] {
+trait DbUserSession extends DbMongoDAO1[String, UserSession] {
   override def find(id: String): Result[String, UserSession] = {
     val usess = super.find(id)
     // if not found not further action

@@ -1,7 +1,7 @@
 package karedo.entity
 
 import com.mongodb.casbah.commons.MongoDBObject
-import karedo.entity.dao.{DbMongoDAO, Keyable}
+import karedo.entity.dao._
 import salat.annotations._
 import karedo.util.{KO, OK, Result}
 
@@ -17,7 +17,7 @@ case class Pref
 ) extends Keyable[String]
 
 
-trait DbPrefs extends DbMongoDAO[String,Pref] {
+trait DbPrefs extends DbMongoDAO1[String,Pref] {
   def key(r:Pref) = r.id
   def load() = {
     dao.find(MongoDBObject()).sort(orderBy = MongoDBObject("sort"-> 1)).toList

@@ -4,29 +4,8 @@ import com.mongodb.casbah.{MongoClient, MongoCredential}
 import com.mongodb.ServerAddress
 import com.mongodb.casbah.MongoClientOptions
 import com.mongodb.casbah.commons.conversions.scala.{RegisterConversionHelpers, RegisterJodaTimeConversionHelpers}
-import com.typesafe.config.Config
-import karedo.util.{Configurable, Util}
-import org.joda.time.{DateTime, DateTimeZone}
 
-trait MongoConnection extends Configurable {
-
-
-  Util.isMongoActive
-
-  lazy val mongoHost = conf.getString("mongo.server.host")
-  lazy val mongoPort = conf.getInt("mongo.server.port")
-  lazy val mongoDbName = conf.getString("mongo.db.name")
-  lazy val mongoDbUser = conf.getString("mongo.db.user")
-  lazy val mongoDbPwd = conf.getString("mongo.db.password")
-
-  lazy val mongoClient = MongoInstance.getInstance(mongoHost, mongoPort, mongoDbName, mongoDbUser, mongoDbPwd)
-
-  lazy val db = mongoClient(mongoDbName)
-  RegisterConversionHelpers()
-  RegisterJodaTimeConversionHelpers()
-}
-
-object MongoInstance {
+object MongoConnection1Object {
   // not found better way to have mongoinstance
   var instance: Option[MongoClient] = None
 
@@ -36,8 +15,8 @@ object MongoInstance {
     def open = {
       println(s"*** mongoHost: $mongoHost, mongoPort: $mongoPort")
       val options = MongoClientOptions(connectionsPerHost = 100)
-      if (mongoDbUser.isEmpty) {
 
+      if (mongoDbUser.isEmpty) {
         MongoClient(new ServerAddress(mongoHost, mongoPort), options = options)
       } else {
         MongoClient(new ServerAddress(mongoHost, mongoPort),
@@ -50,6 +29,14 @@ object MongoInstance {
 
     instance.get
   }
+}
+
+trait MongoConnection1 extends MongoConnectionConfig {
+  lazy val mongoClient1 = MongoConnection1Object.getInstance(mongoHost, mongoPort, mongoDbName, mongoDbUser, mongoDbPwd)
+
+  lazy val db = mongoClient1(mongoDbName)
+  RegisterConversionHelpers()
+  RegisterJodaTimeConversionHelpers()
 
 }
 

@@ -2,7 +2,7 @@ package karedo.entity
 
 import java.util.UUID
 
-import karedo.entity.dao.{DbMongoDAO, Keyable}
+import karedo.entity.dao._
 import karedo.util.Util
 import org.joda.time.DateTime
 import salat.annotations._
@@ -18,4 +18,4 @@ case class MobileSale
   , sale_ids: List[String] = List()
 ) extends Keyable[String]
 
-trait DbMobileSale extends DbMongoDAO[String,MobileSale]
+trait DbMobileSale extends DbMongoDAO1[String,MobileSale]

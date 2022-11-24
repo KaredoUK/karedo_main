@@ -1,6 +1,6 @@
 package karedo.entity
 
-import karedo.entity.dao.{DbMongoDAO, Keyable}
+import karedo.entity.dao._
 import org.joda.time.DateTime
 import salat.annotations._
 import karedo.util.Util.now
@@ -17,7 +17,7 @@ case class UserMobile
 )
 extends Keyable[String]
 
-trait DbUserMobile extends DbMongoDAO[String,UserMobile]
+trait DbUserMobile extends DbMongoDAO1[String,UserMobile]
 
 
 

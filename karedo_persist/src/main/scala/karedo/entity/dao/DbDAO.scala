@@ -19,6 +19,9 @@ trait DbDAOExtensions[K, T <: Keyable[K]] {
   def findByAccount(account_id: String): Result[String, List[T]]
 }
 
+trait Keyable[K] {
+  def id: K
+}
 
 
 

@@ -2,7 +2,7 @@ package karedo.entity
 
 import java.util.UUID
 
-import karedo.entity.dao.{DbMongoDAO, Keyable}
+import karedo.entity.dao._
 import salat.annotations._
 
 
@@ -47,7 +47,7 @@ case class Ad(
               )
 
 // add implementation if you need special functionalities
-trait DbAds extends DbMongoDAO[String, Ads] {
+trait DbAds extends DbMongoDAO1[String, Ads] {
   // preloads some values associated to accountId: accountid
   def preload(applicationId: String, count: Int) = {
 

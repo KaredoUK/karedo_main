@@ -31,7 +31,7 @@ case class UserMessages
 )
 extends Keyable[String]
 
-trait DbUserMessages extends DbMongoDAO[String,UserMessages] {
+trait DbUserMessages extends DbMongoDAO1[String,UserMessages] {
   def getMessages(accountId: String) =
     dao.find(MongoDBObject("account_id" -> accountId)).toList
 

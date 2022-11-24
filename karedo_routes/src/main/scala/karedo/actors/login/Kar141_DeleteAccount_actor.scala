@@ -2,7 +2,7 @@ package karedo.actors.login
 
 import karedo.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.entity._
-import karedo.entity.dao.{DbMongoDAO, Keyable}
+import karedo.entity.dao._
 import karedo.util.Util.now
 import karedo.util.{Result, _}
 import org.slf4j.LoggerFactory

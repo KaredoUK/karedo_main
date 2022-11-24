@@ -2,7 +2,7 @@ package karedo.entity
 
 import java.util.UUID
 
-import karedo.entity.dao.{DbMongoDAO, Keyable}
+import karedo.entity.dao._
 import org.joda.time.DateTime
 import salat.annotations._
 import karedo.util.Util.now
@@ -27,7 +27,7 @@ case class Sale
 ) extends Keyable[String]
 
 // add implementation if you need special functionalities
-trait DbSale extends DbMongoDAO[String,Sale]
+trait DbSale extends DbMongoDAO1[String,Sale]
 
 
 

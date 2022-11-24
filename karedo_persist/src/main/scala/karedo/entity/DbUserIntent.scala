@@ -2,7 +2,7 @@ package karedo.entity
 
 import java.util.UUID
 
-import karedo.entity.dao.{DbMongoDAO, Keyable}
+import karedo.entity.dao._
 import org.joda.time.DateTime
 import salat.annotations._
 import karedo.util.Util.now
@@ -25,4 +25,4 @@ case class IntentUnit (
                   )
 
 
-trait DbUserIntent extends DbMongoDAO[String,UserIntent]
+trait DbUserIntent extends DbMongoDAO1[String,UserIntent]

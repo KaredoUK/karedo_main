@@ -31,7 +31,7 @@ case class KaredoChange
 
 ) extends Keyable[String]
 
-trait DbKaredoChange extends DbMongoDAO[String,KaredoChange] {
+trait DbKaredoChange extends DbMongoDAO1[String,KaredoChange] {
 
   def byAccount(id:String) = MongoDBObject("accountId" -> id)
 

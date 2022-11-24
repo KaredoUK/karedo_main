@@ -1,7 +1,7 @@
 package karedo.entity
 
 import com.mongodb.casbah.commons.MongoDBObject
-import karedo.entity.dao.{DbMongoDAO, Keyable}
+import karedo.entity.dao._
 import org.joda.time.DateTime
 import salat.annotations._
 import karedo.util.Util._
@@ -29,7 +29,7 @@ case class UserAd
 ) extends Keyable[String]
 
 // add implementation if you need special functionalities
-trait DbUserAd extends DbMongoDAO[String, UserAd] {
+trait DbUserAd extends DbMongoDAO1[String, UserAd] {
   // preloads some values associated to accountId: accountid
   def preload() = {
 

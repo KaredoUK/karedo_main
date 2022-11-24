@@ -1,6 +1,6 @@
 package karedo.entity
 
-import karedo.entity.dao.{DbMongoDAO, Keyable}
+import karedo.entity.dao._
 import karedo.util.Util
 import karedo.util.Util.now
 import org.joda.time.DateTime
@@ -39,9 +39,9 @@ case class ChannelUnit
   , share_url: Option[String] = None
 )
 
-trait DbUserInteract extends DbMongoDAO[String, UserInteraction]
+trait DbUserInteract extends DbMongoDAO1[String, UserInteraction]
 
-trait DbUserShare extends DbMongoDAO[String, UserInteraction]
+trait DbUserShare extends DbMongoDAO1[String, UserInteraction]
 
 case class UserFavourite
 (
@@ -60,7 +60,7 @@ case class FavouriteUnit
   , ts: Option[DateTime] = Some(now)
 )
 
-trait DbUserFavourite extends DbMongoDAO[String, UserFavourite]
+trait DbUserFavourite extends DbMongoDAO1[String, UserFavourite]
 
 case class UrlMagic
 (
@@ -70,7 +70,7 @@ case class UrlMagic
   , ts:DateTime = now
 ) extends Keyable[String]
 
-trait DbUrlMagic extends DbMongoDAO[String, UrlMagic]
+trait DbUrlMagic extends DbMongoDAO1[String, UrlMagic]
 
 case class HashedAccount
 (
@@ -78,7 +78,7 @@ case class HashedAccount
   , account_id: String
 ) extends Keyable[String]
 
-trait DbHashedAccount extends DbMongoDAO[String, HashedAccount]
+trait DbHashedAccount extends DbMongoDAO1[String, HashedAccount]
 
 case class UrlAccess
 (
@@ -88,5 +88,5 @@ case class UrlAccess
   , ts:DateTime = now
 ) extends Keyable[String]
 
-trait DbUserUrlAccess extends DbMongoDAO[String, UrlAccess]
+trait DbUserUrlAccess extends DbMongoDAO1[String, UrlAccess]
 

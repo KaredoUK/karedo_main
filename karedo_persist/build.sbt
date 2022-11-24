@@ -12,6 +12,7 @@ libraryDependencies ++= {
   Seq(
 
     "com.github.salat" %% "salat" % "1.10.0"
+    , "org.mongodb.scala" %% "mongo-scala-driver" % "1.2.1"
     //, "org.scalaz" %% "scalaz-core" % "7.2.6" // for Disjunction(Either class)
     , "com.typesafe" % "config" % "1.3.1"
 

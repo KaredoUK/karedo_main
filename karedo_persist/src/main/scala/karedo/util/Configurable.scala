@@ -23,7 +23,7 @@ object ConfigLoader {
     )
   )
 
-  println("Checking Remote Config: " + remoteConf.getString("notification.bcc.list"))
+  println("Checking Remote Config - Version: " + remoteConf.getString("version"))
 
 }
 

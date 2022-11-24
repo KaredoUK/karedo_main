@@ -2,7 +2,7 @@ package karedo.entity
 
 import java.util.UUID
 
-import karedo.entity.dao.{DbMongoDAO, Keyable}
+import karedo.entity.dao._
 import karedo.util.{KO, OK, Result}
 import org.joda.time.DateTime
 import salat.annotations._
@@ -79,7 +79,7 @@ case class Email
   , ts_validated: Option[DateTime] = None
 )
 
-trait DbUserAccount extends DbMongoDAO[String,UserAccount] {
+trait DbUserAccount extends DbMongoDAO1[String,UserAccount] {
   def findActiveMobile(id: String): Result[String, Mobile] = {
     find(id) match {
       case OK(userAccount) => userAccount.findActiveMobile
