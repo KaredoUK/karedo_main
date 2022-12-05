@@ -4,13 +4,13 @@ import akka.http.scaladsl.{ConnectionContext, Http}
 import akka.japi.Util
 import com.typesafe.config.{Config, ConfigFactory}
 import karedo.entity.{DbPrefs, DbUserAd}
-import karedo.entity.dao.MongoConnection1
+import karedo.entity.dao.MongoConnection_Casbah
 import karedo.routes.Routes
 import karedo.util.{DefaultActorSystem, SSLSupport}
 
 
 object Api
-  extends MongoConnection1
+  extends MongoConnection_Casbah
   with Routes
   with DefaultActorSystem
   with SSLSupport {
