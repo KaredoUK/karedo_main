@@ -39,7 +39,8 @@ libraryDependencies ++= {
     "junit" % "junit" % "4.8.1" % "test",
     "com.google.zxing" % "core" % zxingV,
     "com.google.zxing" % "javase" % zxingV,
-    "com.github.kenglxn.qrgen" % "javase" % "2.2.0"
+    "com.github.kenglxn.qrgen" % "javase" % "2.2.0",
+    "io.igl" %% "jwt" % "1.2.0"
   )
 }
 
