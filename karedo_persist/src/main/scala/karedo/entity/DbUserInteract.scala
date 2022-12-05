@@ -39,9 +39,9 @@ case class ChannelUnit
   , share_url: Option[String] = None
 )
 
-trait DbUserInteract extends DbMongoDAO1[String, UserInteraction]
+trait DbUserInteract extends DbMongoDAO_Casbah[String, UserInteraction]
 
-trait DbUserShare extends DbMongoDAO1[String, UserInteraction]
+trait DbUserShare extends DbMongoDAO_Casbah[String, UserInteraction]
 
 case class UserFavourite
 (
@@ -60,7 +60,7 @@ case class FavouriteUnit
   , ts: Option[DateTime] = Some(now)
 )
 
-trait DbUserFavourite extends DbMongoDAO1[String, UserFavourite]
+trait DbUserFavourite extends DbMongoDAO_Casbah[String, UserFavourite]
 
 case class UrlMagic
 (
@@ -70,7 +70,7 @@ case class UrlMagic
   , ts:DateTime = now
 ) extends Keyable[String]
 
-trait DbUrlMagic extends DbMongoDAO1[String, UrlMagic]
+trait DbUrlMagic extends DbMongoDAO_Casbah[String, UrlMagic]
 
 case class HashedAccount
 (
@@ -78,7 +78,7 @@ case class HashedAccount
   , account_id: String
 ) extends Keyable[String]
 
-trait DbHashedAccount extends DbMongoDAO1[String, HashedAccount]
+trait DbHashedAccount extends DbMongoDAO_Casbah[String, HashedAccount]
 
 case class UrlAccess
 (
@@ -88,5 +88,5 @@ case class UrlAccess
   , ts:DateTime = now
 ) extends Keyable[String]
 
-trait DbUserUrlAccess extends DbMongoDAO1[String, UrlAccess]
+trait DbUserUrlAccess extends DbMongoDAO_Casbah[String, UrlAccess]
 

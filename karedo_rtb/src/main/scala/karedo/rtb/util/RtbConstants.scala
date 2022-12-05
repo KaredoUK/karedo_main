@@ -19,7 +19,11 @@ trait RtbConstants {
   val app_name = "Karedo"
   val app_bundle = "uk.co.karedo"
   val app_domain = "karedo.co.uk"
+<<<<<<< Updated upstream
   val app_storeurl_ios = "tbc"
+=======
+  val app_storeurl_ios = "https://itunes.apple.com/WebObjects/MZStore.woa/wa/viewSoftware?id=1195450203&mt=8"
+>>>>>>> Stashed changes
   val app_storeurl_android = "tbc"
   val app_privacypolicy = 1
   val app_paid = 0

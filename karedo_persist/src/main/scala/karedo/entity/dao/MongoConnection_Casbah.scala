@@ -1,11 +1,10 @@
 package karedo.entity.dao
 
-import com.mongodb.casbah.{MongoClient, MongoCredential}
 import com.mongodb.ServerAddress
-import com.mongodb.casbah.MongoClientOptions
 import com.mongodb.casbah.commons.conversions.scala.{RegisterConversionHelpers, RegisterJodaTimeConversionHelpers}
+import com.mongodb.casbah.{MongoClient, MongoClientOptions, MongoCredential}
 
-object MongoConnection1Object {
+object MongoConnectionObject_Casbah {
   // not found better way to have mongoinstance
   var instance: Option[MongoClient] = None
 
@@ -31,8 +30,8 @@ object MongoConnection1Object {
   }
 }
 
-trait MongoConnection1 extends MongoConnectionConfig {
-  lazy val mongoClient1 = MongoConnection1Object.getInstance(mongoHost, mongoPort, mongoDbName, mongoDbUser, mongoDbPwd)
+trait MongoConnection_Casbah extends MongoConnectionConfig {
+  lazy val mongoClient1 = MongoConnectionObject_Casbah.getInstance(mongoHost, mongoPort, mongoDbName, mongoDbUser, mongoDbPwd)
 
   lazy val db = mongoClient1(mongoDbName)
   RegisterConversionHelpers()

@@ -22,7 +22,7 @@ case class UserApp
 ) extends Keyable[String]
 
 // add implementation if you need special functionalities
-trait DbUserApp extends DbMongoDAO1[String,UserApp]
+trait DbUserApp extends DbMongoDAO_Casbah[String,UserApp]
 
 
 

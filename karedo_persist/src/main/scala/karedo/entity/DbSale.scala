@@ -27,7 +27,7 @@ case class Sale
 ) extends Keyable[String]
 
 // add implementation if you need special functionalities
-trait DbSale extends DbMongoDAO1[String,Sale]
+trait DbSale extends DbMongoDAO_Casbah[String,Sale]
 
 
 

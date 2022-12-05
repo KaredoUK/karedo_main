@@ -18,4 +18,4 @@ case class MobileSale
   , sale_ids: List[String] = List()
 ) extends Keyable[String]
 
-trait DbMobileSale extends DbMongoDAO1[String,MobileSale]
+trait DbMobileSale extends DbMongoDAO_Casbah[String,MobileSale]

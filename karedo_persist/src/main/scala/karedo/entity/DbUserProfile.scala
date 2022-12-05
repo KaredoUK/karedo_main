@@ -29,4 +29,4 @@ case class UserProfile
 
 ) extends Keyable[String]
 
-trait DbUserProfile extends DbMongoDAO1[String,UserProfile]
+trait DbUserProfile extends DbMongoDAO_Casbah[String,UserProfile]

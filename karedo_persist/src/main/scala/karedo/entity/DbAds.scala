@@ -47,7 +47,7 @@ case class Ad(
               )
 
 // add implementation if you need special functionalities
-trait DbAds extends DbMongoDAO1[String, Ads] {
+trait DbAds extends DbMongoDAO_Casbah[String, Ads] {
   // preloads some values associated to accountId: accountid
   def preload(applicationId: String, count: Int) = {
 

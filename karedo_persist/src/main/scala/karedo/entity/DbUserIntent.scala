@@ -25,4 +25,4 @@ case class IntentUnit (
                   )
 
 
-trait DbUserIntent extends DbMongoDAO1[String,UserIntent]
+trait DbUserIntent extends DbMongoDAO_Casbah[String,UserIntent]

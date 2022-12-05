@@ -16,7 +16,7 @@ case class EmailVerify
 ) extends Keyable[String]
 
 // add implementation if you need special functionalities
-trait DbEmailVerify extends DbMongoDAO1[String,EmailVerify]
+trait DbEmailVerify extends DbMongoDAO_Casbah[String,EmailVerify]
 
 
 

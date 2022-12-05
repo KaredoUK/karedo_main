@@ -17,7 +17,7 @@ case class Pref
 ) extends Keyable[String]
 
 
-trait DbPrefs extends DbMongoDAO1[String,Pref] {
+trait DbPrefs extends DbMongoDAO_Casbah[String,Pref] {
   def key(r:Pref) = r.id
   def load() = {
     dao.find(MongoDBObject()).sort(orderBy = MongoDBObject("sort"-> 1)).toList

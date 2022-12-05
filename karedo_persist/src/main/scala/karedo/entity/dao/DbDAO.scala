@@ -23,5 +23,8 @@ trait Keyable[K] {
   def id: K
 }
 
+object DbDAOParams {
+  var tablePrefix = "KAR_"
+}
 
 

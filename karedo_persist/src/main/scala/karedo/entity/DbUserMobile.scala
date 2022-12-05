@@ -17,7 +17,7 @@ case class UserMobile
 )
 extends Keyable[String]
 
-trait DbUserMobile extends DbMongoDAO1[String,UserMobile]
+trait DbUserMobile extends DbMongoDAO_Casbah[String,UserMobile]
 
 
 

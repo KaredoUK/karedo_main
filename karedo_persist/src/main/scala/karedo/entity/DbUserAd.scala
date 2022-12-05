@@ -29,7 +29,7 @@ case class UserAd
 ) extends Keyable[String]
 
 // add implementation if you need special functionalities
-trait DbUserAd extends DbMongoDAO1[String, UserAd] {
+trait DbUserAd extends DbMongoDAO_Casbah[String, UserAd] {
   // preloads some values associated to accountId: accountid
   def preload() = {
 

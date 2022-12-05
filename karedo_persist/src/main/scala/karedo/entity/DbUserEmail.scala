@@ -16,7 +16,7 @@ case class UserEmail
   , ts_updated: DateTime = now
 ) extends Keyable[String]
 
-trait DbUserEmail extends DbMongoDAO1[String,UserEmail]
+trait DbUserEmail extends DbMongoDAO_Casbah[String,UserEmail]
 
 
 

@@ -27,7 +27,7 @@ case class UserPrefs
 )
 extends Keyable[String]
 
-trait DbUserPrefs extends DbMongoDAO1[String,UserPrefs]
+trait DbUserPrefs extends DbMongoDAO_Casbah[String,UserPrefs]
 
 
 

@@ -79,7 +79,7 @@ case class Email
   , ts_validated: Option[DateTime] = None
 )
 
-trait DbUserAccount extends DbMongoDAO1[String,UserAccount] {
+trait DbUserAccount extends DbMongoDAO_Casbah[String,UserAccount] {
   def findActiveMobile(id: String): Result[String, Mobile] = {
     find(id) match {
       case OK(userAccount) => userAccount.findActiveMobile
