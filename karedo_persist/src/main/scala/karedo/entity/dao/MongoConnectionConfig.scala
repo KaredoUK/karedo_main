@@ -7,7 +7,7 @@ import karedo.util.{Configurable, Util}
   * Created by charaj on 12/01/2017.
   */
 trait MongoConnectionConfig extends Configurable {
-  Util.isMongoActive
+//  Util.isMongoActive
 
 //  lazy val mongoHost = conf.getString("mongo.server.host")
 //  lazy val mongoPort = conf.getInt("mongo.server.port")

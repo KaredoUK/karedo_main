@@ -12,10 +12,17 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 cd $DIR
 
-./make_binaries.sh
+git pull
 
-kill $(ps aux | grep 'routes-assembly-0.0.2-SNAPSHOT.jar' | awk '{print $2}')
+cd karedo_persist
+sbt clean compile publish-local
 
+cd ../karedo_rtb
+sbt clean compile publish-local
 
-nohup java -jar karedo_routes/target/scala-2.11/routes-assembly-0.0.2-SNAPSHOT.jar &
+cd ../karedo_routes
+sbt clean compile publish-local assembly
+
+cd ..
+
 
