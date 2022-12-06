@@ -1,0 +1,20 @@
+# See http://about.travis-ci.org/docs/user/build-configuration/
+language: scala
+scala:
+   - 2.10.4
+   - 2.11.8
+branches:
+  only:
+    - master
+    - 1.9.x-branch
+    - 1.10.x-branch
+notifications:
+  email:
+    recipients:
+      - prasinous@gmail.com
+      - nzucker@gmail.com
+jdk:
+  - oraclejdk7
+  - oraclejdk8
+services:
+  - mongodb
