@@ -9,15 +9,16 @@ import karedo.util.{Configurable, Util}
 trait MongoConnectionConfig extends Configurable {
   Util.isMongoActive
 
-  lazy val mongoHost = conf.getString("mongo.server.host")
-  lazy val mongoPort = conf.getInt("mongo.server.port")
-  lazy val mongoDbName = conf.getString("mongo.db.name")
-  lazy val mongoDbUser = conf.getString("mongo.db.user")
-  lazy val mongoDbPwd = conf.getString("mongo.db.password")
+//  lazy val mongoHost = conf.getString("mongo.server.host")
+//  lazy val mongoPort = conf.getInt("mongo.server.port")
+//  lazy val mongoDbName = conf.getString("mongo.db.name")
+//  lazy val mongoDbUser = conf.getString("mongo.db.user")
+//  lazy val mongoDbPwd = conf.getString("mongo.db.password")
 
-  lazy val mongoURL = "mongodb://admin:FNPQYDEFFCQDCGWX@sl-eu-lon-2-portal.2.dblayer.com:16096,sl-eu-lon-2-portal.3.dblayer.com:16096/admin?ssl=true"
+  lazy val mongoDbName = conf.getString("mongo.db.name")
+  lazy val mongoURI = conf.getString("mongo.auth.uri")
+  lazy val mongoCACertB64 = conf.getString("mongo.auth.ca_certificate_base64")
 
   lazy val mongoRetryCount = 5
-
 }
 
