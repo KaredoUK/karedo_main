@@ -15,6 +15,7 @@ object ConfigLoader {
   val localConf = ConfigFactory.load()
 
   println("Loading Remote Config : " + localConf.getString("config.path"))
+
   val remoteConf = ConfigFactory.load(
     ConfigFactory.parseURL(
       new URL(

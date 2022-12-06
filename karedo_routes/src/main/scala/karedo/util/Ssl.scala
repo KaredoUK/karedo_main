@@ -43,8 +43,8 @@ import com.typesafe.sslconfig.akka.AkkaSSLConfig
 trait SSLSupport extends DefaultActorSystem with Configurable {
   val sslConfig = AkkaSSLConfig()
 
-  def getHttps(keyStoreName: String, keyStoreType: String ): HttpsConnectionContext = {
-    val password: Array[Char] = Array() // do not store passwords in code, read them from somewhere safe!
+  def getHttps(keyStoreName: String, keyStoreType: String, keyStorePassword: String ): HttpsConnectionContext = {
+    val password: Array[Char] = keyStorePassword.toCharArray
 
     val ks: KeyStore = KeyStore.getInstance(keyStoreType)
     val keystore: InputStream = getClass.getClassLoader.getResourceAsStream(keyStoreName)

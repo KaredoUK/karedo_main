@@ -15,12 +15,6 @@ object Api
   with DefaultActorSystem
   with SSLSupport {
 
-  //Util.
-
-//  private val doSsl = conf.getBoolean("web.ssl")
-//  private val server = conf.getString("web.host")
-//  private val port = conf.getInt("web.port")
-
   private val bindRoutes = routesWithLogging
 
   private val httpConfig = conf.getConfig("web.http")
@@ -40,11 +34,10 @@ object Api
 
     val keyStoreName = httpsConfig.getString("keystore.name")
     val keyStoreType = httpsConfig.getString("keystore.type")
-
-
+    val keyStorePass = httpsConfig.getString("keystore.pass")
 
     println(s"SSL Binding on server $host and port $port")
-    val https = getHttps(keyStoreName, keyStoreType)
+    val https = getHttps(keyStoreName, keyStoreType, keyStorePass)
     Http().setDefaultServerHttpContext(https)
     Http().bindAndHandle(bindRoutes, host, port, connectionContext = https)
   }

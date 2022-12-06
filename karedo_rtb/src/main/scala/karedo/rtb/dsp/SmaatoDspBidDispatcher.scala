@@ -67,7 +67,7 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
       ads
     } catch {
       case e: Exception => {
-        println(s"Dispatchers not found" + "\n" + e.getMessage + "\n" + e.getStackTrace.foldLeft("")((z, b) => z + b.toString + "\n"))
+        logger.error(s"Dispatchers not found" + "\n" + e.getMessage + "\n" + e.getStackTrace.foldLeft("")((z, b) => z + b.toString + "\n"))
         logger.error("Unable to Send Bid Request", e)
         List()
       }

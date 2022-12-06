@@ -59,7 +59,7 @@ class AdActor
         config = c)
     }).toList
 
-    println("Found DSP Configs" + "\n" + dspDispatcherConfigs.toString)
+    logger.debug("Found DSP Configs" + "\n" + dspDispatcherConfigs.toString)
 
     val dispatchers:List[DspBidDispather] = dspDispatcherConfigs.map(dc => {
       dc.kind match {
@@ -148,7 +148,7 @@ class AdActor
 
       val resp:List[List[AdUnit]] = dspDispatchers match {
         case Some(dispatchers) => {
-          println(s"Dispatchers Found" + "\n" + dispatchers.toString)
+          logger.debug(s"Dispatchers Found" + "\n" + dispatchers.toString)
           try {
             val fSeq = Future.sequence(
               dispatchers.map(d =>

@@ -2,7 +2,7 @@ package common
 
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import karedo.entity.{UserAccount, UserApp, UserKaredos}
-import karedo.entity.dao.{DbMongoDAO1, MongoConnection1}
+import karedo.entity.dao._
 import karedo.routes.Routes
 import karedo.util._
 import org.scalatest.{Matchers, WordSpec}
@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * Created by pakkio on 10/21/16.
   */
 trait AllTests extends WordSpec
-  with MongoConnection1
+  with MongoConnection_Casbah
   with Routes
   with ScalatestRouteTest
   with DbCollections
@@ -27,6 +27,6 @@ trait AllTests extends WordSpec
   implicit val timeout: RouteTestTimeout = RouteTestTimeout(1000.second(span))
 
   // can't clear everything otherwise tests cannot go in parallel (!)
-  DbMongoDAO1.tablePrefix = "TestRoutes_"
+  DbDAOParams.tablePrefix = "TestRoutes_"
 
 }

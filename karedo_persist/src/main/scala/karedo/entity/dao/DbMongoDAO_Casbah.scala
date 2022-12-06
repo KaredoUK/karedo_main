@@ -98,7 +98,7 @@ abstract class DbMongoDAO_Casbah[K, T <: Keyable[K]]
 
       if (ret.getN == 0) {
         if (max == 0) {
-          println("Wait too long")
+          logger.error("Wait too long")
           KO("Wait too long for lock to be aquired")
         } else {
           Thread.sleep(10)
@@ -119,7 +119,7 @@ abstract class DbMongoDAO_Casbah[K, T <: Keyable[K]]
       MongoDBObject(
         "$set" -> MongoDBObject(transField -> "", tsField -> Util.now)
       ), upsert = false)
-    if(ret.getN()<1) println("Unlock failed (not previously locked")
+    if(ret.getN()<1) logger.error("Unlock failed (not previously locked")
     find(id)
   }
 

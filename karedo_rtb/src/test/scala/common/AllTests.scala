@@ -1,7 +1,7 @@
 package common
 
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import karedo.entity.dao.MongoConnection
+import karedo.entity.dao.{DbDAOParams, MongoConnection_Casbah}
 import karedo.rtb.model.DbCollections
 import karedo.rtb.util.RtbConstants
 import org.scalatest.{Matchers, WordSpec}
@@ -10,10 +10,10 @@ import org.scalatest.{Matchers, WordSpec}
   */
 trait AllTests extends WordSpec
   with Matchers
-  with MongoConnection
+  with MongoConnection_Casbah
   with ScalatestRouteTest
   with RtbConstants
   with DbCollections
  {
-
+  DbDAOParams.tablePrefix = "TestRTB_"
 }
