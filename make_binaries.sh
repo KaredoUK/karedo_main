@@ -14,7 +14,10 @@ cd $DIR
 
 git pull
 
-cd karedo_persist
+cd salat
+sbt clean compile publish-local
+
+cd ../karedo_persist
 sbt clean compile publish-local
 
 cd ../karedo_rtb
