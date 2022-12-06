@@ -11,7 +11,9 @@ libraryDependencies ++= {
   val akkaV = "2.4.11"
   Seq(
 
-    "com.github.salat" %% "salat" % "1.10.0"
+//    "com.github.salat" %% "salat" % "1.10.0"
+  "com.github.salat" %% "salat" % "CR-1.10.1-SNAPSHOT"
+
 //    , "org.mongodb.scala" %% "mongo-scala-driver" % "1.2.1"
     //, "org.scalaz" %% "scalaz-core" % "7.2.6" // for Disjunction(Either class)
     , "com.typesafe" % "config" % "1.3.1"
