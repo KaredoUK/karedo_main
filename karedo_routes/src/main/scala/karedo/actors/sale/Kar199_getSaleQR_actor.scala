@@ -1,6 +1,7 @@
 package karedo.actors.sale
 
-import java.io.File
+import java.io.{ByteArrayInputStream, File, FileInputStream}
+import java.nio.file.{Files, Paths}
 
 import karedo.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.entity.{UserAccount, UserApp}
@@ -46,3 +47,30 @@ trait Kar199_postSaleQR_actor
     }
   }
 }
+
+trait Kar199_getImage_actor
+  extends DbCollections
+    with KaredoAuthentication
+    with KaredoJsonHelpers
+    with KaredoConstants
+    with KaredoQRCode {
+  override val logger = LoggerFactory.getLogger(classOf[Kar199_getImage_actor])
+
+  def exec(imageName: String): Result[Error, APIResponse] = {
+    try {
+      val basePath = qr_base_file_path + File.separator + qr_img_file_path
+      val imagePath = basePath + File.separator + imageName
+
+      val bytes = Files.readAllBytes(Paths.get(imagePath))
+
+      OK(APIResponse(msg = "", code = HTTP_OK_200, mime = MIME_PNG, bytes = bytes))
+
+    } catch {
+      case e:Exception => {
+        logger.error("Getting image failed", e)
+        KO(Error("Couldn't get image: " + e.toString))
+      }
+    }
+  }
+}
+

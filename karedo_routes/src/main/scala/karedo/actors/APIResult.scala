@@ -8,7 +8,7 @@ import spray.json.{DefaultJsonProtocol, JsString, JsValue, RootJsonFormat, _}
 import akka.http.scaladsl.model.HttpHeader
 
 case class Error(err: String, code: Int = 500, mime:String = "", headers:List[HttpHeader] = List()) extends scala.Error
-case class APIResponse(msg: String, code: Int = 200, mime:String = "", headers:List[HttpHeader] = List())
+case class APIResponse(msg: String, code: Int = 200, mime:String = "", headers:List[HttpHeader] = List(), bytes:Array[Byte] = Array())
 
 
 

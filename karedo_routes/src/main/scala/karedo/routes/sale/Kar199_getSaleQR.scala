@@ -40,7 +40,22 @@ object Kar199_getSaleQR extends KaredoRoute
   }
 }
 
-object Kar199_postQR extends KaredoRoute
+object Kar199_getImage extends KaredoRoute with Kar199_getImage_actor
+{
+  def route = {
+    path("image" / Segment) {
+      imageName =>
+        get {
+          doCall {
+            exec(imageName)
+          }
+        }
+    }
+  }
+
+}
+
+  object Kar199_postQR extends KaredoRoute
   with Kar199_postSaleQR_actor {
 
 //  val multipartForm =

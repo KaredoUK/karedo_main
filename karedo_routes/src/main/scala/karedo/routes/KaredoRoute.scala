@@ -32,12 +32,13 @@ trait KaredoRoute extends KaredoJsonHelpers with KaredoConstants  {
         Future {
           val result = f
           result match {
-            case OK(APIResponse(msg,code, mime, headers)) => {
+            case OK(APIResponse(msg,code, mime, headers, bytes)) => {
               _log.debug(s"[CODE: ${code}] ${msg}")
               val entity = mime match {
                 case MIME_TEXT => HttpEntity(ContentTypes.`text/plain(UTF-8)`, msg)
                 case MIME_HTML => HttpEntity(ContentTypes.`text/html(UTF-8)`, msg)
                 case MIME_JSON => HttpEntity(ContentTypes.`application/json`, msg)
+                case MIME_PNG => HttpEntity(MediaTypes.`image/png`, bytes)
                 case _ => HttpEntity(ContentTypes.`application/json`, msg)
               }
 

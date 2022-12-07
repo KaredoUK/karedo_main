@@ -88,6 +88,7 @@ trait KaredoConstants extends Configurable {
   val MIME_JSON = "JSON"
   val MIME_TEXT = "TEXT"
   val MIME_HTML = "HTML"
+  val MIME_PNG = "PNG"
 
   val COOKIE_ACCOUNT = "_a"
 
@@ -378,7 +379,8 @@ trait KaredoQRCode extends KaredoConstants {
       qrFile.createNewFile()
       MatrixToImageWriter.writeToPath(qr_bitMatrix, "png", qrFile.toPath(), new MatrixToImageConfig())
 
-      OK(baseUrl + File.separator + text + ".png")
+      // OK(baseUrl + File.separator + text + ".png")
+      OK(qr_base_img_url + File.separator + "image" + File.separator + text + ".png" )
     } catch {
       case ex: Exception => {
         logger.error("Couldn't create QR Code", ex)
