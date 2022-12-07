@@ -59,7 +59,10 @@ trait Routes
     // Terms and About
       Terms.route ~ About.route ~ Privacy.route ~
     // Images
-      Kar199_getImage.route
+      Kar199_getImage.route ~
+    // Base
+      Base.route
+
   }
 
 //  override val routes = {

@@ -42,6 +42,8 @@ import akka.stream.ActorMaterializer
   * Created by crajah on 14/10/2016.
   */
 trait KaredoConstants extends Configurable {
+  val VERSION = conf.getString("version")
+
   val GENDER_MALE = "M"
   val GENDER_FEMALE = "F"
 

@@ -2,8 +2,12 @@ package karedo.routes.termsabout
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import karedo.actors.APIResponse
 import karedo.actors.termsabout.TermsAbout
 import karedo.routes.KaredoRoute
+import karedo.util.KaredoConstants
+import karedo.util.{KO, OK, Result}
+
 
 object Terms extends KaredoRoute
   with TermsAbout {
@@ -59,3 +63,18 @@ object Privacy extends KaredoRoute
   }
 }
 
+object Base extends KaredoRoute with KaredoConstants
+{
+  def route = {
+    Route {
+      path( "" ) {
+        get {
+          doCall({
+            OK(APIResponse(VERSION))
+          }
+          )
+        }
+      }
+    }
+  }
+}
