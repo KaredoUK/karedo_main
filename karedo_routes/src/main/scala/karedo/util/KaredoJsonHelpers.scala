@@ -154,4 +154,15 @@ trait KaredoJsonHelpers
   implicit val jsonKar147_ValidateEmail_Res = jsonFormat1(Kar147_ValidateEmail_Res)
 
   case class UrlCodeAndAccountHash(url_code: String, account_hash: String)
+
+  case class Kar12Req
+  (
+    application_id: String
+    , account_id: Option[String]
+    , inform_type: String
+    , subject: String
+    , detail: Option[String]
+    , image_base64: Option[String]
+   )
+  implicit val json_Kar12Req = jsonFormat6(Kar12Req)
 }

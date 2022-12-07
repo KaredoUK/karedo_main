@@ -16,7 +16,8 @@ trait Kar189_postProfile_actor
   extends DbCollections
   with KaredoAuthentication
   with KaredoJsonHelpers
-  with KaredoConstants {
+  with KaredoConstants
+{
   override val logger = LoggerFactory.getLogger(classOf[Kar189_postProfile_actor])
 
   def exec(accountId: String,

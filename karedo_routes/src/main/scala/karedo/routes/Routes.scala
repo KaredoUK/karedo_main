@@ -3,6 +3,7 @@ package karedo.routes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import karedo.routes.ads._
+import karedo.routes.inform.Kar12_postInform
 import karedo.routes.intent._
 import karedo.routes.login._
 import karedo.routes.prefs._
@@ -61,8 +62,9 @@ trait Routes
     // Images
       Kar199_getImage.route ~
     // Base
-      Base.route
-
+      Base.route ~
+    // Inform
+      Kar12_postInform.route
   }
 
 //  override val routes = {
