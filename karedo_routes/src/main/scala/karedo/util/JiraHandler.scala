@@ -34,7 +34,7 @@ trait JiraHandler extends Configurable with DefaultActorSystem {
         JiraIssueType(
           name = Some(TypeJiraIssue(informType).name)
         ),
-        Some(List("CUSTOMER DIRECT", informType))
+        Some(List("CUSTOMER_DIRECT", informType))
       )
     )
 
