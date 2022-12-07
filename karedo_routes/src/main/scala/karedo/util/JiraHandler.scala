@@ -21,6 +21,7 @@ trait JiraHandler extends Configurable with DefaultActorSystem {
   val jiraUser = conf.getString("jira.user")
   val jiraPass = conf.getString("jira.pass")
   val jiraProject = conf.getString("jira.project")
+  val jiraPrefix = conf.getString("jira.prefix")
 
   val logger = LoggerFactory.getLogger(classOf[JiraHandler])
 
@@ -29,11 +30,11 @@ trait JiraHandler extends Configurable with DefaultActorSystem {
       JiraFields(
         JiraProject(
           key = Some(jiraProject)
-        ), s"DIRECT ${subject}", detail.getOrElse(subject),
+        ), s"${jiraPrefix}${subject}", detail.getOrElse(subject),
         JiraIssueType(
           name = Some(TypeJiraIssue(informType).name)
         ),
-        Some(List("customer_direct", informType))
+        Some(List("CUSTOMER DIRECT", informType))
       )
     )
 
