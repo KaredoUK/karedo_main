@@ -24,13 +24,15 @@ trait Kar198_getSale_actor
            deviceId: Option[String],
            applicationId: String,
            sessionId: Option[String],
-           saleId: String): Result[Error, APIResponse] = {
+           saleIdOrig: String): Result[Error, APIResponse] = {
 
     logger.debug(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\napplicationId: $applicationId\nsessionId: $sessionId")
 
     authenticate(accountId, deviceId, applicationId, sessionId, allowCreation = false)(
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
         Try[Result[Error, APIResponse]] {
+          val saleId = saleIdOrig.trim.toUpperCase
+
           val sale = dbSale.find(saleId).get
 
           val newSale = sale.copy(karedos = karedos_to_appKaredos(sale.karedos).toLong)

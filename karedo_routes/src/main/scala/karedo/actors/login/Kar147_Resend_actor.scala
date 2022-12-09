@@ -21,7 +21,7 @@ trait Kar147_Resend_actor
   def exec(request:Kar147_Resend): Result[Error, APIResponse] = {
     Try[Result[Error, APIResponse]] {
       val application_id = request.application_id
-      val msisdn = request.msisdn
+      val msisdn = msisdnFixer(request.msisdn)
 
       logger.debug(s"Resend\nMobile: ${msisdn}\nApplicationID: ${application_id}")
 

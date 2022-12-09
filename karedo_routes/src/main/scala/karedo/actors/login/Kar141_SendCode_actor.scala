@@ -31,21 +31,22 @@ trait Kar141_SendCode_actor
           ): Result[Error, APIResponse] = {
 
     Try[Result[Error, APIResponse]] {
-      val applicationId = request.application_id
-      val firstName = request.first_name
-      val lastName = request.last_name
-      val msisdn = request.msisdn
+      if (request.application_id == null || request.application_id.equals("")) KO(Error(s"application_id is null"))
+      if (request.first_name == null || request.first_name.equals("")) KO(Error(s"first_name is null"))
+      if (request.last_name == null || request.last_name.equals("")) KO(Error(s"last_name is null"))
+      if (request.msisdn == null || request.msisdn.equals("")) KO(Error(s"msisdn is null"))
+
+      if (request.email == null || request.email.equals("")) KO(Error(s"email is null"))
+      if (request.user_type == null || request.user_type.equals("")) KO(Error(s"user_type is null"))
+      if (! request.user_type.equals("CUSTOMER")) KO(Error(s"user_type value is not CUSTOMER. Only one value is supported"))
+
+      val applicationId = request.application_id.trim
+      val firstName = request.first_name.trim
+      val lastName = request.last_name.trim
+      val msisdn = msisdnFixer(request.msisdn)
       val userType = request.user_type
-      val email = request.email
+      val email = request.email.toLowerCase.trim
 
-      if (applicationId == null || applicationId.equals("")) KO(Error(s"application_id is null"))
-      if (firstName == null || firstName.equals("")) KO(Error(s"first_name is null"))
-      if (lastName == null || lastName.equals("")) KO(Error(s"last_name is null"))
-      if (msisdn == null || msisdn.equals("")) KO(Error(s"msisdn is null"))
-
-      if (email == null || email.equals("")) KO(Error(s"email is null"))
-      if (userType == null || userType.equals("")) KO(Error(s"user_type is null"))
-      if (!userType.equals("CUSTOMER")) KO(Error(s"user_type value is not CUSTOMER. Only one value is supported"))
 
       logger.debug(s"OK applicationId: $applicationId firstName: $firstName lastName: $lastName msisdn: $msisdn userType: $userType email: $email")
 

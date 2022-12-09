@@ -311,6 +311,16 @@ trait KaredoUtils
     }
   }
 
+  def msisdnFixer(msisdnOrig: String): String = {
+    require(msisdnOrig != null && ! msisdnOrig.isEmpty)
+    require(msisdnOrig.matches("""^\\s*(?:\\+?(\\d{1,3}))?[-. (]*(\\d{0,3})[-. )]*(\\d{0,3})[-. ]*(\\d{0,4})(?: *x(\\d+))?\\s*$"""))
+
+    val msisdn = msisdnOrig.trim
+
+    // UK
+    if( msisdn.startsWith("07") && msisdn.length == 10 ) "+44" + msisdn.substring(1) else msisdn
+  }
+
   def getDefaultPrefMap():Map[String, UserPrefData] = {
     val prefMap = dbPrefs.load.map(x => x.id -> UserPrefData(x.default, x.name, x.order))(collection.breakOut): Map[String, UserPrefData]
 

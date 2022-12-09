@@ -25,7 +25,7 @@ trait Kar186_postSale_actor
 
   def exec(
             deviceId: Option[String],
-            saleId: String,
+            saleIdOrig: String,
            request: Kar186Req
           ): Result[Error, APIResponse] = {
     val accountId = request.account_id
@@ -39,6 +39,8 @@ trait Kar186_postSale_actor
       (uapp: Result[String, UserApp], uAccount: Result[String, UserAccount], code: Int) => {
 
         Try[Result[Error, APIResponse]] {
+          val saleId = saleIdOrig.trim.toUpperCase
+
           val sale = dbSale.find(saleId).get
           val app_karedos = karedos_to_appKaredos(sale.karedos)
           val sender_id = accountId
