@@ -51,7 +51,7 @@ trait Kar197_putSale_actor
           val sale_type = TRANS_TYPE_SEND_RECEIVE
           val trans_status = TRANS_STATUS_OPEN
 
-          val sale_id = getNewSaleCode
+          val sale_id = getNewSaleCode.toUpperCase
 
           val origSale = Sale(id = sale_id,
             // Merchant - ID, Name, MSISDN

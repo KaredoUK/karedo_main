@@ -313,7 +313,7 @@ trait KaredoUtils
 
   def msisdnFixer(msisdnOrig: String): String = {
     require(msisdnOrig != null && ! msisdnOrig.isEmpty)
-    require(msisdnOrig.matches("""^\\s*(?:\\+?(\\d{1,3}))?[-. (]*(\\d{0,3})[-. )]*(\\d{0,3})[-. ]*(\\d{0,4})(?: *x(\\d+))?\\s*$"""))
+//    require(msisdnOrig.matches("""^\\s*(?:\\+?(\\d{1,3}))?[-. (]*(\\d{0,3})[-. )]*(\\d{0,3})[-. ]*(\\d{0,4})(?: *x(\\d+))?\\s*$"""))
 
     val msisdn = msisdnOrig.trim
 

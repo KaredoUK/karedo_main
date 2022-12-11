@@ -55,7 +55,7 @@ trait Kar183_putTransfer_actor
           val receiver_name = s"${receiverLastName}, ${receiverFirstName}"
           val receiver_msisdn = request.receiver.msisdn
 
-          val sale_id = getNewSaleCode
+          val sale_id = getNewSaleCode.toUpperCase
 
           dbUserMobile.find(receiver_msisdn) match {
             case OK(merchantMobile) => {

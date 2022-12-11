@@ -35,7 +35,7 @@ trait Kar145_EnterCode_actor
       val account_id = userApp.account_id
       val userAccount = dbUserAccount.find(account_id).get
       val mobile = userAccount.mobile.filter(e => e.msisdn == msisdn).head
-      val acc_sms_code = mobile.sms_code.get.trim.toUpperCase
+      val acc_sms_code = mobile.sms_code.get.trim
 
       if( acc_sms_code == sms_code ) {
         val restMobiles = userAccount.mobile.filter(e => ! e.msisdn.equals(msisdn) )
