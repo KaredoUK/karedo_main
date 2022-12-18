@@ -179,6 +179,14 @@ trait KaredoIds {
   def getSHA1Hash(s: String): String = {
     java.security.MessageDigest.getInstance("SHA-1").digest(s.getBytes("UTF-8")).map("%02x".format(_)).mkString
   }
+
+  private def getPasswordHashFormat(a:String, p:String) = s"$p--$a"
+
+  def getPasswordHash(account_id: String, password: String): String = getSHA1Hash(getPasswordHashFormat(account_id, password))
+
+  def doesPasswordMatch(account_id: String, sentPassword: String, storedPassword: String): Boolean
+    = storedPassword.equals(getPasswordHash(account_id, sentPassword))
+
 }
 
 trait KaredoUtils

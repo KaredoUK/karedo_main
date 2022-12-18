@@ -35,7 +35,7 @@ trait Kar138_login_actor
             if( userApp.account_id == userAccount.id ) {
               userAccount.password match {
                 case Some(userPassword) => {
-                  if( userPassword == password) {
+                  if( doesPasswordMatch(account_id, password, userPassword ) ) { // userPassword == password) {
                     val session_id = getNewRandomID
                     val userSession = UserSession(id = session_id, account_id = account_id )
                     dbUserSession.insertNew(userSession) match {

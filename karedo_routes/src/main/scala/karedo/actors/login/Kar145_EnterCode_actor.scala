@@ -43,7 +43,7 @@ trait Kar145_EnterCode_actor
         val newMobile = mobile.copy(valid = true, ts_validated = Some(now))
         val newUserAccount = userAccount.copy(
           mobile = List(newMobile) ++ restMobiles,
-          password = Some(password),
+          password = Some(getPasswordHash(account_id, password)),
           temp = false )
 
         dbUserAccount.update(newUserAccount)
