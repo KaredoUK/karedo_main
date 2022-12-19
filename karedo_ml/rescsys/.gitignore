@@ -1,0 +1,3 @@
+# Created by .gitignore support plugin (hsz.mobi)
+pyfm/pyfm_fast.c
+pyfm/pyfm_fast.so

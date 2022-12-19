@@ -1,0 +1,2 @@
+@(karedos: Double, receiver_msisdn: String, receiver_name: String)
+Success. Transfer of @karedos to @receiver_msisdn | @receiver_name Completed.

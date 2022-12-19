@@ -1,0 +1,5 @@
+karedo_persist is the access point in to the persistence layer.
+
+It is stand alone and can be used with any other component to create a service layer.
+
+It also contains the model components of the Karedo backend.

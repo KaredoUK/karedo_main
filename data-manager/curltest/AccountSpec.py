@@ -1,0 +1,171 @@
+from common import *
+import unittest, json
+
+clearDB()
+#
+# This is testing many things in the
+# "User Profile" section contained in
+# https://java.net/projects/parallelai/pages/RestAPISpecification
+# Look for Question### for doubts
+#
+
+userId=newUUID()
+deviceId=newUUID()
+appid2=newUUID()
+sessionId=newUUID()
+
+
+class TestAccount(unittest.TestCase):
+    
+
+    def test01_P77P53_CreateAccountCustomer(self):
+        global userId, deviceId
+        title("PARALLELAI-77API: Create Account")
+
+        r = post("account", {"deviceId": deviceId,
+                             "msisdn": "00447909738629",
+                             "email": "customer@gmail.com",
+                             "userType": "CUSTOMER"
+                             ""})
+
+        self.assertEqual(r.status_code, HTTP_OK)
+
+        js = json.loads(r.text)
+        self.assertEqual(js["channel"], "email")
+
+        doc = ua.find_one({"email": "customer@gmail.com"})
+        activationCode = doc["applications"][0]["activationCode"]
+        userType=doc["userType"]
+        self.assertEqual(userType,"CUSTOMER")
+
+        title("PARALLELAI-53API: Validate/Activate Account Application")
+        r = post("account/application/validation",
+                 {"deviceId": deviceId, "validationCode": activationCode, "password": "newPass"})
+
+        self.assertEqual(r.status_code, HTTP_OK)
+
+        js = json.loads(r.text)
+        userId = js["userID"]
+        info("UserId returned: " + js["userID"])
+
+    def test01c_P102_LoginCustomer(self):
+        global userId, deviceId, sessionId
+        title("PARALLELAI-102API: Login")
+        #  POST (JavaUUID / "application" / JavaUUID / "login"){
+        r = post("account/"+userId+"/application/"+deviceId+"/login",
+                 {"password" : "newPass"})
+        self.assertEqual(r.status_code, HTTP_OK)
+        js = json.loads(r.text)
+        sessionId = js["sessionId"]
+
+        self.assertTrue(valid_uuid(sessionId))
+        info("login passed sessionId "+sessionId)
+
+
+    def test02_P49_ResetApplication(self):
+        global userId, deviceId, sessionId
+        deviceId = newUUID()
+        title("PARALLELAI-49API: Reset Application for Account")
+
+        info("app: " + deviceId)
+
+        info("Question001: /reset is needed? doc is specifying it but original implementation didn't")
+        r = put("account/" + userId + "/application/" + deviceId + "/reset")
+
+        self.assertEqual(r.status_code, HTTP_OK)
+
+
+        doc = ua.find_one({"email": "customer@gmail.com"})
+        activationCode = doc["applications"][1]["activationCode"]
+
+        info("activationCode: "+activationCode)
+
+        r = post("account/application/validation", {"deviceId": deviceId, "validationCode": activationCode})
+
+        self.assertEqual(r.status_code, HTTP_OK)
+
+    def assertNotIn(self, member, container, msg=None):
+        super(TestAccount, self).assertNotIn(member, container, msg)
+
+    def test03_P50_UpdateInfo(self):
+        global userId, sessionId,deviceId
+        title("PARALLELAI-50API: Update Account Settings")
+
+        info("Question002: not present in documentation")
+        info("Question003: which date format is valid in plain rest?")
+        data={
+            "info":
+                {
+                    "userId": userId, # Question002: not present in documentation
+                    "userType": "CUSTOMER",
+                    "fullName": "Customer",
+                    "email": "customer@gmail.com",
+                    "msisdn": "004476543210",
+                    "postCode": "EC1",
+                    "country": "UK",
+                    #"birthDate": "", <==== Question003: here which format is valid?
+                    "gender": "M"
+                },
+            "settings":
+                {
+                    "maxAdsPerWeek": 500
+                },
+            "totalPoints": 100 # Question004: not present in documentation and NOT actually working
+        }
+        info("Question004: undocumented way to change totalPoints? or error?")
+
+        r=put("account/"+userId,data,session=sessionId)
+        self.assertEqual(r.status_code, HTTP_OK)
+
+        # tryng to do the same without authentication should be blocked
+        r=put("account/"+userId,data,session=newUUID())
+        self.assertEqual(r.status_code, HTTP_AUTH_ERR)
+
+
+
+    def test04_P51_GetInfo(self):
+        global userId, sessionId
+        title("PARALLELAI-51API: Get Account Settings ")
+
+        r=get("account/"+userId,sessionId)
+        self.assertEqual(r.status_code, HTTP_OK)
+        js = json.loads(r.text)
+        self.assertEqual(js["info"]["postCode"],"EC1")
+        self.assertEqual(js["info"]["fullName"],"Customer")
+        self.assertEqual(js["settings"]["maxAdsPerWeek"],500)
+
+        # called without authentication should fail
+        r=get("account/"+userId,session=newUUID())
+        self.assertEqual(r.status_code, HTTP_AUTH_ERR)
+
+        # this is failing (!)
+        #self.assertEqual(js["totalPoints"],100) # Question005: cfr question004 how can we change this value from rest APIs?
+
+    def test05_P54_getUserPoints(self):
+        global userId, sessionId
+        title("PARALLELAI-54API: Get User Points")
+
+        r=get("account/"+userId+"/points",sessionId)
+        self.assertEqual(r.status_code, HTTP_OK)
+        js = json.loads(r.text)
+        self.assertEqual(js["totalPoints"],0) # Question006: cfr Questions 004 and 005: how can we read something different from 0?
+
+        r=get("account/"+userId+"/points",session=newUUID())
+        self.assertEqual(r.status_code, HTTP_AUTH_ERR)
+
+    def test06_P52_deleteAccount(self):
+        global userId, sessionId
+        title("PARALLELAI-52API: Delete Account")
+        r=delete("account/"+userId,session=sessionId)
+        self.assertEqual(r.status_code, HTTP_OK)
+        found=ua.find_one({ "email" : "customer@gmail.com" })
+        self.assertEqual(found,None)
+        r=delete("account/"+userId,session=newUUID())
+        self.assertEqual(r.status_code, HTTP_AUTH_ERR)
+
+suite = unittest.TestLoader().loadTestsFromTestCase(TestAccount)
+
+
+if __name__ == '__main__':
+    unittest.main()
+

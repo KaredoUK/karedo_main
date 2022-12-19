@@ -1,0 +1,3 @@
+@* Activated by Kar183_putTransfer_actor when pending Transfers are completed *@
+@(app_karedos: Long, sender_msisdn: String, sender_name: String )
+@sender_msisdn (@sender_name) has sent you @app_karedos Karedos. Please sign up for Karedo to receive it.

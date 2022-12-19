@@ -1,1 +1,26 @@
+<<<<<<< HEAD
 launchConfigurations/
+=======
+logs
+tmp
+.history
+dist
+**/*.iml
+**/.idea
+**/.idea_modules
+**/target
+**/.DS_Store
+**/logs
+**/target
+**/tmp
+*/.history
+**/dist
+**/out
+**/RUNNING_PID
+**/.settings
+**/.project
+**/.cache-main
+**/log
+**/nohup.out
+
+>>>>>>> adc6307da29477f470fe68c64a34a0d17412a2b5

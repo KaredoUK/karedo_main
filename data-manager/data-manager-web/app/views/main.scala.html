@@ -1,0 +1,27 @@
+@(title: String, showLogo: Boolean = false)(content: Html)
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@title</title>
+    <link rel='shortcut icon' type='image/png' href='@routes.Assets.at("images/favicon.png")'>
+    <link rel='stylesheet' href='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.css"))'>
+    <link rel='stylesheet' href='@routes.Assets.at("stylesheets/index.css")'>
+    <link rel="stylesheet" href='@routes.Assets.at("sylesheets/sign-in-styles.css")' >
+    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("jquery.min.js"))'></script>
+    <script type="text/javascript" src="@routes.MessageController.javascriptRoutes"></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    @if(showLogo) {
+        <div class="container-fluid" style="margin-bottom: 50px">
+            <img src='@routes.Assets.at("images/logo.png")' >
+        </div>
+    }
+
+    <div class="container-fluid">
+        @content
+    </div>
+</body>
+</html>

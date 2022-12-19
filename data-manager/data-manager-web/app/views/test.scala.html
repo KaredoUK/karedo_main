@@ -1,0 +1,11 @@
+@(title: String, list: List[String])
+
+@main(title) {
+
+<ul>
+@for(s <- list) {
+  <li>@s</li>
+} 
+</ul>
+
+}

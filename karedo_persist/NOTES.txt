@@ -1,0 +1,38 @@
+"ads":[ 
+      {
+         "ad_type":"",                  /* One of IMAGE, VIDEO or NATIVE */ 
+         "ad_id":"",                    /* see parent page */
+         "adm":"",                      /* Deprecated. Actual Ad Markup in XHTML format. Used to display the ad.  */
+         "image_ad": {                    /* Details for an image ad. */
+            "image_url":"",             /* URL of the image to display */
+            "click_url":"",             /* URL to open on click */
+            "h":"",                     /* Height of the image. */
+            "w":"",                     /* Width of the image */
+            "beacons": [              /* Tracking pixels and other beacons. We can decide whether to fire them or not */
+                {
+                    "beacon":""         /* URL to the beacon */
+                }
+            }
+         },
+         "video_ad": {
+            "video_url":"",
+            "duration":"",
+            "click_url":"",
+            "h":"",
+            "w":"",
+            "beacons": [
+                {
+                    "beacon":""
+                }
+            ]
+         }
+         "addomain":"",         /* Domain of the advertiser */
+         "iurl":"",             /* Backup image URL */
+         "nurl":"",             /* Back up URL of the ad image */
+         "cid":"",              /* Campaign ID that generated this ad */
+         "crid":"",             /* Creative ID of the image */
+         "w":"",                /* width in pixels */
+         "h":""                 /* Height in pixels */
+      }
+   ]
+}

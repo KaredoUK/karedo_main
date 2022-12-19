@@ -1,0 +1,14 @@
+The parent folder for the Karedo master service.
+
+TODO:
+- break into compoents parts namely persist, api and spray.
+
+spray
+  |
+  v
+api
+ |
+ v
+persist
+
+

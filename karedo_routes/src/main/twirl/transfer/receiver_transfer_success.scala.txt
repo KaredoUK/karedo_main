@@ -1,0 +1,3 @@
+@* Activated by Kar145_EnterCode_actor when pending Transfers are completed *@
+@(app_karedos: Long, sender_msisdn: String, sender_name: String)
+Success. Transfer of @app_karedos Karedos from @sender_msisdn (@sender_name) Completed.

@@ -1,0 +1,66 @@
+# Region 1
+# Node 1
+mongors1n1:
+  image: registry.eu-gb.bluemix.net/karedo/mongo:latest
+  command: mongod --replSet mongors1 --dbpath /data/db --nojournal --oplogSize 16 --noauth
+  environment:
+    TERM: xterm
+  volumes:
+    - mongors1n1:/data/db
+
+# Node 2
+mongors1n2:
+  image: registry.eu-gb.bluemix.net/karedo/mongo:latest
+  command: mongod --replSet mongors1 --dbpath /data/db --nojournal --oplogSize 16 --noauth
+  environment:
+    TERM: xterm
+  volumes:
+    - mongors1n2:/data/db
+
+mongors2n1:
+  image: registry.eu-gb.bluemix.net/karedo/mongo:latest
+  command: mongod --replSet mongors2 --dbpath /data/db --nojournal --oplogSize 16 --noauth
+  environment:
+    TERM: xterm
+  volumes:
+    - mongors2n1:/data/db
+
+mongors2n2:
+  image: registry.eu-gb.bluemix.net/karedo/mongo:latest
+  command: mongod --replSet mongors2 --dbpath /data/db --nojournal --oplogSize 16 --noauth
+  environment:
+    TERM: xterm
+  volumes:
+    - mongors2n2:/data/db
+
+mongocfg1:
+  image: registry.eu-gb.bluemix.net/karedo/mongo:latest
+  command: mongod --dbpath /data/db --configsvr --noauth --port 27017
+  environment:
+    TERM: xterm
+  volumes:
+    - mongo-cfg-1:/data/db
+
+mongocfg2:
+  image: registry.eu-gb.bluemix.net/karedo/mongo:latest
+  command: mongod --dbpath /data/db --configsvr --noauth --port 27017
+  environment:
+    TERM: xterm
+  volumes:
+    - mongo-cfg-2:/data/db
+
+mongos1:
+  image: registry.eu-gb.bluemix.net/karedo/mongo:latest
+  command: mongos --configdb mongocfg1:27017,mongocfg2:27017 --port 27017
+  environment:
+    TERM: xterm
+  ports:
+    - 27017:27017
+
+mongos2:
+  image: registry.eu-gb.bluemix.net/karedo/mongo:latest
+  command: mongos --configdb mongocfg1:27017,mongocfg2:27017 --port 27017
+  environment:
+    TERM: xterm
+  ports:
+    - 27017:27017

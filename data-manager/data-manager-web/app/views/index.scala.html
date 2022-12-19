@@ -1,0 +1,12 @@
+@main("Welcome to Karedo") {
+
+    <script type='text/javascript' src='@routes.Assets.at("javascripts/index.min.js")'></script>
+    <script type="text/javascript" src='@routes.Assets.at("stylesheets/sign-in-scripts.js")'></script>
+
+    <div class="container-fluid">
+        <p>
+            <a class="btn btn-default btn-primary btn-lg" role="button" id="registerUserButton"  href="@routes.RegistrationController.register.url">Create account</a>
+            <a class="btn btn-default btn-lg" role="button"  id="registerAppButton" href="@routes.RegistrationController.registerApplication.url">Existing account</a>
+        </p>
+    </div>
+}
