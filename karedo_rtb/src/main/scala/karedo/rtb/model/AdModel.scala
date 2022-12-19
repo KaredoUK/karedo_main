@@ -27,6 +27,7 @@ object AdModel extends DefaultJsonProtocol {
     , lat: Option[Double] = None
     , lon: Option[Double] = None
     , country: Option[String] = Some("GB")
+    , lmt: Option[Int] = Some(0) // Limit Ad Tracking
   )
 
   case class AdRequest
@@ -77,7 +78,7 @@ object AdModel extends DefaultJsonProtocol {
 
   implicit val adResponse:RootJsonFormat[AdResponse] = jsonFormat2(AdResponse)
 
-  implicit val json_DeviceRequest = jsonFormat15(DeviceRequest)
+  implicit val json_DeviceRequest = jsonFormat16(DeviceRequest)
   implicit val adRequest:RootJsonFormat[AdRequest] = jsonFormat3(AdRequest)
 
 }

@@ -3,6 +3,10 @@ package karedo.util
 import com.typesafe.config._
 import spray.json._
 import java.net.URL
+
+import org.slf4j.LoggerFactory
+import org.slf4j.Logger
+
 import scala.collection.JavaConverters._
 
 trait Configurable extends ConfigObjectImplicits {
@@ -34,7 +38,6 @@ object ConfigLoader {
   val allConf = ConfigFactory.parseMap(allMap.asJava)
 
   println("Checking Remote Config - Version: " + remoteConf.getString("version"))
-
 }
 
 object ConfigObject {

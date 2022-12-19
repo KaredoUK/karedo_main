@@ -29,8 +29,8 @@ object Kar134_ads extends KaredoRoute
                       extractClientIP {
                         ip =>
                           get {
-                            parameters('p, 's ?, 'c.as[Int], 'lat.as[Double].?, 'lon.as[Double].?, 'ifa ?, 'make ?, 'model ?, 'os ?, 'osv ?, 'did ?, 'dpid ?, 'mac ?, 'cc ?) {
-                              (applicationId, sessionId, adCount, lat, lon, ifa, make, model, os, osv, did, dpid, mac, cc) =>
+                            parameters('p, 's ?, 'c.as[Int], 'lat.as[Double].?, 'lon.as[Double].?, 'ifa ?, 'make ?, 'model ?, 'os ?, 'osv ?, 'did ?, 'dpid ?, 'mac ?, 'cc ?, 'lmt.as[Int].?) {
+                              (applicationId, sessionId, adCount, lat, lon, ifa, make, model, os, osv, did, dpid, mac, cc, lmt) =>
                                 doCall({
                                   System.setProperty("java.net.preferIPv4Stack" , "true")
 
@@ -49,7 +49,8 @@ object Kar134_ads extends KaredoRoute
                                     mac = mac,
                                     lat = lat,
                                     lon = lon,
-                                    country = cc
+                                    country = cc,
+                                    lmt = lmt
                                   )
                                   exec(accountId, deviceId, applicationId, sessionId, adCount, devObj)
                                 }

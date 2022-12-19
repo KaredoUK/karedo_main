@@ -123,8 +123,8 @@ class AdActor
 
       val deviceObj: Device = Device(
         ua = devReq.ua,
-//        ifa = if(devReq.ifa.isDefined) devReq.ifa else Some(request.userId),
-        ifa = Some(request.userId),
+        ifa = if(devReq.ifa.isDefined) devReq.ifa else Some(request.userId),
+//        ifa = Some(request.userId),
         geo =
           Some(Geo(
             lat = devReq.lat,
