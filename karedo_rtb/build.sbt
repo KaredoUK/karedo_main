@@ -60,7 +60,7 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test",
     "com.typesafe.akka"   %%  "akka-testkit"      % akkaV   % "test",
 
-    "ch.qos.logback" % "logback-classic" % "1.1.3",
+    "ch.qos.logback" % "logback-classic" % "1.1.10",
 
     "org.scalatest" %% "scalatest" % "3.0.0" % "test",
     "org.specs2" %% "specs2-core" % "3.8.5" % "test",
