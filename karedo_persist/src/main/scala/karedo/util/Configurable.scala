@@ -8,7 +8,7 @@ import scala.collection.JavaConverters._
 trait Configurable extends ConfigObjectImplicits {
   import ConfigLoader._
 
-  val conf = allConf
+  val conf = remoteConf
 }
 
 object ConfigLoader {
