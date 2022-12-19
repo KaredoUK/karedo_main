@@ -27,7 +27,7 @@ trait Kar145_EnterCode_actor
     Try [Result[Error, APIResponse]] {
       logger.debug(s"Mobile Verify\nmsisdn: ${request.msisdn}\nsms_code: ${request.sms_code}\nApplicationID: ${request.application_id}")
 
-      val msisdn = request.msisdn
+      val msisdn = msisdnFixer(request.msisdn)
       val sms_code = request.sms_code
       val password = request.password
 

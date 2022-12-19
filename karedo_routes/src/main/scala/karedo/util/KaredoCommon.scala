@@ -326,7 +326,7 @@ trait KaredoUtils
     val msisdn = msisdnOrig.trim
 
     // UK
-    if( msisdn.startsWith("07") && msisdn.length == 10 ) "+44" + msisdn.substring(1) else msisdn
+    if( msisdn.startsWith("0") && msisdn.length == 10 ) "+44" + msisdn.substring(1) else msisdn
   }
 
   def getDefaultPrefMap():Map[String, UserPrefData] = {

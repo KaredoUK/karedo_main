@@ -53,7 +53,7 @@ trait Kar183_putTransfer_actor
           val receiverFirstName = request.receiver.first_name
           val receiverLastName = request.receiver.last_name
           val receiver_name = s"${receiverLastName}, ${receiverFirstName}"
-          val receiver_msisdn = request.receiver.msisdn
+          val receiver_msisdn = msisdnFixer(request.receiver.msisdn)
 
           val sale_id = getNewSaleCode.toUpperCase
 
