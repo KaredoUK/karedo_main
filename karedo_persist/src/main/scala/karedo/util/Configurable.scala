@@ -3,11 +3,12 @@ package karedo.util
 import com.typesafe.config._
 import spray.json._
 import java.net.URL
+import scala.collection.JavaConverters._
 
 trait Configurable extends ConfigObjectImplicits {
   import ConfigLoader._
 
-  val conf = remoteConf
+  val conf = allConf
 }
 
 object ConfigLoader {
@@ -23,6 +24,14 @@ object ConfigLoader {
       ), ConfigParseOptions.defaults().setSyntax(ConfigSyntax.CONF)
     )
   )
+
+  val envMap = ConfigFactory.systemEnvironment().entrySet().asScala.map { e => (e.getKey.toString, e.getValue.toString) }
+  val propMap = ConfigFactory.systemProperties().entrySet().asScala.map { e => (e.getKey.toString, e.getValue.toString) }
+  val remMap = remoteConf.entrySet().asScala.map { e => (e.getKey.toString, e.getValue.toString) }
+
+  val allMap:Map[String, String] = (envMap ++ propMap ++ remMap).toMap
+
+  val allConf = ConfigFactory.parseMap(allMap.asJava)
 
   println("Checking Remote Config - Version: " + remoteConf.getString("version"))
 
