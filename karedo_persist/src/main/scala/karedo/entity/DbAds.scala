@@ -6,7 +6,8 @@ import karedo.entity.dao._
 import salat.annotations._
 
 
-case class Beacon(beacon: String="")
+
+/*
 
 case class ImageAd(
                     image_url: String = "",
@@ -24,12 +25,12 @@ case class VideoAd(
                     w: Option[Int] = None,
                     beacons: Option[List[Beacon]] = None
                   )
-
 case class Ads(
               // applicationId as key
               @Key("_id") id: String,
               ads: List[Ad]
               ) extends Keyable[String]
+
 case class Ad(
              ad_id: String = UUID.randomUUID().toString,
                 ad_type: String = "IMAGE",
@@ -45,19 +46,41 @@ case class Ad(
                 w: Int = 0,
                 h: Int = 0
               )
+*/
+
+case class BeaconType(beacon: String="")
+
+case class AdType
+(
+  imp_url: String,
+  click_url: String,
+  ad_text: String,
+  ad_source: Option[String],
+  duration: Option[Int] = None,
+  h: Option[Int] = None,
+  w: Option[Int] = None,
+  beacons: Option[List[BeaconType]] = None
+)
+
+
+case class AdUnitType
+(
+  @Key("_id") id: String,
+   ad_type: String,
+   impid: String,
+   ad: AdType,
+   price_USD_per_1k: Double, // In USD eCPM
+   ad_domain: Option[List[String]],
+   iurl: Option[String],
+   nurl: Option[String],
+   cid: String,
+   crid: String,
+   w: Int,
+   h: Int,
+   hint: Double = 0.0
+) extends Keyable[String]
 
 // add implementation if you need special functionalities
-trait DbAds extends DbMongoDAO_Casbah[String, Ads] {
-  // preloads some values associated to accountId: accountid
-  def preload(applicationId: String, count: Int) = {
-
-    def element(i: Int): Ad = Ad(price=10,imageAd = Some(ImageAd(s"Image $i")))
-
-    val l = (for (i <- 1 to count) yield element(i)).toList
-    insertNew(Ads(applicationId, l))
-
-
-  }
-}
+trait DbAds extends DbMongoDAO_Casbah[String, AdUnitType]
 
 

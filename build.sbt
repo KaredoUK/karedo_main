@@ -1,20 +1,41 @@
-organization := "karedo"
+lazy val commonSettings = Seq(
+ organization := "karedo",
+ name := "karedo",
+ version := "0.0.2-SNAPSHOT",
+ scalaVersion := "2.11.8"
+)
 
-name := "karedo"
+lazy val root = (project in file("."))
+  .aggregate(salat, persist, rtb, routes)
 
-version := "0.0.2-SNAPSHOT"
+lazy val salat = (project in file("salat"))
+lazy val persist = (project in file("karedo_persist"))
+  .settings(
+   commonSettings
+  )
+  .dependsOn(salat)
+lazy val rtb = (project in file("karedo_rtb"))
+  .settings(
+  commonSettings
+ )
+  .dependsOn(persist)
 
-scalaVersion in ThisBuild := "2.11.8"
+lazy val routes = (project in file("karedo_routes"))
+  .settings(
+  commonSettings
+ )
+  .dependsOn(persist, rtb)
+
 
 //coverageEnabled := true
 
-lazy val root = project.in(file(".")).aggregate(db,rtb,routes)
-
-lazy val db = project.in(file("karedo_persist"))
-
-lazy val rtb = project.in(file("karedo_rtb")) dependsOn(db)
-
-lazy val routes = project.in(file("karedo_routes")) dependsOn(db, rtb)
+//lazy val root = project.in(file(".")).aggregate(db,rtb,routes)
+//
+//lazy val db = project.in(file("karedo_persist"))
+//
+//lazy val rtb = project.in(file("karedo_rtb")) dependsOn(db)
+//
+//lazy val routes = project.in(file("karedo_routes")) dependsOn(db, rtb)
 
 run := {
  println("******************************")

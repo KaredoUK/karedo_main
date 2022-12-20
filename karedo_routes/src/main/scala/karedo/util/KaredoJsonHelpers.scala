@@ -1,7 +1,5 @@
 package karedo.util
 
-import karedo.entity
-import karedo.entity._
 import karedo.rtb.model.AdModel.AdUnit
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
@@ -10,6 +8,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
   * Created by pakkio on 10/9/16.
   */
 import karedo.util.DateTimeJsonHelper._
+import karedo.entity._
 
 trait KaredoJsonHelpers
   extends DefaultJsonProtocol
@@ -24,23 +23,23 @@ trait KaredoJsonHelpers
   case class ErrorInfo(message:String, info: String)
   implicit val jsonErrorInfo = jsonFormat2(ErrorInfo)
 
-  implicit val jsonChannel = jsonFormat2(Channel)
-  implicit val jsonBacon = jsonFormat1(entity.Beacon)
-  implicit val jsonImage = jsonFormat5(ImageAd)
-  implicit val jsonVideo = jsonFormat6(VideoAd)
-  implicit val jsonAd = jsonFormat13(Ad)
-  implicit val jsonAds = jsonFormat2(Ads)
+//  implicit val jsonChannel = jsonFormat2(Channel)
+//  implicit val jsonBacon = jsonFormat1(entity.Beacon)
+//  implicit val jsonImage = jsonFormat5(ImageAd)
+//  implicit val jsonVideo = jsonFormat6(VideoAd)
+//  implicit val jsonAd = jsonFormat13(Ad)
+//  implicit val jsonAds = jsonFormat2(Ads)
 
-  implicit val jsonAction = jsonFormat2(Action)
-  implicit val jsonMessage = jsonFormat6(UserMessages)
+//  implicit val jsonAction = jsonFormat2(Action)
+//  implicit val jsonMessage = jsonFormat6(UserMessages)
 
 
-  implicit val jsonUserAd = jsonFormat10(UserAd)
+//  implicit val jsonUserAd = jsonFormat10(UserAd)
 
   case class Kar166Request(application_id: String, session_id:String, entries: List[InteractUnit] = List())
 
-  implicit val jsonChannelUnit = jsonFormat4(ChannelUnit)
-  implicit val jsonInteractUnit = jsonFormat10(InteractUnit)
+//  implicit val jsonChannelUnit = jsonFormat4(ChannelUnit)
+//  implicit val jsonInteractUnit = jsonFormat10(InteractUnit)
   implicit val jsonKar166Request:RootJsonFormat[Kar166Request] = jsonFormat3(Kar166Request)
 
   case class Kar167Request(application_id: String, session_id:String, share: InteractUnit)
@@ -49,7 +48,7 @@ trait KaredoJsonHelpers
   case class Kar167Res(channels: List[ChannelUnit])
   implicit val jsonKar167Res:RootJsonFormat[Kar167Res] = jsonFormat1(Kar167Res)
 
-  implicit val jsonFavouriteUnit = jsonFormat6(FavouriteUnit)
+//  implicit val jsonFavouriteUnit = jsonFormat6(FavouriteUnit)
 
   case class Kar165Request(application_id: String, session_id:String, favourites: List[FavouriteUnit])
   implicit val jsonKar165Request:RootJsonFormat[Kar165Request] = jsonFormat3(Kar165Request)
@@ -58,7 +57,7 @@ trait KaredoJsonHelpers
   implicit val jsonKar165Res:RootJsonFormat[Kar165Res] = jsonFormat1(Kar165Res)
 
 
-  implicit val jsonUserProfile = jsonFormat13(UserProfile)
+//  implicit val jsonUserProfile = jsonFormat13(UserProfile)
 
   case class Kar189ReqProfile(gender:Option[String], first_name:Option[String], last_name: Option[String],
                               yob: Option[Int], kids: Option[Int], income: Option[Int], postcode: Option[String], location: Option[Boolean],
@@ -67,8 +66,8 @@ trait KaredoJsonHelpers
   implicit val jsonKar189ReqProfile = jsonFormat10(Kar189ReqProfile)
   implicit val jsonKar189Req:RootJsonFormat[Kar189Req] = jsonFormat3(Kar189Req)
 
-  implicit val jsonUserPrefData = jsonFormat4(UserPrefData)
-  implicit val jsonUserPrefs:RootJsonFormat[UserPrefs] = jsonFormat4(UserPrefs)
+//  implicit val jsonUserPrefData = jsonFormat4(UserPrefData)
+//  implicit val jsonUserPrefs:RootJsonFormat[UserPrefs] = jsonFormat4(UserPrefs)
 
   case class Kar194Res_Prefs(prefs:Map[String, UserPrefData])
   implicit val jsonKar194Res_Prefs:RootJsonFormat[Kar194Res_Prefs] = jsonFormat1(Kar194Res_Prefs)
@@ -76,8 +75,8 @@ trait KaredoJsonHelpers
   case class Kar195Req(application_id: String, session_id: String, prefs: Map[String, Double] )
   implicit val jsonKar195Req = jsonFormat3(Kar195Req)
 
-  implicit val jsonIntent = jsonFormat6(IntentUnit)
-  implicit val jsonUserIntent:RootJsonFormat[UserIntent] = jsonFormat2(UserIntent)
+//  implicit val jsonIntent = jsonFormat6(IntentUnit)
+//  implicit val jsonUserIntent:RootJsonFormat[UserIntent] = jsonFormat2(UserIntent)
 
   case class Kar170ReqIntentUnit(why: String, what: String, when: String, where: String)
   case class Kar170Req(application_id: String, session_id: String, intent: Kar170ReqIntentUnit )
@@ -130,7 +129,7 @@ trait KaredoJsonHelpers
   case class Kar197Res(sale_id: String)
   implicit val jsonKar197Res = jsonFormat1(Kar197Res)
 
-  implicit val jsonSale = jsonFormat13(Sale)
+//  implicit val jsonSale = jsonFormat13(Sale)
 
   case class Kar199Res(qr_code: String)
   implicit val jsonKar199Res = jsonFormat1(Kar199Res)
