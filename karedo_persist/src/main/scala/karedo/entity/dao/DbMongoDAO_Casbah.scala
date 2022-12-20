@@ -63,6 +63,20 @@ abstract class DbMongoDAO_Casbah[K, T <: Keyable[K]]
 
   }
 
+  override def findAll(): Result[String, List[T]] = {
+    logger.debug(s"find all")
+    val ret = Try[List[T]] {
+      val cursor = dao.find(MongoDBObject.empty)
+      cursor.toList
+    } match {
+      case Success(r) => OK(r)
+      case Failure(x) =>
+        KO(x.toString)
+    }
+    logger.debug(s"find all returning $ret")
+    ret
+  }
+
   override def findByAccount(account_id: String): Result[String, List[T]] = {
     logger.debug(s"find by account $account_id")
     val ret = Try {
