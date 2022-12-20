@@ -57,7 +57,7 @@ class Kar183_PutTransfer_Test extends AllTests {
     "* PUT /transfer - Sender account has no valid mobile 1" in {
       val t = setUpTestParms
 
-      val request1 = Kar183Req(
+      val request1 = put_TransferRequest(
         account_id = t.s_acctId,
         application_id = t.s_appId,
         session_id = t.s_sessId,
@@ -87,7 +87,7 @@ class Kar183_PutTransfer_Test extends AllTests {
         Mobile(t.r_msisdn2, Some("CODE"), valid = true)
       )))
 
-      val request2 = Kar183Req(
+      val request2 = put_TransferRequest(
         account_id = t.s_acctId,
         application_id = t.s_appId,
         session_id = t.s_sessId,
@@ -116,7 +116,7 @@ class Kar183_PutTransfer_Test extends AllTests {
         Mobile(t.r_msisdn2, Some("CODE"), valid = true, ts_validated = Some(now))
       )))
 
-      val request = Kar183Req(
+      val request = put_TransferRequest(
         account_id = t.s_acctId,
         application_id = t.s_appId,
         session_id = t.s_sessId,
@@ -144,7 +144,7 @@ class Kar183_PutTransfer_Test extends AllTests {
         Mobile(t.r_msisdn1, Some("SPLAT"), valid = true, ts_validated = Some(now))
       )))
 
-      val request = Kar183Req(
+      val request = put_TransferRequest(
         account_id = t.s_acctId,
         application_id = t.s_appId,
         session_id = t.s_sessId,

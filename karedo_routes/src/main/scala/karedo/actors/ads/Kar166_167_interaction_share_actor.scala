@@ -16,12 +16,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
   */
 
 
-trait Kar166_interaction_actor extends DbCollections
+trait post_InteractionActor extends DbCollections
   with KaredoAuthentication
   with KaredoJsonHelpers {
-  override val logger = LoggerFactory.getLogger(classOf[Kar166_interaction_actor])
+  override val logger = LoggerFactory.getLogger(classOf[post_InteractionActor])
 
-  def exec(accountId: String, deviceId: Option[String], request: Kar166Request): Result[Error, APIResponse] = {
+  def exec(accountId: String, deviceId: Option[String], request: post_InteractionRequest): Result[Error, APIResponse] = {
     val applicationId = request.application_id
     val sessionId = request.session_id
     logger.debug(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\nsessionId: $sessionId")
@@ -48,13 +48,13 @@ trait Kar166_interaction_actor extends DbCollections
   }
 }
 
-trait Kar167_share_data_actor extends DbCollections
+trait post_ShareDataActor extends DbCollections
   with KaredoAuthentication
   with KaredoJsonHelpers
   with KaredoUtils {
-  override val logger = LoggerFactory.getLogger(classOf[Kar167_share_data_actor])
+  override val logger = LoggerFactory.getLogger(classOf[post_ShareDataActor])
 
-  def exec(accountId: String, deviceId: Option[String], request: Kar167Request): Result[Error, APIResponse] = {
+  def exec(accountId: String, deviceId: Option[String], request: post_ShareDataRequest): Result[Error, APIResponse] = {
     val applicationId = request.application_id
     val sessionId = request.session_id
     logger.debug(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\nsessionId: $sessionId")
@@ -120,7 +120,7 @@ trait Kar167_share_data_actor extends DbCollections
 
           dbUserShare.insertNew(UserInteraction(account_id = accountId, interaction = request.share.copy(channels = Some(outChannels))))
 
-          OK(APIResponse(Kar167Res(outChannels).toJson.toString, code))
+          OK(APIResponse(SocialChannelListResponse(outChannels).toJson.toString, code))
         } match {
           case Success(s) => s
           case Failure(f) => MAKE_THROWN_ERROR(f)
@@ -132,12 +132,12 @@ trait Kar167_share_data_actor extends DbCollections
 
 
 
-trait Kar165_postFavourite_actor extends DbCollections
+trait post_FavouriteActor extends DbCollections
   with KaredoAuthentication
   with KaredoJsonHelpers {
-  override val logger = LoggerFactory.getLogger(classOf[Kar165_postFavourite_actor])
+  override val logger = LoggerFactory.getLogger(classOf[post_FavouriteActor])
 
-  def exec(accountId: String, deviceId: Option[String], request: Kar165Request): Result[Error, APIResponse] = {
+  def exec(accountId: String, deviceId: Option[String], request: post_FavouriteRequest): Result[Error, APIResponse] = {
     val applicationId = request.application_id
     val sessionId = request.session_id
     logger.debug(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\nsessionId: $sessionId")
@@ -169,10 +169,10 @@ trait Kar165_postFavourite_actor extends DbCollections
   }
 }
 
-trait Kar165_getFavourite_actor extends DbCollections
+trait get_FavouriteActor extends DbCollections
   with KaredoAuthentication
   with KaredoJsonHelpers {
-  override val logger = LoggerFactory.getLogger(classOf[Kar165_getFavourite_actor])
+  override val logger = LoggerFactory.getLogger(classOf[get_FavouriteActor])
 //accountId, deviceId, applicationId, sessionId
   def exec(accountId: String, deviceId: Option[String], applicationId:String, sessionId: Option[String]): Result[Error, APIResponse] = {
     logger.debug(s"OK\nAccountId: $accountId\ndeviceId: $deviceId\nsessionId: $sessionId")
@@ -183,7 +183,7 @@ trait Kar165_getFavourite_actor extends DbCollections
 
           dbUserFavourite.find(accountId) match {
             case OK(userFav) => {
-              OK(APIResponse(Kar165Res(userFav.entries).toJson.toString, code))
+              OK(APIResponse(FavouriteListResponse(userFav.entries).toJson.toString, code))
             }
             case KO(_) => {
               OK(APIResponse("", code))

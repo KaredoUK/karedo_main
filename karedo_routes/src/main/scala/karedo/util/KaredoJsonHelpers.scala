@@ -36,129 +36,129 @@ trait KaredoJsonHelpers
 
 //  implicit val jsonUserAd = jsonFormat10(UserAd)
 
-  case class Kar166Request(application_id: String, session_id:String, entries: List[InteractUnit] = List())
+  case class post_InteractionRequest(application_id: String, session_id:String, entries: List[InteractUnit] = List())
 
 //  implicit val jsonChannelUnit = jsonFormat4(ChannelUnit)
 //  implicit val jsonInteractUnit = jsonFormat10(InteractUnit)
-  implicit val jsonKar166Request:RootJsonFormat[Kar166Request] = jsonFormat3(Kar166Request)
+  implicit val jsonKar166Request:RootJsonFormat[post_InteractionRequest] = jsonFormat3(post_InteractionRequest)
 
-  case class Kar167Request(application_id: String, session_id:String, share: InteractUnit)
-  implicit val jsonKar167Request:RootJsonFormat[Kar167Request] = jsonFormat3(Kar167Request)
+  case class post_ShareDataRequest(application_id: String, session_id:String, share: InteractUnit)
+  implicit val jsonKar167Request:RootJsonFormat[post_ShareDataRequest] = jsonFormat3(post_ShareDataRequest)
 
-  case class Kar167Res(channels: List[ChannelUnit])
-  implicit val jsonKar167Res:RootJsonFormat[Kar167Res] = jsonFormat1(Kar167Res)
+  case class SocialChannelListResponse(channels: List[ChannelUnit])
+  implicit val jsonKar167Res:RootJsonFormat[SocialChannelListResponse] = jsonFormat1(SocialChannelListResponse)
 
 //  implicit val jsonFavouriteUnit = jsonFormat6(FavouriteUnit)
 
-  case class Kar165Request(application_id: String, session_id:String, favourites: List[FavouriteUnit])
-  implicit val jsonKar165Request:RootJsonFormat[Kar165Request] = jsonFormat3(Kar165Request)
+  case class post_FavouriteRequest(application_id: String, session_id:String, favourites: List[FavouriteUnit])
+  implicit val jsonKar165Request:RootJsonFormat[post_FavouriteRequest] = jsonFormat3(post_FavouriteRequest)
 
-  case class Kar165Res(favourites: List[FavouriteUnit])
-  implicit val jsonKar165Res:RootJsonFormat[Kar165Res] = jsonFormat1(Kar165Res)
+  case class FavouriteListResponse(favourites: List[FavouriteUnit])
+  implicit val jsonKar165Res:RootJsonFormat[FavouriteListResponse] = jsonFormat1(FavouriteListResponse)
 
 
 //  implicit val jsonUserProfile = jsonFormat13(UserProfile)
 
-  case class Kar189ReqProfile(gender:Option[String], first_name:Option[String], last_name: Option[String],
-                              yob: Option[Int], kids: Option[Int], income: Option[Int], postcode: Option[String], location: Option[Boolean],
-                              opt_in: Option[Boolean], third_party: Option[Boolean])
-  case class Kar189Req(application_id: String, session_id: String, profile: Kar189ReqProfile )
-  implicit val jsonKar189ReqProfile = jsonFormat10(Kar189ReqProfile)
-  implicit val jsonKar189Req:RootJsonFormat[Kar189Req] = jsonFormat3(Kar189Req)
+  case class ProfileUnit(gender:Option[String], first_name:Option[String], last_name: Option[String],
+                         yob: Option[Int], kids: Option[Int], income: Option[Int], postcode: Option[String], location: Option[Boolean],
+                         opt_in: Option[Boolean], third_party: Option[Boolean])
+  case class post_ProfileRequest(application_id: String, session_id: String, profile: ProfileUnit )
+  implicit val jsonKar189ReqProfile = jsonFormat10(ProfileUnit)
+  implicit val jsonKar189Req:RootJsonFormat[post_ProfileRequest] = jsonFormat3(post_ProfileRequest)
 
-  case class ChangePasswordRequest(application_id: String, session_id: String, account_id: String,
-                                   old_password: String, new_password: String)
-  implicit val json_ChangePasswordRequest:RootJsonFormat[ChangePasswordRequest] = jsonFormat5(ChangePasswordRequest)
+  case class post_ChangePasswordRequest(application_id: String, session_id: String, account_id: String,
+                                        old_password: String, new_password: String)
+  implicit val json_ChangePasswordRequest:RootJsonFormat[post_ChangePasswordRequest] = jsonFormat5(post_ChangePasswordRequest)
 
 //  implicit val jsonUserPrefData = jsonFormat4(UserPrefData)
 //  implicit val jsonUserPrefs:RootJsonFormat[UserPrefs] = jsonFormat4(UserPrefs)
 
-  case class Kar194Res_Prefs(prefs:Map[String, UserPrefData])
-  implicit val jsonKar194Res_Prefs:RootJsonFormat[Kar194Res_Prefs] = jsonFormat1(Kar194Res_Prefs)
+  case class PrefsListResponse(prefs:Map[String, UserPrefData])
+  implicit val jsonKar194Res_Prefs:RootJsonFormat[PrefsListResponse] = jsonFormat1(PrefsListResponse)
 
-  case class Kar195Req(application_id: String, session_id: String, prefs: Map[String, Double] )
-  implicit val jsonKar195Req = jsonFormat3(Kar195Req)
+  case class post_PrefsRequest(application_id: String, session_id: String, prefs: Map[String, Double] )
+  implicit val jsonKar195Req = jsonFormat3(post_PrefsRequest)
 
 //  implicit val jsonIntent = jsonFormat6(IntentUnit)
 //  implicit val jsonUserIntent:RootJsonFormat[UserIntent] = jsonFormat2(UserIntent)
 
-  case class Kar170ReqIntentUnit(why: String, what: String, when: String, where: String)
-  case class Kar170Req(application_id: String, session_id: String, intent: Kar170ReqIntentUnit )
+  case class IntentUnit(why: String, what: String, when: String, where: String)
+  case class IntentUpdateRequest(application_id: String, session_id: String, intent: IntentUnit )
 
-  implicit val jsonKar170ReqIntentUnit = jsonFormat4(Kar170ReqIntentUnit)
-  implicit val jsonKar170Req:RootJsonFormat[Kar170Req] = jsonFormat3(Kar170Req)
+  implicit val jsonKar170ReqIntentUnit = jsonFormat4(IntentUnit)
+  implicit val jsonKar170Req:RootJsonFormat[IntentUpdateRequest] = jsonFormat3(IntentUpdateRequest)
 
-  case class Kar172Req(application_id: String, session_id: String )
-  implicit val jsonKar172Req = jsonFormat2(Kar172Req)
+  case class delete_IntentRequest(application_id: String, session_id: String )
+  implicit val jsonKar172Req = jsonFormat2(delete_IntentRequest)
 
-  case class Kar141_SendCode_Req(application_id: String, first_name: String, last_name: String,
-                                 msisdn: String, user_type: String, email: String)
-  implicit val jsonKar141_SendCode_Req = jsonFormat6(Kar141_SendCode_Req)
+  case class post_SendCodeRequest(application_id: String, first_name: String, last_name: String,
+                                  msisdn: String, user_type: String, email: String)
+  implicit val jsonKar141_SendCode_Req = jsonFormat6(post_SendCodeRequest)
 
-  case class Kar141_DeleteAccount_Req(application_id: String, account_id: String, session_id: String)
-  implicit val jsonKar141_DeleteAccount_Req = jsonFormat3(Kar141_DeleteAccount_Req)
+  case class delete_AccountRequest(application_id: String, account_id: String, session_id: String)
+  implicit val jsonKar141_DeleteAccount_Req = jsonFormat3(delete_AccountRequest)
 
-  case class Kar141_SendCode_Res(returning_user: Boolean, account_id: Option[String])
-  implicit val jsonKar141_SendCode_Res = jsonFormat2(Kar141_SendCode_Res)
+  case class SendCodeResponse(returning_user: Boolean, account_id: Option[String])
+  implicit val jsonKar141_SendCode_Res = jsonFormat2(SendCodeResponse)
 
   case class SMSRequest(recipients: String, originator: String, body: String)
   implicit val jsonSMSRequest = jsonFormat3(SMSRequest)
 
-  case class Kar145Req(application_id:String, msisdn:String, sms_code:String, password:String)
-  implicit val jsonKar145Req = jsonFormat4(Kar145Req)
+  case class post_EnterCodeRequest(application_id:String, msisdn:String, sms_code:String, password:String)
+  implicit val jsonKar145Req = jsonFormat4(post_EnterCodeRequest)
 
-  case class Kar145Res(account_id:String)
-  implicit val jsonKar145Res = jsonFormat1(Kar145Res)
+  case class AccountIdResponse(account_id:String)
+  implicit val jsonKar145Res = jsonFormat1(AccountIdResponse)
 
-  case class Kar135Res(account_id:Option[String], app_karedos:Int)
-  implicit val jsonKar135Res = jsonFormat2(Kar135Res)
+  case class KaredosResponse(account_id:Option[String], app_karedos:Int)
+  implicit val jsonKar135Res = jsonFormat2(KaredosResponse)
 
-  case class Kar134Res(account_id:Option[String], ad_count:Int, ads:List[AdUnit] )
-  implicit val jsonKar134Res = jsonFormat3(Kar134Res)
+  case class AdResponse(account_id:Option[String], ad_count:Int, ads:List[AdUnit] )
+  implicit val jsonKar134Res = jsonFormat3(AdResponse)
 
-  case class Kar138Req(account_id: String, application_id:String, password: String)
-  implicit val jsonKar138Req = jsonFormat3(Kar138Req)
+  case class post_LoginRequest(account_id: String, application_id:String, password: String)
+  implicit val jsonKar138Req = jsonFormat3(post_LoginRequest)
 
-  case class Kar138Res(session_id: String)
-  implicit val jsonKar138Res = jsonFormat1(Kar138Res)
+  case class SessionIdResponse(session_id: String)
+  implicit val jsonKar138Res = jsonFormat1(SessionIdResponse)
 
   case class Receiver(first_name: String, last_name: String, msisdn:String)
-  case class Kar183Req(account_id: String, application_id: String, session_id: String, app_karedos:Int, receiver:Receiver )
+  case class put_TransferRequest(account_id: String, application_id: String, session_id: String, app_karedos:Int, receiver:Receiver )
   implicit val jsonReceiver = jsonFormat3(Receiver)
-  implicit val jsonKar183Req:RootJsonFormat[Kar183Req] = jsonFormat5(Kar183Req)
+  implicit val jsonKar183Req:RootJsonFormat[put_TransferRequest] = jsonFormat5(put_TransferRequest)
 
-  case class Kar197Req(account_id: String, application_id: String, session_id: String, app_karedos:Int )
-  implicit val jsonKar197Req = jsonFormat4(Kar197Req)
+  case class put_SaleRequest(account_id: String, application_id: String, session_id: String, app_karedos:Int )
+  implicit val jsonKar197Req = jsonFormat4(put_SaleRequest)
 
-  case class Kar197Res(sale_id: String)
-  implicit val jsonKar197Res = jsonFormat1(Kar197Res)
+  case class SaleIdResponse(sale_id: String)
+  implicit val jsonKar197Res = jsonFormat1(SaleIdResponse)
 
 //  implicit val jsonSale = jsonFormat13(Sale)
 
-  case class Kar199Res(qr_code: String)
-  implicit val jsonKar199Res = jsonFormat1(Kar199Res)
+  case class QRCodeResponse(qr_code: String)
+  implicit val jsonKar199Res = jsonFormat1(QRCodeResponse)
 
-  case class Kar186Req(account_id: String, application_id: String, session_id: String )
-  implicit val jsonKar186Req = jsonFormat3(Kar186Req)
+  case class post_SaleRequest(account_id: String, application_id: String, session_id: String )
+  implicit val jsonKar186Req = jsonFormat3(post_SaleRequest)
 
   case class MessageRes(message: String)
   implicit val jsonMessageRes = jsonFormat1(MessageRes)
 
-  case class Kar147_Resend(application_id: String, msisdn: String)
-  implicit val jsonKar147_Resend = jsonFormat2(Kar147_Resend)
+  case class put_ResendRequest(application_id: String, msisdn: String)
+  implicit val jsonKar147_Resend = jsonFormat2(put_ResendRequest)
 
-  case class Kar147_ResendEmail(application_id: String, email: String)
-  implicit val jsonKar147_ResetEmail = jsonFormat2(Kar147_ResendEmail)
+  case class put_ResendEmailRequest(application_id: String, email: String)
+  implicit val jsonKar147_ResetEmail = jsonFormat2(put_ResendEmailRequest)
 
-  case class Kar147_ValidateEmail_Request(application_id: String, account_id: String, session_id: String, email: String)
-  implicit val jsonKar147_ValidateEmail_Request = jsonFormat4(Kar147_ValidateEmail_Request)
+  case class post_ValidateEmailRequest(application_id: String, account_id: String, session_id: String, email: String)
+  implicit val jsonKar147_ValidateEmail_Request = jsonFormat4(post_ValidateEmailRequest)
 
-  case class Kar147_ValidateEmail_Res(valid: Boolean)
-  implicit val jsonKar147_ValidateEmail_Res = jsonFormat1(Kar147_ValidateEmail_Res)
+  case class ValidateBooleanResponse(valid: Boolean)
+  implicit val jsonKar147_ValidateEmail_Res = jsonFormat1(ValidateBooleanResponse)
 
   case class UrlCodeAndAccountHash(url_code: String, account_hash: String)
 
-  case class Kar12Req
+  case class post_InformRequest
   (
     application_id: String
     , account_id: Option[String]
@@ -167,5 +167,5 @@ trait KaredoJsonHelpers
     , detail: Option[String]
     , image_base64: Option[String]
    )
-  implicit val json_Kar12Req = jsonFormat6(Kar12Req)
+  implicit val json_Kar12Req = jsonFormat6(post_InformRequest)
 }

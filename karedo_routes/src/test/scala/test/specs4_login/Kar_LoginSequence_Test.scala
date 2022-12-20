@@ -93,7 +93,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
       val reqMsisdn = unknown_msisdn
       val reqEmail = unknown_email
 
-      val request = Kar141_SendCode_Req(
+      val request = post_SendCodeRequest(
         application_id = reqAppId,
         first_name = reqFName,
         last_name = reqLName,
@@ -108,7 +108,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
         routesWithLogging ~>
         check {
           val st=status
-          val res=responseAs[Kar141_SendCode_Res]
+          val res=responseAs[SendCodeResponse]
           res.returning_user shouldEqual false
           res.account_id shouldEqual None
           status.intValue() shouldEqual (HTTP_OK_200)
@@ -155,7 +155,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
       val reqMsisdn = unknown_msisdn
       val reqEmail = known_email
 
-      val request = Kar141_SendCode_Req(
+      val request = post_SendCodeRequest(
         application_id = reqAppId,
         first_name = reqFName,
         last_name = reqLName,
@@ -170,7 +170,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
         routesWithLogging ~>
         check {
           val st=status
-          val res=responseAs[Kar141_SendCode_Res]
+          val res=responseAs[SendCodeResponse]
           res.returning_user shouldEqual false
           res.account_id shouldEqual None
           status.intValue() shouldEqual (HTTP_OK_200)
@@ -219,7 +219,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
       val reqMsisdn = known_msisdn
       val reqEmail = unknown_email
 
-      val request = Kar141_SendCode_Req(
+      val request = post_SendCodeRequest(
         application_id = reqAppId,
         first_name = reqFName,
         last_name = reqLName,
@@ -234,7 +234,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
         routesWithLogging ~>
         check {
           val st=status
-          val res=responseAs[Kar141_SendCode_Res]
+          val res=responseAs[SendCodeResponse]
           res.returning_user shouldEqual true
           res.account_id shouldEqual Some(known_acctId)
           status.intValue() shouldEqual (HTTP_OK_200)
@@ -288,7 +288,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
       val reqMsisdn = known_msisdn
       val reqEmail = known_email
 
-      val request = Kar141_SendCode_Req(
+      val request = post_SendCodeRequest(
         application_id = reqAppId,
         first_name = reqFName,
         last_name = reqLName,
@@ -303,7 +303,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
         routesWithLogging ~>
         check {
           val st=status
-          val res=responseAs[Kar141_SendCode_Res]
+          val res=responseAs[SendCodeResponse]
           res.returning_user shouldEqual true
           res.account_id shouldEqual Some(known_acctId)
           status.intValue() shouldEqual (HTTP_OK_200)
@@ -359,7 +359,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
       val reqMsisdn = known_msisdn
       val reqEmail = known_email
 
-      val request = Kar141_SendCode_Req(
+      val request = post_SendCodeRequest(
         application_id = reqAppId,
         first_name = reqFName,
         last_name = reqLName,
@@ -374,7 +374,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
         routesWithLogging ~>
         check {
           val st=status
-          val res=responseAs[Kar141_SendCode_Res]
+          val res=responseAs[SendCodeResponse]
           res.returning_user shouldEqual false
           res.account_id shouldEqual None
           status.intValue() shouldEqual (HTTP_OK_200)
@@ -428,7 +428,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
       val reqMsisdn = conflict_msisdn
       val reqEmail = known_email
 
-      val request = Kar141_SendCode_Req(
+      val request = post_SendCodeRequest(
         application_id = reqAppId,
         first_name = reqFName,
         last_name = reqLName,
@@ -460,7 +460,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
       val reqMsisdn = unknown_msisdn
       val reqEmail = unknown_email
 
-      val request = Kar141_SendCode_Req(
+      val request = post_SendCodeRequest(
         application_id = reqAppId,
         first_name = reqFName,
         last_name = reqLName,
@@ -475,7 +475,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
         routesWithLogging ~>
         check {
           val st=status
-          val res=responseAs[Kar141_SendCode_Res]
+          val res=responseAs[SendCodeResponse]
           res.returning_user shouldEqual false
           res.account_id shouldEqual None
           status.intValue() shouldEqual (HTTP_OK_200)
@@ -522,7 +522,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
       val reqMsisdn = unknown_msisdn
       val reqEmail = known_email
 
-      val request = Kar141_SendCode_Req(
+      val request = post_SendCodeRequest(
         application_id = reqAppId,
         first_name = reqFName,
         last_name = reqLName,
@@ -537,7 +537,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
         routesWithLogging ~>
         check {
           val st=status
-          val res=responseAs[Kar141_SendCode_Res]
+          val res=responseAs[SendCodeResponse]
           res.returning_user shouldEqual false
           res.account_id shouldEqual None
           status.intValue() shouldEqual (HTTP_OK_200)
@@ -581,7 +581,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
       val reqMsisdn = unknown_msisdn
       val reqEmail = conflict_email
 
-      val request = Kar141_SendCode_Req(
+      val request = post_SendCodeRequest(
         application_id = reqAppId,
         first_name = reqFName,
         last_name = reqLName,
@@ -596,7 +596,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
         routesWithLogging ~>
         check {
           val st=status
-          val res=responseAs[Kar141_SendCode_Res]
+          val res=responseAs[SendCodeResponse]
           res.returning_user shouldEqual false
           res.account_id shouldEqual None
           status.intValue() shouldEqual (HTTP_OK_200)
@@ -645,7 +645,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
       val reqMsisdn = unknown_msisdn
       val reqEmail = conflict_email
 
-      val request = Kar141_SendCode_Req(
+      val request = post_SendCodeRequest(
         application_id = reqAppId,
         first_name = reqFName,
         last_name = reqLName,
@@ -660,7 +660,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
         routesWithLogging ~>
         check {
           val st=status
-          val res=responseAs[Kar141_SendCode_Res]
+          val res=responseAs[SendCodeResponse]
           res.returning_user shouldEqual false
           res.account_id shouldEqual None
           status.intValue() shouldEqual (HTTP_OK_200)
@@ -709,7 +709,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
       val reqMsisdn = known_msisdn
       val reqEmail = unknown_email
 
-      val request = Kar141_SendCode_Req(
+      val request = post_SendCodeRequest(
         application_id = reqAppId,
         first_name = reqFName,
         last_name = reqLName,
@@ -724,7 +724,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
         routesWithLogging ~>
         check {
           val st=status
-          val res=responseAs[Kar141_SendCode_Res]
+          val res=responseAs[SendCodeResponse]
           res.returning_user shouldEqual true
           res.account_id shouldEqual Some(known_acctId)
           status.intValue() shouldEqual (HTTP_OK_200)
@@ -777,7 +777,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
       val reqMsisdn = known_msisdn
       val reqEmail = known_email
 
-      val request = Kar141_SendCode_Req(
+      val request = post_SendCodeRequest(
         application_id = reqAppId,
         first_name = reqFName,
         last_name = reqLName,
@@ -792,7 +792,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
         routesWithLogging ~>
         check {
           val st=status
-          val res=responseAs[Kar141_SendCode_Res]
+          val res=responseAs[SendCodeResponse]
           res.returning_user shouldEqual true
           res.account_id shouldEqual Some(known_acctId)
           status.intValue() shouldEqual (HTTP_OK_200)
@@ -845,7 +845,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
       val reqMsisdn = known_msisdn
       val reqEmail = conflict_email
 
-      val request = Kar141_SendCode_Req(
+      val request = post_SendCodeRequest(
         application_id = reqAppId,
         first_name = reqFName,
         last_name = reqLName,
@@ -860,7 +860,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
         routesWithLogging ~>
         check {
           val st=status
-          val res=responseAs[Kar141_SendCode_Res]
+          val res=responseAs[SendCodeResponse]
           res.returning_user shouldEqual true
           res.account_id shouldEqual Some(known_acctId)
           status.intValue() shouldEqual (HTTP_OK_200)
@@ -919,7 +919,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
       val reqMsisdn = conflict_msisdn
       val reqEmail = conflict_email
 
-      val request = Kar141_SendCode_Req(
+      val request = post_SendCodeRequest(
         application_id = reqAppId,
         first_name = reqFName,
         last_name = reqLName,
@@ -934,7 +934,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
         routesWithLogging ~>
         check {
           val st=status
-          val res=responseAs[Kar141_SendCode_Res]
+          val res=responseAs[SendCodeResponse]
           res.returning_user shouldEqual true
           res.account_id shouldEqual Some(conflict_acctId)
           status.intValue() shouldEqual (HTTP_OK_200)
@@ -997,7 +997,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
       val reqMsisdn = conflict_msisdn
       val reqEmail = conflict_email
 
-      val request = Kar141_SendCode_Req(
+      val request = post_SendCodeRequest(
         application_id = reqAppId,
         first_name = reqFName,
         last_name = reqLName,
@@ -1045,7 +1045,7 @@ class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
       val reqMsisdn = conflict_msisdn
       val reqEmail = conflict_email
 
-      val request = Kar141_SendCode_Req(
+      val request = post_SendCodeRequest(
         application_id = reqAppId,
         first_name = reqFName,
         last_name = reqLName,

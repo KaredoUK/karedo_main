@@ -3,14 +3,14 @@ package karedo.routes.termsabout
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import karedo.actors.APIResponse
-import karedo.actors.termsabout.TermsAbout
+import karedo.actors.termsabout.TermsAboutActor
 import karedo.routes.KaredoRoute
 import karedo.util.KaredoConstants
 import karedo.util.{KO, OK, Result}
 
 
-object Terms extends KaredoRoute
-  with TermsAbout {
+object get_TermsRoute extends KaredoRoute
+  with TermsAboutActor {
 
   def route = {
     Route {
@@ -27,8 +27,8 @@ object Terms extends KaredoRoute
   }
 }
 
-object About extends KaredoRoute
-  with TermsAbout {
+object get_AboutRoute extends KaredoRoute
+  with TermsAboutActor {
 
   def route = {
     Route {
@@ -45,8 +45,8 @@ object About extends KaredoRoute
   }
 }
 
-object Privacy extends KaredoRoute
-  with TermsAbout {
+object get_PrivacyRoute extends KaredoRoute
+  with TermsAboutActor {
 
   def route = {
     Route {
@@ -63,7 +63,7 @@ object Privacy extends KaredoRoute
   }
 }
 
-object Base extends KaredoRoute with KaredoConstants
+object get_BaseRoute extends KaredoRoute with KaredoConstants
 {
   def route = {
     Route {

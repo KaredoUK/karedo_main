@@ -23,13 +23,13 @@ class Kar138_login_test extends AllTests {
 
 
     "* POST /account/{{account_id}}/application/{{application_id}}/login" in {
-      val request = Kar138Req(acctId, appId, password="pippo").toJson.toString
+      val request = post_LoginRequest(acctId, appId, password="pippo").toJson.toString
       Post(s"/login",
         HttpEntity(ContentTypes.`application/json`, request)) ~>
         routesWithLogging ~>
         check {
           val st=status
-          val res=responseAs[Kar138Res]
+          val res=responseAs[SessionIdResponse]
           val sessionId = res.session_id
           status.intValue() shouldEqual (200)
         }

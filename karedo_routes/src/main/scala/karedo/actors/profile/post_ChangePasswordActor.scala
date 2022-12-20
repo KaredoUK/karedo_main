@@ -19,7 +19,7 @@ trait post_ChangePasswordActor
 {
   override val logger = LoggerFactory.getLogger(this.getClass.toString)
 
-  def exec(request: ChangePasswordRequest): Result[Error, APIResponse] = {
+  def exec(request: post_ChangePasswordRequest): Result[Error, APIResponse] = {
     val account_id = request.account_id
     val application_id = request.application_id
     val session_id = Some(request.session_id)

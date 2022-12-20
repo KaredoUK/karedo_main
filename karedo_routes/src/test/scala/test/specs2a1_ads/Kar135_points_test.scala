@@ -30,7 +30,7 @@ class Kar135_points_test extends AllTests {
         implicit val json = jsonFormat1(AppKaredos)
 
         val res = response
-        responseAs[Kar135Res].app_karedos should equal(KAREDO_AMOUNT / APP_KAREDO_CONV)
+        responseAs[KaredosResponse].app_karedos should equal(KAREDO_AMOUNT / APP_KAREDO_CONV)
 
       }
 

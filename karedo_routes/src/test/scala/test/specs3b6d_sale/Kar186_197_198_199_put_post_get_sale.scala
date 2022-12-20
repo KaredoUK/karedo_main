@@ -66,7 +66,7 @@ class Kar186_197_198_199_put_post_get_sale extends AllTests {
 
       val app_karedos = 100
 
-      val request1 = Kar197Req(t.r_acctId, t.r_appId, t.r_sessId, app_karedos).toJson.toString
+      val request1 = put_SaleRequest(t.r_acctId, t.r_appId, t.r_sessId, app_karedos).toJson.toString
 
       Put(s"/sale",
         HttpEntity(ContentTypes.`application/json`, request1)) ~>
@@ -77,7 +77,7 @@ class Kar186_197_198_199_put_post_get_sale extends AllTests {
 
           status.intValue() shouldEqual (HTTP_OK_200)
 
-          val r = responseAs[Kar197Res]
+          val r = responseAs[SaleIdResponse]
 
           val sale = dbSale.find(r.sale_id).get
 
@@ -101,7 +101,7 @@ class Kar186_197_198_199_put_post_get_sale extends AllTests {
                 sale.karedos should equal(sg.karedos)
               }
 
-            val reqS = Kar186Req(t.s_acctId, t.s_appId, t.s_sessId).toJson.toString
+            val reqS = post_SaleRequest(t.s_acctId, t.s_appId, t.s_sessId).toJson.toString
             Post(s"/sale/${r.sale_id}/complete",
               HttpEntity(ContentTypes.`application/json`, reqS)) ~>
               routesWithLogging ~>

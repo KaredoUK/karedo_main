@@ -3,7 +3,7 @@ package karedo.routes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import karedo.routes.ads._
-import karedo.routes.inform.Kar12_postInform
+import karedo.routes.inform.post_InformRoute
 import karedo.routes.intent._
 import karedo.routes.login._
 import karedo.routes.prefs._
@@ -39,32 +39,32 @@ trait Routes
 
   override val routes = cors {
     // Ads
-    Kar134_ads.route ~ Kar135_points.route ~ Kar136_messages.route ~
+    get_AdsRoute.route ~ get_PointsRoute.route ~ get_MessagesRoute.route ~
     // intent
-      Kar169_getIntent.route ~ Kar170_postIntent.route ~ Kar171_putIntent.route ~ Kar172_deleteIntent.route ~
+      get_IntentRoute.route ~ post_IntentRoute.route ~ put_IntentRoute.route ~ delete_IntentRoute.route ~
     // login
-      Kar138_Login.route ~ Kar141_SendCode.route ~ Kar143_verify.route ~ Kar145_EnterCode.route ~ Kar147_Resend.route ~
-      Kar147_ResendEmail.route ~ Kar147_ValidateEmail.route ~ Kar141_DeleteAccount.route ~ Kar147_ValidateSession.route ~
+      post_LoginRoute.route ~ post_SendCodeRoute.route ~ get_VerifyEmailRoute.route ~ post_EnterCodeRoute.route ~ put_ResendRoute.route ~
+      put_ResendEmailRoute.route ~ post_ValidateEmailRoute.route ~ delete_AccountRoute.route ~ get_ValidateSessionRoute.route ~
     // profile
-      Kar188_getProfile.route ~ Kar189_postProfile.route ~ post_ChangePassword.route ~
+      get_ProfileRoute.route ~ post_ProfileRoute.route ~ post_ChangePasswordRoute.route ~
     // prefs
-      Kar194_getPrefs.route ~ Kar195_postPrefs.route ~
+      get_PrefsRoute.route ~ post_PrefsRoute.route ~
     // Sale
-      Kar183_putTransfer.route ~ Kar197_putSale.route ~ Kar198_getSale.route ~ Kar186_postSale.route ~
-      Kar199_getSaleQR.route ~ Kar199_postQR.route ~
+      put_TransferRoute.route ~ put_SaleRoute.route ~ get_SaleRoute.route ~ post_SaleRoute.route ~
+      get_SaleQRRoute.route ~ post_QRFileRoute.route ~
     // Interaction et al
-      Kar165_getFavourite.route ~ Kar166_interaction.route ~ Kar165_postFavourite.route ~
-      Kar167_share_data.route ~
+      get_FavouriteRoute.route ~ post_InteractionRoute.route ~ post_FavouriteRoute.route ~
+      post_ShareDataRoute.route ~
     // Url Magic
-      UrlMagic_normal.route ~ UrlMagic_share.route ~
+      get_UrlMagicNormalRoute.route ~ get_UrlMagicShareRoute.route ~
     // Terms and About
-      Terms.route ~ About.route ~ Privacy.route ~
+      get_TermsRoute.route ~ get_AboutRoute.route ~ get_PrivacyRoute.route ~
     // Images
-      Kar199_getImage.route ~
+      get_ImageRoute.route ~
     // Base
-      Base.route ~
+      get_BaseRoute.route ~
     // Inform
-      Kar12_postInform.route
+      post_InformRoute.route
   }
 
 //  override val routes = {
