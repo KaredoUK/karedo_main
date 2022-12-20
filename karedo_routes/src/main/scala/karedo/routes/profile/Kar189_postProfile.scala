@@ -5,7 +5,7 @@ package karedo.routes.profile
   */
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import karedo.actors.profile.Kar189_postProfile_actor
+import karedo.actors.profile.{Kar189_postProfile_actor, post_ChangePasswordActor}
 import karedo.routes.KaredoRoute
 
 /**
@@ -32,6 +32,26 @@ object Kar189_postProfile extends KaredoRoute
                 }
               }
           }
+      }
+    }
+  }
+}
+
+object post_ChangePassword extends KaredoRoute
+  with post_ChangePasswordActor {
+
+  def route = {
+    Route {
+      path("password" ) {
+        post {
+          entity(as[ChangePasswordRequest]) {
+            request =>
+              doCall({
+                exec(request)
+              }
+              )
+          }
+        }
       }
     }
   }

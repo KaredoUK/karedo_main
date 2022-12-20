@@ -46,7 +46,7 @@ trait Routes
       Kar138_Login.route ~ Kar141_SendCode.route ~ Kar143_verify.route ~ Kar145_EnterCode.route ~ Kar147_Resend.route ~
       Kar147_ResendEmail.route ~ Kar147_ValidateEmail.route ~ Kar141_DeleteAccount.route ~ Kar147_ValidateSession.route ~
     // profile
-      Kar188_getProfile.route ~ Kar189_postProfile.route ~
+      Kar188_getProfile.route ~ Kar189_postProfile.route ~ post_ChangePassword.route ~
     // prefs
       Kar194_getPrefs.route ~ Kar195_postPrefs.route ~
     // Sale

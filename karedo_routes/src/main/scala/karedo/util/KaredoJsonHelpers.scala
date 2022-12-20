@@ -66,6 +66,10 @@ trait KaredoJsonHelpers
   implicit val jsonKar189ReqProfile = jsonFormat10(Kar189ReqProfile)
   implicit val jsonKar189Req:RootJsonFormat[Kar189Req] = jsonFormat3(Kar189Req)
 
+  case class ChangePasswordRequest(application_id: String, session_id: String, account_id: String,
+                                   old_password: String, new_password: String)
+  implicit val json_ChangePasswordRequest:RootJsonFormat[ChangePasswordRequest] = jsonFormat5(ChangePasswordRequest)
+
 //  implicit val jsonUserPrefData = jsonFormat4(UserPrefData)
 //  implicit val jsonUserPrefs:RootJsonFormat[UserPrefs] = jsonFormat4(UserPrefs)
 
