@@ -82,10 +82,10 @@ trait KaredoJsonHelpers
 //  implicit val jsonIntent = jsonFormat6(IntentUnit)
 //  implicit val jsonUserIntent:RootJsonFormat[UserIntent] = jsonFormat2(UserIntent)
 
-  case class IntentUnit(why: String, what: String, when: String, where: String)
-  case class IntentUpdateRequest(application_id: String, session_id: String, intent: IntentUnit )
+  case class IntentUnitRequest(why: String, what: String, when: String, where: String)
+  case class IntentUpdateRequest(application_id: String, session_id: String, intent: IntentUnitRequest )
 
-  implicit val jsonKar170ReqIntentUnit = jsonFormat4(IntentUnit)
+  implicit val jsonKar170ReqIntentUnit = jsonFormat4(IntentUnitRequest)
   implicit val jsonKar170Req:RootJsonFormat[IntentUpdateRequest] = jsonFormat3(IntentUpdateRequest)
 
   case class delete_IntentRequest(application_id: String, session_id: String )

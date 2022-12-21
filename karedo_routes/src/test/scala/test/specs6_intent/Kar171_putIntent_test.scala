@@ -23,7 +23,7 @@ class Kar171_putIntent_test extends AllTests {
 
   "Kar171" should {
     "PUT /account/{{account_id}}/intent" in {
-      val request = IntentUpdateRequest(presetAccount, session_id=presetSessId, IntentUnit("why_00", "what_00", "when_00", "where_00")).toJson.toString
+      val request = IntentUpdateRequest(presetAccount, session_id=presetSessId, IntentUnitRequest("why_00", "what_00", "when_00", "where_00")).toJson.toString
 
       Put(s"/account/$presetAccount/intent",
         HttpEntity(ContentTypes.`application/json`, request)) ~> routesWithLogging ~> check {

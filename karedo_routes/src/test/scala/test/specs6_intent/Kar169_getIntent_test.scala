@@ -35,7 +35,7 @@ class Kar169_getIntent_test extends AllTests {
   "Kar169 with Intent ID" should {
     "GET /account/{{account_id}}/intent/{{intent_id}}" in {
 
-      val request = IntentUpdateRequest(presetAppId, session_id=Util.newUUID, IntentUnit("why_01", "what_01", "when_00", "where_00")).toJson.toString
+      val request = IntentUpdateRequest(presetAppId, session_id=Util.newUUID, IntentUnitRequest("why_01", "what_01", "when_00", "where_00")).toJson.toString
       Put(s"/account/$presetAccount/intent",
         HttpEntity(ContentTypes.`application/json`, request)) ~> routesWithLogging ~>
       check {

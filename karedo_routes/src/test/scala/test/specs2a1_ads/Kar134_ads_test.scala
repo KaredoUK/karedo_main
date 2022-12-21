@@ -31,7 +31,6 @@ class Kar134_ads_test extends AllTests {
       Get(s"/account/0/ads?p=$newApp&c=$count") ~>
         routesWithLogging ~>
         check {
-          implicit val json = jsonFormat2(AdResponse)
           responseAs[AdResponse].ads should have size (count)
           status.intValue() shouldEqual (HTTP_OK_CREATED_201)
           val uapp = dbUserApp.find(presetAppId)
