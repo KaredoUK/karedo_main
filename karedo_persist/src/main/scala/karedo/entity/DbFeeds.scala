@@ -13,7 +13,7 @@ case class Feed
   @Key("_id") id: String = Util.newUUID
   , name: String
   , url: String
-  , fallbacl_img: String
+  , fallback_img: String
   , prefs: List[String] = List() // Maps to IABs prefs in DbPrefs
 
 ) extends Keyable[String]
