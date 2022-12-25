@@ -118,6 +118,7 @@ case object ORTB2_2 extends DspKind
 case object SMAATO extends DspKind
 case object MOBFOX extends DspKind
 case object FEED extends DspKind
+case object STORED extends DspKind
 
 
 sealed trait MarkupScheme

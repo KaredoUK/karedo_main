@@ -47,6 +47,7 @@ class AdActor
           case "SMAATO" => SMAATO
           case "FEED" => FEED
           case "MOBFOX" => MOBFOX
+          case "STORED" => STORED
           case _ => DUMMY },
         scheme = c.getString("scheme") match {case "https" => HTTPS case _ => HTTP },
         markup = c.getString("markup") match {case "nurl" => NURL case "adm" => ADM case "resp" => RESP case _ => RESP },
@@ -68,6 +69,7 @@ class AdActor
         case SMAATO => new SmaatoDspBidDispatcher(dc)
         case FEED => new FeedBidDispatcher(dc)
         case MOBFOX => new MobfoxDspBidDispatcher(dc)
+        case STORED => new StoredFeedDispatcher(dc)
       }
     })
 

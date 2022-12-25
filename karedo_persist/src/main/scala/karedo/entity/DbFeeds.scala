@@ -14,6 +14,7 @@ case class Feed
   , name: String
   , url: String
   , fallback_img: String
+  , enabled: Boolean = true
   , prefs: List[String] = List() // Maps to IABs prefs in DbPrefs
 
 ) extends Keyable[String]

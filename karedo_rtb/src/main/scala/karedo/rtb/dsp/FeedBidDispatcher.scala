@@ -1,48 +1,55 @@
 package karedo.rtb.dsp
 
-import karedo.entity.UserPrefData
+import karedo.entity.{AdType, AdUnitType, Feed, UserPrefData}
 import karedo.rtb.model.AdModel._
 
 import scala.concurrent.{ExecutionContext, Future}
 import karedo.rtb.model.BidRequestCommon._
 import karedo.rtb.util.{DeviceMake, LoggingSupport, RtbConstants}
-
 import karedo.rtb.model.BidJsonImplicits
 
 import scala.xml._
 import java.net.URL
 import java.text.SimpleDateFormat
+import java.util.concurrent.Executors
 import java.util.{Date, Locale}
+
+import akka.http.scaladsl.model.HttpMethods.GET
+import akka.http.scaladsl.model.{ContentTypes, HttpRequest, Uri}
+import akka.http.scaladsl.model.Uri.Query
+import akka.http.scaladsl.model.headers.RawHeader
+import akka.http.scaladsl.unmarshalling.Unmarshal
+import karedo.rtb.dsp.AdMechanic.httpDispatcher
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import scala.util.{Failure, Success, Try}
-
 import collection.JavaConverters._
 import scala.collection.JavaConverters._
-
 import org.jsoup._
 
-/**
-  * Created by charaj on 27/12/2016.
-  */
-class FeedBidDispatcher(config: DspBidDispatcherConfig)
-  extends DspBidDispather(config)
-    with LoggingSupport
-    with BidJsonImplicits
-    with RtbConstants
-     {
+import scala.concurrent.duration._
+import spray.json.DefaultJsonProtocol._
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.stream.ActorMaterializer
+import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
-  lazy val class_name = this.getClass.getName
 
-  override def getAds(count: Int, user: User, device: Device, iabCatMap: Map[String, UserPrefData], make: DeviceMake, deviceRequest: DeviceRequest): List[AdUnit] = {
-    logger.debug(s"IN: ${class_name}.getAds. Count is ${count}, User is: ${user}, Device is ${device}" )
+object FeedLoader extends RtbConstants with LoggingSupport with DefaultJsonProtocol with HttpDispatcher {
+  private val rssReader = new RssReader
 
-    val adUnits = scala.collection.mutable.ListBuffer.empty[AdUnit]
+  def getAdsFromFeeds(origFeeds: List[Feed], native_cpm: Double): List[AdUnitType] = {
+    logger.debug("Feeds to extract: " + origFeeds)
 
-    val rssReader = new RssReader
+    val enabledFeeds = origFeeds.filter(_.enabled)
 
-    val urls = getUrls
+    logger.debug("Only Enabled Feeds: " + enabledFeeds)
+
+    getAdsFromRssUrl(enabledFeeds.map(feedToRssUrl(_)), native_cpm)
+  }
+
+  def getAdsFromRssUrl(urls: List[RssUrl], native_cpm: Double): List[AdUnitType] = {
+    implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
 
     val fSeq = Future.sequence(
       urls.map(url => Future(
@@ -50,14 +57,11 @@ class FeedBidDispatcher(config: DspBidDispatcherConfig)
       ))
     )
 
-    val feeds: Seq[Seq[RssFeed]] = Await.result(
-      fSeq.mapTo[Seq[Seq[RssFeed]]], dispatcher_max_wait
+    val rssfeeds: Seq[Seq[RssFeed]] = Await.result(
+      fSeq.mapTo[Seq[Seq[RssFeed]]], 10 minutes // @TODO: Should this be infinite?
     )
 
-
-//    java.util.Base64.getDecoder.decode("").toString
-
-    val ads:Seq[Seq[AdUnit]] = feeds.flatten.map(feed => feed.items.map(item => {
+    val ads:Seq[Seq[AdUnitType]] = rssfeeds.flatten.map(feed => feed.items.map(item => {
       val images = item.enclosure.filter(_.mime.startsWith("image"))
       val videos = item.enclosure.filter(_.mime.startsWith("video"))
 
@@ -82,18 +86,18 @@ class FeedBidDispatcher(config: DspBidDispatcherConfig)
         case e:Exception => logger.error(s"${feed.source} => ${item.title} => ${item.link} => getHostFailed", e)
       }
 
-      AdUnit(
+      AdUnitType(
         ad_type = ad_type_NATIVE,
-        ad_id = item.guid,
+        id = item.guid,
         impid = item.guid,
-        ad = Ad(
+        ad = AdType(
           imp_url = enclosure match {
             case Some(url) => url.url
-            case None => feed.image_url
-//              getLargestImageUrl(item.link) match {
-//              case Some(u) => u
-//              case None => feed.image_url
-//            }
+            case None => getLargestImageUrl(item.link) match
+            {
+              case Some(u) => u
+              case None => feed.image_url
+            }
           },
           click_url = item.link,
           ad_text = item.title,
@@ -104,9 +108,9 @@ class FeedBidDispatcher(config: DspBidDispatcherConfig)
           beacons = None
         ),
         price_USD_per_1k =
-          (if(ad_type == ad_type_NATIVE) config.price_cpm
-          else if(ad_type == ad_type_VIDEO) (config.price_cpm - 0.1)
-          else (config.price_cpm - 0.5)) * (1 - config.comm_percent),
+          (if(ad_type == ad_type_NATIVE) native_cpm
+          else if(ad_type == ad_type_VIDEO) (native_cpm - 0.1)
+          else (native_cpm - 0.5)) * (1 - native_cpm),
         ad_domain = Some(List(ad_domain)),
         iurl = Some(item.link),
         nurl = Some(item.link),
@@ -114,11 +118,161 @@ class FeedBidDispatcher(config: DspBidDispatcherConfig)
         crid = item.guid,
         w = 300,
         h = 250,
-        hint = Math.random()
+        hint = Math.random(),
+        prefs = feed.prefs,
+        source = feed.source
       )
     }))
 
-    ads.flatten.sortWith((a,b) => a.hint > b.hint).take(count).toList
+    ads.flatten.toList
+  }
+
+  private def feedToRssUrl(feed: Feed): RssUrl = {
+    RssUrl(
+      name = feed.name,
+      feed_url = new URL(feed.url),
+      image_url = feed.fallback_img,
+      prefs = feed.prefs
+    )
+  }
+
+  private def getBestImage(click_url: String): Option[String] = {
+    case class ArticleExtract
+    (
+      article: String
+      , author: String
+      , feeds: List[String]
+      , image: Option[String]
+      , keywords: List[String]
+      , publishDate: String
+      , title: String
+      , videos: List[String]
+    )
+
+    implicit val json_ArticleExtract: RootJsonFormat[ArticleExtract] = jsonFormat8(ArticleExtract)
+
+    val params = Map("best_image" -> "true", "url" -> click_url)
+
+    val uri = Uri("https://api.aylien.com/api/v1/extract").withQuery(Query(params))
+
+    // "X-AYLIEN-TextAPI-Application-Key: YOUR_APP_KEY" \
+    // -H "X-AYLIEN-TextAPI-Application-ID: YOUR_APP_ID
+
+    val headers = List(RawHeader("X-AYLIEN-TextAPI-Application-Key", "912d430f"),
+      RawHeader("X-AYLIEN-TextAPI-Application-ID", "c5c644c5445fa76ec034058db788d1a3"))
+
+    val f:Future[ArticleExtract] = httpsDispatcher.singleRequest(HttpRequest(
+      GET,
+      uri = uri,
+      headers = headers
+    )
+    ).flatMap { response =>
+      logger.info(response.toString)
+      Unmarshal(response.entity.withContentType(ContentTypes.`application/json`)).to[ArticleExtract]
+    }
+
+    val articleExtract: ArticleExtract = Await.result(f, 5 minutes)
+
+    articleExtract.image
+  }
+
+  private def getImageSize(url: String): Long = {
+    try {
+      Await.result(
+        httpsDispatcher.singleRequest(HttpRequest(GET, Uri(url))).map(r => r.entity.getContentLengthOption().orElse(0)),
+        20 seconds)
+    } catch {
+      case e:Exception => {
+        logger.error("unable to get images", e)
+        0:Long
+      }
+    }
+  }
+
+  private def getLargestImageUrl(url: String): Option[String] = {
+    try {
+      val host = new URL(url).getHost
+
+      val doc = Jsoup.connect(url).get()
+      val images = doc.select("img")
+
+      val imageSrcs = images.asScala.map(_.attr("src"))
+
+      val img = images.asScala
+        .filter(i => { ! (i.attr("height").isEmpty || i.attr("width").isEmpty) })
+        .map(_.attr("src"))
+        .filter(_.contains(host))
+
+//        .map { i =>
+//          val size: Long = getImageSize(i)
+//          (i, size)
+//        }
+//        .maxBy(i => i._2)
+//        ._1
+
+        Some(img.head)
+
+        //     val imgColl = images.asScala
+        //       .filter(i => { ! (i.attr("height").isEmpty || i.attr("width").isEmpty) })
+        //       .map(i => {
+        //         val url = i.attr("src")
+        //
+        //         var ha = i.attr("height")
+        //         var wa = i.attr("width")
+        //
+        //         ha = if(ha.endsWith("px")) ha.substring(0, ha.indexOf("px")) else ha
+        //         wa = if(wa.endsWith("px")) wa.substring(0, wa.indexOf("px")) else wa
+        //
+        //         ha = if(ha.endsWith("%")) ha.substring(0, ha.indexOf("%")) else ha
+        //         wa = if(wa.endsWith("%")) wa.substring(0, wa.indexOf("%")) else wa
+        //
+        //         val h = ha.toInt
+        //         val w = wa.toInt
+        //
+        //         val size = if((h > 5 && w > 5)) h * w else 0
+        //
+        //         (url, size)
+        //       })
+        //
+        //     val oUrl = if(imgColl.isEmpty) images.first().attr("src") else imgColl.maxBy(_._2)._1
+
+//        Some(images.first().attr("src"))
+
+    } catch {
+      case e:Exception => {
+        None
+      }
+    }
+  }
+
+}
+
+/**
+  * Created by charaj on 27/12/2016.
+  */
+class FeedBidDispatcher(config: DspBidDispatcherConfig)
+  extends DspBidDispather(config)
+    with LoggingSupport
+    with BidJsonImplicits
+    with RtbConstants
+     {
+
+  lazy val class_name = this.getClass.getName
+
+  override def getAds(count: Int, user: User, device: Device, iabCatMap: Map[String, UserPrefData], make: DeviceMake, deviceRequest: DeviceRequest): List[AdUnit] = {
+    logger.debug(s"IN: ${class_name}.getAds. Count is ${count}, User is: ${user}, Device is ${device}" )
+
+    val adUnits = scala.collection.mutable.ListBuffer.empty[AdUnit]
+
+    val rssReader = new RssReader
+
+    val urls = getUrls
+
+    val adUnitTypes = FeedLoader.getAdsFromRssUrl(urls.toList, config.price_cpm)
+
+    val ads = AdMechanic.adUntiTypeToAdUnit(adUnitTypes)
+
+    ads.sortWith((a,b) => a.hint > b.hint).take(count)
   }
 
   def getUrls = {
@@ -127,7 +281,8 @@ class FeedBidDispatcher(config: DspBidDispatcherConfig)
      RssUrl(
        name = c.getString("name"),
        feed_url = new URL(c.getString("feed_url")),
-       image_url = c.getString("img_url")
+       image_url = c.getString("img_url"),
+       prefs = List()
      )
    })
   }
@@ -136,7 +291,7 @@ class FeedBidDispatcher(config: DspBidDispatcherConfig)
 }
 
 abstract class Reader extends RtbConstants  {
-  def extract(xml:Elem, name:String, image_url:String):Seq[RssFeed]
+  def extract(xml:Elem, name:String, image_url:String, prefs:List[String]):Seq[RssFeed]
 
   def print(feed:RssFeed) {
     println(feed.items)
@@ -200,7 +355,7 @@ class AtomReader extends Reader {
       .map( n => (n \ "@href").text).head
   }
 
-  override def extract(xml:Elem, name:String, image_url:String) : Seq[RssFeed] = {
+  override def extract(xml:Elem, name:String, image_url:String, prefs:List[String]) : Seq[RssFeed] = {
     for (feed <- xml \\ "feed") yield {
       val items = for (item <- (feed \\ "entry")) yield {
         RssItem(
@@ -229,7 +384,8 @@ class AtomReader extends Reader {
         desc = (feed \ "subtitle ").text,
         items = items,
         source = name,
-        image_url = image_url
+        image_url = image_url,
+        prefs = prefs
       )
     }
   }
@@ -239,7 +395,7 @@ class XmlReader extends Reader {
 
   val dateFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
 
-  override def extract(xml:Elem, name:String, image_url:String) : Seq[RssFeed] = {
+  override def extract(xml:Elem, name:String, image_url:String, prefs:List[String]) : Seq[RssFeed] = {
 
     for (channel <- xml \\ "channel") yield {
       val items = for (item <- (channel \\ "item")) yield {
@@ -279,7 +435,8 @@ class XmlReader extends Reader {
         language = (channel \ "language").text,
         items = items,
         source = name,
-        image_url = image_url
+        image_url = image_url,
+        prefs = prefs
       )
     }
   }
@@ -301,7 +458,7 @@ class RssReader {
         val xml = XML.load(u)
         val actor = if((xml \\ "channel").length == 0) atomReader else xmlReader
 
-        actor.extract(xml, url.name, url.image_url)
+        actor.extract(xml, url.name, url.image_url, url.prefs)
       }
       case Failure(_) => Seq()
     }
@@ -309,7 +466,7 @@ class RssReader {
 }
 
 
-case class RssUrl(name:String, feed_url:URL, image_url:String) {
+case class RssUrl(name:String, feed_url:URL, image_url:String, prefs: List[String]) {
   override def toString = s"RSS: ${name} -> ${feed_url.toString}"
 }
 
@@ -320,14 +477,15 @@ trait RssFeed {
   val desc:String
   val image_url:String
   val items:Seq[RssItem]
+  val prefs:List[String]
   override def toString = title + "\n" + desc + "\n**"
 
 //  def latest = sorted head
   def sorted = items sortWith ((a, b) => a.randonHint > b.randonHint)
 }
 
-case class AtomRssFeed(title:String, link:String, desc:String, items:Seq[RssItem], source:String, image_url:String) extends RssFeed
-case class XmlRssFeed(title:String, link:String, desc:String, language:String, items:Seq[RssItem], source:String, image_url:String) extends RssFeed
+case class AtomRssFeed(title:String, link:String, desc:String, items:Seq[RssItem], source:String, image_url:String,prefs:List[String]) extends RssFeed
+case class XmlRssFeed(title:String, link:String, desc:String, language:String, items:Seq[RssItem], source:String, image_url:String,prefs:List[String]) extends RssFeed
 
 case class RssItem(title:String,
                    link:String,

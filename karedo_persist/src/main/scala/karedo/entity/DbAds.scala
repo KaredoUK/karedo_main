@@ -2,8 +2,12 @@ package karedo.entity
 
 import java.util.UUID
 
+import com.mongodb.casbah.commons.MongoDBObject
 import karedo.entity.dao._
+import karedo.util.{KO, OK, Result}
 import salat.annotations._
+
+import scala.util.{Failure, Success, Try}
 
 
 
@@ -77,10 +81,47 @@ case class AdUnitType
    crid: String,
    w: Int,
    h: Int,
-   hint: Double = 0.0
+   hint: Double = 0.0,
+  prefs: List[String] = List(),
+  source: String
 ) extends Keyable[String]
 
 // add implementation if you need special functionalities
-trait DbAds extends DbMongoDAO_Casbah[String, AdUnitType]
+trait DbAds extends DbMongoDAO_Casbah[String, AdUnitType] {
+  def insertMany(adUnitTypes: List[AdUnitType]): List[Result[String, AdUnitType]] = {
+    adUnitTypes.map {
+      ad =>
+        Try {
+          dao.insert(ad)
+        } match {
+          case Success(x) => OK(ad)
+          case Failure(error) => KO(error.toString)
+        }
+    }
+  }
+
+  def findAllbyPref(pref: String): Result[String, List[AdUnitType]] = {
+    Try[List[AdUnitType]] {
+      val query = MongoDBObject("prefs" -> pref)
+
+      dao.find(query).toList
+    } match {
+      case Success(x) => OK(x)
+      case Failure(error) => KO(error.toString)
+    }
+  }
+
+  def findAllPrefs: Result[String, Set[String]] = {
+    Try[Set[String]] {
+      val query = MongoDBObject()
+      val projs = MongoDBObject("prefs" -> 1)
+
+      dao.find(query, projs).toList.map(_.prefs).flatten.toSet
+    } match {
+      case Success(x) => OK(x)
+      case Failure(error) => KO(error.toString)
+    }
+  }
+}
 
 

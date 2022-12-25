@@ -42,7 +42,7 @@ object MongoConnectionObject_Casbah {
       val options = MongoClientOptions(connectionsPerHost = connectionsPerHost)
 
       if(! mongoCACertB64.isEmpty) {
-        println(s"Got Certificate\n${mongoCACertB64}")
+//        println(s"Got Certificate\n${mongoCACertB64}")
 
         // trust everything
         // @TODO: Add proper CA checking in the future.
