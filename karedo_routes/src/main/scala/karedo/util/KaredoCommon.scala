@@ -124,6 +124,7 @@ trait KaredoConstants extends Configurable {
   val notification_sms_auth_accesskey = conf.getString("notification.sms.auth.accesskey")
   val notification_sms_server_endpoint = conf.getString("notification.sms.server.endpoint")
   val notification_sms_sender = conf.getString("notification.sms.sender")
+  val notification_sms_type = conf.getString("notification.sms.sms_type")
 
   val qr_base_file_path = conf.getString("qr.base.file.path")
   val qr_img_file_path = conf.getString("qr.img.file.path")
@@ -255,7 +256,7 @@ trait KaredoUtils
     val request = HttpRequest(
       POST,
       uri = notification_sms_server_endpoint,
-      entity = HttpEntity(`application/json`, SMSRequest(msisdn, notification_sms_sender, text).toJson.toString),
+      entity = HttpEntity(`application/json`, SMSRequest(msisdn, notification_sms_sender, text, Some(notification_sms_type)).toJson.toString.replaceAll("""_DEL_""", "")),
       headers = List(RawHeader("Authorization", s"AccessKey $notification_sms_auth_accesskey") )
     )
 

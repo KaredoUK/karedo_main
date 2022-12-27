@@ -101,8 +101,8 @@ trait KaredoJsonHelpers
   case class SendCodeResponse(returning_user: Boolean, account_id: Option[String])
   implicit val jsonKar141_SendCode_Res = jsonFormat2(SendCodeResponse)
 
-  case class SMSRequest(recipients: String, originator: String, body: String)
-  implicit val jsonSMSRequest = jsonFormat3(SMSRequest)
+  case class SMSRequest(recipients: String, originator: String, body: String, _DEL_type: Option[String] = Some("sms") )
+  implicit val jsonSMSRequest = jsonFormat4(SMSRequest)
 
   case class post_EnterCodeRequest(application_id:String, msisdn:String, sms_code:String, password:String)
   implicit val jsonKar145Req = jsonFormat4(post_EnterCodeRequest)

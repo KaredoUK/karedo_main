@@ -12,7 +12,7 @@ import scala.xml._
 import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.concurrent.Executors
-import java.util.{Date, Locale}
+import java.util.{Base64, Date, Locale}
 
 import akka.http.scaladsl.model.HttpMethods.GET
 import akka.http.scaladsl.model.{ContentTypes, HttpRequest, Uri}
@@ -34,21 +34,23 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.stream.ActorMaterializer
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
+import com.google.common.net.InternetDomainName
+
 
 object FeedLoader extends RtbConstants with LoggingSupport with DefaultJsonProtocol with HttpDispatcher {
   private val rssReader = new RssReader
 
-  def getAdsFromFeeds(origFeeds: List[Feed], native_cpm: Double): List[AdUnitType] = {
+  def getAdsFromFeeds(origFeeds: List[Feed], native_cpm: Double, adPostfix: Option[AdUnitType => AdUnitType] = None): List[AdUnitType] = {
     logger.debug("Feeds to extract: " + origFeeds)
 
     val enabledFeeds = origFeeds.filter(_.enabled)
 
     logger.debug("Only Enabled Feeds: " + enabledFeeds)
 
-    getAdsFromRssUrl(enabledFeeds.map(feedToRssUrl(_)), native_cpm)
+    getAdsFromRssUrl(enabledFeeds.map(feedToRssUrl(_)), native_cpm, adPostfix)
   }
 
-  def getAdsFromRssUrl(urls: List[RssUrl], native_cpm: Double): List[AdUnitType] = {
+  def getAdsFromRssUrl(urls: List[RssUrl], native_cpm: Double, adPostfix: Option[AdUnitType => AdUnitType] = None): List[AdUnitType] = {
     implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
 
     val fSeq = Future.sequence(
@@ -86,22 +88,23 @@ object FeedLoader extends RtbConstants with LoggingSupport with DefaultJsonProto
         case e:Exception => logger.error(s"${feed.source} => ${item.title} => ${item.link} => getHostFailed", e)
       }
 
-      AdUnitType(
+      val article_elements:(Option[String], Option[String], Option[String], Option[String]) = getItemsFromUrl(item.link)
+
+      val ad = AdUnitType(
         ad_type = ad_type_NATIVE,
-        id = item.guid,
+        id = Base64.getEncoder.encodeToString(java.security.MessageDigest.getInstance("MD5").digest(s"${feed.source}::${item.guid}".getBytes)) ,
         impid = item.guid,
         ad = AdType(
-          imp_url = enclosure match {
-            case Some(url) => url.url
-            case None => getLargestImageUrl(item.link) match
-            {
-              case Some(u) => u
+          imp_url = article_elements._1 match {
+            case Some(s) => s
+            case None => enclosure match {
+              case Some(s) => s.url
               case None => feed.image_url
             }
           },
           click_url = item.link,
-          ad_text = item.title,
-          ad_source = Some(feed.source),
+          ad_text = article_elements._2.getOrElse(item.title),
+          ad_source = article_elements._3 match {case Some(x) => Some(x) case None => Some(feed.source)} ,
           duration = None,
           h = Some(250),
           w = Some(300),
@@ -120,8 +123,11 @@ object FeedLoader extends RtbConstants with LoggingSupport with DefaultJsonProto
         h = 250,
         hint = Math.random(),
         prefs = feed.prefs,
-        source = feed.source
+        source = feed.source,
+        locale = article_elements._4
       )
+
+      adPostfix match {case Some(f) => f(ad) case None => ad}
     }))
 
     ads.flatten.toList
@@ -189,19 +195,65 @@ object FeedLoader extends RtbConstants with LoggingSupport with DefaultJsonProto
     }
   }
 
-  private def getLargestImageUrl(url: String): Option[String] = {
+  private def getItemsFromUrl(url: String): (Option[String], Option[String], Option[String], Option[String]) = {
     try {
-      val host = new URL(url).getHost
-
       val doc = Jsoup.connect(url).get()
-      val images = doc.select("img")
+      val metas = doc.select("meta").asScala
 
-      val imageSrcs = images.asScala.map(_.attr("src"))
+//      println("Metas: " + metas )
 
-      val img = images.asScala
-        .filter(i => { ! (i.attr("height").isEmpty || i.attr("width").isEmpty) })
-        .map(_.attr("src"))
-        .filter(_.contains(host))
+      val article_image = metas
+        .filter(_.attr("property").equalsIgnoreCase("og:image"))
+        .map(_.attr("content").toString).toList match {
+        case Nil => None
+        case l => Some(l.head)
+      }
+
+//      val img_meta = metas.filter(_.attr("property").equalsIgnoreCase("og:image"))
+//
+//      val img_urls = img_meta.map(_.attr("content").toString)
+//
+//      val image_url = if(img_urls.isEmpty) None
+//      else Some(img_urls.head)
+
+      val article_titile = metas
+        .filter(_.attr("property").equalsIgnoreCase("og:title"))
+        .map(_.attr("content").toString).toList match {
+        case Nil => None
+        case l => Some(l.head)
+      }
+
+      val article_source = metas
+        .filter(_.attr("property").equalsIgnoreCase("og:site_name"))
+        .map(_.attr("content").toString).toList match {
+        case Nil => None
+        case l => Some(l.head)
+      }
+
+      val article_locale = metas
+        .filter(_.attr("property").equalsIgnoreCase("og:locale"))
+        .map(_.attr("content").toString).toList match {
+        case Nil => None
+        case l => Some(l.head)
+      }
+
+      (article_image, article_titile, article_source, article_locale)
+
+
+      //      val host = new URL(url).getHost
+      //      val privateDomain:String = InternetDomainName.from(host).topPrivateDomain.toString
+      //
+      //      println("Host: " + host + " Pvt DOmain: " + privateDomain)
+
+
+      //      val images = doc.select("img")
+//
+//      val imageSrcs = images.asScala.map(_.attr("src"))
+//
+//      val img = images.asScala
+//        .filter(i => { ! (i.attr("height").isEmpty || i.attr("width").isEmpty) })
+//        .map(_.attr("src"))
+//        .filter(_.contains(privateDomain))
 
 //        .map { i =>
 //          val size: Long = getImageSize(i)
@@ -210,7 +262,7 @@ object FeedLoader extends RtbConstants with LoggingSupport with DefaultJsonProto
 //        .maxBy(i => i._2)
 //        ._1
 
-        Some(img.head)
+//        Some(img.head)
 
         //     val imgColl = images.asScala
         //       .filter(i => { ! (i.attr("height").isEmpty || i.attr("width").isEmpty) })
@@ -240,7 +292,7 @@ object FeedLoader extends RtbConstants with LoggingSupport with DefaultJsonProto
 
     } catch {
       case e:Exception => {
-        None
+        (None, None, None, None)
       }
     }
   }

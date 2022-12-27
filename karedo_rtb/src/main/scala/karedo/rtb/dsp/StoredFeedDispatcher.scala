@@ -53,7 +53,7 @@ class StoredFeedDispatcher (config: DspBidDispatcherConfig)
 //        scala.util.Random.shuffle(adIab).take(f._2)
 //      }
 
-      AdMechanic.adUntiTypeToAdUnit(iabCount.take(count))
+      AdMechanic.adUntiTypeToAdUnit(scala.util.Random.shuffle(iabCount).take(count))
     } match {
       case Success(s) => s
       case Failure(f) => {

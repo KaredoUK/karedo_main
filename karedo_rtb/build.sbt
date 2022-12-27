@@ -66,7 +66,8 @@ libraryDependencies ++= {
     "org.specs2" %% "specs2-core" % "3.8.5" % "test",
     "org.specs2" %% "specs2-junit" % "3.8.5.1" % "test",
     "junit" % "junit" % "4.8.1" % "test",
-    "org.jsoup" % "jsoup" % "1.10.1"
+    "org.jsoup" % "jsoup" % "1.10.1",
+    "com.google.guava" % "guava" % "21.0"
   )
 }
 

@@ -83,7 +83,8 @@ case class AdUnitType
    h: Int,
    hint: Double = 0.0,
   prefs: List[String] = List(),
-  source: String
+  source: String,
+  locale: Option[String] = None
 ) extends Keyable[String]
 
 // add implementation if you need special functionalities
