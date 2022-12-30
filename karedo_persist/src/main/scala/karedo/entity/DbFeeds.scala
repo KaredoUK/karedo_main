@@ -15,7 +15,7 @@ case class Feed
   , url: String
   , fallback_img: String
   , enabled: Boolean = true
-  , locale: Option[String] = None
+  , locale: String = "en_GB"
   , prefs: List[String] = List() // Maps to IABs prefs in DbPrefs
 
 ) extends Keyable[String]

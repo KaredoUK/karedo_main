@@ -9,6 +9,9 @@ import salat.annotations._
 
 import scala.util.{Failure, Success, Try}
 
+import org.joda.time.DateTime
+
+
 
 
 /*
@@ -84,7 +87,8 @@ case class AdUnitType
    hint: Double = 0.0,
   prefs: List[String] = List(),
   source: String,
-  locale: Option[String] = None
+  locale: Option[String] = None,
+  pub_date: DateTime
 ) extends Keyable[String]
 
 // add implementation if you need special functionalities

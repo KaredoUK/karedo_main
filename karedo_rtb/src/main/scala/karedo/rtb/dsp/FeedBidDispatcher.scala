@@ -33,8 +33,10 @@ import spray.json.DefaultJsonProtocol._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.stream.ActorMaterializer
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
-
 import com.google.common.net.InternetDomainName
+import org.joda.time.DateTime
+import org.joda.time.format.{DateTimeFormat, ISODateTimeFormat}
+import org.slf4j.LoggerFactory
 
 
 object FeedLoader extends RtbConstants with LoggingSupport with DefaultJsonProtocol with HttpDispatcher {
@@ -113,7 +115,7 @@ object FeedLoader extends RtbConstants with LoggingSupport with DefaultJsonProto
         price_USD_per_1k =
           (if(ad_type == ad_type_NATIVE) native_cpm
           else if(ad_type == ad_type_VIDEO) (native_cpm - 0.1)
-          else (native_cpm - 0.5)) * (1 - native_cpm),
+          else (native_cpm - 0.5)),
         ad_domain = Some(List(ad_domain)),
         iurl = Some(item.link),
         nurl = Some(item.link),
@@ -124,7 +126,8 @@ object FeedLoader extends RtbConstants with LoggingSupport with DefaultJsonProto
         hint = Math.random(),
         prefs = feed.prefs,
         source = feed.source,
-        locale = article_elements._4
+        locale = article_elements._4,
+        pub_date = item.pub_date
       )
 
       adPostfix match {case Some(f) => f(ad) case None => ad}
@@ -345,6 +348,8 @@ class FeedBidDispatcher(config: DspBidDispatcherConfig)
 abstract class Reader extends RtbConstants  {
   def extract(xml:Elem, name:String, image_url:String, prefs:List[String]):Seq[RssFeed]
 
+  val logger = LoggerFactory.getLogger(classOf[Reader])
+
   def print(feed:RssFeed) {
     println(feed.items)
   }
@@ -394,11 +399,15 @@ abstract class Reader extends RtbConstants  {
 
 class AtomReader extends Reader {
 
-  val dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH);
+  val dateFormatter = ISODateTimeFormat.dateTime()
 
-  private def parseAtomDate(date:String, formatter:SimpleDateFormat):Date = {
-    val newDate = date.reverse.replaceFirst(":", "").reverse
-    return formatter.parse(newDate)
+  private def parseAtomDate(date:String):DateTime = {
+    try {
+      dateFormatter.parseDateTime(date)
+    } catch {
+      case e: Exception => logger.error("Date Parsing Failed", e)
+        karedo.util.Util.now
+    }
   }
 
   private def getHtmlLink(node:NodeSeq) = {
@@ -414,7 +423,7 @@ class AtomReader extends Reader {
           title = (item \\ "title").text.replaceAll("\n", "").replaceAll("\t", ""),
           link = getHtmlLink((item \\ "link")).replaceAll("\n", "").replaceAll("\t", ""),
           desc = (item \\ "summary").text,
-//          date = parseAtomDate((item \\ "published").text, dateFormatter),
+          pub_date = parseAtomDate((item \\ "published").text),
           guid = (item \\ "id").text.replaceAll("\n", "").replaceAll("\t", ""),
           enclosure = (item \\ "link")
             .filter(n => (n \ "@type").text.startsWith("image") || (n \ "@type").text.startsWith("video"))
@@ -445,7 +454,20 @@ class AtomReader extends Reader {
 
 class XmlReader extends Reader {
 
-  val dateFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
+  val dateFormatZZZ = DateTimeFormat.forPattern("EEE, dd MMM yyyy HH:mm:ss ZZZ").withLocale(Locale.ENGLISH).withOffsetParsed()
+  val dateFormatZ = DateTimeFormat.forPattern("EEE, dd MMM yyyy HH:mm:ss Z").withLocale(Locale.ENGLISH).withOffsetParsed()
+
+  private def parseRssDate(date:String):DateTime = {
+    try {
+      date match {
+        case s if s.contains("+") || s.contains("_") => dateFormatZ.parseDateTime(s)
+        case s => dateFormatZZZ.parseDateTime(s)
+      }
+    } catch {
+      case e: Exception => logger.error("Date Parsing Failed", e)
+        karedo.util.Util.now
+    }
+  }
 
   override def extract(xml:Elem, name:String, image_url:String, prefs:List[String]) : Seq[RssFeed] = {
 
@@ -455,7 +477,7 @@ class XmlReader extends Reader {
           title = (item \\ "title").text.replaceAll("\n", "").replaceAll("\t", ""),
           link = (item \\ "link").text.replaceAll("\n", "").replaceAll("\t", ""),
           desc = (item \\ "description").text,
-//          date = dateFormatter.parse((item \\ "pubDate").text),
+          pub_date = parseRssDate((item \\ "pubDate").text),
           guid = (item \\ "guid").text.replaceAll("\n", "").replaceAll("\t", ""),
           enclosure = (item \\ "enclosure").filter(n => (n \ "@type").text.startsWith("image") || (n \ "@type").text.startsWith("video"))
             .map(
@@ -542,7 +564,7 @@ case class XmlRssFeed(title:String, link:String, desc:String, language:String, i
 case class RssItem(title:String,
                    link:String,
                    desc:String,
-//                   date:Date,
+                   pub_date:DateTime,
                    guid:String,
                    enclosure:Seq[RssEnclosure] = Nil,
                    randonHint: Double )

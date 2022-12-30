@@ -10,7 +10,7 @@ import karedo.util.json.JodaImplicits
 package object entity extends DefaultJsonProtocol with SprayJsonSupport with JodaImplicits {
   implicit val json_Beacon = jsonFormat1(BeaconType)
   implicit val json_AdType = jsonFormat8(AdType)
-  implicit val json_AdUnitType:RootJsonFormat[AdUnitType] = jsonFormat16(AdUnitType)
+  implicit val json_AdUnitType:RootJsonFormat[AdUnitType] = jsonFormat17(AdUnitType)
 
   implicit val json_Feed:RootJsonFormat[Feed] = jsonFormat7(Feed)
 
