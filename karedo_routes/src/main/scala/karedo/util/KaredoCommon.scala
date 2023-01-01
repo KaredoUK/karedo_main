@@ -160,11 +160,15 @@ trait KaredoConstants extends Configurable {
 }
 
 trait KaredoIds {
+  val logger = LoggerFactory.getLogger(classOf[KaredoIds])
+
   def getNewRandomID = UUID.randomUUID().toString
 
   def getNewSMSCode = {
     val random = new scala.util.Random
-    (random.alphanumeric take 6 mkString).toUpperCase
+    (1 to 6).map(_ => random.nextInt(10).toString).reduce(_ + _)
+
+//    (random.alphanumeric take 6 mkString).toUpperCase
   }
 
   def getNewSaleCode = {
@@ -186,7 +190,11 @@ trait KaredoIds {
   def getPasswordHash(account_id: String, password: String): String = getSHA1Hash(getPasswordHashFormat(account_id, password))
 
   def doesPasswordMatch(account_id: String, sentPassword: String, storedPassword: String): Boolean
-    = storedPassword.equals(getPasswordHash(account_id, sentPassword))
+    = {
+    val sentHashed = getPasswordHash(account_id, sentPassword)
+    logger.info(s"Stored: ${storedPassword}  Sent: ${sentPassword}  Sent Hashed: ${sentHashed}")
+    storedPassword.equals(sentHashed)
+  }
 
 }
 
