@@ -11,7 +11,7 @@ import spray.json.{JsObject, JsString}
 
 trait KaredoAuthentication extends KaredoConstants with KaredoUtils {
   self: DbCollections  =>
-  val logger = LoggerFactory.getLogger(classOf[KaredoAuthentication])
+  override val logger = LoggerFactory.getLogger(classOf[KaredoAuthentication])
 
   def authenticate
   (

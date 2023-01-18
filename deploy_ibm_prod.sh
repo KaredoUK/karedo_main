@@ -14,5 +14,5 @@ cd $DIR
 
 ./make_binaries.sh
 
-cf push karedo_test -p karedo_routes/target/scala-2.11/routes-assembly-0.0.2-SNAPSHOT.jar
+./push_ibm_prod.sh
 

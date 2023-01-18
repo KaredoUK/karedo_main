@@ -4,15 +4,36 @@
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <target>System.out</target>
         <encoder>
-            <pattern>%-5level[%thread] %X{akkaSource} %logger{0} - %msg%n</pattern>
+            <pattern>%-5level[%thread] %logger{0}: %msg %ex{5} %n</pattern>
         </encoder>
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>log/karedo.log</file>
+        <file>log/karedo_full.log</file>
         <append>false</append>
         <encoder>
-            <pattern>%d %-5level [%thread] %X{akkaSource} %logger{1} - %msg%n</pattern>
+            <outputPatternAsHeader>true</outputPatternAsHeader>
+            <pattern>%d %-5level [%thread] %logger{10}: %msg %ex{5} %n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>log/karedo.log</file>
+        <append>true</append>
+        <prudent>true</prudent>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover -->
+            <fileNamePattern>log/karedo.%d{yyyy-MM-dd}.log</fileNamePattern>
+
+            <!-- keep 30 days' worth of history capped at 3GB total size -->
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+
+        </rollingPolicy>
+        <encoder>
+            <outputPatternAsHeader>true</outputPatternAsHeader>
+            <!-- pattern>%d %-5level [%thread] %X{akkaSource} %logger{1} - %msg%n</pattern -->
+            <pattern>%d %-5level [%thread] %logger{10}: %msg %ex{5} %n</pattern>
         </encoder>
     </appender>
 
@@ -20,7 +41,7 @@
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="ROLLING"/>
     </root>
 
 </configuration>

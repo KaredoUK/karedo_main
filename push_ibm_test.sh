@@ -12,7 +12,5 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 cd $DIR
 
-./make_binaries.sh
-
-cf push karedo -p karedo_routes/target/scala-2.11/routes-assembly-0.0.2-SNAPSHOT.jar
+cf push karedo_test -p karedo_routes/target/scala-2.11/routes-assembly-0.0.2-SNAPSHOT.jar
 
