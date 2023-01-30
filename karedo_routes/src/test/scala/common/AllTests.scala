@@ -6,6 +6,7 @@ import karedo.entity.dao._
 import karedo.routes.Routes
 import karedo.util._
 import org.scalatest.{Matchers, WordSpec}
+import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -23,6 +24,8 @@ trait AllTests extends WordSpec
   with KaredoConstants
   with KaredoIds
   with Matchers {
+
+  override val logger = LoggerFactory.getLogger(classOf[AllTests])
 
   implicit val timeout: RouteTestTimeout = RouteTestTimeout(1000.second(span))
 

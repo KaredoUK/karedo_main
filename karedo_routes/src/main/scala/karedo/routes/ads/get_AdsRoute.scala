@@ -20,47 +20,50 @@ object get_AdsRoute extends KaredoRoute
       // GET /account/{{account_id}}/ads?p={{application_id}}&s={{session_id}}&c={{ad_count}}
       path("account" / Segment / "ads") {
         accountId =>
-          optionalHeaderValueByName("X_Identification") {
-            deviceId =>
-              optionalHeaderValueByName("User-Agent") {
-                ua =>
-                  optionalHeaderValueByName("X-Forwarded-For") {
-                    xff =>
-                      extractClientIP {
-                        ip =>
-                          get {
-                            parameters('p, 's ?, 'c.as[Int], 'lat.as[Double].?, 'lon.as[Double].?, 'ifa ?, 'make ?, 'model ?, 'os ?, 'osv ?, 'did ?, 'dpid ?, 'mac ?, 'cc ?, 'lmt.as[Int].?) {
-                              (applicationId, sessionId, adCount, lat, lon, ifa, make, model, os, osv, did, dpid, mac, cc, lmt) =>
-                                doCall({
-                                  System.setProperty("java.net.preferIPv4Stack" , "true")
+          extractRequest { request =>
+            optionalHeaderValueByName("X_Identification") {
+              deviceId =>
+                optionalHeaderValueByName("User-Agent") {
+                  ua =>
+                    optionalHeaderValueByName("X-Forwarded-For") {
+                      xff =>
+                        extractClientIP {
+                          ip =>
+                            get {
+                              parameters('p, 's ?, 'c.as[Int], 'lat.as[Double].?, 'lon.as[Double].?, 'ifa ?, 'make ?, 'model ?, 'os ?, 'osv ?, 'did ?, 'dpid ?, 'mac ?, 'cc ?, 'lmt.as[Int].?) {
+                                (applicationId, sessionId, adCount, lat, lon, ifa, make, model, os, osv, did, dpid, mac, cc, lmt) =>
+                                  doCall({
+                                    System.setProperty("java.net.preferIPv4Stack" , "true")
 
-                                  val devObj = DeviceRequest(
-                                    ua = ua,
-                                    xff = xff,
-                                    ifa = ifa,
-                                    deviceType = Some(getDeviceType(make, model)),
-                                    ip = if( ip.getAddress.isPresent) Some(ip.getAddress.get.getHostAddress) else None,
-                                    make = make,
-                                    model = model,
-                                    os = os,
-                                    osv = osv,
-                                    did = did,
-                                    dpid = dpid,
-                                    mac = mac,
-                                    lat = lat,
-                                    lon = lon,
-                                    country = cc,
-                                    lmt = lmt
+                                    val devObj = DeviceRequest(
+                                      ua = ua,
+                                      xff = xff,
+                                      ifa = ifa,
+                                      deviceType = Some(getDeviceType(make, model)),
+                                      ip = if( ip.getAddress.isPresent) Some(ip.getAddress.get.getHostAddress) else None,
+                                      make = make,
+                                      model = model,
+                                      os = os,
+                                      osv = osv,
+                                      did = did,
+                                      dpid = dpid,
+                                      mac = mac,
+                                      lat = lat,
+                                      lon = lon,
+                                      country = cc,
+                                      lmt = lmt,
+                                      src_headers = request.headers.map(e => e.name() -> e.value()).toMap
+                                    )
+                                    exec(accountId, deviceId, applicationId, sessionId, adCount, devObj)
+                                  }
                                   )
-                                  exec(accountId, deviceId, applicationId, sessionId, adCount, devObj)
-                                }
-                                )
+                              }
                             }
-                          }
-                      }
-                  }
+                        }
+                    }
 
-              }
+                }
+            }
           }
       }
     }

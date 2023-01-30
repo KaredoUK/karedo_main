@@ -34,7 +34,7 @@ class ReloadableX509TrustManager(path_to_trust_store: String, password: String) 
     }
   }
 
-  def reloadTrustManager = {
+  def reloadTrustManager() = {
     // load keystore from specified cert store (or default)
     val keystore = KeyStore.getInstance(KeyStore.getDefaultType)
 

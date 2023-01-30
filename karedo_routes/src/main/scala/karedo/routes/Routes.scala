@@ -104,7 +104,8 @@ trait CorsSupport {
   protected def corsAllowOrigins: List[String] = List("*")
 
   protected def corsAllowedHeaders: List[String]
-    = List("Origin", "X-Requested-With", "Content-Type", "Accept", "Accept-Encoding", "Accept-Language", "Host", "Referer", "User-Agent", "Geolocation")
+    = List("Origin", "X-Requested-With", "Content-Type", "Accept", "Accept-Encoding", "Accept-Language",
+    "Host", "Referer", "User-Agent", "Geolocation", "Authorization", "X-Authorization")
 
   protected def corsAllowCredentials: Boolean = true
 

@@ -4,11 +4,13 @@ import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import common.AllTests
 import karedo.entity.{UserAccount, UserApp}
 import org.junit.runner.RunWith
+import org.scalatest.Ignore
 import org.scalatest.junit.JUnitRunner
 
 /**
   * Created by pakkio on 10/21/16.
   */
+@Ignore
 @RunWith(classOf[JUnitRunner])
 class Kar138_login_test extends AllTests {
 

@@ -14,6 +14,7 @@ import karedo.rtb.model.AdModel.{AdUnit, DeviceRequest}
 import karedo.entity._
 import karedo.rtb.model.BidRequestCommon._
 import karedo.rtb.util.DeviceMake
+import karedo.util.Util.now
 import com.typesafe.config.Config
 
 import scala.concurrent.Future
@@ -21,6 +22,7 @@ import karedo.rtb.util.LoggingSupport
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import karedo.rtb.model.DbCollections
 
 import scala.concurrent.duration._
 
@@ -30,9 +32,16 @@ trait HttpDispatcher {
 
   val httpDispatcher = Http()
   val httpsDispatcher = Http()
+
+  def getInternetDispatcher(scheme: HttpScheme) = {
+    scheme match {
+      case HTTP => httpDispatcher
+      case HTTPS => httpsDispatcher
+    }
+  }
 }
 
-abstract class DspBidDispather(config: DspBidDispatcherConfig) extends LoggingSupport with HttpDispatcher  {
+abstract class DspBidDispather(config: DspBidDispatcherConfig) extends LoggingSupport with HttpDispatcher with DbCollections  {
 
   implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
 
@@ -73,12 +82,9 @@ abstract class DspBidDispather(config: DspBidDispatcherConfig) extends LoggingSu
 
     logger.info(s"Request (${config.name}) => ${out_request}")
 
-    val dispatcher = config.scheme match {
-      case HTTP => httpDispatcher
-      case HTTPS => httpsDispatcher
-    }
+    val dispatcher = getHttpDispatcher
 
-    dispatcher.singleRequest(out_request)
+    singleRequest(out_request)
   }
 
   def deserialize[T](r: HttpResponse)(implicit um: Unmarshaller[ResponseEntity, T]): Future[Option[T]] = {
@@ -93,6 +99,29 @@ abstract class DspBidDispather(config: DspBidDispatcherConfig) extends LoggingSu
       }
     }
   }
+
+  def singleRequest(request: HttpRequest): Future[HttpResponse] = {
+    val out = getHttpDispatcher.singleRequest(request)
+
+    out.map(r => {
+      Future {
+        dbRTBMessages.insertNew(RTBMessage(
+          id = s"${config.name}-${now}",
+          request = RequestMessage(
+            source = Some(config.name),
+            request = Some(request.toString())),
+          response = ResponseMessage(
+            source = Some(config.name),
+            response = Some(out.toString()
+          )
+        )))
+      }
+    })
+
+    out
+  }
+
+  def getHttpDispatcher() = getInternetDispatcher(config.scheme)
 }
 
 case class DspBidDispatcherConfig

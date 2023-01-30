@@ -13,7 +13,7 @@ import org.scalatest.junit.JUnitRunner
 /**
  * Created by pakkio on 10/21/16.
  */
-@Ignore
+//@Ignore
 @RunWith(classOf[JUnitRunner])
 class Kar166_interaction_test extends AllTests {
 

@@ -14,14 +14,20 @@ import model._
 import Uri._
 import HttpMethods._
 import MediaTypes._
+import ContentTypes.`application/json`
 import StatusCodes._
-import unmarshalling.{ Unmarshal, Unmarshaller }
-import akka.stream.scaladsl.{ Source, Sink }
+import unmarshalling.{Unmarshal, Unmarshaller}
+import marshalling._
+import unmarshalling._
+import akka.stream.scaladsl.{Sink, Source}
+
 import scala.concurrent._
 import java.util.concurrent.Executors
 
-
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import spray.json.DefaultJsonProtocol
+
+import scala.util.{Failure, Success, Try}
 
 /**
   * Created by crajah on 28/11/2016.
@@ -31,7 +37,9 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
     with DeviceMakes
     with RtbConstants
     with LoggingSupport
-    with BidJsonImplicits {
+    with BidJsonImplicits
+    with DefaultJsonProtocol
+ {
 
   implicit val ecLocal: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
 
@@ -223,46 +231,85 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
 
     val rtbHeader = headers.RawHeader("x-openrtb-version", "2.2")
 
-    def apiCall: Future[Option[BidResponse]] = {
-
-      val bid_request = HttpRequest(
-        POST,
-        uri = Uri(path = Path(config.path)),
-        entity = HttpEntity(`application/json`, bid.toJson.toString),
-        headers = List(rtbHeader)
-      )
-
-      logger.info(s"Bid Reqest (${config.name}) => ${bid_request}")
-
-      val source = Source.single(
-        bid_request
-      )
-
-      val flow = config.scheme match {
-        case HTTP => httpDispatcher.outgoingConnection(host = config.host, port = config.port).mapAsync(1) { r => deserialize[BidResponse](r) }
-        case HTTPS => httpsDispatcher.outgoingConnectionHttps(host = config.host, port = config.port).mapAsync(1) { r => deserialize[BidResponse](r)
-        }
-      }
-
-      source.via(flow).runWith(Sink.head)
-    }
+//    def apiCall: Future[Option[BidResponse]] = {
+//
+//      val bid_request = HttpRequest(
+//        POST,
+//        uri = Uri(path = Path(config.path)),
+//        entity = HttpEntity(`application/json`, bid.toJson.toString),
+//        headers = List(rtbHeader)
+//      )
+//
+//      logger.info(s"Bid Reqest (${config.name}) => ${bid_request}")
+//
+//      val source = Source.single(
+//        bid_request
+//      )
+//
+//      val flow = config.scheme match {
+//        case HTTP => httpDispatcher.outgoingConnection(host = config.host, port = config.port).mapAsync(1) { r => deserialize[BidResponse](r) }
+//        case HTTPS => httpsDispatcher.outgoingConnectionHttps(host = config.host, port = config.port).mapAsync(1) { r => deserialize[BidResponse](r)
+//        }
+//      }
+//
+//      source.via(flow).runWith(Sink.head)
+//    }
 
 
     try {
 
-      val responseFuture:Future[Option[BidResponse]] = apiCall
+      val httpBidResponse:Future[HttpResponse] = sendBidRequestAsSingle(bid)
 
-      val response = Await.result(responseFuture, rtb_max_wait)
+      val responseAsFutureEither:Future[Either[String, BidResponse]] = httpBidResponse.flatMap {
+        response =>
+          Unmarshal(response).to[Either[String, BidResponse]]
+      }
+
+//      val responseAsFutureTry:Future[Try[HttpResponse]] = httpBidResponse.map {
+//        response =>
+//          response.entity.contentType match {
+//            case `application/json` => Success(response)
+//            case _ => Failure(new Exception(s"BID ERROR:from ${config.name}: ${response.toString()}"))
+//          }
+//      }
+//
+//      val bidResponseAsFutureTry:Future[BidResponse] = responseAsFutureTry.flatMap {
+//        response =>
+//          Unmarshal(response).to[BidResponse]
+//      }
+//
+//      val responseFuture:Future[Option[BidResponse]] = bidResponseAsFutureTry map Some.apply
+
+      val response = Await.result(responseAsFutureEither, rtb_max_wait)
 
       logger.info(s"${config.name}: Response from Exchange: " + response)
 
-      response
+      response match {
+        case Left(s) => None
+        case Right(b) => Some(b)
+      }
     } catch {
       case e: Exception => {
         logger.error(s"${config.name}: Error Sending Bid Request to [${config.endpoint}] failed.\nBid Request:\n${bid.toJson.toString}", e)
         None
       }
     }
+  }
+
+  def sendBidRequestAsSingle(bid:BidRequest): Future[HttpResponse] = {
+    val uri_path = config.endpoint
+    val rtbHeader = headers.RawHeader("x-openrtb-version", "2.2")
+
+    val httpBidRequest = HttpRequest(
+      POST,
+      uri = Uri(uri_path),
+      entity = HttpEntity(`application/json`, bid),
+      headers = List(rtbHeader)
+    )
+
+    logger.info(s"Bid Reqest (${config.name}) => ${httpBidRequest}")
+
+    singleRequest(httpBidRequest)
   }
 
   def buildBidRequest(seqId: Int, user: User, device: Device, iabCatMap: Map[String, UserPrefData], make: DeviceMake): BidRequest = {

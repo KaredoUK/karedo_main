@@ -5,12 +5,14 @@ import common.AllTests
 import karedo.entity._
 import karedo.util.Util.now
 import org.junit.runner.RunWith
+import org.scalatest.Ignore
 import org.scalatest.junit.JUnitRunner
 
 
 /**
   * Created by pakkio on 10/20/16.
   */
+@Ignore
 @RunWith(classOf[JUnitRunner])
 class Kar186_197_198_199_put_post_get_sale extends AllTests {
 

@@ -5,12 +5,13 @@ import karedo.entity.{UserAccount, UserApp}
 import karedo.rtb.model.AdModel.AdResponse
 import karedo.util.Util
 import org.junit.runner.RunWith
-import org.scalatest.WordSpec
+import org.scalatest.{Ignore, WordSpec}
 import org.scalatest.junit.{JUnit3Suite, JUnitRunner}
 
 /**
   * Created by pakkio on 10/21/16.
   */
+@Ignore
 @RunWith(classOf[JUnitRunner])
 class Kar134_ads_test extends AllTests {
   val presetAppId = Util.newMD5

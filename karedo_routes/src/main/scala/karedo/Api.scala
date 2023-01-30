@@ -6,19 +6,17 @@ import com.typesafe.config.{Config, ConfigFactory}
 import karedo.entity.{DbPrefs, DbUserAd}
 import karedo.entity.dao.MongoConnection_Casbah
 import karedo.routes.Routes
-import karedo.util.{DefaultActorSystem, SSLSupport}
+import karedo.util.{DefaultActorSystem, KaredoConstants, SSLSupport}
 
 
 object Api
   extends MongoConnection_Casbah
   with Routes
   with DefaultActorSystem
-  with SSLSupport {
+  with SSLSupport with KaredoConstants {
 
   private val bindRoutes = routesWithLogging
 
-  private val httpConfig = conf.getConfig("web.http")
-  private val httpsConfig = conf.getConfig("web.https")
 
   if( httpConfig.getBoolean("enabled") ) {
     val host = httpConfig.getString("host")
@@ -32,9 +30,6 @@ object Api
     val host = httpsConfig.getString("host")
     val port = httpsConfig.getInt("port")
 
-    val keyStoreName = httpsConfig.getString("keystore.name")
-    val keyStoreType = httpsConfig.getString("keystore.type")
-    val keyStorePass = httpsConfig.getString("keystore.pass")
 
     println(s"SSL Binding on server $host and port $port")
     val https = getHttps(keyStoreName, keyStoreType, keyStorePass)

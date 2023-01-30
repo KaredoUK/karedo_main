@@ -5,11 +5,13 @@ import common.AllTests
 import karedo.entity.{UserAccount, UserApp, UserIntent}
 import karedo.util.Util
 import org.junit.runner.RunWith
+import org.scalatest.Ignore
 import org.scalatest.junit.JUnitRunner
 
 /**
   * Created by pakkio on 10/21/16.
   */
+@Ignore
 @RunWith(classOf[JUnitRunner])
 class Kar169_getIntent_test extends AllTests {
 

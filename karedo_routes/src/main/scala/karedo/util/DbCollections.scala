@@ -30,4 +30,5 @@ trait DbCollections {
   val dbUserUrlAccess = new DbUserUrlAccess {}
   val dbHashedAccount = new DbHashedAccount {}
   val dbInform = new DbInform {}
+  val dbAPIMessages = new DbAPIMessages {}
 }

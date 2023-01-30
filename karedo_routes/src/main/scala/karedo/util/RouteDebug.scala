@@ -8,7 +8,12 @@ import akka.http.scaladsl.server.RouteResult.Rejected
 import akka.http.scaladsl.server._
 import akka.http.scaladsl.server.directives.LogEntry
 import akka.stream.scaladsl.Flow
+import karedo.entity.{APIMessage, RequestMessage, ResponseMessage}
 import org.slf4j.LoggerFactory
+
+import scala.concurrent.Future
+import karedo.util.Util.now
+
 
 /**
   * Created by pakkio on 10/3/16.
@@ -23,9 +28,32 @@ trait RouteDebug {
     case _ => TextMessage("Message type unsupported")
   }
 
+  val dbColl = new DbCollections {
+    def logEntry(request: String, response: String) = {
+      import scala.concurrent.ExecutionContext.Implicits.global
+
+      Future {
+        dbAPIMessages.insertNew(
+          APIMessage(
+            id = s"${now}",
+            request = RequestMessage(
+              request = Some(request)
+            ),
+            response = ResponseMessage(
+              response = Some(response)
+            )
+          ))
+      }
+    }
+  }
+
   // logs just the request method and response status at info level
   def createLogEntry(request: HttpRequest, text: String): Some[LogEntry] = {
-    val logString: String = "#### Request " + request + "\n => \n Response: " + text + "\n"
+
+    dbColl.logEntry(request.toString, text)
+
+    val logString: String = s"######\n[REQ]> ${request}\n=>\n[RES]> ${text}\n######"
+//      "#### Request " + request + "\n => \n Response: " + text + "\n"
     logger.info(logString)
     Some(LogEntry(logString, InfoLevel))
   }
@@ -33,13 +61,13 @@ trait RouteDebug {
   def myLog(request: HttpRequest): Any => Option[LogEntry] = {
     case x: HttpResponse => {
       createLogEntry(request, x.toString)
-      x.entity match {
-        /*case e: HttpData => {
-            createLogEntry(request,   x.status + " " + e.asString)
-
-        }*/
-        case _ => createLogEntry(request, x.toString())
-      }
+//      x.entity match {
+//        /*case e: HttpData => {
+//            createLogEntry(request,   x.status + " " + e.asString)
+//
+//        }*/
+//        case _ => createLogEntry(request, x.toString())
+//      }
     } // log response
     case Rejected(rejections) => createLogEntry(request, " Rejection " + rejections.toString())
     case x => createLogEntry(request, x.toString())

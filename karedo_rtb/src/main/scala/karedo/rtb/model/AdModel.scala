@@ -1,7 +1,8 @@
 package karedo.rtb.model
 
 
-import karedo.rtb.util.{DEV_TYPE_ANDROID, DeviceMake, DEV_TYPE_IOS}
+import akka.http.scaladsl.model.HttpRequest
+import karedo.rtb.util.{DEV_TYPE_ANDROID, DEV_TYPE_IOS, DeviceMake}
 import spray.json._
 
 
@@ -28,6 +29,7 @@ object AdModel extends DefaultJsonProtocol {
     , lon: Option[Double] = None
     , country: Option[String] = Some("GB")
     , lmt: Option[Int] = Some(0) // Limit Ad Tracking
+    , src_headers: Map[String, String] = Map()
   )
 
   case class AdRequest
@@ -78,7 +80,7 @@ object AdModel extends DefaultJsonProtocol {
 
   implicit val adResponse:RootJsonFormat[AdResponse] = jsonFormat2(AdResponse)
 
-  implicit val json_DeviceRequest = jsonFormat16(DeviceRequest)
+  implicit val json_DeviceRequest = jsonFormat17(DeviceRequest)
   implicit val adRequest:RootJsonFormat[AdRequest] = jsonFormat3(AdRequest)
 
 }

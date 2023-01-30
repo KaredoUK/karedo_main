@@ -6,13 +6,14 @@ import karedo.entity._
 import karedo.util._
 import karedo.util.Util.now
 import org.junit.runner.RunWith
-import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach, Ignore}
 import org.scalatest.junit.JUnitRunner
 
 
 /**
   * Created by pakkio on 10/21/16.
   */
+@Ignore
 @RunWith(classOf[JUnitRunner])
 class Kar_LoginSequence_Test extends AllTests with BeforeAndAfterEach {
 

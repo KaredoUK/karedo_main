@@ -37,6 +37,9 @@ trait BidJsonImplicits extends DefaultJsonProtocol {
   implicit  val json_Imp_2_2_1 = jsonFormat12(BidRequestModel_2_2_1.Imp)
   implicit  val json_bidRequest_2_2_1:RootJsonFormat[BidRequestModel_2_2_1.BidRequest] = jsonFormat14(BidRequestModel_2_2_1.BidRequest)
 
+  implicit def impBidRequestFwd2_2(bid: BidRequestModel_2_2_1.BidRequest): String = bid.toJson.toString
+  implicit def impBidRequestBck2_2(bid: String): BidRequestModel_2_2_1.BidRequest = bid.parseJson.convertTo[BidRequestModel_2_2_1.BidRequest]
+
   implicit  val json_Format = jsonFormat2(BidRequestModel_2_4.Format)
   implicit  val json_Native = jsonFormat4(BidRequestModel_2_4.Native)
   implicit  val json_Banner_2_4 = jsonFormat11(BidRequestModel_2_4.Banner)
@@ -45,10 +48,15 @@ trait BidJsonImplicits extends DefaultJsonProtocol {
   implicit  val json_Imp_2_4 = jsonFormat16(BidRequestModel_2_4.Imp)
   implicit  val json_bidRequest_2_4:RootJsonFormat[BidRequestModel_2_4.BidRequest] = jsonFormat16(BidRequestModel_2_4.BidRequest)
 
+  implicit def impBidRequestFwd2_4(bid: BidRequestModel_2_4.BidRequest): String = bid.toJson.toString
+  implicit def impBidRequestBck2_4(bid: String): BidRequestModel_2_4.BidRequest = bid.parseJson.convertTo[BidRequestModel_2_4.BidRequest]
+
   implicit val json_Bid = jsonFormat20(Bid)
   implicit val json_SeatBid = jsonFormat3(SeatBid)
   implicit val json_bidResponse:RootJsonFormat[BidResponse] = jsonFormat6(BidResponse)
 
+  implicit def impBidResponseFwd(bid: BidResponse): String = bid.toJson.toString
+  implicit def impBidResponseBck(bid: String): BidResponse = bid.parseJson.convertTo[BidResponse]
 }
 
 object BidRequestCommon extends DefaultJsonProtocol {

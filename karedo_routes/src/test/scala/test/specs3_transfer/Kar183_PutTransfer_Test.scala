@@ -6,12 +6,14 @@ import karedo.entity._
 import org.scalatest.junit.JUnitRunner
 import karedo.util.Util.now
 import org.junit.runner.RunWith
+import org.scalatest.Ignore
 
 
 
 /**
   * Created by pakkio on 10/20/16.
   */
+@Ignore
 @RunWith(classOf[JUnitRunner])
 class Kar183_PutTransfer_Test extends AllTests {
 

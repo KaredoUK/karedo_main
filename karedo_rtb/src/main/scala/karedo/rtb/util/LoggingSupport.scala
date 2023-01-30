@@ -10,3 +10,4 @@ trait LoggingSupport {
 
   val marker = MarkerFactory.getMarker("AD_REQUEST")
 }
+

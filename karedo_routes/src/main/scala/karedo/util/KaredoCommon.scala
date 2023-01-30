@@ -36,6 +36,7 @@ import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.BasicHttpCredentials
 import akka.stream.ActorMaterializer
+import karedo.Api.conf
 
 
 /**
@@ -133,6 +134,14 @@ trait KaredoConstants extends Configurable {
   val url_magic_share_base = conf.getString("url.magic.share.base")
   val url_magic_norm_base = conf.getString("url.magic.norm.base")
   val url_magic_fallback_url = conf.getString("url.magic.fallback.url")
+
+  val httpConfig = conf.getConfig("web.http")
+  val httpsConfig = conf.getConfig("web.https")
+
+  val keyStoreName = httpsConfig.getString("keystore.name")
+  val keyStoreType = httpsConfig.getString("keystore.type")
+  val keyStorePass = httpsConfig.getString("keystore.pass")
+  val keyAlias     = httpsConfig.getString("keystore.alias")
 
   def getDeviceType(make: Option[String], model: Option[String]): Int = {
     val DEVICE_TYPE_MOBILE_TABLET: Int = 1
