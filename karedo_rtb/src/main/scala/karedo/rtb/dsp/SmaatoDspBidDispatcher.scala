@@ -21,6 +21,7 @@ import karedo.rtb.util.DeviceMakes
 import karedo.util.Util.now
 
 import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.collection.immutable.Map
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 
@@ -254,29 +255,14 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
   def sendRequest(params: Map[String, String], deviceRequest: DeviceRequest ): Option[HttpAdResponse] = {
     logger.debug(marker, s"IN: ${class_name}.sendRequest. Request: ${params}" )
 
-    import scala.collection._
+    val headerMap:Map[String, String] = addOptionHeaderToMap(deviceRequest.src_headers, "x-mh-User-Agent", deviceRequest.ua )
 
-    val http_headers:mutable.MutableList[HttpHeader] = mutable.MutableList()
-
-    // Make the headers
-    val xffOption = deviceRequest.xff match {
-      case Some(x) if deviceRequest.ip.isDefined => Some(x + ", " + deviceRequest.ip.get)
-      case Some(x) => Some(x)
-      case None if deviceRequest.ip.isDefined => Some(deviceRequest.ip.get)
-      case None => None
-    }
-
-    if( xffOption.isDefined ) {
-      http_headers += headers.RawHeader("x-mh-X-Forwarded-For", xffOption.get)
-      http_headers += headers.RawHeader("X-Forwarded-For", xffOption.get)
-    }
-
-    if( deviceRequest.ua.isDefined ) http_headers += headers.RawHeader("x-mh-User-Agent", deviceRequest.ua.get)
+    val http_headers = makeHttpHeaderFromMap(headerMap)
 
     val uri_path = config.endpoint
 
     try {
-      val responseFuture = singleRequestCall(uri_path, params, http_headers.toList)
+      val responseFuture = singleRequestCall(uri_path, params, http_headers)
 
       val response = Await.result(responseFuture, rtb_max_wait)
 

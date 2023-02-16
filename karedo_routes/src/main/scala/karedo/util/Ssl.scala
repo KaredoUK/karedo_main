@@ -75,9 +75,9 @@ trait KeySupport {
 
   def getSecret(ks: KeyStore, alias: String, password: String): String = {
     val key = ks.getKey(alias, password.toCharArray).asInstanceOf[PrivateKey]
-    println(s"Key : ${key.getAlgorithm} ${key.getFormat} ${key.getEncoded}")
+//    println(s"Key : ${key.getAlgorithm} ${key.getFormat} ${key.getEncoded}")
     val secret = key.getEncoded.map("%02X" format _).mkString
-    println("Secret: " + secret)
+//    println("Secret: " + secret)
     secret
   }
 }

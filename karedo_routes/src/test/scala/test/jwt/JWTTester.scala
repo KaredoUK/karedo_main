@@ -1,7 +1,8 @@
 package test.jwt
 
 import common.AllTests
-import karedo.util.{JWTSupport, JWTWithKey}
+import karedo.jwt._
+import karedo.util.JWTWithKey
 import org.joda.time.DateTime
 import org.junit.runner.RunWith
 import org.scalatest.WordSpec
@@ -10,6 +11,7 @@ import spray.json.RootJsonFormat
 
 import scala.util.{Failure, Success, Try}
 import karedo.util.Util.now
+import karedo.util._
 
 /**
   * Created by charaj on 11/03/2017.

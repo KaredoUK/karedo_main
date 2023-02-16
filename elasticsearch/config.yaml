@@ -1,0 +1,15 @@
+
+
+nodes:  
+  src_api:
+    type: mongo
+    uri: mongodb://admin:FNPQYDEFFCQDCGWX@sl-eu-lon-2-portal.2.dblayer.com:16096,sl-eu-lon-2-portal.3.dblayer.com:16096/admin?ssl=true
+    namespace: Karedo.KAR_APIMessage
+
+
+  sink_api:
+    type: elasticsearch
+    uri: https://admin:NYVTVIDHWCRRCUAX@sl-eu-lon-2-portal3.dblayer.com:16981/
+    namespace: karedo_api.json
+
+

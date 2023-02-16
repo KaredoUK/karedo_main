@@ -84,9 +84,9 @@ class AdActor
     val adUnits:List[AdUnit] = Try [List[AdUnit]] {
       val userProfile = dbUserProfile.find(request.userId).get
       val userPrefs = dbUserPrefs.find(request.userId).get
-      val devReq = request.device
+      val devReq = request.device.copy(src_headers = addIPAddressToXFFHeader(request.device.src_headers, request.device.ip).toMap)
 
-      val make = devReq.make.getOrElse("") match {
+      val make: DeviceMake = devReq.make.getOrElse("") match {
         case DEVICE_MAKE_IOS => DEV_TYPE_IOS
         case DEVICE_MAKE_ANDROID => DEV_TYPE_ANDROID
         case _ => DEV_TYPE_IOS

@@ -10,27 +10,27 @@ import salat.global._
 import scala.util.{Failure, Success, Try}
 
 
-abstract class DbMongoDAO_Casbah[K, T <: Keyable[K]]
-(implicit
- val manifestT: Manifest[T]
- , val manifestK: Manifest[K]
-)
-
-  extends DbDAO[K, T]
+abstract class DbMongoDAO_Casbah[K, T <: Keyable[K]] (implicit override val manifestT: Manifest[T], override val manifestK: Manifest[K])
+//(implicit
+// val manifestT: Manifest[T]
+// , val manifestK: Manifest[K]
+//)
+  extends ParentDAO[K, T]
+  with DbDAO[K, T]
     with DbDAOExtensions[K, T]
-    with MongoConnection_Casbah {
-
+//    with MongoConnection_Casbah
+{
 
   def byId(userId: K) = MongoDBObject("_id" -> userId)
 
   def byField[F](fname: String, value: F) = MongoDBObject(fname -> value)
 
-  val thisClass = manifestT.runtimeClass
-  val simpleName = thisClass.getSimpleName
-  val logger = LoggerFactory.getLogger(thisClass)
-  //logger.debug(s"setting up $thisClass")
-
-  lazy val dao = new SalatDAO[T, K](collection = db(s"${DbDAOParams.tablePrefix}$simpleName")) {}
+//  val thisClass = manifestT.runtimeClass
+//  val simpleName = thisClass.getSimpleName
+//  val logger = LoggerFactory.getLogger(thisClass)
+//  //logger.debug(s"setting up $thisClass")
+//
+//  lazy val dao = new SalatDAO[T, K](collection = db(s"${DbDAOParams.tablePrefix}$simpleName")) {}
 
   override def insertNew(r: T): Result[String, T] = {
     val id = r.id

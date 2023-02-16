@@ -25,6 +25,8 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import karedo.rtb.model.DbCollections
 
 import scala.concurrent.duration._
+import scala.collection.immutable.Map
+import scala.util.{Failure, Success}
 
 trait HttpDispatcher {
   implicit val actor_system = ActorSystem("rtb")
@@ -103,54 +105,48 @@ abstract class DspBidDispather(config: DspBidDispatcherConfig) extends LoggingSu
   def singleRequest(request: HttpRequest): Future[HttpResponse] = {
     val out = getHttpDispatcher.singleRequest(request)
 
-    out.map(r => {
-      Future {
-        dbRTBMessages.insertNew(RTBMessage(
-          id = s"${config.name}-${now}",
-          request = RequestMessage(
-            source = Some(config.name),
-            request = Some(request.toString())),
-          response = ResponseMessage(
-            source = Some(config.name),
-            response = Some(out.toString()
+    out.onComplete {
+      case Success(response) => {
+        println("&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+
+        implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
+
+        Future {
+          println("%%%%%%%%%%%%%%%%%%%%%")
+
+
+          dbRTBMessages.insertNew(
+            RTBMessage(
+              id = s"${now} | ${config.name}",
+              request = RequestMessage(
+                source = Some(config.name),
+                request = Some(request.toString()),
+                entity = Some(request.entity.toString),
+                headers = Some(request.headers.map(e => e.name() -> e.value()).toMap),
+                protocol = Some(request.protocol.value),
+                uri = Some(request.uri.toString()),
+                method = Some(request.method.value)
+              ),
+              response = ResponseMessage(
+                source = Some(config.name),
+                response = Some(response.toString()),
+                entity = Some(response.entity.toString),
+                headers = Some(response.headers.map(e => e.name() -> e.value()).toMap),
+                protocol = Some(response.protocol.value),
+                status = Some(response.status.toString())
+              )
+            )
           )
-        )))
+        } onComplete {
+          case Success(s) => logger.debug(s"${config.name} - Database Save Success: ${s}")
+          case Failure(f) => logger.debug(s"${config.name} - Database Save Failure: ${f}")
+        }
       }
-    })
+      case Failure(f) => logger.error(s"${config.name} : Request failed. Received Failure: ${f}")
+    }
 
     out
   }
 
   def getHttpDispatcher() = getInternetDispatcher(config.scheme)
 }
-
-case class DspBidDispatcherConfig
-(name: String,
- kind: DspKind,
- scheme: HttpScheme,
- markup: MarkupScheme,
- host: String,
- port: Int = 80,
- path: String,
- endpoint: String,
- price_cpm: Double,
- comm_percent: Double,
- config: Config )
-
-sealed trait HttpScheme
-case object HTTP extends HttpScheme
-case object HTTPS extends HttpScheme
-
-sealed trait DspKind
-case object DUMMY extends DspKind
-case object ORTB2_2 extends DspKind
-case object SMAATO extends DspKind
-case object MOBFOX extends DspKind
-case object FEED extends DspKind
-case object STORED extends DspKind
-
-
-sealed trait MarkupScheme
-case object NURL extends MarkupScheme
-case object ADM extends MarkupScheme
-case object RESP extends MarkupScheme

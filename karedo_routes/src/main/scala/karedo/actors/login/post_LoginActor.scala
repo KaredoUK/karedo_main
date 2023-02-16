@@ -2,6 +2,7 @@ package karedo.actors.login
 
 import karedo.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.entity.UserSession
+import karedo.jwt.JWTMechanic
 import karedo.util._
 import org.slf4j.LoggerFactory
 
@@ -16,6 +17,7 @@ trait post_LoginActor
   with KaredoJsonHelpers
   with KaredoConstants
   with KaredoUtils
+  with JWTMechanic
 {
   override val logger = LoggerFactory.getLogger(classOf[post_LoginActor])
 
@@ -39,7 +41,8 @@ trait post_LoginActor
                     val session_id = getNewRandomID
                     val userSession = UserSession(id = session_id, account_id = account_id )
                     dbUserSession.insertNew(userSession) match {
-                      case OK(_) => OK(APIResponse(SessionIdResponse(session_id).toJson.toString , HTTP_OK_200))
+                      case OK(_) => OK(APIResponse(SessionIdResponse(session_id).toJson.toString , HTTP_OK_200,
+                        jwt = getJWT(application_id, account_id, Some(session_id))))
                       case KO(error) => MAKE_ERROR(error, "Unable to create a UserSession object")
                     }
                   } else {

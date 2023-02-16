@@ -292,27 +292,12 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
   def sendRequest(params: Map[String, String], deviceRequest: DeviceRequest ): Option[HttpAdResponse] = {
     logger.debug(marker, s"IN: ${class_name}.sendRequest. Request: ${params}" )
 
-    import scala.collection._
-
-
-    val http_headers:mutable.MutableList[HttpHeader] = mutable.MutableList()
-
-    // Make the headers
-    val xffOption = deviceRequest.xff match {
-      case Some(x) if deviceRequest.ip.isDefined => Some(x + ", " + deviceRequest.ip.get)
-      case Some(x) => Some(x)
-      case None if deviceRequest.ip.isDefined => Some(deviceRequest.ip.get)
-      case None => None
-    }
-
-    if( xffOption.isDefined ) {
-      http_headers += headers.RawHeader("X-Forwarded-For", xffOption.get)
-    }
+    val http_headers = makeHttpHeaderFromMap(deviceRequest.src_headers)
 
     val uri_path = config.endpoint
 
     try {
-      val responseFuture = singleRequestCall(uri_path, params, http_headers.toList)
+      val responseFuture = singleRequestCall(uri_path, params, http_headers)
 
       val response = Await.result(responseFuture, rtb_max_wait)
 

@@ -18,6 +18,11 @@ case class RequestMessage
 (
   source: Option[String] = None
   , request: Option[String] = None
+  , entity: Option[String] = None
+  , headers: Option[Map[String, String]] = None
+  , protocol: Option[String] = None
+  , uri: Option[String] = None
+  , method: Option[String] = None
   , ts: DateTime = now
 )
 
@@ -25,6 +30,10 @@ case class ResponseMessage
 (
   source: Option[String] = None
   , response: Option[String] = None
+  , entity: Option[String] = None
+  , headers: Option[Map[String, String]] = None
+  , protocol: Option[String] = None
+  , status: Option[String] = None
   , ts: DateTime = now
 )
 

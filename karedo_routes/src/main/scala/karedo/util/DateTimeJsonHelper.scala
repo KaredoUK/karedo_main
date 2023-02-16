@@ -1,6 +1,6 @@
 package karedo.util
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, DateTimeZone}
 import org.joda.time.format.ISODateTimeFormat
 import spray.json.{JsString, JsValue, RootJsonFormat, _}
 
@@ -14,12 +14,12 @@ object DateTimeJsonHelper {
     val formatter = ISODateTimeFormat.basicDateTime
 
     def write(obj: DateTime): JsValue = {
-      JsString(formatter.print(obj))
+      JsString(formatter.print(obj.withZone(DateTimeZone.UTC)))
     }
 
     def read(json: JsValue): DateTime = json match {
       case JsString(s) => try {
-        formatter.parseDateTime(s)
+        formatter.parseDateTime(s).withZone(DateTimeZone.UTC)
       }
       catch {
         case t: Throwable => error(s)

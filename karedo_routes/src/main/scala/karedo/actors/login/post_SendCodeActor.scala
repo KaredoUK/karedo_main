@@ -2,6 +2,7 @@ package karedo.actors.login
 
 import karedo.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.entity._
+import karedo.jwt.JWTMechanic
 import karedo.util.Util.now
 import karedo.util.{Result, _}
 import org.slf4j.LoggerFactory
@@ -22,6 +23,7 @@ trait post_SendCodeActor
     with KaredoConstants
     with KaredoUtils
     with DefaultActorSystem
+    with JWTMechanic
 {
 
   override val logger = LoggerFactory.getLogger(classOf[post_SendCodeActor])

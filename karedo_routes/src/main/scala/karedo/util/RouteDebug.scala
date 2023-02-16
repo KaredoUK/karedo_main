@@ -29,7 +29,11 @@ trait RouteDebug {
   }
 
   val dbColl = new DbCollections {
-    def logEntry(request: String, response: String) = {
+    def logEntry(source: String, request: HttpRequest, response: HttpResponse) = {
+      logEntryString(source, request.toString(), response.toString())
+    }
+
+    def logEntryString(source: String, request: String, response: String) = {
       import scala.concurrent.ExecutionContext.Implicits.global
 
       Future {
@@ -37,6 +41,7 @@ trait RouteDebug {
           APIMessage(
             id = s"${now}",
             request = RequestMessage(
+              source = Some(source),
               request = Some(request)
             ),
             response = ResponseMessage(
@@ -48,28 +53,27 @@ trait RouteDebug {
   }
 
   // logs just the request method and response status at info level
-  def createLogEntry(request: HttpRequest, text: String): Some[LogEntry] = {
+  def createLogEntry(source: String, request: HttpRequest, response: HttpResponse): Some[LogEntry] = {
 
-    dbColl.logEntry(request.toString, text)
+    dbColl.logEntry(source, request, response)
 
-    val logString: String = s"######\n[REQ]> ${request}\n=>\n[RES]> ${text}\n######"
-//      "#### Request " + request + "\n => \n Response: " + text + "\n"
+    createLogEntryString(source, request.toString, response.toString)
+  }
+
+  def createLogEntryString(source: String, request: String, response: String): Some[LogEntry] = {
+    dbColl.logEntryString(source, request, response)
+
+    val logString: String = s"######\n[REQ]> ${request}\n=>\n[RES]> ${response}\n######"
+    //      "#### Request " + request + "\n => \n Response: " + text + "\n"
     logger.info(logString)
     Some(LogEntry(logString, InfoLevel))
   }
 
   def myLog(request: HttpRequest): Any => Option[LogEntry] = {
-    case x: HttpResponse => {
-      createLogEntry(request, x.toString)
-//      x.entity match {
-//        /*case e: HttpData => {
-//            createLogEntry(request,   x.status + " " + e.asString)
-//
-//        }*/
-//        case _ => createLogEntry(request, x.toString())
-//      }
+    case response: HttpResponse => {
+      createLogEntry("HttpResponse", request, response)
     } // log response
-    case Rejected(rejections) => createLogEntry(request, " Rejection " + rejections.toString())
-    case x => createLogEntry(request, x.toString())
+    case Rejected(rejections) => createLogEntryString("Rejection", request.toString(), " Rejection " + rejections.toString())
+    case x => createLogEntryString("Other", request.toString, x.toString)
   }
 }

@@ -27,6 +27,7 @@ import java.util.concurrent.Executors
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import spray.json.DefaultJsonProtocol
 
+import scala.collection.immutable.Map
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -50,9 +51,10 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
     try {
       val fSeq = Future.sequence(
         (0 until count).toList.map(
-          x ⇒ Future(
+          x => Future(
             sendBidRequest(
-              buildBidRequest(x, user, device, iabCatMap, make)
+              buildBidRequest(x, user, device, iabCatMap, make),
+              deviceRequest.src_headers
             )
           )
         )
@@ -225,67 +227,27 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
     )
   }
 
-  def sendBidRequest(bid:BidRequest): Option[BidResponse] = {
+  def sendBidRequest(bid:BidRequest, src_headers: Map[String, String]): Option[BidResponse] = {
     logger.debug(marker, s"IN: ORTB2_2_1DspBidDispatcher.sendBidRequest. Bid Request: ${bid.toJson.toString}" )
-
-
-    val rtbHeader = headers.RawHeader("x-openrtb-version", "2.2")
-
-//    def apiCall: Future[Option[BidResponse]] = {
-//
-//      val bid_request = HttpRequest(
-//        POST,
-//        uri = Uri(path = Path(config.path)),
-//        entity = HttpEntity(`application/json`, bid.toJson.toString),
-//        headers = List(rtbHeader)
-//      )
-//
-//      logger.info(s"Bid Reqest (${config.name}) => ${bid_request}")
-//
-//      val source = Source.single(
-//        bid_request
-//      )
-//
-//      val flow = config.scheme match {
-//        case HTTP => httpDispatcher.outgoingConnection(host = config.host, port = config.port).mapAsync(1) { r => deserialize[BidResponse](r) }
-//        case HTTPS => httpsDispatcher.outgoingConnectionHttps(host = config.host, port = config.port).mapAsync(1) { r => deserialize[BidResponse](r)
-//        }
-//      }
-//
-//      source.via(flow).runWith(Sink.head)
-//    }
-
 
     try {
 
-      val httpBidResponse:Future[HttpResponse] = sendBidRequestAsSingle(bid)
+      val httpBidResponse:Future[HttpResponse] = sendBidRequestAsSingle(bid, src_headers)
 
       val responseAsFutureEither:Future[Either[String, BidResponse]] = httpBidResponse.flatMap {
         response =>
           Unmarshal(response).to[Either[String, BidResponse]]
       }
 
-//      val responseAsFutureTry:Future[Try[HttpResponse]] = httpBidResponse.map {
-//        response =>
-//          response.entity.contentType match {
-//            case `application/json` => Success(response)
-//            case _ => Failure(new Exception(s"BID ERROR:from ${config.name}: ${response.toString()}"))
-//          }
-//      }
-//
-//      val bidResponseAsFutureTry:Future[BidResponse] = responseAsFutureTry.flatMap {
-//        response =>
-//          Unmarshal(response).to[BidResponse]
-//      }
-//
-//      val responseFuture:Future[Option[BidResponse]] = bidResponseAsFutureTry map Some.apply
-
       val response = Await.result(responseAsFutureEither, rtb_max_wait)
 
       logger.info(s"${config.name}: Response from Exchange: " + response)
 
       response match {
-        case Left(s) => None
+        case Left(s) => {
+          logger.info(s"${config.name}: Marshalled response from Exchange: " + s)
+          None
+        }
         case Right(b) => Some(b)
       }
     } catch {
@@ -296,15 +258,19 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
     }
   }
 
-  def sendBidRequestAsSingle(bid:BidRequest): Future[HttpResponse] = {
+  def sendBidRequestAsSingle(bid:BidRequest, src_headers: Map[String, String]): Future[HttpResponse] = {
+
+    val headerMap:Map[String, String] = addHeaderToMap(src_headers, "x-openrtb-version", "2.2" )
+
+    val http_headers = makeHttpHeaderFromMap(headerMap)
+
     val uri_path = config.endpoint
-    val rtbHeader = headers.RawHeader("x-openrtb-version", "2.2")
 
     val httpBidRequest = HttpRequest(
       POST,
       uri = Uri(uri_path),
       entity = HttpEntity(`application/json`, bid),
-      headers = List(rtbHeader)
+      headers = http_headers
     )
 
     logger.info(s"Bid Reqest (${config.name}) => ${httpBidRequest}")

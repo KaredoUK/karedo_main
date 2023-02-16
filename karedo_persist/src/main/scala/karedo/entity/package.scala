@@ -68,8 +68,8 @@ package object entity extends DefaultJsonProtocol with SprayJsonSupport with Jod
 
   implicit val json_UserSession:RootJsonFormat[UserSession] = jsonFormat5(UserSession)
 
-  implicit val json_BidRequestMessage = jsonFormat3(RequestMessage)
-  implicit val json_BidResponseMessage = jsonFormat3(ResponseMessage)
+  implicit val json_BidRequestMessage = jsonFormat8(RequestMessage)
+  implicit val json_BidResponseMessage = jsonFormat7(ResponseMessage)
   implicit val json_RTBMessage: RootJsonFormat[RTBMessage] = jsonFormat4(RTBMessage)
   implicit val json_AdMessage: RootJsonFormat[AdMessage] = jsonFormat4(AdMessage)
   implicit val json_APIMessage: RootJsonFormat[APIMessage] = jsonFormat4(APIMessage)
