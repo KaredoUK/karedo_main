@@ -70,7 +70,7 @@ class DbUserKaredosSpec
     test.insertNew(UserKaredos(acct1,0))
     val locked = test.lock(acct1,"transid")
     locked must beOK
-    val locked1 = test.lock(acct1,"transid2",max = 5)
+    val locked1 = test.lock(acct1,"transid2",retries = 5)
     locked1 must beKO
     val unlock = test.unlock(acct1,"transid")
     unlock must beOK

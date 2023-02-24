@@ -1,11 +1,11 @@
-organization := "karedo"
-name := "persist"
-version := "0.0.2-SNAPSHOT"
-
-scalaVersion := "2.11.8"
-
-resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases/"
-resolvers += Resolver.mavenLocal
+//organization := "karedo"
+//name := "persist"
+//version := "0.0.2-SNAPSHOT"
+//
+//scalaVersion := "2.11.8"
+//
+//resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases/"
+//resolvers += Resolver.mavenLocal
 
 libraryDependencies ++= {
   val akkaV = "2.4.11"
@@ -60,4 +60,4 @@ initialize := {
 parallelExecution in Test := false
 
 coverageEnabled := false
-
+test in assembly := {}
