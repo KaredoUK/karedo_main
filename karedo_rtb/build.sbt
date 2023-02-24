@@ -94,4 +94,4 @@ lazy val root = (project in file(".")).
 */
 
 coverageEnabled := false
-
+test in assembly := {}
