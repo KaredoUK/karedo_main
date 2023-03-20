@@ -6,14 +6,13 @@ import karedo.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.entity._
 import karedo.routes.KaredoRoute
 import karedo.rtb.actor._
-import karedo.rtb.model.AdModel.{DeviceRequest, _}
+import karedo.rtb.model.AdModel.{DeviceRequest, adUnit, _}
 import karedo.util.{KaredoConstants, _}
 import org.slf4j.LoggerFactory
 import spray.json._
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
@@ -110,7 +109,7 @@ trait get_AdsActor
 
         def getAdsFor(application: UserApp, uAcc: UserAccount): Result[Error, String] = {
           val userId = uAcc.id
-          val adsBack = adActor.getAds(AdRequest(userId = userId, count = adCount, device = devObj))
+          val adsReceived = adActor.getAds(AdRequest(userId = userId, count = adCount, device = devObj))
 
           for {
             x <- 0 to adsRepeat
@@ -118,9 +117,32 @@ trait get_AdsActor
             adActor.getAds(AdRequest(userId = userId, count = adCount, device = devObj))
           }
 
-          val pointsGained = adsBack.map(
+          val pointsGained = adsReceived.map(
             ad => computePoints(ad)
           ).sum.toInt
+
+          val account_hash = storeAccountHash(accountId) match {
+            case OK(h) => h
+            case KO(h) => h
+          }
+
+          def getMagicUrl(url: String, execute: Boolean): String = {
+            if(execute) storeUrlMagic(url, None) match {
+              case OK(url_code) => s"${url_magic_share_base}/nrm?u=${url_code}&v=${account_hash}"
+              case KO(_) => url
+            } else url
+          }
+
+          val adsBack = adsReceived.map {
+            adUnit =>
+              adUnit.copy(
+              ad = adUnit.ad.copy (
+                imp_url = getMagicUrl(adUnit.ad.imp_url, adsMarkUrlImp),
+                click_url = getMagicUrl(adUnit.ad.click_url, adsMarkUrlClick)
+              )
+            )
+          }
+
 
           val uUserKaredos = dbUserKaredos.addKaredos(uAcc.id, pointsGained)
 
@@ -132,7 +154,12 @@ trait get_AdsActor
 
             if (uKaredoChange.isKO) KO(Error(s"Cant track karedo history in karedochange because of ${uKaredoChange.err}"))
             else {
-              OK(AdResponse(JsonAccountIfNotTemp(uAcc), adsBack.size, adsBack).toJson.toString)
+              OK(
+                AdResponse(
+                  JsonAccountIfNotTemp(uAcc),
+                  adsBack.size,
+                  adsBack
+                ).toJson.toString)
             }
           }
         }

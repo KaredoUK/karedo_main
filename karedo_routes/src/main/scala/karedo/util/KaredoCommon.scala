@@ -140,6 +140,9 @@ trait KaredoConstants extends Configurable {
 
   val adsRepeat = conf.getInt("ads.repeat")
 
+  val adsMarkUrlImp = conf.getBoolean("ads.mask.url.imp")
+  val adsMarkUrlClick = conf.getBoolean("ads.mask.url.click")
+
   val keyStoreName = httpsConfig.getString("keystore.name")
   val keyStoreType = httpsConfig.getString("keystore.type")
   val keyStorePass = httpsConfig.getString("keystore.pass")
