@@ -1,7 +1,5 @@
 package karedo.routes
 
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
 import karedo.routes.ads._
 import karedo.routes.inform.post_InformRoute
 import karedo.routes.intent._
@@ -9,28 +7,20 @@ import karedo.routes.login._
 import karedo.routes.prefs._
 import karedo.routes.profile._
 import karedo.routes.sale._
+import karedo.routes.termsabout._
 import karedo.routes.transfer._
 import karedo.routes.url._
-import karedo.routes.termsabout._
 import karedo.sample.Entities
 import karedo.util.RouteDebug
 //import org.clapper.classutil.ClassInfo
 import org.slf4j.LoggerFactory
 
 // For CORS
-import akka.http.scaladsl.model.HttpHeader
 import akka.http.scaladsl.model.HttpMethods._
-import akka.http.scaladsl.model.HttpResponse
-import akka.http.scaladsl.model.headers.`Access-Control-Allow-Credentials`
-import akka.http.scaladsl.model.headers.`Access-Control-Allow-Methods`
-import akka.http.scaladsl.model.headers.`Access-Control-Allow-Origin`
-import akka.http.scaladsl.model.headers.`Access-Control-Allow-Headers`
-import akka.http.scaladsl.model.headers.`Access-Control-Max-Age`
-import akka.http.scaladsl.model.headers.Origin
-import akka.http.scaladsl.server.Directive0
+import akka.http.scaladsl.model.{HttpHeader, HttpResponse}
+import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.MethodRejection
-import akka.http.scaladsl.server.RejectionHandler
+import akka.http.scaladsl.server.{Directive0, MethodRejection, RejectionHandler}
 
 trait Routes
   extends Entities

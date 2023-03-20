@@ -1,6 +1,7 @@
 package karedo.rtb.util
 
 import akka.http.scaladsl.model.{HttpHeader, headers}
+import karedo.util.Configurable
 
 import scala.concurrent.duration._
 import scala.collection.immutable._
@@ -9,7 +10,7 @@ import scala.collection.mutable
 /**
   * Created by crajah on 04/12/2016.
   */
-trait RtbConstants {
+trait RtbConstants extends Configurable {
   val bid_tmax = 250
   val bid_bcat = List("IAB25", "IAB26")
 
@@ -40,6 +41,8 @@ trait RtbConstants {
 
   val rtb_max_wait = (bid_tmax * 20) milliseconds
   val dispatcher_max_wait = (bid_tmax * 100) milliseconds
+
+  val dsp_outbound_queue_size = conf.getInt("dsp.outbound.queue")
 
   implicit def mapToMutableMap[K, V](fromMap: Map[K, V]):mutable.Map[K, V] = {
     val toMap: mutable.Map[K, V] = mutable.Map()

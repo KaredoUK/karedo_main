@@ -1,14 +1,14 @@
-package karedo
+/*
+package karedo.entity
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import karedo.util.json.JodaImplicits
-import spray.json._
-import spray.json.DefaultJsonProtocol._
+import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
 /**
-  * Created by charaj on 19/04/2017.
+  * Created by charaj on 17/04/2017.
   */
-package object entity extends DefaultJsonProtocol with SprayJsonSupport with JodaImplicits {
+trait EntityImplicits extends DefaultJsonProtocol with SprayJsonSupport with JodaImplicits {
   implicit val json_Beacon = jsonFormat1(BeaconType)
   implicit val json_AdType = jsonFormat8(AdType)
   implicit val json_AdUnitType:RootJsonFormat[AdUnitType] = jsonFormat17(AdUnitType)
@@ -75,3 +75,4 @@ package object entity extends DefaultJsonProtocol with SprayJsonSupport with Jod
   implicit val json_AdMessage: RootJsonFormat[AdMessage] = jsonFormat4(AdMessage)
   implicit val json_APIMessage: RootJsonFormat[APIMessage] = jsonFormat4(APIMessage)
 }
+*/

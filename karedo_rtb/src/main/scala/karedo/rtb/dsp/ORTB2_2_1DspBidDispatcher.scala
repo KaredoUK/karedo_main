@@ -275,7 +275,7 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
 
     logger.info(s"Bid Reqest (${config.name}) => ${httpBidRequest}")
 
-    singleRequest(httpBidRequest)
+    singleFlowRequest(httpBidRequest)
   }
 
   def buildBidRequest(seqId: Int, user: User, device: Device, iabCatMap: Map[String, UserPrefData], make: DeviceMake): BidRequest = {

@@ -2,11 +2,10 @@ package karedo.routes.termsabout
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import karedo.actors.APIResponse
-import karedo.actors.termsabout.TermsAboutActor
+import karedo.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.routes.KaredoRoute
-import karedo.util.KaredoConstants
-import karedo.util.{KO, OK, Result}
+import karedo.util._
+import org.slf4j.LoggerFactory
 
 
 object get_TermsRoute extends KaredoRoute
@@ -17,7 +16,6 @@ object get_TermsRoute extends KaredoRoute
       path("terms" ) {
         get {
               doCall({
-                import karedo.util.KaredoConstants
                 exec(GET_TERM)
               }
               )
@@ -35,7 +33,6 @@ object get_AboutRoute extends KaredoRoute
       path("about" ) {
         get {
           doCall({
-            import karedo.util.KaredoConstants
             exec(GET_ABOUT)
           }
           )
@@ -53,7 +50,6 @@ object get_PrivacyRoute extends KaredoRoute
       path("privacy" ) {
         get {
           doCall({
-            import karedo.util.KaredoConstants
             exec(GET_PRIVACY)
           }
           )
@@ -76,5 +72,23 @@ object get_BaseRoute extends KaredoRoute with KaredoConstants
         }
       }
     }
+  }
+}
+
+trait TermsAboutActor extends DbCollections
+  with KaredoAuthentication
+  with KaredoJsonHelpers
+  with KaredoConstants {
+  override val logger = LoggerFactory.getLogger(classOf[TermsAboutActor])
+
+  def exec(termsAbout: String): Result[Error, APIResponse] = {
+    val msg: String = termsAbout match {
+      case GET_TERM => terms.html.terms.render().toString
+      case GET_ABOUT  => terms.html.about.render().toString
+      case GET_PRIVACY  => terms.html.privacy.render().toString
+      case _ => "<html><body><h1>INFO</h1></body></html>"
+    }
+
+    OK(APIResponse(msg = msg, code = HTTP_OK_200, mime = MIME_HTML))
   }
 }

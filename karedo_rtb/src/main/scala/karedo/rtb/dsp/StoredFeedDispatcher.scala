@@ -28,7 +28,7 @@ class StoredFeedDispatcher (config: DspBidDispatcherConfig)
       val dbAds = new DbAds {}
 
       val allAds = iabCatMap.map { case (k, v) =>
-        (k, v, dbAds.findAllbyPref(k) match {
+        (k, v, dbAds.findAllbyPref(k, count) match {
           case OK(x) => x
           case KO(_) => List()
         })

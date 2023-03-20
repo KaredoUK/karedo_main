@@ -4,10 +4,6 @@ import karedo.rtb.model.AdModel.AdUnit
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 
-/**
-  * Created by pakkio on 10/9/16.
-  */
-import karedo.util.DateTimeJsonHelper._
 import karedo.entity._
 
 trait KaredoJsonHelpers

@@ -1,6 +1,4 @@
-<<<<<<< HEAD
 launchConfigurations/
-=======
 logs
 tmp
 .history
@@ -22,5 +20,5 @@ dist
 **/.cache-main
 **/log
 **/nohup.out
-
->>>>>>> adc6307da29477f470fe68c64a34a0d17412a2b5
+**/.ivy
+project/.ivy

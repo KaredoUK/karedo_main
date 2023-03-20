@@ -4,6 +4,7 @@ import java.util.concurrent.Executors
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
+import akka.http.scaladsl.coding.{Deflate, Gzip, NoCoding}
 import akka.http.scaladsl.model.HttpMethods.GET
 import akka.http.scaladsl.model.StatusCodes.OK
 import akka.http.scaladsl.model.Uri.Query
@@ -13,20 +14,20 @@ import akka.stream._
 import karedo.rtb.model.AdModel.{AdUnit, DeviceRequest}
 import karedo.entity._
 import karedo.rtb.model.BidRequestCommon._
-import karedo.rtb.util.DeviceMake
+import karedo.rtb.util.{DeviceMake, LoggingSupport, RtbConstants}
 import karedo.util.Util.now
 import com.typesafe.config.Config
 
-import scala.concurrent.Future
-import karedo.rtb.util.LoggingSupport
-
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{Await, ExecutionContext, Future, Promise}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.model.headers.HttpEncodings
+import akka.stream.scaladsl.{Keep, Sink, Source}
 import karedo.rtb.model.DbCollections
 
 import scala.concurrent.duration._
 import scala.collection.immutable.Map
 import scala.util.{Failure, Success}
+//import scala.concurrent.ExecutionContext.Implicits.global
 
 trait HttpDispatcher {
   implicit val actor_system = ActorSystem("rtb")
@@ -43,7 +44,10 @@ trait HttpDispatcher {
   }
 }
 
-abstract class DspBidDispather(config: DspBidDispatcherConfig) extends LoggingSupport with HttpDispatcher with DbCollections  {
+abstract class DspBidDispather(config: DspBidDispatcherConfig)
+  extends LoggingSupport
+    with HttpDispatcher
+    with DbCollections with RtbConstants  {
 
   implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
 
@@ -86,7 +90,7 @@ abstract class DspBidDispather(config: DspBidDispatcherConfig) extends LoggingSu
 
     val dispatcher = getHttpDispatcher
 
-    singleRequest(out_request)
+    singleFlowRequest(out_request)
   }
 
   def deserialize[T](r: HttpResponse)(implicit um: Unmarshaller[ResponseEntity, T]): Future[Option[T]] = {
@@ -102,48 +106,88 @@ abstract class DspBidDispather(config: DspBidDispatcherConfig) extends LoggingSu
     }
   }
 
-  def singleRequest(request: HttpRequest): Future[HttpResponse] = {
-    val out = getHttpDispatcher.singleRequest(request)
+  def singleFlowRequest(request: HttpRequest): Future[HttpResponse] = {
+    val QueueSize = dsp_outbound_queue_size
 
-    out.onComplete {
-      case Success(response) => {
-        println("&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+    val authority = request.uri.authority
+    val req_host = authority.host.address()
+    val req_port = authority.port match { case 0 => 80 case x => x }
 
-        implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
+    logger.info(s"> ***** Host: ${req_host} and port: ${req_port}")
 
-        Future {
-          println("%%%%%%%%%%%%%%%%%%%%%")
+    // This idea came initially from this blog post:
+    // http://kazuhiro.github.io/scala/akka/akka-http/akka-streams/2016/01/31/connection-pooling-with-akka-http-and-source-queue.html
+    val poolClientFlow = Http().cachedHostConnectionPool[Promise[HttpResponse]](host = req_host)
 
+    val queue =
+      Source.queue[(HttpRequest, Promise[HttpResponse])](QueueSize, OverflowStrategy.dropNew)
+        .via(poolClientFlow)
+        .toMat(Sink.foreach({
+          case ((Success(resp), p)) => p.success(resp)
+          case ((Failure(e), p))    => p.failure(e)
+        }))(Keep.left)
+        .run()
 
-          dbRTBMessages.insertNew(
-            RTBMessage(
-              id = s"${now} | ${config.name}",
-              request = RequestMessage(
-                source = Some(config.name),
-                request = Some(request.toString()),
-                entity = Some(request.entity.toString),
-                headers = Some(request.headers.map(e => e.name() -> e.value()).toMap),
-                protocol = Some(request.protocol.value),
-                uri = Some(request.uri.toString()),
-                method = Some(request.method.value)
-              ),
-              response = ResponseMessage(
-                source = Some(config.name),
-                response = Some(response.toString()),
-                entity = Some(response.entity.toString),
-                headers = Some(response.headers.map(e => e.name() -> e.value()).toMap),
-                protocol = Some(response.protocol.value),
-                status = Some(response.status.toString())
-              )
-            )
-          )
-        } onComplete {
-          case Success(s) => logger.debug(s"${config.name} - Database Save Success: ${s}")
-          case Failure(f) => logger.debug(s"${config.name} - Database Save Failure: ${f}")
-        }
+    def queueRequest(request: HttpRequest): Future[HttpResponse] = {
+      val responsePromise = Promise[HttpResponse]()
+      queue.offer(request -> responsePromise).flatMap {
+        case QueueOfferResult.Enqueued    => responsePromise.future
+        case QueueOfferResult.Dropped     => Future.failed(new RuntimeException("Queue overflowed. Try again later."))
+        case QueueOfferResult.Failure(ex) => Future.failed(ex)
+        case QueueOfferResult.QueueClosed => Future.failed(new RuntimeException("Queue was closed (pool shut down) while running the request. Try again later."))
       }
-      case Failure(f) => logger.error(s"${config.name} : Request failed. Received Failure: ${f}")
     }
+
+    queueRequest(request).map(decodeResponse).map(logTransaction(request, _))
+  }
+
+  private def decodeResponse(response: HttpResponse): HttpResponse = {
+    val decoder = response.encoding match {
+      case HttpEncodings.gzip ⇒
+        Gzip
+      case HttpEncodings.deflate ⇒
+        Deflate
+      case HttpEncodings.identity ⇒
+        NoCoding
+    }
+
+    decoder.decode(response)
+  }
+
+  private def logTransaction(request: HttpRequest, response: HttpResponse): HttpResponse = {
+    implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
+
+    dbRTBMessages.insert_f(
+      RTBMessage(
+        id = s"${now} | ${config.name}",
+        request = RequestMessage(
+          source = Some(config.name),
+          request = Some(request.toString()),
+          entity = Some(request.entity.toString),
+          headers = Some(request.headers.map(e => e.name() -> e.value()).toMap),
+          protocol = Some(request.protocol.value),
+          uri = Some(request.uri.toString()),
+          method = Some(request.method.value)
+        ),
+        response = ResponseMessage(
+          source = Some(config.name),
+          response = Some(response.toString()),
+          entity = Some(response.entity.toString),
+          headers = Some(response.headers.map(e => e.name() -> e.value()).toMap),
+          protocol = Some(response.protocol.value),
+          status = Some(response.status.toString())
+        )
+      )
+    )
+
+    response
+  }
+
+  def singleRequest_NOTUSED(request: HttpRequest): Future[HttpResponse] = {
+
+    implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
+
+    val out = getHttpDispatcher.singleRequest(request).map(decodeResponse).map(logTransaction(request, _))
 
     out
   }

@@ -1,16 +1,39 @@
-package karedo.actors.profile
+package karedo.routes.profile
 
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 import karedo.actors.{APIResponse, Error, KaredoAuthentication}
-import karedo.entity.{UserAccount, UserApp, UserProfile}
+import karedo.entity.{UserAccount, UserApp}
+import karedo.routes.KaredoRoute
+import karedo.util.Util.now
 import karedo.util._
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
-import karedo.util.Util.now
 
 /**
-  * Created by charaj on 07/02/2017.
+  * Created by charaj on 17/04/2017.
   */
+object post_ChangePasswordRoute extends KaredoRoute
+  with post_ChangePasswordActor {
+
+  def route = {
+    Route {
+      path("password" ) {
+        post {
+          entity(as[post_ChangePasswordRequest]) {
+            request =>
+              doCall({
+                exec(request)
+              }
+              )
+          }
+        }
+      }
+    }
+  }
+}
+
 trait post_ChangePasswordActor
   extends DbCollections
     with KaredoAuthentication
@@ -57,3 +80,4 @@ trait post_ChangePasswordActor
     )
   }
 }
+

@@ -1,18 +1,74 @@
-package karedo.actors.url
+package karedo.routes.url
 
 import akka.http.scaladsl.model.{RemoteAddress, headers}
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 import karedo.actors.{APIResponse, Error, KaredoAuthentication}
-import karedo.entity.{UrlAccess, UserAccount, UserApp}
+import karedo.entity.UrlAccess
+import karedo.routes.KaredoRoute
 import karedo.util._
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
-/**
-  * Created by pakkio on 10/8/16.
-  */
+object get_UrlMagicShareRoute extends KaredoRoute
+  with UrlMagicActor {
+
+  def route = {
+    Route {
+      path("shr" ) {
+        optionalHeaderValueByName("User-Agent") {
+          ua =>
+            extractClientIP {
+              ip =>
+                get {
+                  parameters('u, 'v) {
+                    (url_code, hash_account) =>
+                      doCall({
+                        exec(url_code, hash_account, true, ua, ip)
+                      }
+                      )
+                  }
+                }
+            }
+        }
+      }
+
+    }
+
+  }
+}
+
+object get_UrlMagicNormalRoute extends KaredoRoute
+  with UrlMagicActor {
+
+  def route = {
+    Route {
+      path("nrm" ) {
+        optionalHeaderValueByName("User-Agent") {
+          ua =>
+            extractClientIP {
+              ip =>
+                get {
+                  parameters('u, 'v) {
+                    (url_code, hash_account) =>
+                      doCall({
+                        exec(url_code, hash_account, false, ua, ip)
+                      }
+                      )
+                  }
+                }
+            }
+        }
+      }
+
+    }
+
+  }
+}
 
 
 trait UrlMagicActor extends DbCollections

@@ -1,20 +1,15 @@
 package karedo.routes
 
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.model.{HttpEntity, _}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.model.headers._
 import karedo.actors.{APIResponse, Error}
-import karedo.entity._
 import karedo.jwt.JWTWithKey
 import karedo.util._
-import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
 import org.slf4j.LoggerFactory
 import spray.json._
 
-import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}

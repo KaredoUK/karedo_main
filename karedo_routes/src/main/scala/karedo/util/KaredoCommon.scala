@@ -138,6 +138,8 @@ trait KaredoConstants extends Configurable {
   val httpConfig = conf.getConfig("web.http")
   val httpsConfig = conf.getConfig("web.https")
 
+  val adsRepeat = conf.getInt("ads.repeat")
+
   val keyStoreName = httpsConfig.getString("keystore.name")
   val keyStoreType = httpsConfig.getString("keystore.type")
   val keyStorePass = httpsConfig.getString("keystore.pass")

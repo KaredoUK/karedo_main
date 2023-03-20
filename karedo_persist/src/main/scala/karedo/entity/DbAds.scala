@@ -105,11 +105,11 @@ trait DbAds extends DbMongoDAO_Casbah[String, AdUnitType] {
     }
   }
 
-  def findAllbyPref(pref: String): Result[String, List[AdUnitType]] = {
+  def findAllbyPref(pref: String, limit: Int = 20): Result[String, List[AdUnitType]] = {
     Try[List[AdUnitType]] {
       val query = MongoDBObject("prefs" -> pref)
 
-      dao.find(query).toList
+      dao.find(query).limit(limit).toList
     } match {
       case Success(x) => OK(x)
       case Failure(error) => KO(error.toString)
