@@ -139,6 +139,7 @@ trait KaredoConstants extends Configurable {
   val httpsConfig = conf.getConfig("web.https")
 
   val adsRepeat = conf.getInt("ads.repeat")
+  val adsImpProb = conf.getDouble("ads.imp.prob")
 
   val adsMarkUrlImp = conf.getBoolean("ads.mask.url.imp")
   val adsMarkUrlClick = conf.getBoolean("ads.mask.url.click")

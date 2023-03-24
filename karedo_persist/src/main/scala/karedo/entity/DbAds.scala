@@ -109,7 +109,11 @@ trait DbAds extends DbMongoDAO_Casbah[String, AdUnitType] {
     Try[List[AdUnitType]] {
       val query = MongoDBObject("prefs" -> pref)
 
-      dao.find(query).limit(limit).toList
+      dao.find(query)
+//        .aggregate(MongoDBObject("$sample" -> limit))
+        .limit(limit).toList
+
+//      dao.collection.aggregate(MongoDBObject("$sample" -> limit)).results.toList.asInstanceOf[List[AdUnitType]]
     } match {
       case Success(x) => OK(x)
       case Failure(error) => KO(error.toString)

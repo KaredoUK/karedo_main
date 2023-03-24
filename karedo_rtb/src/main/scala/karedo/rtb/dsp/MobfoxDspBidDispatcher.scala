@@ -128,7 +128,7 @@ class MobfoxDspBidDispatcher(config: DspBidDispatcherConfig)
               , impid = main_id
               , ad = Ad
               (
-                imp_url = main.getOrElse(icon.getOrElse(Img("", banner_w, banner_h))).url,
+                imp_url = Some(main.getOrElse(icon.getOrElse(Img("", banner_w, banner_h))).url),
                 click_url = native.link.url,
                 ad_text = title.getOrElse(Title("")).text,
                 ad_source = Some("mobfox"),

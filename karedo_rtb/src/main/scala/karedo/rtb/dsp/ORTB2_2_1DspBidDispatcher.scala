@@ -156,7 +156,7 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
       }
 
       Ad(
-        imp_url = urlPair._1
+        imp_url = Some(urlPair._1)
         , click_url = urlPair._2
         , ad_text = ""
         , ad_source = bid.adomain match {case Some(add) => Some(add.head) case None => None}
@@ -171,7 +171,7 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
         val u = ("http://karedo.co.uk/ads/c1.jpg",
           "https://www.washingtonpost.com/news/answer-sheet/wp/2015/03/26/no-finlands-schools-arent-giving-up-traditional-subjects-heres-what-the-reforms-will-really-do/",
           "No, Finland isn’t ditching traditional school subjects. Here’s what’s really happening.", Some("Washington Post"))
-        Ad( u._1, u._2, u._3, u._4, None, Some(250), Some(300), None)
+        Ad( Some(u._1), u._2, u._3, u._4, None, Some(250), Some(300), None)
       }
     }
   }

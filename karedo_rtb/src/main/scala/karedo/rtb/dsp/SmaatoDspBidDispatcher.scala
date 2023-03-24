@@ -133,7 +133,7 @@ class SmaatoDspBidDispatcher (config: DspBidDispatcherConfig)
       case Some(_ad) => {
         Some(
           Ad(
-            imp_url = _ad.source.get,
+            imp_url = Some(_ad.source.get),
             click_url = _ad.target.get,
             ad_text = a.adtext.getOrElse(""),
             ad_source = if(a.brand.isDefined) Some(a.brand.get.name) else None ,

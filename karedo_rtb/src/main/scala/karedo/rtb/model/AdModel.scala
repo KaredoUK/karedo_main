@@ -43,11 +43,12 @@ object AdModel extends DefaultJsonProtocol {
   val ad_type_IMAGE = "IMAGE"
   val ad_type_VIDEO = "VIDEO"
   val ad_type_NATIVE = "NATIVE"
+  val ad_type_TEXT = "TEXT"
 
   case class Beacon(beacon: String)
 
   case class Ad(
-                 imp_url: String,
+                 imp_url: Option[String],
                  click_url: String,
                  ad_text: String,
                  ad_source: Option[String],

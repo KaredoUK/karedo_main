@@ -126,20 +126,22 @@ trait get_AdsActor
             case KO(h) => h
           }
 
-          def getMagicUrl(url: String, execute: Boolean): String = {
-            if(execute) storeUrlMagic(url, None) match {
-              case OK(url_code) => s"${url_magic_share_base}/nrm?u=${url_code}&v=${account_hash}"
+          def getMagicUrl(url: Option[String], execute: Boolean): Option[String] = {
+            if(execute && url.isDefined) storeUrlMagic(url.get, None) match {
+              case OK(url_code) => Some(s"${url_magic_share_base}/nrm?u=${url_code}&v=${account_hash}")
               case KO(_) => url
             } else url
           }
 
           val adsBack = adsReceived.map {
             adUnit =>
+              val impify = (Math.random() <= adsImpProb)
               adUnit.copy(
-              ad = adUnit.ad.copy (
-                imp_url = getMagicUrl(adUnit.ad.imp_url, adsMarkUrlImp),
-                click_url = getMagicUrl(adUnit.ad.click_url, adsMarkUrlClick)
-              )
+                ad_type = if (impify) ad_type_TEXT else adUnit.ad_type,
+                ad = adUnit.ad.copy (
+                  imp_url = if (impify) getMagicUrl(adUnit.ad.imp_url, adsMarkUrlImp) else Some(""),
+                  click_url = getMagicUrl(Some(adUnit.ad.click_url), adsMarkUrlClick).get
+                )
             )
           }
 

@@ -22,7 +22,7 @@ object AdMechanic extends HttpDispatcher {
           ad_id = adu.id,
           impid = adu.impid,
           ad = Ad(
-            imp_url = adu.ad.imp_url,
+            imp_url = Some(adu.ad.imp_url),
             click_url = adu.ad.click_url,
             ad_text = adu.ad.ad_text,
             ad_source = adu.ad.ad_source,

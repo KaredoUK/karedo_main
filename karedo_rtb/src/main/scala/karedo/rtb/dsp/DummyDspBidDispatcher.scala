@@ -32,7 +32,7 @@ class DummyDspBidDispatcher(config: DspBidDispatcherConfig)
           ad_type_IMAGE,
           java.util.UUID.randomUUID.toString,
           java.util.UUID.randomUUID.toString,
-          Ad( u._1, u._2, u._3, u._4, None, Some(250), Some(300), None),
+          Ad( Some(u._1), u._2, u._3, u._4, None, Some(250), Some(300), None),
           0.25,
           Some(List("karedo.co.uk")),
           None,
