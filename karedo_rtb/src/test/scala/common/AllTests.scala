@@ -1,7 +1,7 @@
 package common
 
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import karedo.entity.dao.{DbDAOParams, MongoConnection_Casbah}
+import karedo.persist.entity.dao.{DbDAOParams, MongoConnection_Casbah}
 import karedo.rtb.model.DbCollections
 import karedo.rtb.util.RtbConstants
 import org.scalatest.{Matchers, WordSpec}

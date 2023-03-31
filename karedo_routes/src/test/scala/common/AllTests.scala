@@ -1,10 +1,10 @@
 package common
 
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
-import karedo.entity.{UserAccount, UserApp, UserKaredos}
-import karedo.entity.dao._
-import karedo.routes.Routes
-import karedo.util._
+import karedo.persist.entity.{UserAccount, UserApp, UserKaredos}
+import karedo.persist.entity.dao._
+import karedo.route.routes.Routes
+import karedo.route.util._
 import org.scalatest.{Matchers, WordSpec}
 import org.slf4j.LoggerFactory
 

@@ -60,9 +60,8 @@ lazy val libs_test = Seq (
   "org.scalatest" %% "scalatest" % "3.0.0" % "test"
 )
 
-lazy val akkaV = "2.5.0"
-lazy val akkaHttpV = "10.0.5"
-
+lazy val akkaV = "2.5.1"
+lazy val akkaHttpV = "10.0.6"
 lazy val libs_akka = Seq (
   "com.typesafe.akka" %% "akka-http-core" % akkaHttpV,
   "com.typesafe.akka" %% "akka-http" % akkaHttpV,
@@ -70,13 +69,16 @@ lazy val libs_akka = Seq (
   "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpV,
   "com.typesafe.akka" %% "akka-http-jackson" % akkaHttpV,
   "com.typesafe.akka" %% "akka-http-xml" % akkaHttpV,
+  "com.typesafe.akka" %% "akka-parsing" % akkaHttpV,
 
   "com.typesafe.akka" %% "akka-agent" % akkaV,
   "com.typesafe.akka" %% "akka-actor" % akkaV,
   "com.typesafe.akka" %% "akka-slf4j" % akkaV,
   "com.typesafe.akka" %% "akka-stream" % akkaV,
   "com.typesafe.akka" %% "akka-stream-testkit" % akkaV % "test",
-  "com.typesafe.akka" %% "akka-testkit" % akkaV % "test"
+  "com.typesafe.akka" %% "akka-testkit" % akkaV % "test",
+  "com.typesafe.akka" %% "akka-typed" % akkaV,
+  "com.typesafe.akka" %% "akka-contrib" % akkaV
 )
 
 lazy val libs_config = Seq (
@@ -94,22 +96,31 @@ lazy val libs_scalaXml = Seq(
 )
 
 lazy val dispatchV = "0.11.3"
-
 lazy val libs_dispatch = Seq("net.databinder.dispatch" %% "dispatch-core" % dispatchV)
 
 lazy val salatV = "1.11.0"
-
 lazy val libs_salat = Seq(
   "com.github.salat" %% "salat" % "1.11.0"
 )
 
 lazy val zxingV = "3.3.0"
-
 lazy val libs_zxing = Seq(
   "com.google.zxing" % "core" % zxingV,
   "com.google.zxing" % "javase" % zxingV,
   "com.github.kenglxn.qrgen" % "javase" % "2.2.0"
 )
+
+lazy val scalaxV = "0.4.3"
+lazy val libs_scalax = Seq (
+  "com.github.scala-incubator.io" %% "scala-io-core" % scalaxV,
+  "com.github.scala-incubator.io" %% "scala-io-file" % scalaxV
+)
+
+lazy val jodaV = "2.9.9"
+lazy val libs_joda = Seq (
+  "joda-time" % "joda-time" % jodaV
+)
+
 
 // Project Definitions
 // ########### Routes #############
@@ -130,6 +141,7 @@ lazy val karedo_routes = (project in file("karedo_routes"))
       "io.igl" %% "jwt" % "1.2.0"
     )
   )
+  .dependsOn(karedo_common)
   .dependsOn(karedo_rtb)
 
 
@@ -154,6 +166,7 @@ lazy val karedo_rtb = (project in file("karedo_rtb"))
           "com.google.guava" % "guava" % "21.0"
         )
   )
+  .dependsOn(karedo_common)
   .dependsOn(karedo_persist)
 
 // ########### Persist #############
@@ -169,7 +182,8 @@ lazy val karedo_persist = (project in file("karedo_persist"))
         libs_logging ++
         libs_config
   )
-//  .dependsOn(salat)
+  .dependsOn(karedo_common)
+  .dependsOn(karedo_graph)
 
 
 // ########### Salat #############
@@ -184,6 +198,27 @@ lazy val karedo_common = (project in file("karedo_common"))
   .settings(commonSettings: _*)
   .settings(releaseSettings: _*)
   .settings(name := "common")
+  .settings(
+    libraryDependencies ++=
+      libs_logging ++
+      libs_scalax ++
+      libs_test ++
+      libs_akka ++
+      libs_joda
+  )
+
+// ########### Graph #############
+lazy val karedo_graph = (project in file("karedo_graph"))
+  .settings(commonSettings: _*)
+  .settings(releaseSettings: _*)
+  .settings(name := "graph")
+
+
+// ########### Config #############
+lazy val karedo_config = (project in file("karedo_config"))
+  .settings(commonSettings: _*)
+  .settings(releaseSettings: _*)
+  .settings(name := "config")
 
 
 // ########### Root #############

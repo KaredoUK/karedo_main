@@ -1,6 +1,6 @@
 package utils
 
-import karedo.util.{KO, OK, Result}
+import karedo.route.util.{KO, OK, Result}
 import org.specs2.mutable._
 
 /**

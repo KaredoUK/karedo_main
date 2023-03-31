@@ -2,9 +2,9 @@ package test.specs4_login
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import common.AllTests
-import karedo.entity._
-import karedo.util._
-import karedo.util.Util.now
+import karedo.persist.entity._
+import karedo.route.util._
+import karedo.common.misc.Util.now
 import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach, Ignore}
 import org.scalatest.junit.JUnitRunner

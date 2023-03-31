@@ -2,10 +2,10 @@ package test.specs2a1_ads
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import common.AllTests
-import karedo.entity.UserAccount
-import karedo.entity.UserAd
-import karedo.util.Util
-import karedo.entity.UserApp
+import karedo.common.misc.Util
+import karedo.persist.entity.UserAccount
+import karedo.persist.entity.UserAd
+import karedo.persist.entity.UserApp
 import org.junit.runner.RunWith
 import org.scalatest.Ignore
 import org.scalatest.junit.JUnitRunner

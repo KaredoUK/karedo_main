@@ -2,8 +2,8 @@ package test.specs6_intent
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import common.AllTests
-import karedo.entity.{UserAccount, UserApp, UserIntent}
-import karedo.util.Util
+import karedo.common.misc.Util
+import karedo.persist.entity.{UserAccount, UserApp, UserIntent}
 import org.junit.runner.RunWith
 import org.scalatest.Ignore
 import org.scalatest.junit.JUnitRunner

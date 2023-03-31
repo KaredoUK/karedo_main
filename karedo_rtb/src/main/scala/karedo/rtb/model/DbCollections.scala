@@ -1,6 +1,6 @@
 package karedo.rtb.model
 
-import karedo.entity.{DbPrefs, DbRTBMessages, DbUserAccount, DbUserPrefs, DbUserProfile}
+import karedo.persist.entity.{DbPrefs, DbRTBMessages, DbUserAccount, DbUserPrefs, DbUserProfile}
 
 /**
   * Created by crajah on 15/10/2016.

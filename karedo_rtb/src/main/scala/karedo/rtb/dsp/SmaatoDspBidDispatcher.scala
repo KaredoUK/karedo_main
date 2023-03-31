@@ -10,7 +10,7 @@ import akka.http.scaladsl.model._
 
 import akka.http.scaladsl.unmarshalling.{Unmarshal, Unmarshaller}
 import akka.stream.scaladsl.{Sink, Source}
-import karedo.entity.UserPrefData
+import karedo.persist.entity.UserPrefData
 import karedo.rtb.model.AdModel._
 import karedo.rtb.model.BidJsonImplicits
 import karedo.rtb.model.BidRequestCommon.{Device, User}
@@ -18,7 +18,7 @@ import karedo.rtb.model.BidRequestModel_2_2_1.BidRequest
 import karedo.rtb.model.BidResponseModelCommon.BidResponse
 import karedo.rtb.util._
 import karedo.rtb.util.DeviceMakes
-import karedo.util.Util.now
+import karedo.common.misc.Util.now
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.collection.immutable.Map

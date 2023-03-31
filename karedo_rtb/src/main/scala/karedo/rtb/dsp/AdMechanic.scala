@@ -5,7 +5,7 @@ import akka.http.scaladsl.model.Uri.{Path, Query}
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{HttpRequest, Uri, headers}
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import karedo.entity.AdUnitType
+import karedo.persist.entity.AdUnitType
 import karedo.rtb.model.AdModel.{Ad, AdUnit}
 
 import scala.concurrent.Await

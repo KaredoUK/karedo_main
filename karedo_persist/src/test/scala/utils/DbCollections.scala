@@ -1,6 +1,6 @@
 package utils
 
-import karedo.entity._
+import karedo.persist.entity._
 
 /**
   * Created by crajah on 11/10/2016.

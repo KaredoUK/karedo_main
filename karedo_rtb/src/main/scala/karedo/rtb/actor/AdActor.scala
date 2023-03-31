@@ -6,13 +6,13 @@ import java.io.File
 import java.util.concurrent.Executors
 
 import akka.actor.Actor
-import karedo.entity.UserPrefData
+import karedo.persist.entity.UserPrefData
 import karedo.rtb.dsp._
 import karedo.rtb.model._
 import karedo.rtb.model.AdModel._
-import karedo.util.{KO, OK, Result}
+import karedo.route.util.{KO, OK, Result}
 import karedo.rtb.model.DbCollections
-import karedo.util.Configurable
+import karedo.route.util.Configurable
 
 import scala.util.{Failure, Success, Try}
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -36,7 +36,7 @@ class AdActor
 
   preStart
 
-  def preStart = {
+  def preStart() = {
     val dspDispatcherConfigs = conf.getConfigList("dsp.dispatchers").asScala.map(c => {
       DspBidDispatcherConfig(
         name = c.getString("name"),

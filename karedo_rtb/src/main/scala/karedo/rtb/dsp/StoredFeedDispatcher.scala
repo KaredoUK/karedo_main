@@ -1,11 +1,11 @@
 package karedo.rtb.dsp
 
-import karedo.entity.{DbAds, UserPrefData}
+import karedo.persist.entity.{DbAds, UserPrefData}
 import karedo.rtb.model.AdModel.{AdUnit, DeviceRequest}
 import karedo.rtb.model.BidJsonImplicits
 import karedo.rtb.model.BidRequestCommon.{Device, User}
 import karedo.rtb.util.{DeviceMake, LoggingSupport}
-import karedo.util.{KO, OK}
+import karedo.route.util.{KO, OK}
 import org.slf4j.LoggerFactory
 
 

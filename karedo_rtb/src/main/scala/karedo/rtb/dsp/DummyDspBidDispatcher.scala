@@ -2,7 +2,7 @@ package karedo.rtb.dsp
 
 import java.util.concurrent.Executors
 
-import karedo.entity.UserPrefData
+import karedo.persist.entity.UserPrefData
 import karedo.rtb.model.AdModel.{Ad, _}
 import karedo.rtb.model.BidJsonImplicits
 

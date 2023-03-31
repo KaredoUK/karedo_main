@@ -1,7 +1,7 @@
 package karedo.rtb.util
 
 import akka.http.scaladsl.model.{HttpHeader, headers}
-import karedo.util.Configurable
+import karedo.route.util.Configurable
 
 import scala.concurrent.duration._
 import scala.collection.immutable._

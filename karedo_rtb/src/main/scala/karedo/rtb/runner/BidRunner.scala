@@ -3,11 +3,11 @@ package karedo.rtb.runner
 import akka.actor.{ActorSystem, Props}
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import karedo.entity.KaredoChange
+import karedo.persist.entity.KaredoChange
 import karedo.rtb.actor.AdActor
 import karedo.rtb.model.AdModel._
-import karedo.util.{KO, OK, Result}
-import karedo.util.Util.newUUID
+import karedo.route.util.{KO, OK, Result}
+import karedo.common.misc.Util.newUUID
 import karedo.rtb.util.{DeviceMakes, RtbConstants}
 import akka.pattern.ask
 import akka.util.Timeout

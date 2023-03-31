@@ -11,11 +11,11 @@ import StatusCodes._
 import unmarshalling.{Unmarshal, Unmarshaller}
 
 import akka.stream.scaladsl.{Sink, Source}
-import karedo.entity.UserPrefData
+import karedo.persist.entity.UserPrefData
 import karedo.rtb.model.AdModel._
 import karedo.rtb.model.BidRequestCommon.{Device, User}
 import karedo.rtb.util.{DeviceMakes, _}
-import karedo.util.Util.now
+import karedo.common.misc.Util.now
 import spray.json._
 
 import scala.concurrent.{Await, ExecutionContext, Future}

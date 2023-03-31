@@ -12,10 +12,10 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.{Unmarshal, Unmarshaller}
 import akka.stream._
 import karedo.rtb.model.AdModel.{AdUnit, DeviceRequest}
-import karedo.entity._
+import karedo.persist.entity._
 import karedo.rtb.model.BidRequestCommon._
 import karedo.rtb.util.{DeviceMake, LoggingSupport, RtbConstants}
-import karedo.util.Util.now
+import karedo.common.misc.Util.now
 import com.typesafe.config.Config
 
 import scala.concurrent.{Await, ExecutionContext, Future, Promise}
@@ -151,7 +151,7 @@ abstract class DspBidDispather(config: DspBidDispatcherConfig)
         NoCoding
     }
 
-    decoder.decode(response)
+    decoder.decodeMessage(response)
   }
 
   private def logTransaction(request: HttpRequest, response: HttpResponse): HttpResponse = {

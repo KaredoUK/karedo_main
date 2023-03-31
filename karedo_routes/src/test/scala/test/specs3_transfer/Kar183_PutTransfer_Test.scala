@@ -2,9 +2,9 @@ package test.specs3_transfer
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import common.AllTests
-import karedo.entity._
+import karedo.persist.entity._
 import org.scalatest.junit.JUnitRunner
-import karedo.util.Util.now
+import karedo.common.misc.Util.now
 import org.junit.runner.RunWith
 import org.scalatest.Ignore
 

@@ -2,8 +2,8 @@ package test.specs3b6d_sale
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import common.AllTests
-import karedo.entity._
-import karedo.util.Util.now
+import karedo.persist.entity._
+import karedo.common.misc.Util.now
 import org.junit.runner.RunWith
 import org.scalatest.Ignore
 import org.scalatest.junit.JUnitRunner

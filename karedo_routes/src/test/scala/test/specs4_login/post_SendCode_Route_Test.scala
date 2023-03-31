@@ -2,7 +2,7 @@ package test.specs4_login
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import common.AllTests
-import karedo.entity.{UserAccount, UserApp}
+import karedo.persist.entity.{UserAccount, UserApp}
 import org.junit.runner.RunWith
 import org.scalatest.Ignore
 import org.scalatest.junit.JUnitRunner

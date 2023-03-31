@@ -1,14 +1,14 @@
 package toplevel
 
 import common.AllTests
-import karedo.entity._
+import karedo.persist.entity._
 import karedo.rtb.model.AdModel.{AdRequest, DeviceRequest}
-import karedo.util.Util._
+import karedo.common.misc.Util._
 import org.junit.runner.RunWith
 import org.scalatest.WordSpec
 import org.scalatest.junit.{JUnit3Suite, JUnitRunner}
 import karedo.rtb.actor._
-import karedo.util.KO
+import karedo.route.util.KO
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
 import scala.collection.immutable.ListMap
 

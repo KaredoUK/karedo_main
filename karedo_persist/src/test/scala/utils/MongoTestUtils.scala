@@ -2,8 +2,8 @@ package utils
 
 import java.util.UUID
 
-import karedo.entity.dao._
-import karedo.util.{Configurable, KO, OK}
+import karedo.persist.entity.dao._
+import karedo.route.util.{Configurable, KO, OK}
 import org.specs2.matcher.Matcher
 import org.specs2.mutable.Specification
 

@@ -1,6 +1,6 @@
 package karedo.rtb.dsp
 
-import karedo.entity.{AdType, AdUnitType, Feed, UserPrefData}
+import karedo.persist.entity.{AdType, AdUnitType, Feed, UserPrefData}
 import karedo.rtb.model.AdModel._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -34,6 +34,8 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.stream.ActorMaterializer
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 import com.google.common.net.InternetDomainName
+import karedo.common.misc
+import karedo.common.misc.Util
 import org.joda.time.DateTime
 import org.joda.time.format.{DateTimeFormat, ISODateTimeFormat}
 import org.slf4j.LoggerFactory
@@ -406,7 +408,7 @@ class AtomReader extends Reader {
       dateFormatter.parseDateTime(date)
     } catch {
       case e: Exception => logger.error("Date Parsing Failed", e)
-        karedo.util.Util.now
+        Util.now
     }
   }
 
@@ -465,7 +467,7 @@ class XmlReader extends Reader {
       }
     } catch {
       case e: Exception => logger.error("Date Parsing Failed", e)
-        karedo.util.Util.now
+        misc.Util.now
     }
   }
 

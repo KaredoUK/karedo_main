@@ -1,14 +1,14 @@
 package karedo.rtb.dsp
 
-import karedo.entity.UserPrefData
+import karedo.persist.entity.UserPrefData
 import karedo.rtb.model.AdModel._
 import karedo.rtb.model.BidRequestCommon._
 import karedo.rtb.model.BidResponseModelCommon._
 import karedo.rtb.model.BidRequestModel_2_2_1._
 import karedo.rtb.model.BidJsonImplicits
 import karedo.rtb.util._
-import karedo.util.Util.newUUID
-import karedo.util.Util.now
+import karedo.common.misc.Util.newUUID
+import karedo.common.misc.Util.now
 import akka.http.scaladsl._
 import model._
 import Uri._

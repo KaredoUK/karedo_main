@@ -1,8 +1,8 @@
 package test.specs2a1_ads
 
 import common.AllTests
-import karedo.entity.{UserAccount, UserApp, UserKaredos, UserMessages}
-import karedo.util.Util
+import karedo.common.misc.Util
+import karedo.persist.entity.{UserAccount, UserApp, UserKaredos, UserMessages}
 import org.junit.runner.RunWith
 import org.scalatest.Ignore
 import org.scalatest.junit.JUnitRunner
