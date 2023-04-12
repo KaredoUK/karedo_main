@@ -24,11 +24,11 @@ lazy val commonSettings = Seq(
     "-encoding", "UTF-8",
     "-Yrangepos"
   ),
-//  initialize := {
-//    val _ = initialize.value
-//    if (sys.props("java.specification.version") != "1.8")
-//      sys.error("Java 8 is required for this project.")
-//  },
+  //  initialize := {
+  //    val _ = initialize.value
+  //    if (sys.props("java.specification.version") != "1.8")
+  //      sys.error("Java 8 is required for this project.")
+  //  },
   resolvers ++= Seq(
     "typesafe" at "http://repo.typesafe.com/typesafe/releases/",
     Resolver.mavenLocal,
@@ -43,7 +43,7 @@ lazy val releaseSettings = Seq(
   releaseVersionBump := Next,
   releaseTagName := s"${(version in ThisBuild).value}",
   releaseNextVersion := { ver => Version(ver).map(_.bump.string).getOrElse(versionFormatError) },
-    releaseProcess := Seq[ReleaseStep](
+  releaseProcess := Seq[ReleaseStep](
     inquireVersions,
     tagRelease,
     setNextVersion,
@@ -53,7 +53,7 @@ lazy val releaseSettings = Seq(
 )
 
 // Library Definitions
-lazy val libs_test = Seq (
+lazy val libs_test = Seq(
   "org.specs2" %% "specs2-core" % "3.8.5" % "test",
   "org.specs2" %% "specs2-junit" % "3.8.5.1" % "test",
   "junit" % "junit" % "4.8.1" % "test",
@@ -62,7 +62,7 @@ lazy val libs_test = Seq (
 
 lazy val akkaV = "2.5.1"
 lazy val akkaHttpV = "10.0.6"
-lazy val libs_akka = Seq (
+lazy val libs_akka = Seq(
   "com.typesafe.akka" %% "akka-http-core" % akkaHttpV,
   "com.typesafe.akka" %% "akka-http" % akkaHttpV,
   "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpV % "test",
@@ -81,11 +81,11 @@ lazy val libs_akka = Seq (
   "com.typesafe.akka" %% "akka-contrib" % akkaV
 )
 
-lazy val libs_config = Seq (
+lazy val libs_config = Seq(
   "com.typesafe" % "config" % "1.3.1"
 )
 
-lazy val libs_logging = Seq (
+lazy val libs_logging = Seq(
   "com.typesafe.scala-logging" % "scala-logging-slf4j_2.11" % "2.1.2",
   "ch.qos.logback" % "logback-classic" % "1.1.10"
 )
@@ -111,14 +111,18 @@ lazy val libs_zxing = Seq(
 )
 
 lazy val scalaxV = "0.4.3"
-lazy val libs_scalax = Seq (
+lazy val libs_scalax = Seq(
   "com.github.scala-incubator.io" %% "scala-io-core" % scalaxV,
   "com.github.scala-incubator.io" %% "scala-io-file" % scalaxV
 )
 
 lazy val jodaV = "2.9.9"
-lazy val libs_joda = Seq (
+lazy val libs_joda = Seq(
   "joda-time" % "joda-time" % jodaV
+)
+
+lazy val libs_nimbusds = Seq(
+  "com.nimbusds" % "nimbus-jose-jwt" % "4.37.1"
 )
 
 
@@ -131,15 +135,15 @@ lazy val karedo_routes = (project in file("karedo_routes"))
   .settings(SbtTwirl.projectSettings)
   .settings(
     libraryDependencies ++=
-    libs_test ++
-    libs_akka ++
-    libs_logging ++
-    libs_config ++
-    libs_zxing ++
-    Seq(
-      "org.clapper" %% "classutil" % "1.0.11",
-      "io.igl" %% "jwt" % "1.2.0"
-    )
+      libs_test ++
+        libs_akka ++
+        libs_logging ++
+        libs_config ++
+        libs_zxing ++
+        Seq(
+          "org.clapper" %% "classutil" % "1.0.11",
+          "io.igl" %% "jwt" % "1.2.0"
+        )
   )
   .dependsOn(karedo_common)
   .dependsOn(karedo_rtb)
@@ -152,8 +156,8 @@ lazy val karedo_rtb = (project in file("karedo_rtb"))
   .settings(name := "rtb")
   .enablePlugins(ScalaxbPlugin)
   .settings(
-    scalaxbDispatchVersion in (Compile, scalaxb) := dispatchV,
-    scalaxbPackageName in (Compile, scalaxb) := "generated",
+    scalaxbDispatchVersion in(Compile, scalaxb) := dispatchV,
+    scalaxbPackageName in(Compile, scalaxb) := "generated",
     libraryDependencies ++=
       libs_dispatch ++
         libs_scalaXml ++
@@ -201,10 +205,11 @@ lazy val karedo_common = (project in file("karedo_common"))
   .settings(
     libraryDependencies ++=
       libs_logging ++
-      libs_scalax ++
-      libs_test ++
-      libs_akka ++
-      libs_joda
+        libs_scalax ++
+        libs_test ++
+        libs_akka ++
+        libs_joda ++
+        libs_nimbusds
   )
 
 // ########### Graph #############
@@ -223,7 +228,7 @@ lazy val karedo_config = (project in file("karedo_config"))
 
 // ########### Root #############
 lazy val root = (project in file("."))
-//  .dependsOn(salat, karedo_persist, karedo_rtb, karedo_routes)
+  //  .dependsOn(salat, karedo_persist, karedo_rtb, karedo_routes)
   .aggregate(salat, karedo_persist, karedo_rtb, karedo_routes)
   .settings(commonSettings: _*)
   .settings(releaseSettings: _*)
@@ -234,5 +239,5 @@ lazy val root = (project in file("."))
 
 //coverageEnabled := false
 //test in assembly := {}
-mainClass in (Compile,run) := Some("karedo.Main")
+mainClass in(Compile, run) := Some("karedo.Main")
 

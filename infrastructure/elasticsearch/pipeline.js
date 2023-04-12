@@ -9,13 +9,13 @@ var source = mongodb({
   // "bulk": false,
   // "collection_filters": "{}"
   "namespace": "Karedo.KAR_APIMessage"
-})
+});
 
 var sink = elasticsearch({
   "uri": "https://admin:NYVTVIDHWCRRCUAX@sl-eu-lon-2-portal3.dblayer.com:16981/"
   // "timeout": "10s", // defaults to 30s
   // "aws_access_key": "ABCDEF", // used for signing requests to AWS Elasticsearch service
   // "aws_access_secret": "ABCDEF" // used for signing requests to AWS Elasticsearch service
-})
+});
 
-t.Source(source).Save(sink)
+t.Source(source).Save(sink);
