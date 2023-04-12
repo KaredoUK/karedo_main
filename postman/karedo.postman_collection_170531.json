@@ -1,0 +1,933 @@
+{
+	"variables": [],
+	"info": {
+		"name": "karedo",
+		"_postman_id": "387989e8-aea2-cb38-56de-b21ab4af77a7",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Ad Launch Sequence",
+			"description": "",
+			"item": [
+				{
+					"name": "4a1 Ad Launch GET /account/{{account_id}}/ads",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/ads?p={{application_id}}&s={{session_id}}&c={{ad_count}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"application_id\": \"{{application_id}}\",       \n    \"msisdn\":\"{{msisdn}}\"                 \n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "4a1 Ad Launch GET /account/{{account_id}}/points",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/points?p={{application_id}}&s={{session_id}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"application_id\": \"{{application_id}}\",       \n    \"msisdn\":\"{{msisdn}}\"                 \n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "4a1 Ad Launch GET /account/{{account_id}}/messages",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/messages?p={{application_id}}&s={{session_id}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"application_id\": \"{{application_id}}\",       \n    \"msisdn\":\"{{msisdn}}\"                 \n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "4a1 Ad Launch POST /account/{{account_id}}/ad/interaction",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/ad/interaction",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"application_id\": \"{{application_id}}\",\n\t\"session_id\": \"{{session_id}}\",\n\t\"entries\" : [\n\t\t{\n\t\t    \"action_type\": \"VIEW\",\n\t\t  \t\"ad_type\": \"IMAGE\",\n\t\t  \t\"ad_id\": \"{{ad_id}}\",\n\t\t  \t\"ad_text\": \"{{ad_text}}\",\n\t\t  \t\"imp_url\": \"{{imp_url}}\",\n\t\t  \t\"click_url\": \"{{click_url}}\",\n\t\t  \t\"ad_domain\": \"{{ad_domain}}\",\n\t\t  \t\"cid\": \"{{cid}}\",\n\t\t  \t\"crid\": \"{{crid}}\",\n \t\t\t\"channels\": [\n\t\t\t\t{\n\t\t\t\t\t\"channel\":\"FACEBOOK\",\t\t\t\t\t\n\t\t\t\t\t\"channel_id\": \"{{email}}\"\t\t\t\n\t\t\t\t}\n\t\t\t]\n\t\t}\n\t]\t\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "4a1 Ad Launch POST /account/{{account_id}}/ad/favourite",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/ad/favourite",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"application_id\": \"{{application_id}}\",\n\t\"session_id\": \"{{session_id}}\",\n\t\"favourites\" : [\n\t\t{\n\t\t  \t\"ad_id\": \"{{ad_id}}\",\n\t\t  \t\"ad_domain\": \"{{ad_domain}}\",\n\t\t  \t\"cid\": \"{{cid}}\",\n\t\t  \t\"crid\": \"{{crid}}\",\n\t\t  \t\"favourite\": false\n\t\t}\n\t]\t\n}\n"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "4a1 Ad Launch POST /account/{{account_id}}/ad/share_data",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/ad/share_data",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"application_id\": \"{{application_id}}\",\n\t\"session_id\": \"{{session_id}}\",\n\t\"share\" : \n\t\t{\n\t\t    \"action_type\": \"VIEW\",\n\t\t  \t\"ad_type\": \"IMAGE\",\n\t\t  \t\"ad_id\": \"{{ad_id}}\",\n\t\t  \t\"ad_text\": \"{{ad_text}}\",\n\t\t  \t\"imp_url\": \"http://www.bbc.co.uk\",\n\t\t  \t\"click_url\": \"{{click_url}}\",\n\t\t  \t\"ad_domain\": \"{{ad_domain}}\",\n\t\t  \t\"cid\": \"{{cid}}\",\n\t\t  \t\"crid\": \"{{crid}}\",\n \t\t\t\"channels\": [\n\t\t\t\t{\n\t\t\t\t\t\"channel\":\"TWITTER\",\t\t\t\t\t\n\t\t\t\t\t\"channel_id\": \"{{email}}\"\t\t\t\n\t\t\t\t},\n\t\t\t\t\t\t\t\t{\n\t\t\t\t\t\"channel\":\"EMAIL\",\t\t\t\t\t\n\t\t\t\t\t\"channel_id\": \"{{email}}\"\t\t\t\n\t\t\t\t}\n\n\t\t\t]\n\t\t}\n\t\t\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "4a1 Ad Launch GET /account/{{account_id}}/ad/favourite",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/ad/favourite?p={{application_id}}&s={{session_id}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"application_id\": \"{{application_id}}\",\n\t\"session_id\": \"{{session_id}}\",\n\t\"favourites\" : [\n\t\t{\n\t\t  \t\"ad_id\": \"{{ad_id}}\",\n\t\t  \t\"ad_domain\": \"{{ad_domain}}\",\n\t\t  \t\"cid\": \"{{cid}}\",\n\t\t  \t\"crid\": \"{{crid}}\"\n\t\t}\n\t]\t\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "4a1 Ad Launch GET /account/0/ads",
+					"request": {
+						"url": "{{base_url}}/account/0/ads?p={{application_id}}&s={{session_id}}&c={{ad_count}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"application_id\": \"{{application_id}}\",       \n    \"msisdn\":\"{{msisdn}}\"                 \n}"
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Inform",
+			"description": "",
+			"item": [
+				{
+					"name": "6g. Feedback POST /inform",
+					"request": {
+						"url": "{{base_url}}/inform",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n    \"application_id\": \"{{application_id}}\",   \n    \"account_id\": \"{{account_id}}\",       \n    \"inform_type\": \"SUGGEST\",\n    \"subject\": \"Test Subject {{$guid}}\",\n    \"detail\": \"Test Detail {{$guid}}\"\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Intent",
+			"description": "",
+			"item": [
+				{
+					"name": "6c. Intent GET /account/{{account_id}}/intent/0",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/intent/0?p={{application_id}}&s={{session_id}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n    \"application_id\": \"{{application_id}}\",   \n    \"session_id\": \"{{session_id}}\",       \n    \"prefs\": {\n        \"IAB1\":\"\",\n        \"IAB2\":\"\",\n        \"IAB3\":\"\",\n        \"IAB4\":\"\",\n        \"IAB5\":\"\",\n        \"IAB6\":\"\",\n        \"IAB7\":\"\",\n        \"IAB8\":\"\",\n        \"IAB9\":\"\",\n        \"IAB10\":\"\",\n        \"IAB11\":\"\",\n        \"IAB12\":\"\",\n        \"IAB13\":\"\",\n        \"IAB14\":\"\",\n        \"IAB15\":\"\",\n        \"IAB16\":\"\",\n        \"IAB17\":\"\",\n        \"IAB18\":\"\",\n        \"IAB19\":\"\",\n        \"IAB20\":\"\",\n        \"IAB21\":\"\",\n        \"IAB22\":\"\",\n        \"IAB23\":\"\"\n    }\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "6c. Intent GET /account/{{account_id}}/intent/{{intent_id}}",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/intent/{{intent_id}}?p={{application_id}}&s={{session_id}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n    \"application_id\": \"{{application_id}}\",   \n    \"session_id\": \"{{session_id}}\",       \n    \"prefs\": {\n        \"IAB1\":\"\",\n        \"IAB2\":\"\",\n        \"IAB3\":\"\",\n        \"IAB4\":\"\",\n        \"IAB5\":\"\",\n        \"IAB6\":\"\",\n        \"IAB7\":\"\",\n        \"IAB8\":\"\",\n        \"IAB9\":\"\",\n        \"IAB10\":\"\",\n        \"IAB11\":\"\",\n        \"IAB12\":\"\",\n        \"IAB13\":\"\",\n        \"IAB14\":\"\",\n        \"IAB15\":\"\",\n        \"IAB16\":\"\",\n        \"IAB17\":\"\",\n        \"IAB18\":\"\",\n        \"IAB19\":\"\",\n        \"IAB20\":\"\",\n        \"IAB21\":\"\",\n        \"IAB22\":\"\",\n        \"IAB23\":\"\"\n    }\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "6c. Intent POST /account/{{account_id}}/intent/{{intent_id}}",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/intent/{{intent_id}}",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n    \"application_id\": \"{{application_id}}\",   \n    \"session_id\": \"{{session_id}}\",       \n    \"intent\": {\n        \"why\":\"*************** WHY\",\n        \"what\":\"************** WHAT\",\n        \"when\":\"************** WHEN\",\n        \"where\":\"*************** WHERE\"\n    }\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "6c. Intent PUT /account/{{account_id}}/intent",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/intent",
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n    \"application_id\": \"{{application_id}}\",   \n    \"session_id\": \"{{session_id}}\",       \n    \"intent\": {\n        \"why\":\"why_00\",\n        \"what\":\"what_00\",\n        \"when\":\"when_00\",\n        \"where\":\"where_00\"\n    }\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "6c. Intent DELETE /account/{{account_id}}/intent/{{intent_id}}",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/intent/{{intent_id}}",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n    \"application_id\": \"{{application_id}}\",   \n    \"session_id\": \"{{session_id}}\"\n}\n"
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Login Sequence",
+			"description": "",
+			"item": [
+				{
+					"name": "4b Send Code: POST /account",
+					"request": {
+						"url": "{{base_url}}/account",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"application_id\": \"{{application_id}}\",     \n    \"first_name\": \"Chandan\",           \n    \"last_name\": \"Rajah\",            \n    \"msisdn\": \"{{msisdn}}\",              \n    \"user_type\": \"CUSTOMER\",           \n    \"email\": \"{{email}}\"                 \n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "4b Send Code: GET /verify",
+					"request": {
+						"url": "{{base_url}}/verify?e={{email}}&c={{email_code}}&v={{verify_code}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"application_id\": \"{{$guid}}\",     \n    \"first_name\": \"Chandan\",           \n    \"last_name\": \"Rajah\",            \n    \"msisdn\": \"{{msisdn}}\",              \n    \"userType\": \"CUSTOMER\",           \n    \"email\": \"{{email}}\"                 \n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "4c Enter Code: POST /verify",
+					"request": {
+						"url": "{{base_url}}/verify",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"application_id\": \"{{application_id}}\",      \n    \"msisdn\": \"{{msisdn}}\",               \n    \"sms_code\":\"MAUIOT\",             \n    \"password\":\"{{password}}\"              \n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "4d Resend Code: PUT /resend",
+					"request": {
+						"url": "{{base_url}}/resend",
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"application_id\": \"{{application_id}}\",       \n    \"msisdn\":\"{{msisdn}}\"                 \n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "4a. Login POST /login",
+					"request": {
+						"url": "{{base_url}}/login",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"account_id\": \"{{account_id}}\",\n\t\"application_id\": \"{{application_id}}\",\n    \"password\": \"{{password}}\"\n\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "4d Resend Code: PUT /resend/email",
+					"request": {
+						"url": "{{base_url}}/resend/email",
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"application_id\": \"{{application_id}}\",       \n    \"email\":\"{{email}}\"                 \n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "4b Send Code: GET /validate/session",
+					"request": {
+						"url": "{{base_url}}/validate/session?p={{application_id}}&a={{account_id}}&s={{session_id}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"application_id\": \"{{$guid}}\",     \n    \"first_name\": \"Chandan\",           \n    \"last_name\": \"Rajah\",            \n    \"msisdn\": \"{{msisdn}}\",              \n    \"userType\": \"CUSTOMER\",           \n    \"email\": \"{{email}}\"                 \n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "4b Send Code: POST /validate/email",
+					"request": {
+						"url": "{{base_url}}/validate/email",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"application_id\": \"{{application_id}}\",     \n    \"account_id\": \"{{account_id}}\",           \n    \"session_id\": \"{{session_id}}\",              \n    \"email\": \"{{email}}\"\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Profile and Prefs",
+			"description": "",
+			"item": [
+				{
+					"name": "6a1. Profile GET /account/{{account_id}}/profile",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/profile?p={{application_id}}&s={{session_id}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"password\": \"{{password}}\"\n\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "6a1. Profile POST /account/{{account_id}}/profile",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/profile",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n    \"application_id\": \"{{application_id}}\",   \n    \"session_id\": \"{{session_id}}\",       \n    \"profile\": {\n\t\"gender\":\"M\",\n\t\"first_name\":\"Chandan_1\",\n\t\"last_name\": \"Rajah_1\",\n\t\"yob\": 1976,\n\t\"kids\": 2,\n\t\"income\": 10000,\n\t\"postcode\" : \"GU22 0AH\",\n\t\"location\": true,\n\t\"opt_in\": true,\n\t\"third_party\": true\n    }\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "6b Prefs GET /account/{{account_id}}/prefs",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/prefs?p={{application_id}}&s={{session_id}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n    \"application_id\": \"{{application_id}}\",   \n    \"session_id\": \"{{session_id}}\",       \n    \"profile\": {\n        \"gender\":\"\",\n        \"first_name\":\"\",\n        \"last_name\": \"\",\n        \"yob\": \"\",\n        \"kids\": \"\",\n        \"income\": \"\",\n        \"location\": \"\",\n        \"opt-in\": \"\",\n        \"third-party\": \"\"\n    }\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "6b Prefs POST /account/{{account_id}}/prefs",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/prefs",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n    \"application_id\": \"{{application_id}}\",   \n    \"session_id\": \"{{session_id}}\",       \n      \"prefs\": {\n    \"IAB9\": 0.11,\n    \"IAB6\": 0.22,\n    \"IAB19\": 0.33,\n    \"IAB13\": 0.44,\n    \"IAB4\": 0.55,\n    \"IAB23\": 0.66\n      }\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Sale and Transfer",
+			"description": "",
+			"item": [
+				{
+					"name": "3b/c, Sale Complete POST /sale/{{sale_id}}/complete",
+					"request": {
+						"url": "{{base_url}}/sale/{{sale_id}}/complete",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"account_id\": \"{{account_id}}\",\n    \"application_id\": \"{{application_id}}\",\n    \"session_id\": \"{{session_id}}\"\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "3d. Add Contact PUT /transfer",
+					"request": {
+						"url": "{{base_url}}/transfer",
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"account_id\": \"{{account_id}}\",\n    \"application_id\": \"{{application_id}}\",\n    \"session_id\": \"{{session_id}}\",\n    \"app_karedos\": {{app_karedos}},\n    \"receiver\": {\n        \"first_name\": \"{{first_name}}\",\n        \"last_name\": \"{{last_name}}\",\n        \"msisdn\": \"{{msisdn}}\"\n    }\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "6e Receive Karedos GET /sale/{{sale_id}}",
+					"request": {
+						"url": "{{base_url}}/sale/{{sale_id}}?a={{account_id}}&p={{application_id}}&s={{session_id}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"account_id\": \"{{account_id}}\",\n    \"application_id\": \"{{application_id}}\",\n    \"session_id\": \"{{session_id}}\",\n    \"app_karedos\": \"{{app_karedos}}\"              \n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "6e Receive Karedos GET /sale/{{sale_id}}/qr",
+					"request": {
+						"url": "{{base_url}}/sale/{{sale_id}}/qr",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"account_id\": \"{{account_id}}\",\n    \"application_id\": \"{{application_id}}\",\n    \"session_id\": \"{{session_id}}\",\n    \"app_karedos\": \"{{app_karedos}}\"              \n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "6e Receive Karedos PUT /sale",
+					"request": {
+						"url": "{{base_url}}/sale",
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"account_id\": \"{{account_id}}\",\n    \"application_id\": \"{{application_id}}\",\n    \"session_id\": \"{{session_id}}\",\n    \"app_karedos\": {{app_karedos}}              \n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "6e Receive Karedos POST /qr",
+					"request": {
+						"url": "{{base_url}}/qr",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"enabled": true,
+									"src": "MATROX-HAT.png",
+									"value": ""
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "GET {{base_url}}/image/{{sale_id}}.png",
+					"request": {
+						"url": "{{base_url}}/image/{{sale_id}}.png",
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TBD - Brand",
+			"description": "",
+			"item": [
+				{
+					"name": "6d. Brand GET /account/{{account_id}}/brand/{{brand_id}}",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/brand/{{brand_id}}?p={{application_id}}&s={{session_id}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n    \"application_id\": \"{{application_id}}\",   \n    \"session_id\": \"{{session_id}}\"\n}\n"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "6d. Brand POST /account/{{account_id}}/brand/{{brand_id}}",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/brand/{{brand_id}}",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n    \"application_id\": \"{{application_id}}\",   \n    \"session_id\": \"{{session_id}}\",       \n    \"brand\": {\n        \"name\": \"\",\n        \"domain\": \"\",\n        \"image_url\": \"\",\n        \"site_url\": \"\"\n    }\n}\n"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "6d. Brand PUT /account/{{account_id}}/brand",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/brand",
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n    \"application_id\": \"{{application_id}}\",   \n    \"session_id\": \"{{session_id}}\",       \n    \"brand_id\": \"\"\n}\n"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "6d. Brand DELETE /account/{{account_id}}/brand/{{brand_id}}",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/brand/{{brand_id}}",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n    \"application_id\": \"{{application_id}}\",   \n    \"session_id\": \"{{session_id}}\"\n}\n"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "6d. Brand GET /account/{{account_id}}/brand/{{brand_id}}/message",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/brand/{{brand_id}}/message?p={{application_id}}&s={{session_id}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n    \"application_id\": \"{{application_id}}\",   \n    \"session_id\": \"{{session_id}}\"\n}\n"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "6d. Brand POST /account/{{account_id}}/brand/{{brand_id}}/message",
+					"request": {
+						"url": "{{base_url}}/account/{{account_id}}/brand/{{brand_id}}/message",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n    \"application_id\": \"{{application_d}}\",   \n    \"session_id\": \"{{session_id}}\",       \n    \"brand_id\": \"\",\n    \"message\": {\n        \"text\": \"\"\n    }\n}\n"
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Terms and About",
+			"description": "",
+			"item": [
+				{
+					"name": "6a2/6f Terms GET /terms",
+					"request": {
+						"url": "{{base_url}}/terms",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n    \"application_id\": \"{{application_id}}\",   \n    \"session_id\": \"{{session_id}}\",       \n    \"profile\": {\n        \"gender\":\"\",\n        \"first_name\":\"\",\n        \"last_name\": \"\",\n        \"yob\": \"\",\n        \"kids\": \"\",\n        \"income\": \"\",\n        \"location\": \"\",\n        \"opt-in\": \"\",\n        \"third-party\": \"\"\n    }\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "6a2/6f Terms GET /about",
+					"request": {
+						"url": "{{base_url}}/about",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n    \"application_id\": \"{{application_id}}\",   \n    \"session_id\": \"{{session_id}}\",       \n    \"profile\": {\n        \"gender\":\"\",\n        \"first_name\":\"\",\n        \"last_name\": \"\",\n        \"yob\": \"\",\n        \"kids\": \"\",\n        \"income\": \"\",\n        \"location\": \"\",\n        \"opt-in\": \"\",\n        \"third-party\": \"\"\n    }\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Url Magic",
+			"description": "",
+			"item": [
+				{
+					"name": "URL Magic Share GET /shr",
+					"request": {
+						"url": "{{base_url}}/shr?u=853826909ac44311ac4058fcdda818dd1e464213&v=47c7d131de10bc4f5a1255336c2123f26c7500fa",
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "URL Magic Share GET /nrm",
+					"request": {
+						"url": "{{base_url}}/nrm?u=853826909ac44311ac4058fcdda818dd1e464213&v=47c7d131de10bc4f5a1255336c2123f26c7500fa",
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Smaato",
+			"request": {
+				"url": "http://soma.smaato.net/oapi/reqAd.jsp?adspace=130192236&pub=1100028064&devip=188.223.196.198&device=Mozilla%2F5.0+%28Linux%3B+Android+6.0.1%3B+SM-G925F+Build%2FMMB29K%3B+wv%29+&format=all&response=XML&ref=http%3A%2F%2Fkaredo.co.uk&vastver=2&nver=1&bundle=uk.co.karedo.karedo&googleadid=a7bb56cc-4b79-4404-9fdf-ac9709b2a4b8&googlednt=true&dimension=medrect&height=250&width=300&session=f37605cf2c39be5cd162c2249d227850&age=40&gender=m&region=uk&divid=smt-130192236",
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-mh-User-Agent",
+						"value": "Mozilla/5.0 (Linux; Android 6.0.1; SM-G925F Build/MMB29K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/54.0.2840.68 Mobile Safari/537.36",
+						"description": ""
+					},
+					{
+						"key": "x-mh-X-Forwarded-For",
+						"value": "188.223.196.198",
+						"description": ""
+					},
+					{
+						"key": "x-mh-Accept-Encoding",
+						"value": "gzip, deflate",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
