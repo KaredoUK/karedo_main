@@ -1,4 +1,4 @@
-logLevel := Level.Debug
+//logLevel := Level.Debug
 
 addSbtPlugin("org.scalaxb" % "sbt-scalaxb" % "1.5.1")
 addSbtPlugin("se.marcuslonnberg" % "sbt-docker" % "1.3.0")
