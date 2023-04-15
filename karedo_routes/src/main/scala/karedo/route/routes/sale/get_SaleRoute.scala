@@ -7,12 +7,15 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import karedo.route.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.persist.entity._
+import karedo.route.common.{KaredoConstants, KaredoJsonHelpers}
 import karedo.route.routes.KaredoRoute
 import karedo.route.util._
 import org.slf4j.LoggerFactory
 import spray.json._
 
 import scala.util.{Failure, Success, Try}
+import karedo.common.result.{KO, OK, Result}
+import karedo.route.common.DbCollections
 
 
 /**

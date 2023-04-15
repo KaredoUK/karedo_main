@@ -11,11 +11,13 @@ import karedo.persist.entity.{Email, EmailVerify, Mobile, UserApp, UserEmail, Us
 import karedo.common.jwt.JWTMechanic
 import karedo.route.routes.KaredoRoute
 import karedo.common.misc.Util.now
+import karedo.route.common.{DbCollections, KaredoConstants, KaredoJsonHelpers, KaredoUtils}
 import karedo.route.util._
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
 import scala.concurrent.ExecutionContext.Implicits.global
+import karedo.common.result.{KO, OK, Result}
 
 /**
   * Created by pakkio on 10/3/16.

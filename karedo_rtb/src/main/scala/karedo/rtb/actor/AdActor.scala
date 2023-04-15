@@ -10,9 +10,7 @@ import karedo.persist.entity.UserPrefData
 import karedo.rtb.dsp._
 import karedo.rtb.model._
 import karedo.rtb.model.AdModel._
-import karedo.route.util.{KO, OK, Result}
 import karedo.rtb.model.DbCollections
-import karedo.route.util.Configurable
 
 import scala.util.{Failure, Success, Try}
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -20,6 +18,7 @@ import collection.JavaConverters._
 import karedo.rtb.model.BidRequestCommon._
 import karedo.rtb.util._
 import RtbUtils._
+import karedo.route.util.Configurable
 import org.slf4j.MarkerFactory
 
 /**

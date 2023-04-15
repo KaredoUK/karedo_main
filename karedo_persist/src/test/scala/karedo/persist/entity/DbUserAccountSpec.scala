@@ -2,13 +2,13 @@ package karedo.persist.entity
 
 import java.util.UUID
 
-import karedo.route.util.{KO, OK}
 import org.specs2.matcher.{EitherMatchers, MatchResult}
 import org.specs2.mutable.Specification
 import utils.MongoTestUtils
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import karedo.common.misc.Util.now
+import karedo.common.result.{Result, OK, KO}
 
 
 @RunWith(classOf[JUnitRunner])

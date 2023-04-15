@@ -3,13 +3,15 @@ package karedo.route.routes.inform
 import akka.http.scaladsl.server.Directives._
 import karedo.route.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.persist.entity.{Inform, Jira}
+import karedo.route.common.{JiraHandler, KaredoConstants, KaredoJsonHelpers}
 import karedo.route.routes.KaredoRoute
 import karedo.route.util._
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
-
 import scala.concurrent.ExecutionContext.Implicits.global
+import karedo.common.result.{KO, OK, Result}
+import karedo.route.common.DbCollections
 
 
 /**

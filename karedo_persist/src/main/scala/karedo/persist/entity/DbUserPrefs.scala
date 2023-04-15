@@ -3,7 +3,6 @@ package karedo.persist.entity
 import java.util.UUID
 
 import karedo.persist.entity.dao._
-import karedo.route.util.Result
 import org.joda.time.DateTime
 import salat.annotations._
 import karedo.common.misc.Util.now

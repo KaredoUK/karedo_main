@@ -7,6 +7,8 @@ import karedo.rtb.model.AdModel.AdResponse
 import org.junit.runner.RunWith
 import org.scalatest.{Ignore, WordSpec}
 import org.scalatest.junit.{JUnit3Suite, JUnitRunner}
+import karedo.common.result.{KO, OK, Result}
+import karedo.route.common.DbCollections
 
 /**
   * Created by pakkio on 10/21/16.

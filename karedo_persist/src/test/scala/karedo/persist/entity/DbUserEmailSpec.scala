@@ -3,13 +3,13 @@ package karedo.persist.entity
 import java.util.UUID
 
 import karedo.common.misc.Util
-import karedo.route.util.{KO, OK}
 import org.specs2.matcher.{EitherMatchers, TryMatchers}
 import org.specs2.mutable.Specification
 import utils.MongoTestUtils
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import org.specs2.runner.JUnitRunner
+import karedo.common.result.{Result, OK, KO}
 
 @RunWith(classOf[JUnitRunner])
 class DbUserEmailSpec

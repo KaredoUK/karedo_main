@@ -29,7 +29,8 @@ trait RouteDebug {
     logEntryString(source, request.toString(), response.toString())
   }
 
-  def logEntryString(source: String, request: String, response: String)
+  // @TODO: Needs to be implemented to database for analytics
+  def logEntryString(source: String, request: String, response: String) = {}
 
   // logs just the request method and response status at info level
   def createLogEntry(source: String, request: HttpRequest, response: HttpResponse): Some[LogEntry] = {

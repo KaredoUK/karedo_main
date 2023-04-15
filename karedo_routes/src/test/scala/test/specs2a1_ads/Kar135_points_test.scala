@@ -6,6 +6,8 @@ import karedo.persist.entity.{UserAccount, UserApp, UserKaredos}
 import org.junit.runner.RunWith
 import org.scalatest.Ignore
 import org.scalatest.junit.JUnitRunner
+import karedo.common.result.{KO, OK, Result}
+import karedo.route.common.DbCollections
 
 /**
   * Created by pakkio on 10/21/16.

@@ -5,10 +5,10 @@ import java.util.UUID
 import com.mongodb.casbah.Imports._
 import karedo.common.misc.Util
 import karedo.persist.entity.dao._
-import karedo.route.util.{KO, Result}
 import org.joda.time.DateTime
 import salat.annotations._
 import karedo.common.misc.Util.now
+import karedo.common.result.{Result, OK, KO}
 
 import scala.util.{Failure, Success, Try}
 

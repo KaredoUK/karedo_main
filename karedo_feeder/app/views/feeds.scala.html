@@ -1,0 +1,59 @@
+@import karedo.persist.entity.Feed
+@import helper._
+@import java.util.UUID
+
+@(feeds: List[Feed], feedForm: Form[Feed])(implicit messages: Messages)
+
+@main("Feeds list") {
+    <style>
+    table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+        padding: 5px;
+        text-align: left;
+    }
+    </style>
+
+    <h1>@feeds.size feeds(s)</h1>
+
+    <table style="width:70%">
+        <tr>
+            <th>Enabled</th>
+            <th>Name</th>
+            <th>URL</th>
+            <th>Fallback Img</th>
+            <th>Prefs</th>
+            <th>Actions</th>
+        </tr>
+        @feeds.map { feed =>
+            <tr>
+                <td>@feed.enabled</td>
+                <td>@feed.name</td>
+                <td>@feed.url</td>
+                <td>@feed.fallback_img</td>
+                <td>@feed.prefs.map(_ + " ")</td>
+                <td>
+                @form(action = routes.FeedController.editFeed()) {
+                    <input type="hidden" name="id" value='@feed.id' >
+                    <input type="submit" value="Edit">
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+
+    <h2>Add a new Feed</h2>
+
+    @form(action = routes.FeedController.editFeed()) {
+        <input type="hidden" name="id" value='0' >
+        <input type="submit" value="Add">
+    }
+
+    @if(feedForm.hasGlobalErrors) {
+        <ul>
+        @for(error <- feedForm.globalErrors) {
+            <li>@Messages(error.messages, error.args)</li>
+        }
+        </ul>
+    }
+}

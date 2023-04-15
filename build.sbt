@@ -33,8 +33,11 @@ lazy val commonSettings = Seq(
     "typesafe" at "http://repo.typesafe.com/typesafe/releases/",
     Resolver.mavenLocal,
     Resolver.sbtPluginRepo("releases"),
-    Resolver.sonatypeRepo("public")
+    Resolver.sonatypeRepo("public"),
+    Resolver.url("Typesafe Ivy releases", url("https://repo.typesafe.com/typesafe/ivy-releases"))(Resolver.ivyStylePatterns),
+    "jitpack.io" at "https://jitpack.io"
   )
+
 
 )
 
@@ -226,12 +229,32 @@ lazy val karedo_config = (project in file("karedo_config"))
   .settings(name := "config")
 
 
+// ########### Feeder #############
+lazy val karedo_feeder = (project in file("karedo_feeder"))
+  .settings(commonSettings: _*)
+  .settings(releaseSettings: _*)
+  .settings(name := "feeder")
+  .enablePlugins(PlayScala)
+  .dependsOn(karedo_common)
+  .dependsOn(karedo_persist)
+  .dependsOn(karedo_rtb)
+
 // ########### Root #############
 lazy val root = (project in file("."))
   //  .dependsOn(salat, karedo_persist, karedo_rtb, karedo_routes)
-  .aggregate(salat, karedo_persist, karedo_rtb, karedo_routes)
+  .aggregate(salat, karedo_persist, karedo_rtb, karedo_routes, karedo_feeder)
   .settings(commonSettings: _*)
   .settings(releaseSettings: _*)
+  .settings(
+    libraryDependencies ++= Seq(
+      jdbc,
+      cache,
+      ws,
+      "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test
+    )
+  )
+  .settings(fork in run := true)
+
 
 
 //parallelExecution in Test := false

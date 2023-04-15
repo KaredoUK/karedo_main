@@ -2,7 +2,6 @@ package karedo.persist.entity.dao
 
 import com.mongodb.WriteResult
 import com.mongodb.casbah.commons.MongoDBObject
-import karedo.route.util.{KO, OK, Result}
 import org.slf4j.LoggerFactory
 import salat._
 import salat.dao.SalatDAO
@@ -10,6 +9,7 @@ import salat.global._
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
+import karedo.common.result.{Result, OK, KO}
 
 
 abstract class DbMongoDAO_Casbah[K, T <: Keyable[K]] (implicit override val manifestT: Manifest[T], override val manifestK: Manifest[K])

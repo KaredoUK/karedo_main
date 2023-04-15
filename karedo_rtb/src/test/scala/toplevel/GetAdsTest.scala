@@ -8,7 +8,6 @@ import org.junit.runner.RunWith
 import org.scalatest.WordSpec
 import org.scalatest.junit.{JUnit3Suite, JUnitRunner}
 import karedo.rtb.actor._
-import karedo.route.util.KO
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
 import scala.collection.immutable.ListMap
 

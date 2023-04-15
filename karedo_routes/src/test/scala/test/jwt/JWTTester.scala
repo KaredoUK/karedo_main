@@ -7,7 +7,6 @@ import org.scalatest.junit.JUnitRunner
 
 import scala.util.{Failure, Success, Try}
 import karedo.common.misc.Util.now
-import karedo.route.util._
 import org.joda.time.DateTime
 
 /**

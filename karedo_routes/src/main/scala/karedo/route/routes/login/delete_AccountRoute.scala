@@ -8,11 +8,13 @@ import akka.http.scaladsl.server.Route
 import karedo.route.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.common.akka.DefaultActorSystem
 import karedo.persist.entity.{UserAccount, UserApp}
+import karedo.route.common.{DbCollections, KaredoConstants, KaredoJsonHelpers, KaredoUtils}
 import karedo.route.routes.KaredoRoute
 import karedo.route.util._
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
+import karedo.common.result.{KO, OK, Result}
 
 /**
   * Created by pakkio on 10/3/16.

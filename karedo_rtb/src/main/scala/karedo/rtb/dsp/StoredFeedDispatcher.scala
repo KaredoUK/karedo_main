@@ -5,11 +5,11 @@ import karedo.rtb.model.AdModel.{AdUnit, DeviceRequest}
 import karedo.rtb.model.BidJsonImplicits
 import karedo.rtb.model.BidRequestCommon.{Device, User}
 import karedo.rtb.util.{DeviceMake, LoggingSupport}
-import karedo.route.util.{KO, OK}
 import org.slf4j.LoggerFactory
 
-
 import scala.util.{Failure, Success, Try}
+import karedo.common.result.{Result, KO, OK}
+
 
 /**
   * Created by charaj on 12/02/2017.

@@ -12,9 +12,9 @@ import karedo.route.routes.termsabout._
 import karedo.route.routes.transfer._
 import karedo.route.routes.url._
 import karedo.route.sample.Entities
-import karedo.route.util.RouteDebug
 //import org.clapper.classutil.ClassInfo
 import org.slf4j.LoggerFactory
+import karedo.common.route.RouteDebug
 
 // For CORS
 import akka.http.scaladsl.model.HttpMethods._

@@ -3,7 +3,7 @@ package karedo.persist.entity
 import com.mongodb.casbah.commons.MongoDBObject
 import karedo.persist.entity.dao._
 import salat.annotations._
-import karedo.route.util.{KO, OK, Result}
+import karedo.common.result.{Result, OK, KO}
 
 
 case class Pref

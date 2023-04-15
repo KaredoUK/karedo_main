@@ -6,7 +6,6 @@ import akka.util.Timeout
 import karedo.persist.entity.KaredoChange
 import karedo.rtb.actor.AdActor
 import karedo.rtb.model.AdModel._
-import karedo.route.util.{KO, OK, Result}
 import karedo.common.misc.Util.newUUID
 import karedo.rtb.util.{DeviceMakes, RtbConstants}
 import akka.pattern.ask

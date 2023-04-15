@@ -2,7 +2,6 @@ package karedo.persist.entity
 
 import java.util.{Random, UUID}
 
-import karedo.route.util.{KO, OK, Result}
 import org.junit.Ignore
 import org.specs2.matcher.EitherMatchers
 import org.specs2.mutable.Specification
@@ -14,6 +13,7 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
+import karedo.common.result.{Result, OK, KO}
 
 @Ignore
 @RunWith(classOf[JUnitRunner])

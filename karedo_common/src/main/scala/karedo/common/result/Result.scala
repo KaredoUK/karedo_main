@@ -1,4 +1,4 @@
-package karedo.route.util
+package karedo.common.result
 
 sealed abstract class Result[+A, +B] extends Product with Serializable {
 

@@ -4,13 +4,14 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import karedo.route.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.persist.entity.{UserAccount, UserApp, UserInteraction}
+import karedo.route.common.KaredoJsonHelpers
 import karedo.route.routes.KaredoRoute
-import karedo.route.util.{DbCollections, KaredoJsonHelpers, OK, Result}
+import karedo.common.result.{KO, OK, Result}
+import karedo.route.common.DbCollections
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object post_InteractionRoute extends KaredoRoute

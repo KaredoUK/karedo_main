@@ -6,9 +6,9 @@ import utils.{DbCollections, MongoTestUtils}
 import java.util.UUID
 
 import org.joda.time.DateTime.now
-import karedo.route.util.{KO, OK}
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
+import karedo.common.result.{Result, OK, KO}
 
 @RunWith(classOf[JUnitRunner])
 class DbUserIntentSpec

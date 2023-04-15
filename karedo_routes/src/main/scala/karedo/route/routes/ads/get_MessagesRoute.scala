@@ -4,8 +4,9 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import karedo.route.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.persist.entity.{UserAccount, UserApp}
+import karedo.route.common.{DbCollections, KaredoJsonHelpers}
 import karedo.route.routes.KaredoRoute
-import karedo.route.util.{KO, OK, Result, _}
+import karedo.common.result.{KO, OK, Result}
 import org.slf4j.LoggerFactory
 import spray.json._
 

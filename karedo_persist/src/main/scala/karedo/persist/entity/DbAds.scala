@@ -4,11 +4,10 @@ import java.util.UUID
 
 import com.mongodb.casbah.commons.MongoDBObject
 import karedo.persist.entity.dao._
-import karedo.route.util.{KO, OK, Result}
+import karedo.common.result.{Result, OK, KO}
 import salat.annotations._
 
 import scala.util.{Failure, Success, Try}
-
 import org.joda.time.DateTime
 
 

@@ -5,14 +5,16 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import karedo.route.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.persist.entity.UrlAccess
+import karedo.route.common.{KaredoConstants, KaredoJsonHelpers}
 import karedo.route.routes.KaredoRoute
 import karedo.route.util._
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-
 import scala.concurrent.ExecutionContext.Implicits.global
+import karedo.common.result.{KO, OK, Result}
+import karedo.route.common.DbCollections
 
 object get_UrlMagicShareRoute extends KaredoRoute
   with UrlMagicActor {

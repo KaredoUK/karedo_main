@@ -6,6 +6,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import karedo.route.actors.{APIResponse, Error}
 import karedo.common.jwt.JWTWithKey
+import karedo.route.common.{KaredoConstants, KaredoJsonHelpers}
 import karedo.route.util._
 import org.slf4j.LoggerFactory
 import spray.json._
@@ -13,6 +14,7 @@ import spray.json._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
+import karedo.common.result.{Result, OK, KO}
 
 /**
   * Created by pakkio on 05/10/16.

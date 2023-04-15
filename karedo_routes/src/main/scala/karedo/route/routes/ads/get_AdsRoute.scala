@@ -8,7 +8,8 @@ import karedo.persist.entity._
 import karedo.route.routes.KaredoRoute
 import karedo.rtb.actor._
 import karedo.rtb.model.AdModel.{DeviceRequest, adUnit, _}
-import karedo.route.util.{KaredoConstants, _}
+import karedo.common.result.{KO, OK, Result}
+import karedo.route.common.{DbCollections, KaredoConstants, KaredoJsonHelpers}
 import org.slf4j.LoggerFactory
 import spray.json._
 

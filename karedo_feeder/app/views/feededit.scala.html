@@ -1,0 +1,57 @@
+@import karedo.persist.entity.Feed
+@import helper._
+@import java.util.UUID
+
+@(feed: Feed, feedForm: Form[Feed], defPrefs: Map[String, String])(implicit messages: Messages)
+
+@main("Feed Edit") {
+
+    <h1>@feed.name</h1>
+
+    <h2>Edit Feed</h2>
+
+    <table style="width:70%">
+        <tr>
+            <th>Enabled</th>
+            <th>Name</th>
+            <th>URL</th>
+            <th>Fallback Img</th>
+            <th>Prefs</th>
+            <th>Actions</th>
+        </tr>
+        <tr>
+            <td>@feed.enabled</td>
+            <td>@feed.name</td>
+            <td>@feed.url</td>
+            <td>@feed.fallback_img</td>
+            <td>@feed.prefs.map(_ + " ")</td>
+            <td></td>
+        </tr>
+
+        @form(action = routes.FeedController.postFeed()) {
+            <tr>
+                <td>@checkbox(feedForm("enabled"))</td>
+                <td>@inputText(feedForm("name"))</td>
+                <td>@inputText(feedForm("url"))</td>
+                <td>@inputText(feedForm("fallback_img"))</td>
+                <td>
+                    @select(
+                        field = feedForm("prefs"),
+                        options = defPrefs.map(t => (t._1, s"${t._1}: ${t._2}")).toSeq,
+                        'multiple->"multiple"
+                    )
+                </td>
+                <td><input type="submit" value="Save"></td>
+            </tr>
+        }
+
+    </table>
+
+    @if(feedForm.hasGlobalErrors) {
+        <ul>
+        @for(error <- feedForm.globalErrors) {
+            <li>@Messages(error.messages, error.args)</li>
+        }
+        </ul>
+    }
+}

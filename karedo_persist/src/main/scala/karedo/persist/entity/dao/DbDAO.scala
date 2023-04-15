@@ -1,9 +1,8 @@
 package karedo.persist.entity.dao
 
-import karedo.route.util.Result
-
 import scala.concurrent.Future
 import scala.util.Try
+import karedo.common.result.{Result, OK, KO}
 
 trait DbDAO[K, T <: Keyable[K]] {
   type F_UNIT = Future[Unit]
