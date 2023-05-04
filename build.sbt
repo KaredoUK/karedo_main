@@ -148,6 +148,10 @@ lazy val karedo_routes = (project in file("karedo_routes"))
           "io.igl" %% "jwt" % "1.2.0"
         )
   )
+//  .settings(
+//    libraryDependencies += "org.mortbay.jetty" % "jetty" % "6.1.22" % "container"
+//  )
+//  .settings(appengineSettings: _*)
   .dependsOn(karedo_common)
   .dependsOn(karedo_rtb)
 

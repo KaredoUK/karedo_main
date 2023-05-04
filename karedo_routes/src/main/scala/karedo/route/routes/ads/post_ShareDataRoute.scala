@@ -106,7 +106,14 @@ trait post_ShareDataActor extends DbCollections
 
                 val share_url = s"${url_magic_share_base}/shr?u=${url_code}&v=${account_hash}"
 
-                val social_share_data = request.share.ad_text.getOrElse("Shared from Karedo")
+                val social_share_data = request.share.ad_text match {
+                  case Some(t) => c.channel match {
+                    case SOCIAL_FACEBOOK | SOCIAL_GOOGLE_P => t + " via Karedo [http://karedo.co.uk]"
+                    case SOCIAL_TWITTER => t + " via @Karedo_Mobile"
+                    case _ => t
+                  }
+                  case None => "Shared via Karedo [http://karedo.co.uk]"
+                }
 
                 c.copy(share_data = Some(social_share_data), share_url = Some(share_url))
               }
