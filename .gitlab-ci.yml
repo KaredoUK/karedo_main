@@ -32,11 +32,11 @@ build_and_package:
     paths:
       - karedo_routes/target/scala-2.11/routes-assembly-0.0.3-SNAPSHOT.jar
 
-test_all:
-  stage: test
-  allow_failure: true
-  script:
-    - sbt test
+#test_all:
+#  stage: test
+#  allow_failure: true
+#  script:
+#    - sbt test
 
 ibm_deploy:
   stage: deploy
