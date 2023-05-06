@@ -1,6 +1,6 @@
 before_script:
-  - echo "deb https://dl.bintray.com/sbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
-  - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 642AC823
+  - echo "deb https://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list.d/sbt.list
+  - apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 642AC823
   - apt-get update -qq && apt-get install -y -qq sbt openjdk-8-jdk
 
 stages:
@@ -20,6 +20,6 @@ job1:
   script:
     - sbt clean compile karedo_routes/assembly
 
-    
+
 
 
