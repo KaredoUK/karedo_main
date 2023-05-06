@@ -1,6 +1,7 @@
 before_script:
 #  - echo "deb https://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list.d/sbt.list
 #  - apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 642AC823
+  - apt-get update -qq && apt-get install -y -qq openjdk-8-jdk
   - curl -L -o sbt.deb http://dl.bintray.com/sbt/debian/sbt-0.13.15.deb
   - dpkg -i sbt.deb
   - apt-get update -qq && apt-get install -y -qq sbt openjdk-8-jdk
