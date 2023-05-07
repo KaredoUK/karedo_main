@@ -44,12 +44,12 @@ ibm_deploy:
     - curl -L -o bluemix.tar.gz https://public.dhe.ibm.com/cloud/bluemix/cli/bluemix-cli/Bluemix_CLI_0.5.4_amd64.tar.gz
     - tar -zxf bluemix.tar.gz
     - export PATH=${PATH}:Bluemix_CLI/bin
-    - chmod +x Bluemix_CLI/bin/*
+    - chmod -R +x Bluemix_CLI/bin/*
     - bluemix api https://api.eu-gb.bluemix.net
     - bluemix login -u crajah@karedo.co.uk -p X4ph0lYZ! -o Karedo
     - bluemix app push karedo -p karedo_routes/target/scala-2.11/routes-assembly-0.0.3-SNAPSHOT.jar
   dependencies:
     - build_and_package
-    
+
 
 
