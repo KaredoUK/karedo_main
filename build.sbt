@@ -8,7 +8,7 @@ import sbtrelease._
 lazy val commonSettings = Seq(
   organization := "karedo",
   name := "karedo",
-  version := "0.0.3-SNAPSHOT",
+  version := "0.0.4-SNAPSHOT",
   scalaVersion := "2.11.8",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
   parallelExecution in Test := false,
@@ -54,6 +54,12 @@ lazy val releaseSettings = Seq(
     pushChanges
   )
 )
+
+lazy val libs_macwire = "com.softwaremill.macwire" %% "macros" % "2.2.5" % "provided"
+lazy val libs_scalaTest = "org.scalatest" %% "scalatest" % "3.0.1" % Test
+
+resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
+
 
 // Library Definitions
 lazy val libs_test = Seq(
@@ -130,6 +136,33 @@ lazy val libs_nimbusds = Seq(
 
 
 // Project Definitions
+lazy val account_api = (project in file("account_api"))
+  .settings(commonSettings: _*)
+  .settings(name := "account_api")
+  .settings(
+    libraryDependencies ++= Seq(
+      lagomScaladslApi
+    )
+  )
+
+lazy val account_impl = (project in file("account_impl"))
+  .settings(commonSettings: _*)
+  .settings(name := "account_impl")
+  .enablePlugins(LagomScala)
+  .settings(
+    libraryDependencies ++= Seq(
+      lagomScaladslPersistenceCassandra,
+      lagomScaladslKafkaBroker,
+      lagomScaladslTestKit,
+      libs_macwire,
+      libs_scalaTest
+    )
+  )
+  .settings(lagomForkedTestSettings: _*)
+  .dependsOn(account_api)
+
+
+
 // ########### Routes #############
 lazy val karedo_routes = (project in file("karedo_routes"))
   .settings(commonSettings: _*)
@@ -246,7 +279,7 @@ lazy val karedo_feeder = (project in file("karedo_feeder"))
 // ########### Root #############
 lazy val root = (project in file("."))
   //  .dependsOn(salat, karedo_persist, karedo_rtb, karedo_routes)
-  .aggregate(salat, karedo_persist, karedo_rtb, karedo_routes, karedo_feeder)
+  .aggregate(salat, karedo_persist, karedo_rtb, karedo_routes, karedo_feeder, account_api, account_impl)
   .settings(commonSettings: _*)
   .settings(releaseSettings: _*)
   .settings(

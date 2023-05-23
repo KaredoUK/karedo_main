@@ -132,6 +132,10 @@ trait KaredoConstants extends Configurable {
   val adsRepeat = conf.getInt("ads.repeat")
   val adsImpProb = conf.getDouble("ads.imp.prob")
 
+  val adsMobProb = conf.getDouble("ads.admob.prob")
+  val adsMobAppId = conf.getString("ads.admob.app.id")
+  val adsMobUnitId = conf.getString("ads.admob.unit.id")
+
   val adsMarkUrlImp = conf.getBoolean("ads.mask.url.imp")
   val adsMarkUrlClick = conf.getBoolean("ads.mask.url.click")
 

@@ -30,6 +30,8 @@ class DummyDspBidDispatcher(config: DspBidDispatcherConfig)
         val u = makeAdUrlPair(x + salt)
         adUnits += AdUnit(
           ad_type_IMAGE,
+          None,
+          None,
           java.util.UUID.randomUUID.toString,
           java.util.UUID.randomUUID.toString,
           Ad( Some(u._1), u._2, u._3, u._4, None, Some(250), Some(300), None),

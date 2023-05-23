@@ -44,6 +44,7 @@ object AdModel extends DefaultJsonProtocol {
   val ad_type_VIDEO = "VIDEO"
   val ad_type_NATIVE = "NATIVE"
   val ad_type_TEXT = "TEXT"
+  val ad_type_ADMOB = "ADMOB"
 
   case class Beacon(beacon: String)
 
@@ -60,6 +61,8 @@ object AdModel extends DefaultJsonProtocol {
 
   case class AdUnit(
                      ad_type: String,
+                     ad_app_id: Option[String] = None,
+                     ad_unit_id: Option[String] = None,
                      ad_id: String,
                      impid: String,
                      ad: Ad,
@@ -77,7 +80,7 @@ object AdModel extends DefaultJsonProtocol {
 
   implicit val beacon = jsonFormat1(Beacon)
   implicit val ad = jsonFormat8(Ad)
-  implicit val adUnit = jsonFormat13(AdUnit)
+  implicit val adUnit = jsonFormat15(AdUnit)
 
   implicit val adResponse:RootJsonFormat[AdResponse] = jsonFormat2(AdResponse)
 

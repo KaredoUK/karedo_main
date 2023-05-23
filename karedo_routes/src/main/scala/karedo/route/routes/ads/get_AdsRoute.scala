@@ -136,15 +136,34 @@ trait get_AdsActor
           }
 
           val adsBack = adsReceived.map {
+                adUnit =>
+                  adUnit.copy(
+                    ad = adUnit.ad.copy (
+                      imp_url = getMagicUrl(adUnit.ad.imp_url, adsMarkUrlImp),
+                      click_url = getMagicUrl(Some(adUnit.ad.click_url), adsMarkUrlClick).get
+                    )
+                  )
+          }.map {
             adUnit =>
               val impify = (Math.random() <= adsImpProb)
-              adUnit.copy(
-                ad_type = if (impify) ad_type_TEXT else adUnit.ad_type,
-                ad = adUnit.ad.copy (
-                  imp_url = if (impify) getMagicUrl(adUnit.ad.imp_url, adsMarkUrlImp) else Some(""),
-                  click_url = getMagicUrl(Some(adUnit.ad.click_url), adsMarkUrlClick).get
+              val admobify = (Math.random() <= adsMobProb)
+
+              if(admobify) {
+                adUnit.copy(
+                  ad_type = ad_type_ADMOB,
+                  ad_app_id = Some(adsMobAppId),
+                  ad_unit_id = Some(adsMobUnitId)
                 )
-            )
+              } else if(impify) {
+                adUnit.copy(
+                  ad_type = ad_type_TEXT,
+                  ad = adUnit.ad.copy (
+                    imp_url = Some("")
+                  )
+                )
+              } else {
+                adUnit
+              }
           }
 
 
