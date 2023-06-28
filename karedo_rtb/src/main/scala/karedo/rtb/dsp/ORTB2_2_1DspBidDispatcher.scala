@@ -204,12 +204,12 @@ class ORTB2_2_1DspBidDispatcher(config: DspBidDispatcherConfig)
       val out = in match {
         case Some(str) => {
           Some(Map(
-            ("${AUCTION_ID}", response_id)
-            , ("${AUCTION_BID_ID}", seat_id)
-            , ("${AUCTION_IMP_ID}", bid.impid)
-            , ("${AUCTION_SEAT_ID}", seat_id)
-            , ("${AUCTION_AD_ID}", bid.adid.getOrElse(s"${bid.id}-${bid.impid}"))
-            , ("${AUCTION_PRICE}", bid.price.toString)
+            ("""${AUCTION_ID}""", response_id)
+            , ("""${AUCTION_BID_ID}""", seat_id)
+            , ("""${AUCTION_IMP_ID}""", bid.impid)
+            , ("""${AUCTION_SEAT_ID}""", seat_id)
+            , ("""${AUCTION_AD_ID}""", bid.adid.getOrElse(s"${bid.id}-${bid.impid}"))
+            , ("""${AUCTION_PRICE}""", bid.price.toString)
           ).foldLeft(str){case (s, (k, v)) => s.replaceAll(k, v)})
         }
         case None => None

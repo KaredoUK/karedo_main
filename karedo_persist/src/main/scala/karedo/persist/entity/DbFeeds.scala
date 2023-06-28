@@ -2,6 +2,7 @@ package karedo.persist.entity
 
 import karedo.common.misc.Util
 import karedo.persist.entity.dao.{DbMongoDAO_Casbah, Keyable}
+import org.joda.time.DateTime
 import salat.annotations.Key
 
 /**

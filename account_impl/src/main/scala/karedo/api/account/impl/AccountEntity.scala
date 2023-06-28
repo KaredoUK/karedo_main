@@ -1,14 +1,21 @@
 package karedo.api.account.impl
 
-import java.time.LocalDateTime
+import java.time.{Instant, LocalDateTime, ZoneId, ZoneOffset}
+import java.time.LocalDateTime._
+import java.util.UUID
 
 import akka.Done
 import com.lightbend.lagom.scaladsl.persistence.{AggregateEvent, AggregateEventTag, PersistentEntity}
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
 import com.lightbend.lagom.scaladsl.playjson.{JsonSerializer, JsonSerializerRegistry}
+import karedo.api.account.RegisterRequest
+import karedo.api.account.model.UserAccount
 import play.api.libs.json.{Format, Json}
 
 import scala.collection.immutable.Seq
+import scala.concurrent.{ExecutionContext, Future}
+import reactivemongo.api.{DefaultDB, MongoConnection, MongoDriver}
+import reactivemongo.bson.{BSONDateTime, BSONDocumentReader, BSONDocumentWriter, BSONHandler, Macros, document}
 
 /**
   * This is an event sourced entity. It has a state, [[AccountState]], which
@@ -33,22 +40,37 @@ class AccountEntity extends PersistentEntity {
 
   override type Command = AccountCommand[_]
   override type Event = AccountEvent
-  override type State = AccountState
+  override type State = UserAccount
+
+  // TODO: Connect to MongoDB here.
+  val mongoUri = "mongodb://localhost:27017/mydb?authMode=scram-sha1"
+
+  import ExecutionContext.Implicits.global
+
+  // Connect to the database: Must be done only once per application
+  val driver = MongoDriver()
+  val parsedUri = MongoConnection.parseURI(mongoUri)
+  val connection = parsedUri.map(driver.connection(_))
+
+  val futureConnection = Future.fromTry(connection)
+  def db: Future[DefaultDB] = futureConnection.flatMap(_.database("test"))
+
+  def collection(name: String) = db.map(_.collection(s"TEST_ACCOUNT_${name}"))
+
 
   /**
     * The initial state. This is used if there is no snapshotted state to be found.
     */
-  override def initialState: AccountState = AccountState("Hello", LocalDateTime.now.toString)
+  override def initialState: State = UserAccount()
 
   /**
     * An entity can define different behaviours for different states, so the behaviour
     * is a function of the current state to a set of actions.
     */
   override def behavior: Behavior = {
-    case AccountState(message, _) => Actions().onCommand[UseGreetingMessage, Done] {
-
+    case ua : UserAccount => Actions().onCommand[RegisterUserMessage, Done] {
       // Command handler for the UseGreetingMessage command
-      case (UseGreetingMessage(newMessage), ctx, state) =>
+      case (RegisterUserMessage(message), ctx, state) =>
         // In response to this command, we want to first persist it as a
         // GreetingMessageChanged event
         ctx.thenPersist(
@@ -77,6 +99,9 @@ class AccountEntity extends PersistentEntity {
     }
   }
 }
+
+
+
 
 /**
   * The current state held by the persistent entity.
@@ -127,6 +152,11 @@ object GreetingMessageChanged {
   * This interface defines all the commands that the HelloWorld entity supports.
   */
 sealed trait AccountCommand[R] extends ReplyType[R]
+
+case class RegisterUserMessage(message: RegisterRequest) extends AccountCommand[Done]
+object RegisterUserMessage {
+  implicit def format: Format[RegisterUserMessage] = Json.format
+}
 
 /**
   * A command to switch the greeting message.

@@ -407,9 +407,14 @@ class AtomReader extends Reader {
     try {
       dateFormatter.parseDateTime(date)
     } catch {
-      case e: Exception => logger.error("Date Parsing Failed", e)
-        Util.now
+      case x : Exception => {
+        println(x)
+        misc.Util.now
+      }
     }
+//      case e: Exception => logger.error("Date Parsing Failed", e)
+//        Util.now
+//    }
   }
 
   private def getHtmlLink(node:NodeSeq) = {
@@ -466,8 +471,10 @@ class XmlReader extends Reader {
         case s => dateFormatZZZ.parseDateTime(s)
       }
     } catch {
-      case e: Exception => logger.error("Date Parsing Failed", e)
+      case x : Exception => {
+        println(x)
         misc.Util.now
+      }
     }
   }
 

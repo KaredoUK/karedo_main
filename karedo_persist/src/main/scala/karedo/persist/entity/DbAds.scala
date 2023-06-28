@@ -9,7 +9,7 @@ import salat.annotations._
 
 import scala.util.{Failure, Success, Try}
 import org.joda.time.DateTime
-
+import com.mongodb.casbah.Imports._
 
 
 
@@ -125,6 +125,15 @@ trait DbAds extends DbMongoDAO_Casbah[String, AdUnitType] {
       val projs = MongoDBObject("prefs" -> 1)
 
       dao.find(query, projs).toList.map(_.prefs).flatten.toSet
+    } match {
+      case Success(x) => OK(x)
+      case Failure(error) => KO(error.toString)
+    }
+  }
+
+  def removeByDate(date: DateTime): Result[String, Unit] = {
+    Try[Unit] {
+      dao.remove("pub_date" $lt date)
     } match {
       case Success(x) => OK(x)
       case Failure(error) => KO(error.toString)

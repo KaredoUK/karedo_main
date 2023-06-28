@@ -14,6 +14,9 @@ import org.slf4j.LoggerFactory
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
 
+import org.joda.time.DateTime
+import org.joda.time.DateTime.now
+
 /**
   * Created by charaj on 11/02/2017.
   */
@@ -25,9 +28,14 @@ class AdLoadActor extends Actor with DbHelper {
     0 seconds, 1 hour, self, "load"
   )
 
+  context.system.scheduler.schedule(
+    0 seconds, 24 hour, self, "deleteFeeds"
+  )
 
   def receive = {
-    case "load" => loadFeeds
+    case "load"         => loadFeeds
+    case "deleteFeeds"  => deleteAds
+    case "keepAlive"    => keepAlive
   }
 
   def loadFeeds = {
@@ -57,6 +65,20 @@ class AdLoadActor extends Actor with DbHelper {
       }
       case KO(f) => logger.error(s"Failed - Get Feeds from DB: ${f}")
     }
+  }
+
+  def deleteAds = {
+    val dt = now minusDays(30)
+
+    dbAds.removeByDate(dt)
+
+    ()
+  }
+
+  def keepAlive = {
+    println( "-*" )
+
+    ()
   }
 }
 

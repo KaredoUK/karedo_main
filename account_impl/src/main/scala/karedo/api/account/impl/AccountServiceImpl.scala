@@ -32,7 +32,7 @@ class AccountServiceImpl(persistentEntityRegistry: PersistentEntityRegistry) ext
   override def register() = ServiceCall { request =>
     val ref = persistentEntityRegistry.refFor[AccountEntity](request.application_id)
 
-    ref.ask(UseGreetingMessage(request.email))
+    ref.ask(RegisterUserMessage(request))
   }
 
 

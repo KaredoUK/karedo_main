@@ -1,3 +1,4 @@
+import com.lightbend.lagom.sbt.LagomImport.lagomScaladslPersistenceCassandra
 import sbt.Keys._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 import sbtrelease.ReleasePlugin.autoImport._
@@ -134,32 +135,65 @@ lazy val libs_nimbusds = Seq(
   "com.nimbusds" % "nimbus-jose-jwt" % "4.37.1"
 )
 
+lazy val blueprints_version = "2.5.0"
+lazy val rexster_version = "2.5.0"
+lazy val mongodb_java_driver_version = "2.9.1"
+lazy val libs_graph = Seq(
+  "org.mongodb" % "mongo-java-driver" % mongodb_java_driver_version,
+  "com.tinkerpop.blueprints" % "blueprints-core" % blueprints_version,
+  "com.tinkerpop.blueprints" % "blueprints-test" % blueprints_version % "test",
+  "com.tinkerpop.rexster" % "rexster-core" % rexster_version,
+  "com.foursquare" % "fongo" % "1.1.1"
+)
+
+lazy val libs_reactivemongo = Seq(
+  "org.reactivemongo" %% "reactivemongo" % "0.12.5"
+)
+
 
 // Project Definitions
 lazy val account_api = (project in file("account_api"))
   .settings(commonSettings: _*)
   .settings(name := "account_api")
-  .settings(
-    libraryDependencies ++= Seq(
-      lagomScaladslApi
-    )
-  )
-
-lazy val account_impl = (project in file("account_impl"))
-  .settings(commonSettings: _*)
-  .settings(name := "account_impl")
   .enablePlugins(LagomScala)
   .settings(
     libraryDependencies ++= Seq(
-      lagomScaladslPersistenceCassandra,
-      lagomScaladslKafkaBroker,
+      lagomScaladslApi,
+//      lagomScaladslPersistenceCassandra,
+//      lagomScaladslKafkaBroker,
       lagomScaladslTestKit,
       libs_macwire,
       libs_scalaTest
-    )
+    ) ++ libs_reactivemongo ++ libs_akka
   )
   .settings(lagomForkedTestSettings: _*)
-  .dependsOn(account_api)
+  .settings(
+    assemblyMergeStrategy in assembly := {
+      case PathList("io.netty", xs @ _*) => MergeStrategy.last
+      case x =>
+        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        oldStrategy(x)
+    }
+  )
+  .dependsOn(karedo_reactive)
+  .dependsOn(karedo_common)
+
+
+//lazy val account_impl = (project in file("account_impl"))
+//  .settings(commonSettings: _*)
+//  .settings(name := "account_impl")
+//  .enablePlugins(LagomScala)
+//  .settings(
+//    libraryDependencies ++= Seq(
+//      lagomScaladslPersistenceCassandra,
+//      lagomScaladslKafkaBroker,
+//      lagomScaladslTestKit,
+//      libs_macwire,
+//      libs_scalaTest
+//    ) ++ libs_reactivemongo
+//  )
+//  .settings(lagomForkedTestSettings: _*)
+//  .dependsOn(account_api)
 
 
 
@@ -227,7 +261,7 @@ lazy val karedo_persist = (project in file("karedo_persist"))
         libs_config
   )
   .dependsOn(karedo_common)
-  .dependsOn(karedo_graph)
+//  .dependsOn(karedo_graph)
 
 
 // ########### Salat #############
@@ -250,13 +284,35 @@ lazy val karedo_common = (project in file("karedo_common"))
         libs_akka ++
         libs_joda ++
         libs_nimbusds
+//        ++
+//        libs_reactivemongo
   )
 
-// ########### Graph #############
-lazy val karedo_graph = (project in file("karedo_graph"))
+// ########### Reactve Mongo #############
+lazy val karedo_reactive = (project in file("karedo_reactive_mongo"))
   .settings(commonSettings: _*)
   .settings(releaseSettings: _*)
-  .settings(name := "graph")
+  .settings(name := "reactive_mongo")
+  .settings(
+    libraryDependencies ++=
+      libs_logging ++
+        libs_scalax ++
+        libs_test ++
+        libs_akka ++
+        libs_joda ++
+        libs_nimbusds ++
+        libs_reactivemongo
+  )
+
+
+// ########### Graph #############
+//lazy val karedo_graph = (project in file("karedo_graph"))
+//  .settings(commonSettings: _*)
+//  .settings(releaseSettings: _*)
+//  .settings(name := "graph")
+//  .settings(
+//    libraryDependencies ++= libs_graph
+//  )
 
 
 // ########### Config #############
@@ -279,7 +335,7 @@ lazy val karedo_feeder = (project in file("karedo_feeder"))
 // ########### Root #############
 lazy val root = (project in file("."))
   //  .dependsOn(salat, karedo_persist, karedo_rtb, karedo_routes)
-  .aggregate(salat, karedo_persist, karedo_rtb, karedo_routes, karedo_feeder, account_api, account_impl)
+  .aggregate(salat, karedo_persist, karedo_rtb, karedo_routes, karedo_feeder, account_api)
   .settings(commonSettings: _*)
   .settings(releaseSettings: _*)
   .settings(

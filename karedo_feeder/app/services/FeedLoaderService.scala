@@ -16,6 +16,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class FeedLoaderService @Inject() (appLifecycle: ApplicationLifecycle, actorSystem: ActorSystem) {
   println("Launching FeedLoaderService")
 
-  actorSystem.scheduler.schedule(0 seconds, 1 hour, actorSystem.actorOf(Props[AdLoadActor], "AdLoadActor"), "load")
+//  actorSystem.scheduler.schedule(0 seconds, 1 hour, actorSystem.actorOf(Props[AdLoadActor], "AdLoadActor"), "load")
+//  actorSystem.scheduler.schedule(0 seconds, 24 hour, actorSystem.actorOf(Props[AdLoadActor], "AdLoadActor"), "deleteFeeds")
+//  actorSystem.scheduler.schedule(0 seconds, 31 minutes, actorSystem.actorOf(Props[AdLoadActor], "AdLoadActor"), "keepAlive")
 
 }

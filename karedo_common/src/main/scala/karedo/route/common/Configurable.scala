@@ -18,7 +18,7 @@ trait Configurable extends ConfigObjectImplicits {
 
 object ConfigLoader {
   println("Loading Local Config")
-  val localConf = ConfigFactory.load()
+  private val localConf = ConfigFactory.load()
 
   println("Loading Remote Config : " + localConf.getString("config.path"))
 
@@ -30,13 +30,13 @@ object ConfigLoader {
     )
   )
 
-  val envMap = ConfigFactory.systemEnvironment().entrySet().asScala.map { e => (e.getKey.toString, e.getValue.toString) }
-  val propMap = ConfigFactory.systemProperties().entrySet().asScala.map { e => (e.getKey.toString, e.getValue.toString) }
-  val remMap = remoteConf.entrySet().asScala.map { e => (e.getKey.toString, e.getValue.toString) }
+  private val envMap = ConfigFactory.systemEnvironment().entrySet().asScala.map { e => (e.getKey.toString, e.getValue.toString) }
+  private val propMap = ConfigFactory.systemProperties().entrySet().asScala.map { e => (e.getKey.toString, e.getValue.toString) }
+  private val remMap = remoteConf.entrySet().asScala.map { e => (e.getKey.toString, e.getValue.toString) }
 
-  val allMap:Map[String, String] = (envMap ++ propMap ++ remMap).toMap
+  private val allMap:Map[String, String] = (envMap ++ propMap ++ remMap).toMap
 
-  val allConf = ConfigFactory.parseMap(allMap.asJava)
+  private val allConf = ConfigFactory.parseMap(allMap.asJava)
 
   println("Checking Remote Config - Version: " + remoteConf.getString("version"))
 }

@@ -1,5 +1,6 @@
 package controllers
 
+import java.net.URLDecoder
 import java.security.MessageDigest
 import java.util.{Base64, UUID}
 import javax.inject._
@@ -15,6 +16,11 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.i18n.Messages.Implicits._
 
+import org.joda.time.DateTime
+import org.joda.time.DateTime.now
+
+import scala.util.Try
+
 /**
   * Created by charaj on 07/02/2017.
   */
@@ -27,6 +33,27 @@ class FeedController @Inject()(val messagesApi: MessagesApi) extends Controller 
 
 
     Ok(views.html.feeds(feeds, feedForm))
+  }
+
+  def saveFeeds(urlOrig: String) = play.api.mvc.Action {
+
+    Try(URLDecoder.decode(urlOrig)).toOption match {
+      case Some(url) => {
+        val feed = Feed(
+          id = Base64.getEncoder().encodeToString(MessageDigest.getInstance("MD5").digest(url.getBytes) ),
+          name = "_",
+          url = url,
+          fallback_img = "http://karedo.co.uk/feeds/logo/O_alone.png",
+          locale = "en_GB",
+          prefs = List()
+        )
+
+        FeedMechanic.upsert(feed)
+
+        Ok(views.html.message("Success"))
+      }
+      case None => Ok(views.html.message("Failure"))
+    }
   }
 
   def postFeed = play.api.mvc.Action(parse.form(feedForm)) { implicit request =>
@@ -103,6 +130,12 @@ object FeedMechanic extends DbHelper {
       case OK(_) => dbFeeds.update(feed)
       case KO(_) => dbFeeds.insertNew(feed)
     }
+
+    ()
+  }
+
+  def delete(feed: Feed) = {
+    dbFeeds.delete(feed)
 
     ()
   }

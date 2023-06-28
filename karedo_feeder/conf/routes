@@ -14,6 +14,7 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 
 # Feeds Setup
 GET     /feeds                      controllers.FeedController.getFeeds
+GET     /feeds/save/*url            controllers.FeedController.saveFeeds(url: String)
 POST    /feeds                      controllers.FeedController.postFeed
 POST    /feeds/edit                 controllers.FeedController.editFeed
 #POST    /feeds/update               controllers.FeedController.updateFeed
