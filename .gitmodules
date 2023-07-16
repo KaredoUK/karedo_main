@@ -1,0 +1,6 @@
+[submodule "service-locator-dns"]
+	path = service-locator-dns
+	url = https://github.com/typesafehub/service-locator-dns.git
+[submodule "akka-dns"]
+	path = akka-dns
+	url = https://github.com/ilya-epifanov/akka-dns.git
