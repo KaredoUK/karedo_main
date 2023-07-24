@@ -1,7 +1,7 @@
 package karedo.persist.entity.dao
 
 import com.mongodb.casbah.commons.conversions.scala.{RegisterConversionHelpers, RegisterJodaTimeConversionHelpers}
-import karedo.route.util.Configurable
+import karedo.common.config.Configurable
 
 /**
   * Created by charaj on 12/01/2017.

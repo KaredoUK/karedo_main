@@ -9,7 +9,6 @@ import karedo.route.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.persist.entity.{UserAccount, UserApp}
 import karedo.route.common.{DbCollections, KaredoConstants, KaredoJsonHelpers}
 import karedo.route.routes.KaredoRoute
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 import karedo.common.result.{KO, OK, Result}
 
@@ -25,7 +24,7 @@ object delete_IntentRoute extends KaredoRoute
       // DELETE /account/{{account_id}}/intent/{{intent_id}}
       path("account" / Segment / "intent" / Segment) {
         (accountId, intentId) =>
-          optionalHeaderValueByName("X_Identification") {
+          optionalHeaderValueByName(AUTH_HEADER_NAME) {
             deviceId =>
               delete {
                 entity(as[delete_IntentRequest]) {

@@ -10,7 +10,6 @@ import karedo.persist.entity.{MobileSale, Sale, UserAccount, UserApp}
 import karedo.route.routes.KaredoRoute
 import karedo.common.misc.Util.now
 import karedo.route.common.{DbCollections, KaredoConstants, KaredoJsonHelpers, KaredoUtils}
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
@@ -28,7 +27,7 @@ object put_TransferRoute extends KaredoRoute
 
       // PUT /account/{{account_id}}/intent
       path("transfer" ) {
-        optionalHeaderValueByName("X_Identification") {
+        optionalHeaderValueByName(AUTH_HEADER_NAME) {
           deviceId =>
             put {
               entity(as[put_TransferRequest]) {

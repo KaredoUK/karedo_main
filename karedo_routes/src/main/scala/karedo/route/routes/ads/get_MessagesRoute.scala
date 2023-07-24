@@ -19,7 +19,7 @@ object get_MessagesRoute extends KaredoRoute
       // GET /account/{{account_id}}/messages?p={{application_id}}&s={{session_id}}
       path("account" / Segment / "messages") {
         accountId =>
-          optionalHeaderValueByName("X_Identification") {
+          optionalHeaderValueByName(AUTH_HEADER_NAME) {
             deviceId =>
               get {
                 parameters('p, 's ?) {

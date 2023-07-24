@@ -7,11 +7,11 @@ import karedo.persist.entity.{UserAccount, UserApp}
 import karedo.route.routes.KaredoRoute
 import karedo.common.misc.Util.now
 import karedo.route.common.{DbCollections, KaredoConstants, KaredoJsonHelpers}
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
 import karedo.common.result.{KO, OK, Result}
+import karedo.route.routes.profile.post_ProfileRoute.AUTH_HEADER_NAME
 
 /**
   * Created by charaj on 17/04/2017.
@@ -22,13 +22,16 @@ object post_ChangePasswordRoute extends KaredoRoute
   def route = {
     Route {
       path("password" ) {
-        post {
-          entity(as[post_ChangePasswordRequest]) {
-            request =>
-              doCall({
-                exec(request)
-              }
-              )
+        optionalHeaderValueByName(AUTH_HEADER_NAME) {
+          deviceId =>
+          post {
+            entity(as[post_ChangePasswordRequest]) {
+              request =>
+                doCall({
+                  exec(deviceId, request)
+                }
+                )
+            }
           }
         }
       }
@@ -44,7 +47,7 @@ trait post_ChangePasswordActor
 {
   override val logger = LoggerFactory.getLogger(this.getClass.toString)
 
-  def exec(request: post_ChangePasswordRequest): Result[Error, APIResponse] = {
+  def exec(deviceId: Option[String], request: post_ChangePasswordRequest): Result[Error, APIResponse] = {
     val account_id = request.account_id
     val application_id = request.application_id
     val session_id = Some(request.session_id)

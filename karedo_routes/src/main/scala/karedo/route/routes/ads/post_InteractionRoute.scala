@@ -23,7 +23,7 @@ object post_InteractionRoute extends KaredoRoute
       // POST /account/{account_id}/ad/interaction
       path("account" / Segment / "ad" / "interaction") {
         accountId =>
-          optionalHeaderValueByName("X_Identification") {
+          optionalHeaderValueByName(AUTH_HEADER_NAME) {
             deviceId =>
               post {
                 entity(as[post_InteractionRequest]) {

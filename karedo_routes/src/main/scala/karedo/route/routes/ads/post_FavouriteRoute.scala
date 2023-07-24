@@ -6,7 +6,6 @@ import karedo.route.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.persist.entity.{UserAccount, UserApp, UserFavourite}
 import karedo.route.common.KaredoJsonHelpers
 import karedo.route.routes.KaredoRoute
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
@@ -20,7 +19,7 @@ object post_FavouriteRoute extends KaredoRoute
     Route {
       path("account" / Segment / "ad" / "favourite") {
         accountId =>
-          optionalHeaderValueByName("X_Identification") {
+          optionalHeaderValueByName(AUTH_HEADER_NAME) {
             deviceId =>
               post {
                 entity(as[post_FavouriteRequest]) {

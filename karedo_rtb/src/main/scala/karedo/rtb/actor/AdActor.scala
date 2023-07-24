@@ -18,7 +18,7 @@ import collection.JavaConverters._
 import karedo.rtb.model.BidRequestCommon._
 import karedo.rtb.util._
 import RtbUtils._
-import karedo.route.util.Configurable
+import karedo.common.config.Configurable
 import org.slf4j.MarkerFactory
 
 /**

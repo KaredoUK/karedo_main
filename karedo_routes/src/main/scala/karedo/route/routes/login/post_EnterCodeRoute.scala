@@ -10,11 +10,11 @@ import karedo.persist.entity.UserMobile
 import karedo.route.routes.KaredoRoute
 import karedo.common.misc.Util.now
 import karedo.route.common.{DbCollections, KaredoConstants, KaredoJsonHelpers, KaredoUtils}
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
 import karedo.common.result.{KO, OK, Result}
+import karedo.route.routes.prefs.get_PrefsRoute.AUTH_HEADER_NAME
 
 /**
   * Created by pakkio on 10/3/16.
@@ -24,19 +24,21 @@ object post_EnterCodeRoute extends KaredoRoute
 
   def route = {
     Route {
-
       // POST /verify?e={email}&c={email_code}&a={account_id}
       path("verify" ) {
-        post {
-          entity(as[post_EnterCodeRequest]) {
-            request =>
-              doCall(
-                {
-                  exec(request)
-                }
-              )
+        optionalHeaderValueByName(AUTH_HEADER_NAME) {
+          deviceId =>
+            post {
+              entity(as[post_EnterCodeRequest]) {
+                request =>
+                  doCall(
+                    {
+                      exec(deviceId, request)
+                    }
+                  )
 
-          }
+              }
+            }
         }
       }
     }
@@ -52,7 +54,8 @@ trait post_EnterCodeActor
 {
   override val logger = LoggerFactory.getLogger(classOf[post_EnterCodeActor])
 
-  def exec(request:post_EnterCodeRequest): Result[Error, APIResponse] = {
+  def exec( deviceId: Option[String],
+            request:post_EnterCodeRequest): Result[Error, APIResponse] = {
 
     Try [Result[Error, APIResponse]] {
       logger.debug(s"Mobile Verify\nmsisdn: ${request.msisdn}\nsms_code: ${request.sms_code}\nApplicationID: ${request.application_id}")

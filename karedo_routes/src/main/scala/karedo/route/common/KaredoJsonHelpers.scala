@@ -4,10 +4,14 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import karedo.persist.entity._
 import karedo.rtb.model.AdModel.AdUnit
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
+import org.joda.time.DateTime
 
 trait KaredoJsonHelpers
   extends DefaultJsonProtocol
   with SprayJsonSupport {
+
+  case class HeaderIds(application_id: String, account_id: String, session_id: String)
+  implicit val jsonHeaderIds = jsonFormat3(HeaderIds)
 
   case class ErrorRes(error_code: Int, error_type: Option[String], error_text: String)
   implicit val jsonErrorRes = jsonFormat3(ErrorRes)
@@ -163,4 +167,7 @@ trait KaredoJsonHelpers
     , image_base64: Option[String]
    )
   implicit val json_Kar12Req = jsonFormat6(post_InformRequest)
+
+  case class post_Location(header: HeaderIds, lat: String, lon: String, ts: DateTime)
+  implicit val json_PostLocation = jsonFormat4(post_Location)
 }

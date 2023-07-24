@@ -11,7 +11,6 @@ import karedo.persist.entity.{UserAccount, UserApp, UserPrefs}
 import karedo.route.routes.KaredoRoute
 import karedo.common.misc.Util.now
 import karedo.route.common.{DbCollections, KaredoConstants, KaredoJsonHelpers}
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 import karedo.common.result.{KO, OK, Result}
 
@@ -29,7 +28,7 @@ object get_PrefsRoute extends KaredoRoute
       // GET /account/{{account_id}}/prefs?p={{application_id}}&s={{session_id}}
       path("account" / Segment / "prefs") {
         accountId =>
-          optionalHeaderValueByName("X_Identification") {
+          optionalHeaderValueByName(AUTH_HEADER_NAME) {
             deviceId =>
               get {
                 parameters('p, 's ?) {

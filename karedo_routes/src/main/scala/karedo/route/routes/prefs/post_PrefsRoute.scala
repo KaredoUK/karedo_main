@@ -10,7 +10,6 @@ import karedo.persist.entity.{UserAccount, UserApp, UserPrefData, UserPrefs}
 import karedo.route.routes.KaredoRoute
 import karedo.common.misc.Util.now
 import karedo.route.common.{DbCollections, KaredoConstants, KaredoJsonHelpers}
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
@@ -28,7 +27,7 @@ object post_PrefsRoute extends KaredoRoute
       // POST /account/{{account_id}}/prefs
       path("account" / Segment / "prefs") {
         accountId =>
-          optionalHeaderValueByName("X_Identification") {
+          optionalHeaderValueByName(AUTH_HEADER_NAME) {
             deviceId =>
               post {
                 entity(as[post_PrefsRequest]) {

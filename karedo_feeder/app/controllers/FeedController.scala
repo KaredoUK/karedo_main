@@ -92,7 +92,7 @@ class FeedController @Inject()(val messagesApi: MessagesApi) extends Controller 
   }
 
   def deleteFeed = play.api.mvc.Action {
-    Ok(views.html.index("Your new application is ready."))
+    Ok("Your new application is ready.")
   }
 }
 

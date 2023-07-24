@@ -8,17 +8,13 @@ import com.lightbend.lagom.scaladsl.api.{Service, ServiceCall}
 import karedo.api.account.messages.RegisterRequest
 import play.api.libs.json.{Format, Json}
 
-object AccountService  {
-  val TOPIC_NAME = "greetings"
-}
-
 /**
   * The SoT service interface.
   * <p>
   * This describes everything that Lagom needs to know about how to serve and
   * consume the SotService.
   */
-trait AccountService extends Service {
+trait ProfileService extends Service {
 
   def register(): ServiceCall[RegisterRequest, Done]
 

@@ -1,22 +1,19 @@
-package karedo.api.account.impl
+package karedo.api.account
 
 import akka.Done
 import com.lightbend.lagom.scaladsl.api.ServiceCall
-import karedo.api.account.AccountService
 import karedo.api.account.model._
-import karedo.common.misc.Util.newUUID
 import karedo.common.mongo.reactive.MongoDAO
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class AccountServiceImpl extends AccountService {
   implicit val prefix = "TEST_"
-  val userAppDAO = new MongoDAO[UserApp] {}//{ override def name = "UserApp" }
-  val userMobileDAO = new MongoDAO[UserMobile] {}//{ override def name = "UserMobile" }
-  val userEmailDAO = new MongoDAO[UserEmail] {}//{ override def name = "UserEmail" }
-  val userAccountDAO = new MongoDAO[UserAccount] {}//{ override def name = "UserAccount" }
-  val userProfileDAO = new MongoDAO[UserProfile] {}//{ override def name = "UserProfile" }
+  val userAppDAO = new MongoDAO[UserApp] { override def collectionName = "UserApp" }
+  val userMobileDAO = new MongoDAO[UserMobile] { override def collectionName = "UserMobile" }
+  val userEmailDAO = new MongoDAO[UserEmail] { override def collectionName = "UserEmail" }
+  val userAccountDAO = new MongoDAO[UserAccount] { override def collectionName = "UserAccount" }
+  val userProfileDAO = new MongoDAO[UserProfile] { override def collectionName = "UserProfile" }
 
   override def register() = ServiceCall { request =>
     val userAppF = userAppDAO.findOneById(request.application_id)

@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.headers.BasicHttpCredentials
 import akka.http.scaladsl.model.{headers, _}
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import karedo.common.akka.DefaultActorSystem
-import karedo.route.util.Configurable
+import karedo.common.config.Configurable
 import org.slf4j.LoggerFactory
 import spray.json._
 

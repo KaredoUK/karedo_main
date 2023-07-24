@@ -7,7 +7,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import karedo.route.actors._
 import karedo.route.routes._
-import karedo.route.util._
+
 import org.slf4j.LoggerFactory
 import karedo.persist.entity._
 import karedo.route.common.{DbCollections, KaredoConstants, KaredoJsonHelpers}
@@ -26,7 +26,7 @@ object get_IntentRoute extends KaredoRoute
       // GET /account/{{account_id}}/intent/{{intent_id}}?p={{application_id}}&s={{session_id}}
       path("account" / Segment / "intent" / Segment) {
         (accountId, intentId) =>
-            optionalHeaderValueByName("X_Identification") {
+            optionalHeaderValueByName(AUTH_HEADER_NAME) {
               deviceId =>
                 get {
                   parameters('p, 's ?) {

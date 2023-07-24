@@ -8,10 +8,6 @@ import com.lightbend.lagom.scaladsl.api.{Service, ServiceCall}
 import karedo.api.account.messages.RegisterRequest
 import play.api.libs.json.{Format, Json}
 
-object AccountService  {
-  val TOPIC_NAME = "greetings"
-}
-
 /**
   * The SoT service interface.
   * <p>

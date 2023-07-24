@@ -9,7 +9,6 @@ import karedo.route.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.persist.entity._
 import karedo.route.common.{KaredoConstants, KaredoJsonHelpers}
 import karedo.route.routes.KaredoRoute
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 import spray.json._
 
@@ -29,7 +28,7 @@ object get_SaleRoute extends KaredoRoute
 
       path("sale" / Segment ) {
         saleId =>
-          optionalHeaderValueByName("X_Identification") {
+          optionalHeaderValueByName(AUTH_HEADER_NAME) {
             deviceId =>
               get {
                 parameters('a, 'p, 's ?) {

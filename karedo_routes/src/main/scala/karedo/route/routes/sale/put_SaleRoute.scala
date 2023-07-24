@@ -10,7 +10,6 @@ import karedo.persist.entity.{Sale, UserAccount, UserApp}
 import karedo.route.routes.KaredoRoute
 import karedo.common.misc.Util.now
 import karedo.route.common.{KaredoConstants, KaredoJsonHelpers, KaredoUtils}
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
@@ -27,7 +26,7 @@ object put_SaleRoute extends KaredoRoute
     Route {
 
       path("sale" ) {
-        optionalHeaderValueByName("X_Identification") {
+        optionalHeaderValueByName(AUTH_HEADER_NAME) {
           deviceId =>
             put {
               entity(as[put_SaleRequest]) {

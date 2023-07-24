@@ -5,7 +5,6 @@ import akka.http.scaladsl.server.Route
 import karedo.route.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.route.common.{KaredoConstants, KaredoJsonHelpers}
 import karedo.route.routes.KaredoRoute
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 import karedo.common.result.{KO, OK, Result}
 import karedo.route.common.DbCollections

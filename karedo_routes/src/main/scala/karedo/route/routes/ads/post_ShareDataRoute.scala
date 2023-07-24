@@ -6,7 +6,6 @@ import karedo.route.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.persist.entity.{UserAccount, UserApp, UserInteraction}
 import karedo.route.common.{KaredoJsonHelpers, KaredoUtils}
 import karedo.route.routes.KaredoRoute
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
@@ -25,7 +24,7 @@ object post_ShareDataRoute extends KaredoRoute
     Route {
       path("account" / Segment / "ad" / "share_data") {
         accountId =>
-              optionalHeaderValueByName("X_Identification") {
+              optionalHeaderValueByName(AUTH_HEADER_NAME) {
                 deviceId =>
                   post {
                     entity(as[post_ShareDataRequest]) {

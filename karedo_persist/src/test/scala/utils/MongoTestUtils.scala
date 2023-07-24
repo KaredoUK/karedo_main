@@ -2,9 +2,9 @@ package utils
 
 import java.util.UUID
 
-import karedo.common.result.{Result, OK, KO}
+import karedo.common.config.Configurable
+import karedo.common.result.{KO, OK, Result}
 import karedo.persist.entity.dao._
-import karedo.route.util.Configurable
 import org.specs2.matcher.Matcher
 import org.specs2.mutable.Specification
 

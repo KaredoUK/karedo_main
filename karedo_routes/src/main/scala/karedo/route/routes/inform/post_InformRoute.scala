@@ -5,13 +5,13 @@ import karedo.route.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.persist.entity.{Inform, Jira}
 import karedo.route.common.{JiraHandler, KaredoConstants, KaredoJsonHelpers}
 import karedo.route.routes.KaredoRoute
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
 import scala.concurrent.ExecutionContext.Implicits.global
 import karedo.common.result.{KO, OK, Result}
 import karedo.route.common.DbCollections
+import karedo.route.routes.prefs.get_PrefsRoute.AUTH_HEADER_NAME
 
 
 /**
@@ -23,13 +23,16 @@ object post_InformRoute
 {
   def route = {
     path("inform") {
-      post {
-        entity( as[post_InformRequest]) {
-          request =>
-            doCall({
-              exec(request)
-            })
-        }
+      optionalHeaderValueByName(AUTH_HEADER_NAME) {
+        deviceId =>
+          post {
+            entity(as[post_InformRequest]) {
+              request =>
+                doCall({
+                  exec(deviceId, request)
+                })
+            }
+          }
       }
     }
   }
@@ -45,7 +48,8 @@ trait post_InformActor extends DbCollections
 
   override val logger = LoggerFactory.getLogger(classOf[post_InformActor])
 
-  def exec(request: post_InformRequest): Result[Error, APIResponse] = {
+  def exec(deviceId: Option[String],
+            request: post_InformRequest): Result[Error, APIResponse] = {
 
     try {
       val account_id = request.account_id match {

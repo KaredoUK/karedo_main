@@ -2,7 +2,7 @@
 @import helper._
 @import java.util.UUID
 
-@(feeds: List[Feed], feedForm: Form[Feed])(implicit messages: Messages)
+@(feeds: List[Feed], feedForm: Form[Feed])//(implicit messages: Messages)
 
 @main("Feeds list") {
     <style>
@@ -52,7 +52,8 @@
     @if(feedForm.hasGlobalErrors) {
         <ul>
         @for(error <- feedForm.globalErrors) {
-            <li>@Messages(error.messages, error.args)</li>
+            <li>error.messages</li>
+            @*<li>@Messages(error.messages, error.args)</li>*@
         }
         </ul>
     }

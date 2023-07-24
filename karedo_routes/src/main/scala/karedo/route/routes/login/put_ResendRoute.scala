@@ -9,11 +9,11 @@ import karedo.route.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.persist.entity.EmailVerify
 import karedo.route.common.{DbCollections, KaredoConstants, KaredoJsonHelpers, KaredoUtils}
 import karedo.route.routes.KaredoRoute
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
 import karedo.common.result.{KO, OK, Result}
+import karedo.route.routes.prefs.get_PrefsRoute.AUTH_HEADER_NAME
 
 /**
   * Created by pakkio on 10/3/16.
@@ -24,16 +24,20 @@ object put_ResendRoute extends KaredoRoute
   def route = {
     Route {
       path("resend") {
+        optionalHeaderValueByName(AUTH_HEADER_NAME) {
+          deviceId =>
           put {
             entity(as[put_ResendRequest]) {
               request =>
                 doCall({
-                  exec(request)
+                  exec(deviceId, request)
                 }
                 )
             }
           }
+        }
       }
+
     }
   }
 }
@@ -47,7 +51,7 @@ trait put_ResendEmailActor
 {
   override val logger = LoggerFactory.getLogger(classOf[put_ResendEmailActor])
 
-  def exec(request:put_ResendEmailRequest): Result[Error, APIResponse] = {
+  def exec(deviceId:Option[String], request:put_ResendEmailRequest): Result[Error, APIResponse] = {
     Try[Result[Error, APIResponse]] {
       val application_id = request.application_id
       val address = request.email

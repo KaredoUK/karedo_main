@@ -1,7 +1,7 @@
 package karedo.route
 
+import karedo.common.config.Configurable
 import karedo.persist.entity.{DbPrefs, DbUserAd}
-import karedo.route.util.Configurable
 
 /**
   * Created by pakkio on 13/10/16.

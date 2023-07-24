@@ -10,7 +10,6 @@ import karedo.persist.entity.{UserAccount, UserApp, UserProfile}
 import karedo.route.routes.KaredoRoute
 import karedo.common.misc.Util.now
 import karedo.route.common.{DbCollections, KaredoConstants, KaredoJsonHelpers}
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 import karedo.common.result.{KO, OK, Result}
 
@@ -28,7 +27,7 @@ object post_ProfileRoute extends KaredoRoute
       // POST /account/{{account_id}}/profile
       path("account" / Segment / "profile") {
         accountId =>
-          optionalHeaderValueByName("X_Identification") {
+          optionalHeaderValueByName(AUTH_HEADER_NAME) {
             deviceId =>
               post {
                 entity(as[post_ProfileRequest]) {

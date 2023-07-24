@@ -10,7 +10,6 @@ import karedo.persist.entity._
 import karedo.route.routes.KaredoRoute
 import karedo.common.misc.Util.now
 import karedo.route.common.{DbCollections, KaredoConstants, KaredoJsonHelpers}
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 import spray.json._
 import karedo.common.result.{KO, OK, Result}
@@ -28,7 +27,7 @@ object get_ProfileRoute extends KaredoRoute
       // GET /account/{{account_id}}/profile?p={{application_id}}&s={{session_id}}
       path("account" / Segment / "profile") {
         accountId =>
-          optionalHeaderValueByName("X_Identification") {
+          optionalHeaderValueByName(AUTH_HEADER_NAME) {
             deviceId =>
               get {
                 parameters('p, 's ?) {

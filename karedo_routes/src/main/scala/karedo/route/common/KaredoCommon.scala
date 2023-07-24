@@ -16,11 +16,11 @@ import com.google.zxing.qrcode._
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.google.zxing.{BarcodeFormat, BinaryBitmap, EncodeHintType}
 import karedo.common.akka.DefaultActorSystem
+import karedo.common.config.Configurable
 import karedo.common.misc.Util.now
 import karedo.common.result._
 import karedo.persist.entity._
 import karedo.route.actors.Error
-import karedo.route.util.Configurable
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
@@ -34,6 +34,8 @@ import scala.util.{Failure, Success, Try}
   * Created by crajah on 14/10/2016.
   */
 trait KaredoConstants extends Configurable {
+  val AUTH_HEADER_NAME = "X-Authorization"
+
   val VERSION = conf.getString("version")
 
   val GENDER_MALE = "M"

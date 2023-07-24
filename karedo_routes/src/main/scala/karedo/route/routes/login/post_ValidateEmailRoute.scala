@@ -6,7 +6,6 @@ import karedo.route.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.persist.entity.{UserAccount, UserApp}
 import karedo.route.common.{DbCollections, KaredoConstants, KaredoJsonHelpers, KaredoUtils}
 import karedo.route.routes.KaredoRoute
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
@@ -21,7 +20,7 @@ object post_ValidateEmailRoute extends KaredoRoute
   def route = {
     Route {
       path("validate" / "email") {
-        optionalHeaderValueByName("X_Identification") {
+        optionalHeaderValueByName(AUTH_HEADER_NAME) {
           deviceId =>
             post {
               entity(as[post_ValidateEmailRequest]) {

@@ -12,12 +12,12 @@ import karedo.common.jwt.JWTMechanic
 import karedo.route.routes.KaredoRoute
 import karedo.common.misc.Util.now
 import karedo.route.common.{DbCollections, KaredoConstants, KaredoJsonHelpers, KaredoUtils}
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
 import scala.concurrent.ExecutionContext.Implicits.global
 import karedo.common.result.{KO, OK, Result}
+import karedo.route.routes.prefs.get_PrefsRoute.AUTH_HEADER_NAME
 
 /**
   * Created by pakkio on 10/3/16.
@@ -27,18 +27,20 @@ object post_SendCodeRoute extends KaredoRoute
 
   def route = {
     Route {
-
       // POST /account
       path("account") {
-              post {
-                entity(as[post_SendCodeRequest]) {
-                  request =>
-                    doCall({
-                      exec(request)
-                    }
-                    )
-                }
+        optionalHeaderValueByName(AUTH_HEADER_NAME) {
+          deviceId =>
+            post {
+              entity(as[post_SendCodeRequest]) {
+                request =>
+                  doCall({
+                    exec(deviceId, request)
+                  }
+                  )
               }
+            }
+        }
       }
     }
   }
@@ -56,7 +58,7 @@ trait post_SendCodeActor
 
   override val logger = LoggerFactory.getLogger(classOf[post_SendCodeActor])
 
-  def exec(
+  def exec( deviceId: Option[String],
             request: post_SendCodeRequest
           ): Result[Error, APIResponse] = {
 

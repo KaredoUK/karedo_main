@@ -10,7 +10,6 @@ import karedo.persist.entity.{IntentUnit, UserAccount, UserApp, UserIntent}
 import karedo.route.routes.KaredoRoute
 import karedo.common.misc.Util.now
 import karedo.route.common.{DbCollections, KaredoConstants, KaredoJsonHelpers, KaredoUtils}
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 import karedo.common.result.{KO, OK, Result}
 
@@ -26,7 +25,7 @@ object put_IntentRoute extends KaredoRoute
       // PUT /account/{{account_id}}/intent
       path("account" / Segment / "intent" ) {
         accountId =>
-          optionalHeaderValueByName("X_Identification") {
+          optionalHeaderValueByName(AUTH_HEADER_NAME) {
             deviceId =>
               put {
                 entity(as[IntentUpdateRequest]) {

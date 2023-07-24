@@ -1,13 +1,9 @@
-package karedo.route.util
+package karedo.common.config
+
+import java.net.URL
 
 import com.typesafe.config._
 import spray.json._
-import java.net.URL
-
-import karedo.route.util.ConfigLoader.localConf
-import org.slf4j.LoggerFactory
-import org.slf4j.Logger
-import org.slf4j.event.Level
 
 import scala.collection.JavaConverters._
 

@@ -6,8 +6,8 @@ import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
 import akka.http.scaladsl.{ConnectionContext, HttpsConnectionContext}
 import com.typesafe.sslconfig.akka.AkkaSSLConfig
 import karedo.common.akka.DefaultActorSystem
+import karedo.common.config.Configurable
 import karedo.common.crypto.KeySupport
-import karedo.route.util.Configurable
 
 //object Ssl {
 //

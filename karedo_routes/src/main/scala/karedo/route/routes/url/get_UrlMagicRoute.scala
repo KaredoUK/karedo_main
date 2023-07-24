@@ -7,7 +7,6 @@ import karedo.route.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.persist.entity.UrlAccess
 import karedo.route.common.{KaredoConstants, KaredoJsonHelpers}
 import karedo.route.routes.KaredoRoute
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future

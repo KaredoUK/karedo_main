@@ -10,9 +10,9 @@ import karedo.persist.entity.UserSession
 import karedo.common.jwt.JWTMechanic
 import karedo.route.common.{DbCollections, KaredoConstants, KaredoJsonHelpers, KaredoUtils}
 import karedo.route.routes.KaredoRoute
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 import karedo.common.result.{KO, OK, Result}
+import karedo.route.routes.prefs.get_PrefsRoute.AUTH_HEADER_NAME
 
 /**
   * Created by pakkio on 10/3/16.
@@ -22,18 +22,20 @@ object post_LoginRoute extends KaredoRoute
 
   def route = {
     Route {
-
       // POST /account/{{account_id}}/application/{{application_id}}/login
       path("login") {
-          post {
-            entity(as[post_LoginRequest]) {
-              request =>
-                doCall({
-                  exec(request)
-                }
-                )
+        optionalHeaderValueByName(AUTH_HEADER_NAME) {
+          deviceId =>
+            post {
+              entity(as[post_LoginRequest]) {
+                request =>
+                  doCall({
+                    exec(deviceId, request)
+                  }
+                  )
+              }
             }
-          }
+        }
       }
     }
   }
@@ -49,7 +51,8 @@ trait post_LoginActor
 {
   override val logger = LoggerFactory.getLogger(classOf[post_LoginActor])
 
-  def exec(request:post_LoginRequest): Result[Error, APIResponse] = {
+  def exec( deviceId: Option[String],
+            request:post_LoginRequest): Result[Error, APIResponse] = {
 
     val account_id = request.account_id
     val application_id = request.application_id

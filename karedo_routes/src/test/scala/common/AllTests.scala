@@ -5,7 +5,6 @@ import karedo.persist.entity.{UserAccount, UserApp, UserKaredos}
 import karedo.persist.entity.dao._
 import karedo.route.common.{KaredoConstants, KaredoIds, KaredoJsonHelpers}
 import karedo.route.routes.Routes
-import karedo.route.util._
 import org.scalatest.{Matchers, WordSpec}
 import org.slf4j.LoggerFactory
 import karedo.common.result.{KO, OK, Result}

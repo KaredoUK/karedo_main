@@ -5,11 +5,11 @@ import akka.http.scaladsl.server.Route
 import karedo.route.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.route.common.{DbCollections, KaredoConstants, KaredoJsonHelpers, KaredoUtils}
 import karedo.route.routes.KaredoRoute
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
 import karedo.common.result.{KO, OK, Result}
+import karedo.route.routes.prefs.get_PrefsRoute.AUTH_HEADER_NAME
 
 /**
   * Created by charaj on 16/04/2017.
@@ -20,13 +20,16 @@ object put_ResendEmailRoute extends KaredoRoute
   def route = {
     Route {
       path("resend" / "email") {
-        put {
-          entity(as[put_ResendEmailRequest]) {
-            request =>
-              doCall({
-                exec(request)
-              }
-              )
+        optionalHeaderValueByName(AUTH_HEADER_NAME) {
+          deviceId =>
+          put {
+            entity(as[put_ResendEmailRequest]) {
+              request =>
+                doCall({
+                  exec(deviceId, request)
+                }
+                )
+            }
           }
         }
       }
@@ -43,7 +46,7 @@ trait put_ResendActor
 {
   override val logger = LoggerFactory.getLogger(classOf[put_ResendActor])
 
-  def exec(request:put_ResendRequest): Result[Error, APIResponse] = {
+  def exec(deviceId: Option[String], request:put_ResendRequest): Result[Error, APIResponse] = {
     Try[Result[Error, APIResponse]] {
       val application_id = request.application_id
       val msisdn = msisdnFixer(request.msisdn)

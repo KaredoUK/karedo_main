@@ -6,7 +6,6 @@ import karedo.route.actors.{APIResponse, Error, KaredoAuthentication}
 import karedo.persist.entity.{UserAccount, UserApp}
 import karedo.route.common.{DbCollections, KaredoConstants, KaredoJsonHelpers}
 import karedo.route.routes.KaredoRoute
-import karedo.route.util._
 import org.slf4j.LoggerFactory
 import karedo.common.result.{Result, OK, KO}
 
@@ -21,7 +20,7 @@ object get_PointsRoute extends KaredoRoute
       // GET /account/{{account_id}}/points?p={{application_id}}&s={{session_id}}
       path("account" / Segment / "points") {
         accountId =>
-          optionalHeaderValueByName("X_Identification") {
+          optionalHeaderValueByName(AUTH_HEADER_NAME) {
             deviceId =>
               get {
                 parameters('p, 's ?) {

@@ -29,7 +29,7 @@ object get_AdsRoute extends KaredoRoute
       path("account" / Segment / "ads") {
         accountId =>
           extractRequest { request =>
-            optionalHeaderValueByName("X_Identification") {
+            optionalHeaderValueByName(AUTH_HEADER_NAME) {
               deviceId =>
                 optionalHeaderValueByName("User-Agent") {
                   ua =>

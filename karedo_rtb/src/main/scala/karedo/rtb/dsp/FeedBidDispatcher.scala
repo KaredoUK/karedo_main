@@ -21,7 +21,7 @@ import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import karedo.rtb.dsp.AdMechanic.httpDispatcher
 
-import scala.concurrent.ExecutionContext.Implicits.global
+//import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import scala.util.{Failure, Success, Try}
 import collection.JavaConverters._
@@ -148,6 +148,8 @@ object FeedLoader extends RtbConstants with LoggingSupport with DefaultJsonProto
   }
 
   private def getBestImage(click_url: String): Option[String] = {
+    import scala.concurrent.ExecutionContext.Implicits.global
+
     case class ArticleExtract
     (
       article: String
@@ -188,6 +190,8 @@ object FeedLoader extends RtbConstants with LoggingSupport with DefaultJsonProto
   }
 
   private def getImageSize(url: String): Long = {
+    import scala.concurrent.ExecutionContext.Implicits.global
+
     try {
       Await.result(
         httpsDispatcher.singleRequest(HttpRequest(GET, Uri(url))).map(r => r.entity.getContentLengthOption().orElse(0)),
@@ -348,6 +352,8 @@ class FeedBidDispatcher(config: DspBidDispatcherConfig)
 }
 
 abstract class Reader extends RtbConstants  {
+  import scala.concurrent.ExecutionContext.Implicits.global
+
   def extract(xml:Elem, name:String, image_url:String, prefs:List[String]):Seq[RssFeed]
 
   val logger = LoggerFactory.getLogger(classOf[Reader])
